@@ -1,0 +1,13 @@
+/*
+	Test CSS file
+	for Java browser.
+*/
+
+h1 {
+	color: black;
+	font-size: 120%;
+}
+
+h2, h3 {
+	float: right;
+}
