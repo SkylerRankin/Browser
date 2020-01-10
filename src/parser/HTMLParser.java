@@ -8,6 +8,7 @@ import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import css.CSSStyle;
 import model.DOMNode;
 import model.RenderNode;
 
@@ -69,10 +70,38 @@ public class HTMLParser {
         return root;
     }
     
-    public RenderNode generateRenderTree(DOMNode dom) {
-        RenderNode root = new RenderNode("");
-        
-        return root;
+//    public RenderNode generateRenderTree(DOMNode dom) {
+//        DOMNode body = getBodyNode(dom);
+//        if (body == null) {
+//            System.out.println("HTMLParser: no body element found");
+//            return null;
+//        }
+//        return createRenderNode(body);
+//    }
+    
+//    public RenderNode createRenderNode(DOMNode d) {
+//        System.out.println(d.type);
+//        if (HTMLElements.usedInRenderTree(d.type)) {
+//            RenderNode rn = new RenderNode(d);
+//            for (DOMNode child : d.children) {
+//                RenderNode c = createRenderNode(child);
+//                c.style = new CSSStyle();
+//                if (c != null) rn.children.add(c);
+//            }
+//            return rn;
+//        } else {
+//            return null;
+//        }
+//    }
+    
+    public DOMNode getBodyNode(DOMNode dom) {
+        if (dom.type.equals(HTMLElements.BODY)) return dom;
+        DOMNode bodyCandidate = null;
+        for (DOMNode child : dom.children) {
+            DOMNode d = getBodyNode(child);
+            if (d != null) bodyCandidate = d;
+        }
+        return bodyCandidate;
     }
     
     public boolean isSingular(String content) {

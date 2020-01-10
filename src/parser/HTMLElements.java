@@ -21,7 +21,17 @@ public class HTMLElements {
     public static final String P = "p";
     public static final String INPUT = "input";
     
+    public static final String[] RENDER_TREE_ELEMENTS = {BODY, TEXT, H1, H2, H3, H4, H5, H6, DIV, P, INPUT};
+    public static final String[] BLOCK_LEVEL_ELEMENTS = {H1, H2, H3, H4, H5, H6, DIV, P};
+    
     public boolean isValidElement(String element) {
+        return false;
+    }
+    
+    public static boolean usedInRenderTree(String element) {
+        for (int i = 0; i < RENDER_TREE_ELEMENTS.length; ++i) {
+            if (RENDER_TREE_ELEMENTS[i].equals(element)) return true;
+        }
         return false;
     }
 

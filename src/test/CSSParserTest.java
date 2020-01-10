@@ -46,7 +46,7 @@ public class CSSParserTest {
         assertEquals(expected, actual);
     }
     
-    /* Maybe the CSSOM shouldnt contain the classes and ids, just the element tree
+    /* Maybe the CSSOM shouldn't contain the classes and ids, just the element tree
         use two other maps for classes and ids
     */
     

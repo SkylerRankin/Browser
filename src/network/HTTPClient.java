@@ -11,7 +11,6 @@ public class HTTPClient {
         urlString = HTTPClient.formatURL(urlString);
         
         try {
-            Thread.sleep(2000);
             URL url = new URL(urlString);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestProperty("Content-Type", "application/json");
