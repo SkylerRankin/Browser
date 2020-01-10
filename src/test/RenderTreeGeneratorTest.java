@@ -49,12 +49,11 @@ public class RenderTreeGeneratorTest {
         div.addChild(p);
         p.addChild(pText);
         
-//        domTree.print("");
-        
         RenderTreeGenerator rtg = new RenderTreeGenerator();
         RenderNode renderTree = rtg.domTreeToRenderTree(domTree);
-        renderTree.print();
         
 	}
+	
+	
 
 }

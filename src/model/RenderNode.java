@@ -16,11 +16,15 @@ public class RenderNode {
     public RenderNode parent;
     public CSSStyle style;
     public Box box;
+    public Float maxWidth;
+    public Float maxHeight;
     
     public RenderNode(String type) {
         this.type = type;
         children = new ArrayList<RenderNode>();
         box = new Box();
+        maxWidth = null;
+        maxHeight = null;
     }
     
     public RenderNode(DOMNode dom, int id, int depth) {

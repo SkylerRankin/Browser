@@ -2,29 +2,30 @@ package renderer;
 
 import java.util.Stack;
 
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.text.Font;
+import model.Box;
 import model.DOMNode;
 import model.RenderNode;
 
 public class HTMLRenderer {
     
-    public RenderNode generateRenderTree(DOMNode dom) {
-        RenderNode root = new RenderNode("body");
-        
-        return root;
+    public static void render(GraphicsContext gc, RenderNode root) {
+    	System.out.printf("rendering: %s\n", root.type);
+    	drawBox(gc, root.box);
+    	if (root.text != null) drawText(gc, root);
+    	for (RenderNode child : root.children) {
+    		render(gc, child);
+    	}
     }
     
-    public void calculateLayouts(DOMNode root, int width) {
-        
-        Stack<DOMNode> nodes = new Stack<DOMNode>();
-        nodes.add(root);
-        while(!nodes.isEmpty()) {
-            DOMNode current = nodes.pop();
-        }
-        
+    public static void drawBox(GraphicsContext gc, Box box) {
+    	gc.strokeRect(box.x, box.y, box.width, box.height);
     }
     
-    public void render(DOMNode root) {
-        
+    public static void drawText(GraphicsContext gc, RenderNode node) {
+    	System.out.printf("drawing text %s at (%.2f, %.2f)\n", node.text, node.box.x, node.box.y + node.box.height);
+        gc.fillText(node.text, node.box.x, node.box.y + node.box.height);
     }
     
 }

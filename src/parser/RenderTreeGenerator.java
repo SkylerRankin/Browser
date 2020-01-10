@@ -12,9 +12,10 @@ public class RenderTreeGenerator {
 	private int nodeID = 0;
 	private Map<Integer, RenderNode> parentRenderNodeMap = new HashMap<Integer, RenderNode>();
 
-	public RenderNode generateRenderTree(DOMNode dom) {
+	public RenderNode generateRenderTree(DOMNode dom, Float screenWidth) {
 		RenderNode renderTree = domTreeToRenderTree(dom);
-		BoxLayoutCalculator boxLayoutCalculator = new BoxLayoutCalculator(parentRenderNodeMap);
+		BoxLayoutCalculator boxLayoutCalculator = new BoxLayoutCalculator(parentRenderNodeMap, screenWidth);
+		boxLayoutCalculator.setBoxBounds(renderTree);
 		boxLayoutCalculator.calculateBoxes(renderTree);
 		return renderTree;
     }

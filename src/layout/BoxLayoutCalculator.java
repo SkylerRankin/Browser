@@ -14,39 +14,79 @@ public class BoxLayoutCalculator {
     private Map<Integer, RenderNode> lastAddedChildMap;
     private Map<Integer, RenderNode> parentNodeMap;
     
-    public BoxLayoutCalculator(Map<Integer, RenderNode> parentNodeMap) {
+    public BoxLayoutCalculator(Map<Integer, RenderNode> parentNodeMap, float screenWidth) {
+    	this.screenWidth = screenWidth;
     	this.parentNodeMap = parentNodeMap;
         this.lastAddedChildMap = new HashMap<Integer, RenderNode>();
     }
     
     /**
+     * Traverse the render tree and fill in all the boxes that have fixed sizes, as well as the 
+     * max height and width for each node, based on the parent size.
+     * @param root
+     */
+    public void setBoxBounds(RenderNode root) {
+    	RenderNode parent = parentNodeMap.get(root.id);
+    	if (parent == null) {
+    		root.maxWidth = screenWidth;
+    		root.box.x = 0;
+    		root.box.y = 0;
+    	} else {
+    		root.maxWidth = parent.maxWidth;
+    	}
+    	
+    	if (root.text != null) {
+    		Vector2 textSize = TextDimensionCalculator.getTextDimension(root.text, root.style);
+    		root.box.width = textSize.x;
+    		root.box.height = textSize.y;
+    	}
+    	
+    	for (RenderNode child : root.children) {
+    		setBoxBounds(child);
+    	}
+    	
+    }
+    
+    public void printBoxes(RenderNode root) {
+    	System.out.printf("BoxLayoutCalculator: printing boxes\n\n");
+    	System.out.printf("[%s] (%.2f, %.2f), (%.2f, %.2f)\n", root.type, root.box.x, root.box.y, root.box.width, root.box.height);
+    	for (RenderNode child : root.children) {
+    		printBoxes(child, "\t");
+    	}
+    	System.out.printf("\n");
+    }
+    
+    private void printBoxes(RenderNode root, String pad) {
+    	System.out.printf("%s[%s] (%.2f, %.2f), (%.2f, %.2f)\n", pad, root.type, root.box.x, root.box.y, root.box.width, root.box.height);
+    	for (RenderNode child : root.children) {
+    		printBoxes(child, pad+"\t");
+    	}
+    }
+    
+    /**
      * Take the render node tree and fill in the x, y, width, and height of the boxes
-     * first pass should set all of the size requirements from the css, such as width=100px or height=50%
      * Then, go from top to bottom; root node is as wide as screen, but height isn't known
-     * need to propagate values upwards as height gets updated
+     * need to propagate values upwards as height gets updated.
+     * Updates lastAddedChild as it works down the tree
      * 
      * @param root		The root of the render tree to use
      */
     
     public void calculateBoxes(RenderNode root) {
-        if (parentNodeMap.get(root.id) == null) {
-            root.box.x = 0;
-            root.box.y = 0;
-            root.box.width = 0;
-            root.box.height = 0;
-        } else {
-            Vector2 position = nextPosition(parentNodeMap.get(root.id));
-            root.box.x = position.x;
-            root.box.y = position.y;
-            Vector2 size = calculateNodeSize(root);
-            root.box.width = size.x;
-            root.box.height = size.y;
-            propagateSize(root);
-        }
-        
-        for (RenderNode child : root.children) {
-            calculateBoxes(child);
-        }
+    	RenderNode parent = parentNodeMap.get(root.id);
+    	System.out.printf("calculateBoxes: root=%s parent=%s\n", root.type, (parent == null ? null : parent.type));
+    	
+    	if (parent != null) {
+    		Vector2 nextPosition = nextPosition(parent);
+    		root.box.x = nextPosition.x;
+    		root.box.y = nextPosition.y;
+    		propagateSize(root);
+    		lastAddedChildMap.put(parent.id, root);
+    	}
+    	
+    	for (RenderNode child : root.children) {
+    		calculateBoxes(child);
+    	}
     }
     
     /**
@@ -55,32 +95,29 @@ public class BoxLayoutCalculator {
      * @param node      The node with a newly updated dimension.
      */
     public void propagateSize(RenderNode node) {
-    	if (node.parent == null) {
-    		return;
-    	}
+    	RenderNode parent = parentNodeMap.get(node.id);
+    	System.out.printf("propagateSize: node=%s, parent=%s\n", node.type, (parent == null ? null : parent.type));
+    	if (parent == null) return;
     	
     	float newWidth = node.box.width;
     	float newHeight = node.box.height;
     	
-    	// cannot just assume that if child is wider, then parent width is the child width, children could be side by side
+    	parent.box.width = newWidth;
+    	parent.box.height = newHeight;
     	
+    	propagateSize(parent);
     }
     
     public Vector2 nextPosition(RenderNode parent) {
         RenderNode lastAddedChild = lastAddedChildMap.get(parent.id);
         if (lastAddedChild == null) {
+        	// If this is the first child, then it gets added in the top right of parent
             return new Vector2(parent.box.x, parent.box.y);
         } else {
+        	// If this is not first, add it relative to the last added child
+        	// Below assumes all block level elements; need to handle in-line
             return new Vector2(parent.box.x, parent.box.y + parent.box.height);
         }
-    }
-    
-    public Vector2 calculateNodeSize(RenderNode node) {
-        Vector2 size = new Vector2();
-        if (node.style.width != null) {
-            
-        }
-        return size;
     }
 
 }
