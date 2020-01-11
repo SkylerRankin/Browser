@@ -64,6 +64,7 @@ public class BoxLayoutCalculatorTest {
 		createSimpleRenderTree();
 		BoxLayoutCalculator blc = new BoxLayoutCalculator(parentMap, 50f);
 		blc.setBoxBounds(root);
+		blc.printBoxes(root);
 		blc.calculateBoxes(root);
 		blc.printBoxes(root);
 	}

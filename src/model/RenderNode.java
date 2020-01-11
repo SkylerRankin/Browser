@@ -18,6 +18,7 @@ public class RenderNode {
     public Box box;
     public Float maxWidth;
     public Float maxHeight;
+    public String cssAttribute;
     
     public RenderNode(String type) {
         this.type = type;
@@ -25,6 +26,8 @@ public class RenderNode {
         box = new Box();
         maxWidth = null;
         maxHeight = null;
+        cssAttribute = null;
+        style = new CSSStyle();
     }
     
     public RenderNode(DOMNode dom, int id, int depth) {
@@ -33,6 +36,8 @@ public class RenderNode {
         this.depth = depth;
         this.id = id;
         children = new ArrayList<RenderNode>();
+        cssAttribute = dom.attributes.get("style");
+        style = new CSSStyle();
     }
     
     public void render() {}

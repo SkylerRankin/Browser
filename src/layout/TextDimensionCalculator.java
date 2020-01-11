@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import css.CSSStyle;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import model.Vector2;
 
@@ -17,6 +19,11 @@ public class TextDimensionCalculator {
      */
     public static Vector2 getTextDimension(String s, CSSStyle style) {
     	Text text = new Text(s);
+    	FontWeight fontWeight = FontWeight.NORMAL;
+    	if (style.fontWeight == CSSStyle.fontWeightType.BOLD) {
+    		fontWeight = FontWeight.BOLD;
+    	}
+    	text.setFont(Font.font(style.fontFamily, fontWeight, style.fontSize));
     	float width = (float) text.getBoundsInLocal().getWidth();
     	float height = (float) text.getBoundsInLocal().getHeight();
         return new Vector2(width, height);

@@ -4,6 +4,7 @@ import java.util.Stack;
 
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import model.Box;
 import model.DOMNode;
 import model.RenderNode;
@@ -24,7 +25,7 @@ public class HTMLRenderer {
     }
     
     public static void drawText(GraphicsContext gc, RenderNode node) {
-    	System.out.printf("drawing text %s at (%.2f, %.2f)\n", node.text, node.box.x, node.box.y + node.box.height);
+    	gc.setFont(Font.font(node.style.fontFamily, FontWeight.BOLD, node.style.fontSize));
         gc.fillText(node.text, node.box.x, node.box.y + node.box.height);
     }
     

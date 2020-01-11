@@ -324,34 +324,5 @@ public class HTMLParserTest {
         DOMNode bodyNode = parser.getBodyNode(dom);
         assertEquals(null, bodyNode);
     }
-    
-//    @Test
-//    public void testGenerateRenderTree() {
-//        // <html><body><div>before<p>middle</p>after</div></body></html>
-//        DOMNode dom = new DOMNode("root");
-//        DOMNode html = new DOMNode(HTMLElements.HTML);
-//        DOMNode body = new DOMNode(HTMLElements.BODY);
-//        DOMNode div = new DOMNode(HTMLElements.DIV);
-//        DOMNode beforeText = new DOMNode(HTMLElements.TEXT);
-//        beforeText.content = "before";
-//        DOMNode afterText = new DOMNode(HTMLElements.TEXT);
-//        afterText.content = "after";
-//        DOMNode p = new DOMNode(HTMLElements.P);
-//        DOMNode pText = new DOMNode(HTMLElements.TEXT);
-//        pText.content = "middle";
-//        
-//        dom.addChild(html);
-//        html.addChild(body);
-//        body.addChild(div);
-//        div.addChild(beforeText);
-//        div.addChild(p);
-//        div.addChild(afterText);
-//        p.addChild(pText);
-//        
-//        HTMLParser parser = new HTMLParser();
-//        RenderNode renderNode = parser.generateRenderTree(dom);
-//        renderNode.print();
-//        
-//    }
-    
+        
 }

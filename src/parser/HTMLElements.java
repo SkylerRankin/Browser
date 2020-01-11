@@ -5,9 +5,10 @@ public class HTMLElements {
     public static final String TEXT = "text";
     
     public static final String DOCTYPE = "!doctype";
-    
     public static final String HTML = "html";
     public static final String HEAD = "head";
+    public static final String META = "meta";
+    public static final String STYLE = "style";
     public static final String TITLE = "title";
     public static final String BODY = "body";
     
@@ -20,6 +21,16 @@ public class HTMLElements {
     public static final String DIV = "div";
     public static final String P = "p";
     public static final String INPUT = "input";
+    public static final String UL = "ul";
+    public static final String OL = "ol";
+    public static final String LI = "li";
+    public static final String HR = "hr";
+    public static final String B = "b";
+    public static final String IMG = "img";
+    public static final String A = "a";
+    public static final String TABLE = "table";
+    public static final String TR = "tr";
+    public static final String TD = "td";
     
     public static final String[] RENDER_TREE_ELEMENTS = {BODY, TEXT, H1, H2, H3, H4, H5, H6, DIV, P, INPUT};
     public static final String[] BLOCK_LEVEL_ELEMENTS = {H1, H2, H3, H4, H5, H6, DIV, P};

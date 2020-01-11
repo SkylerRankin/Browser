@@ -96,11 +96,15 @@ public class BoxLayoutCalculator {
      */
     public void propagateSize(RenderNode node) {
     	RenderNode parent = parentNodeMap.get(node.id);
-    	System.out.printf("propagateSize: node=%s, parent=%s\n", node.type, (parent == null ? null : parent.type));
     	if (parent == null) return;
     	
-    	float newWidth = node.box.width;
-    	float newHeight = node.box.height;
+    	float newWidth = Math.max(node.box.width, parent.box.width);
+    	float newHeight = 0;
+    	for (RenderNode child : parent.children) {
+    		newHeight += child.box.height;
+    	}
+    	
+    	System.out.printf("propagateSize: node=%s, parent=%s, (%.2f, %.2f)\n", node.type, (parent == null ? null : parent.type), newWidth, newHeight);
     	
     	parent.box.width = newWidth;
     	parent.box.height = newHeight;
