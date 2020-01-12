@@ -3,6 +3,7 @@ package layout;
 import java.util.HashMap;
 import java.util.Map;
 
+import css.CSSStyle;
 import model.RenderNode;
 import model.Vector2;
 
@@ -13,7 +14,7 @@ public class BoxLayoutCalculator {
     
     private Map<Integer, RenderNode> lastAddedChildMap;
     private Map<Integer, RenderNode> parentNodeMap;
-    
+        
     public BoxLayoutCalculator(Map<Integer, RenderNode> parentNodeMap, float screenWidth) {
     	this.screenWidth = screenWidth;
     	this.parentNodeMap = parentNodeMap;
@@ -74,12 +75,14 @@ public class BoxLayoutCalculator {
     
     public void calculateBoxes(RenderNode root) {
     	RenderNode parent = parentNodeMap.get(root.id);
-    	System.out.printf("calculateBoxes: root=%s parent=%s\n", root.type, (parent == null ? null : parent.type));
+    	System.out.printf("\ncalculateBoxes: root=%s parent=%s\n", root.type, (parent == null ? null : parent.type));
     	
     	if (parent != null) {
-    		Vector2 nextPosition = nextPosition(parent);
+    		Vector2 nextPosition = nextPosition(parent, root.style.diplay);
+    		System.out.printf("nextPosition = %s\n", nextPosition.toString());
     		root.box.x = nextPosition.x;
     		root.box.y = nextPosition.y;
+    		root.positioned = true;
     		propagateSize(root);
     		lastAddedChildMap.put(parent.id, root);
     	}
@@ -98,10 +101,28 @@ public class BoxLayoutCalculator {
     	RenderNode parent = parentNodeMap.get(node.id);
     	if (parent == null) return;
     	
-    	float newWidth = Math.max(node.box.width, parent.box.width);
-    	float newHeight = 0;
+    	// Find width and height by finding difference between farthest elements, vertically and horizontally
+    	
+    	RenderNode leftMost = null;
+    	RenderNode rightMost = null;
+    	RenderNode topMost = null;
+    	RenderNode bottomMost = null;
+    	
     	for (RenderNode child : parent.children) {
-    		newHeight += child.box.height;
+    		if (child.positioned) {
+    			if (leftMost == null || child.box.x < leftMost.box.x) leftMost = child;
+        		if (rightMost == null || (child.box.x + child.box.width) > (rightMost.box.x + rightMost.box.width)) rightMost = child;
+        		if (topMost == null || child.box.y < topMost.box.y) topMost = child;
+        		if (bottomMost == null || (child.box.y + child.box.height) > (bottomMost.box.y + bottomMost.box.height)) bottomMost = child;
+    		}
+    	}
+    	
+    	float newWidth = 0;
+    	float newHeight = 0;
+    	
+    	if (parent.children.size() > 0) {
+    		newWidth = rightMost.box.x - leftMost.box.x + rightMost.box.width;
+    		newHeight = bottomMost.box.y - topMost.box.y + bottomMost.box.height;
     	}
     	
     	System.out.printf("propagateSize: node=%s, parent=%s, (%.2f, %.2f)\n", node.type, (parent == null ? null : parent.type), newWidth, newHeight);
@@ -112,15 +133,19 @@ public class BoxLayoutCalculator {
     	propagateSize(parent);
     }
     
-    public Vector2 nextPosition(RenderNode parent) {
+    public Vector2 nextPosition(RenderNode parent, CSSStyle.displayType displayType) {
         RenderNode lastAddedChild = lastAddedChildMap.get(parent.id);
         if (lastAddedChild == null) {
         	// If this is the first child, then it gets added in the top right of parent
             return new Vector2(parent.box.x, parent.box.y);
         } else {
-        	// If this is not first, add it relative to the last added child
-        	// Below assumes all block level elements; need to handle in-line
-            return new Vector2(parent.box.x, parent.box.y + parent.box.height);
+        	switch (displayType) {
+        	case INLINE:
+        		return new Vector2(parent.box.x + parent.box.width, parent.box.y);
+        	case BLOCK:
+        	default:
+        		return new Vector2(parent.box.x, parent.box.y + parent.box.height);
+        	}
         }
     }
 

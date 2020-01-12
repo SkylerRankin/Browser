@@ -20,6 +20,11 @@ public class RenderNode {
     public Float maxHeight;
     public String cssAttribute;
     
+    // False until the BoxLayoutCalculator sets this node's box object correctly
+    // This way we don't consider nodes to be at position (0, 0) when they are 
+    // actually just not yet positioned.
+    public boolean positioned = false;
+    
     public RenderNode(String type) {
         this.type = type;
         children = new ArrayList<RenderNode>();
