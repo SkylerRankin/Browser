@@ -17,8 +17,8 @@ public class RenderNode {
     public CSSStyle style;
     public Box box;
     public Float maxWidth;
-    public Float maxHeight;
-    public String cssAttribute;
+    public Float maxHeight = null;
+    public String cssAttribute = null;
     
     // False until the BoxLayoutCalculator sets this node's box object correctly
     // This way we don't consider nodes to be at position (0, 0) when they are 

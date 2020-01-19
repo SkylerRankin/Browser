@@ -9,6 +9,8 @@ public class Box {
     public float y;
     public float width;
     public float height;
+	public boolean fixedWidth = false;
+	public boolean fixedHeight = false;
     
     /**
      * Convert box coordinates to global coordinates. Take a point 

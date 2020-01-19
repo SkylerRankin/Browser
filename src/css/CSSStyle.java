@@ -4,8 +4,6 @@ import model.Color;
 
 public class CSSStyle {
 	
-	// TODO complete this list?
-	
     public static enum dimensionType {PIXEL, PERCENTAGE};
     public static enum displayType {BLOCK, INLINE};
     public static enum fontStyleType {NORMAL, ITALICS, OBLIQUE};
