@@ -16,7 +16,7 @@ public class RenderNode {
     public RenderNode parent;
     public CSSStyle style;
     public Box box;
-    public Float maxWidth;
+    public Float maxWidth = null;
     public Float maxHeight = null;
     public String cssAttribute = null;
     

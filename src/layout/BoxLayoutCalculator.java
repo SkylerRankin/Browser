@@ -21,8 +21,7 @@ public class BoxLayoutCalculator {
     }
     
     /**
-     * Traverse the render tree and fill in all the boxes that have fixed sizes, as well as the 
-     * max height and width for each node, based on the parent size.
+     * Traverse the render tree and fill in all the boxes that have fixed sizes
      * @param root
      */
     public void setBoxBounds(RenderNode root) {
@@ -30,7 +29,6 @@ public class BoxLayoutCalculator {
     	if (parent == null) {
     		root.box.fixedWidth = true;
     		root.box.width = screenWidth;
-//    		root.maxWidth = screenWidth;
     		root.box.x = 0;
     		root.box.y = 0;
     	} else {
@@ -80,7 +78,6 @@ public class BoxLayoutCalculator {
     	
     	if (parent != null) {
     		Vector2 nextPosition = nextPosition(root, parent);
-//    		System.out.printf("nextPosition = %s\n", nextPosition.toString());
     		root.box.x = nextPosition.x;
     		root.box.y = nextPosition.y;
     		root.positioned = true;
@@ -104,10 +101,18 @@ public class BoxLayoutCalculator {
     		root.maxWidth = this.screenWidth;
     		root.maxHeight = null;
     	} else {
-    		root.maxWidth = root.box.fixedWidth ? new Float(root.box.width) : parent.maxWidth;
-    		root.maxHeight = root.box.fixedHeight ? new Float(root.box.height) : parent.maxHeight;
+    		if (root.box.fixedWidth) {
+    			root.maxWidth = root.box.width + root.style.marginLeft + root.style.marginRight;
+    		} else if (parent.maxWidth != null) {
+    			root.maxWidth = parent.maxWidth - parent.style.paddingLeft - parent.style.paddingRight - root.style.marginLeft - root.style.marginRight;
+    		}
+    		
+    		if (root.box.fixedHeight) {
+    			root.maxHeight = root.box.height + root.style.marginTop + root.style.marginBottom;
+    		} else if (parent.maxHeight != null) {
+    			root.maxHeight = parent.maxHeight - parent.style.paddingTop - parent.style.paddingBottom - root.style.marginTop - root.style.marginBottom;
+    		}
     	}
-    	
     	for (RenderNode child : root.children) {
     		propagateMaxSizes(child);
     	}
@@ -142,8 +147,13 @@ public class BoxLayoutCalculator {
     	float newHeight = 0;
     	
     	if (parent.children.size() > 0) {
-    		newWidth = rightMost.box.x - leftMost.box.x + rightMost.box.width;
-    		newHeight = bottomMost.box.y - topMost.box.y + bottomMost.box.height;
+    		newWidth = rightMost.box.x - leftMost.box.x + rightMost.box.width + 
+    				parent.style.paddingLeft + parent.style.paddingRight;
+//    				node.style.marginLeft + node.style.marginRight;
+    		// Only the bottom margin matters since top margin is inside the bottom-top y value range
+    		newHeight = bottomMost.box.y - topMost.box.y + bottomMost.box.height +
+    				parent.style.paddingBottom + parent.style.paddingTop +
+    				topMost.style.marginTop + bottomMost.style.marginBottom;
     	}
     	
 //    	System.out.printf("propagateSize: node=%s, parent=%s, (%.2f, %.2f)\n", node.type, (parent == null ? null : parent.type), newWidth, newHeight);
@@ -164,18 +174,32 @@ public class BoxLayoutCalculator {
         RenderNode lastAddedChild = lastAddedChildMap.get(parent.id);
         if (lastAddedChild == null) {
         	// If this is the first child, then it gets added in the top right of parent
-            return new Vector2(parent.box.x, parent.box.y);
+            return new Vector2(
+            		parent.box.x + parent.style.paddingLeft + node.style.marginLeft,
+            		parent.box.y + parent.style.paddingTop + node.style.marginTop
+            );
         } else {
         	switch (displayType) {
         	case INLINE:
+        		// TODO handle stacking padding
         		// Try in-line, but if it needs more space, continue to block case
-        		float x = lastAddedChild.box.x + lastAddedChild.box.width;
-        		if (parent != null && x + node.box.width <= parent.maxWidth) {
+        		float x = lastAddedChild.box.x + lastAddedChild.box.width + node.style.marginLeft;
+        		float boundary = parent.maxWidth - parent.style.paddingRight - node.style.marginRight;
+        		if (parent != null && x + node.box.width <= boundary) {
         			return new Vector2(x, lastAddedChild.box.y);
         		}
         	case BLOCK:
         	default:
-        		return new Vector2(parent.box.x, parent.box.y + parent.box.height);
+        		// Default block elements get put to the left, and right below all the other elements. The height gets updated later.
+        		// Bottom padding no longer impacts the last added child, so have to subtract that when finding the new values
+        		// TODO probably other sides' padding have a stacking effect that needs to be managed
+        		
+        		float bottomPaddingCorrection = parent.style.paddingBottom;
+        		float bottomMarginCorrection = parent.style.marginBottom;
+        		
+        		return new Vector2(
+        				parent.box.x + parent.style.paddingLeft + node.style.marginLeft,
+        				parent.box.y + parent.box.height + node.style.marginTop - bottomPaddingCorrection);
         	}
         }
     }

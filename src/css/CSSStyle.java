@@ -1,6 +1,9 @@
 package css;
 
-import model.Color;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import model.Color8Bit;
 
 public class CSSStyle {
 	
@@ -12,21 +15,21 @@ public class CSSStyle {
     public static enum textDecorationType {NONE, OVERLINE, LINETHROUGH, UNDERLINE};
     public static enum wordWrapType {NORMAL, BREAKWORD};
     
-    public Color backgroundColor = new Color("white");
+    public Color8Bit backgroundColor = new Color8Bit("white");
     
-    public Color borderColor = new Color("white");
+    public Color8Bit borderColor = new Color8Bit("white");
     public int borderWidth = 1;
     public int borderWidthTop = 1;
     public int borderWidthRight = 1;
     public int borderWidthBottom = 1;
     public int borderWidthLeft = 1;
     
-    public Color color = new Color("black");
+    public Color8Bit color = new Color8Bit("black");
     
     public displayType diplay = displayType.BLOCK;
     
     public String fontFamily = "Arial";
-    public int fontSize = 10;
+    public int fontSize = 15;
     public fontStyleType fontStyle = fontStyleType.NORMAL;
     public fontWeightType fontWeight = fontWeightType.NORMAL;
     
@@ -53,5 +56,19 @@ public class CSSStyle {
     public textDecorationType textDecoration = textDecorationType.NONE;
     
     public wordWrapType wordWrap = wordWrapType.NORMAL;
+    
+    /**
+     * Apply some CSS rules
+     * @param css	Map<String, String> of the CSS attribute and value
+     */
+    public void apply(Map<String, String> css) {
+    	for (Entry<String, String> e : css.entrySet()) {
+    		switch (e.getKey()) {
+    		case "font-size":
+    			fontSize = Integer.parseInt(e.getValue());
+    			break;
+    		}
+    	}
+    }
     
 }

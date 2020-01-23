@@ -16,6 +16,7 @@ public class RenderTreeGenerator {
 		RenderNode renderTree = domTreeToRenderTree(dom);
 		BoxLayoutCalculator boxLayoutCalculator = new BoxLayoutCalculator(parentRenderNodeMap, screenWidth);
 		boxLayoutCalculator.setBoxBounds(renderTree);
+		boxLayoutCalculator.propagateMaxSizes(renderTree);
 		boxLayoutCalculator.calculateBoxes(renderTree);
 		return renderTree;
     }

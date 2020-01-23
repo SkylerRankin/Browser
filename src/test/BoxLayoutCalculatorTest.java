@@ -23,83 +23,6 @@ public class BoxLayoutCalculatorTest {
 		JFXPanel jfxPanel = new JFXPanel();
 	}
 	
-	private void createSimpleRenderTree() {
-		parentMap = new HashMap<Integer, RenderNode>();
-		
-		root = new RenderNode("body");
-		RenderNode h1 = new RenderNode("h1");
-		RenderNode div = new RenderNode("div");
-		RenderNode p1 = new RenderNode("p");
-		RenderNode p2 = new RenderNode("p");
-		
-		root.id = 0;	root.depth = 0;
-		h1.id = 1;		h1.depth = 1;
-		div.id = 2;		div.depth = 1;
-		p1.id = 3;		p1.depth = 2;
-		p2.id = 4;		p2.depth = 2;
-		
-		h1.text = "A Test";
-		p1.text = "The first paragraph.";
-		p2.text = "The second, much longer, paragraph.";
-		
-		root.children.add(h1);
-		root.children.add(div);
-		div.children.add(p1);
-		div.children.add(p2);
-		
-		parentMap.put(1, root);
-		parentMap.put(2, root);
-		parentMap.put(3, div);
-		parentMap.put(4, div);
-	}
-	
-	private void createRenderTreeWithInline() {
-		parentMap = new HashMap<Integer, RenderNode>();
-		
-		root = new RenderNode("body");
-		RenderNode h1 = new RenderNode("h1");
-		RenderNode div = new RenderNode("div");
-		RenderNode span1 = new RenderNode("span");
-		RenderNode span2 = new RenderNode("span");
-		RenderNode p = new RenderNode("p");
-		RenderNode span3 = new RenderNode("span");
-		
-		span1.style.diplay = CSSStyle.displayType.INLINE;
-		span2.style.diplay = CSSStyle.displayType.INLINE;
-		span3.style.diplay = CSSStyle.displayType.INLINE;
-
-		
-		root.id = 0;	root.depth = 0;
-		h1.id = 1;		h1.depth = 1;
-		div.id = 2;		div.depth = 1;
-		span1.id = 3;	span1.depth = 2;
-		span2.id = 4;	span2.depth = 2;
-		p.id = 5;		p.depth = 2;
-		span3.id = 6;	span3.depth = 2;
-
-		
-		h1.text = "A Test";
-		span1.text = "Search";
-		span2.text = "Cancel";
-		p.text = "A paragraph of information for testing.";
-		span3.text = "Author Unknown";
-		
-		root.children.add(h1);
-		root.children.add(div);
-		div.children.add(span1);
-		div.children.add(span2);
-		div.children.add(p);
-		div.children.add(span3);
-		
-		parentMap.put(1, root);
-		parentMap.put(2, root);
-		parentMap.put(3, div);
-		parentMap.put(4, div);
-		parentMap.put(5, div);
-		parentMap.put(6, div);
-
-	}
-
 	private void createTree2() {
 		
 		// 5 in-line spans in a row; should show two per line, since each is 40 wide and total width is set to 100
@@ -221,156 +144,46 @@ public class BoxLayoutCalculatorTest {
 		parentMap.put(5, C);
 		parentMap.put(6, C);
 	}
-	
-	private void createRenderTree_widths_and_inline() {
+
+	private void createTree4() {
+		// Two nested divs with padding, and some text in the middle
+		// Outer div has fixed size, inner doesn't
+		
 		parentMap = new HashMap<Integer, RenderNode>();
 		
 		root = new RenderNode("body");
 		RenderNode A = new RenderNode("div");
 		RenderNode B = new RenderNode("div");
-		RenderNode C = new RenderNode("div");
-		RenderNode D = new RenderNode("div");
-		RenderNode E = new RenderNode("div");
-		RenderNode F = new RenderNode("div");
-		RenderNode G = new RenderNode("div");
-		RenderNode H = new RenderNode("div");
-		RenderNode I = new RenderNode("div");
-		RenderNode J = new RenderNode("div");
-
+		RenderNode C = new RenderNode("text");
+		
 		A.box.fixedWidth = true;
 		A.box.fixedHeight = true;
+		
 		A.box.width = 50;
-		A.box.height = 20;
+		A.box.height = 50;
 		
-		B.box.fixedWidth = true;
-		B.box.fixedHeight = true;
-		B.box.width = 40;
-		B.box.height = 10;
+		A.style.paddingTop = 5;
+		A.style.paddingBottom = 5;
+		A.style.paddingLeft = 10;
+		A.style.paddingRight = 10;
 		
-		D.box.fixedWidth = true;
-		D.box.fixedHeight = true;
-		D.box.width = 40;
-		D.box.height = 5;
-		
-		E.box.fixedWidth = true;
-		E.box.fixedHeight = true;
-		E.box.width = 40;
-		E.box.height = 5;
-		
-		F.box.fixedWidth = true;
-		F.box.fixedHeight = true;
-		F.box.width = 40;
-		F.box.height = 5;
-		
-		H.box.fixedWidth = true;
-		H.box.fixedHeight = true;
-		H.box.width = 10;
-		H.box.height = 40;
-		
-		I.box.fixedWidth = true;
-		I.box.fixedHeight = true;
-		I.box.width = 30;
-		I.box.height = 10;
-		
-		J.box.fixedWidth = true;
-		J.box.fixedHeight = true;
-		J.box.width = 30;
-		J.box.height = 10;
-		
-		
-		B.style.diplay = CSSStyle.displayType.INLINE;
-		D.style.diplay = CSSStyle.displayType.INLINE;
-		E.style.diplay = CSSStyle.displayType.INLINE;
-		F.style.diplay = CSSStyle.displayType.INLINE;
-		J.style.diplay = CSSStyle.displayType.INLINE;
-
+		B.style.paddingTop = 2;
+		B.style.paddingBottom = 2;
+		B.style.paddingLeft = 2;
+		B.style.paddingRight = 2;
 		
 		root.id = 0;	root.depth = 0;
 		A.id = 1;		A.depth = 1;
-		B.id = 2;		B.depth = 1;
-		C.id = 3;		C.depth = 1;
-		D.id = 4;		D.depth = 2;
-		E.id = 5;		E.depth = 2;
-		F.id = 6;		F.depth = 2;
-		G.id = 7;		G.depth = 2;
-		H.id = 8;		H.depth = 3;
-		I.id = 9;		I.depth = 3;
-		J.id = 10;		J.depth = 3;
+		B.id = 2;		B.depth = 2;
+		C.id = 3;		C.depth = 3;
 		
 		root.children.add(A);
-		root.children.add(B);
-		root.children.add(C);
-		C.children.add(D);
-		C.children.add(E);		
-		C.children.add(F);		
-		C.children.add(G);
-		G.children.add(H);
-		G.children.add(I);
-		G.children.add(J);
+		A.children.add(B);
+		B.children.add(C);
 		
 		parentMap.put(1, root);
-		parentMap.put(2, root);
-		parentMap.put(3, root);
-		parentMap.put(4, C);
-		parentMap.put(5, C);
-		parentMap.put(6, C);
-		parentMap.put(7, C);
-		parentMap.put(8, G);
-		parentMap.put(9, G);
-		parentMap.put(10, G);
-		
-	}
-	
-//	@Test
-	public void setBoxBoundsTest_simple() {
-		createSimpleRenderTree();
-		BoxLayoutCalculator blc = new BoxLayoutCalculator(parentMap, 50f);
-		blc.setBoxBounds(root);
-		blc.printBoxes(root);
-	}
-	
-//	@Test
-	public void calculateBoxesTest_simple() {
-		createSimpleRenderTree();
-		BoxLayoutCalculator blc = new BoxLayoutCalculator(parentMap, 50f);
-		blc.setBoxBounds(root);
-		blc.printBoxes(root);
-		blc.calculateBoxes(root);
-		blc.printBoxes(root);
-	}
-	
-//	@Test
-	public void calculateBoxesText_inline() {
-		createRenderTreeWithInline();
-		BoxLayoutCalculator blc = new BoxLayoutCalculator(parentMap, 50f);
-		blc.setBoxBounds(root);
-		blc.printBoxes(root);
-		blc.calculateBoxes(root);
-		blc.printBoxes(root);
-	}
-	
-//	@Test
-	public void calculateBoxesText_inline2() {
-		createRenderTree_widths_and_inline();
-		BoxLayoutCalculator blc = new BoxLayoutCalculator(parentMap, 50f);
-		blc.printBoxes(root);
-		blc.calculateBoxes(root);
-		blc.printBoxes(root);
-		
-		Float[] x = {0f, 50f, 0f, 0f, 40f, 0f, 0f, 0f, 0f, 30f};
-		Float[] y = {0f, 0f, 20f, 20f, 20f, 25f, 30f, 30f, 70f, 70f};
-		Float[] width = {100f, 40f, 80f, 40f, 40f, 40f, 60f, 10f, 30f, 30f};
-		Float[] height = {80f, 10f, 60f, 5f, 5f, 5f, 50f, 40f, 10f, 10f};
-		
-		for (int i = 0; i < 11; ++i) {
-			RenderNode node = findRenderNode(i, root);
-			assertNotNull(node);
-			assertEquals(x[i], (Float) node.box.x);
-			assertEquals(y[i], (Float) node.box.y);
-			assertEquals(width[i], (Float) node.box.width);
-			assertEquals(height[i], (Float) node.box.height);
-		}
-		
+		parentMap.put(2, A);
+		parentMap.put(3, B);
 	}
 	
 	@Test
@@ -445,6 +258,27 @@ public class BoxLayoutCalculatorTest {
 		assertEquals((Float) 55f, (Float) F.box.y);
 		assertEquals((Float) 31f, (Float) F.box.width);
 		assertEquals((Float) 5f, (Float) F.box.height);
+	}
+	
+	@Test
+	public void calculateBoxesTestTree4() {
+		createTree4();
+		BoxLayoutCalculator blc = new BoxLayoutCalculator(parentMap, 100f);
+		blc.setBoxBounds(root);
+		blc.propagateMaxSizes(root);
+		blc.calculateBoxes(root);
+		
+		RenderNode A = findRenderNode(1, root);
+		RenderNode B = findRenderNode(2, root);
+		RenderNode C = findRenderNode(3, root);
+		
+		assertEquals((Float) 0f, (Float) A.box.x);
+		assertEquals((Float) 0f, (Float) A.box.y);
+		assertEquals((Float) 10f, (Float) B.box.x);
+		assertEquals((Float) 5f, (Float) B.box.y);
+		assertEquals((Float) 12f, (Float) C.box.x);
+		assertEquals((Float) 7f, (Float) C.box.y);
+		
 	}
 	
 	@Test
