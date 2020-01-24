@@ -6,9 +6,11 @@ import java.util.Map;
 import org.junit.Test;
 
 import css.DefaultCSSLoader;
+import css.DefaultColors;
 import javafx.application.Application;
 import javafx.scene.canvas.GraphicsContext;
 import layout.BoxLayoutCalculator;
+import model.CSSColor;
 import model.RenderNode;
 import parser.RenderTreeGenerator;
 import renderer.HTMLRenderer;
@@ -43,6 +45,8 @@ public class HTMLRendererTest {
 		p1.style.marginBottom = 15;
 		p2.style.marginTop = 15;
 		p2.style.marginBottom = 5;
+		
+		p2.style.backgroundColor = new CSSColor("gray");
 		
 //		root.box.x = 0;		root.box.y = 0;		root.box.width = 200f;			root.box.height = 100f;
 //		h1.box.x = 0;		h1.box.y = 0;		h1.box.width = 32.75f;			h1.box.height = 15.96f;
@@ -123,6 +127,7 @@ public class HTMLRendererTest {
 	
 	public static void render(GraphicsContext gc, double width, double height) {
 		RenderNode root = createSimpleRenderTree();
+		DefaultColors.init();
 //		RenderNode root = createTree4();
 		DefaultCSSLoader.loadDefaults(root);
 		BoxLayoutCalculator blc = new BoxLayoutCalculator(parentNodeMap, 500f);

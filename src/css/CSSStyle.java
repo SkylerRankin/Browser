@@ -3,7 +3,7 @@ package css;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import model.Color8Bit;
+import model.CSSColor;
 
 public class CSSStyle {
 	
@@ -15,16 +15,16 @@ public class CSSStyle {
     public static enum textDecorationType {NONE, OVERLINE, LINETHROUGH, UNDERLINE};
     public static enum wordWrapType {NORMAL, BREAKWORD};
     
-    public Color8Bit backgroundColor = new Color8Bit("white");
+    public CSSColor backgroundColor = new CSSColor("white");
     
-    public Color8Bit borderColor = new Color8Bit("white");
+    public CSSColor borderColor = new CSSColor("white");
     public int borderWidth = 1;
     public int borderWidthTop = 1;
     public int borderWidthRight = 1;
     public int borderWidthBottom = 1;
     public int borderWidthLeft = 1;
     
-    public Color8Bit color = new Color8Bit("black");
+    public CSSColor color = new CSSColor("black");
     
     public displayType diplay = displayType.BLOCK;
     
@@ -66,6 +66,9 @@ public class CSSStyle {
     		switch (e.getKey()) {
     		case "font-size":
     			fontSize = Integer.parseInt(e.getValue());
+    			break;
+    		case "font-weight":
+    			if (e.getValue().equals("bold")) fontWeight = fontWeightType.BOLD;
     			break;
     		}
     	}

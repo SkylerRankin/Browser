@@ -147,10 +147,11 @@ public class BoxLayoutCalculator {
     	float newHeight = 0;
     	
     	if (parent.children.size() > 0) {
+    		// Get distance between left and right-most nodes plus actual width of right-most to get width of element
+    		// Then add in the padding and margins on each side. Margins on the "inside" don't matter for the overall size.
     		newWidth = rightMost.box.x - leftMost.box.x + rightMost.box.width + 
-    				parent.style.paddingLeft + parent.style.paddingRight;
-//    				node.style.marginLeft + node.style.marginRight;
-    		// Only the bottom margin matters since top margin is inside the bottom-top y value range
+    				parent.style.paddingLeft + parent.style.paddingRight +
+    				leftMost.style.marginLeft + rightMost.style.marginRight;
     		newHeight = bottomMost.box.y - topMost.box.y + bottomMost.box.height +
     				parent.style.paddingBottom + parent.style.paddingTop +
     				topMost.style.marginTop + bottomMost.style.marginBottom;
@@ -195,7 +196,6 @@ public class BoxLayoutCalculator {
         		// TODO probably other sides' padding have a stacking effect that needs to be managed
         		
         		float bottomPaddingCorrection = parent.style.paddingBottom;
-        		float bottomMarginCorrection = parent.style.marginBottom;
         		
         		return new Vector2(
         				parent.box.x + parent.style.paddingLeft + node.style.marginLeft,
