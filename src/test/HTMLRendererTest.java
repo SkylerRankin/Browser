@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.junit.Test;
 
+import css.CSSStyle;
 import css.DefaultCSSLoader;
 import css.DefaultColors;
 import javafx.application.Application;
@@ -14,6 +15,7 @@ import model.CSSColor;
 import model.RenderNode;
 import parser.RenderTreeGenerator;
 import renderer.HTMLRenderer;
+import renderer.ImageCache;
 
 public class HTMLRendererTest {
 	
@@ -27,6 +29,22 @@ public class HTMLRendererTest {
 		RenderNode h2 = new RenderNode("h2");
 		RenderNode p1 = new RenderNode("p");
 		RenderNode p2 = new RenderNode("p");
+		RenderNode img = new RenderNode("img");
+		RenderNode ul = new RenderNode("ol");
+		RenderNode li1 = new RenderNode("li");
+		RenderNode li2 = new RenderNode("li");
+		RenderNode li3 = new RenderNode("li");
+		
+		li1.text = "first item";
+		li2.text = "second item";
+		li3.text = "third item";
+		
+//		img.box.fixedWidth = true;
+//		img.box.width = 300;
+//		img.box.fixedHeight = true;
+//		img.box.height = 200;
+//		
+//		img.attributes.put("src", "https://upload.wikimedia.org/wikipedia/en/9/90/ElderScrollsOblivionScreenshot11.jpg");
 		
 		parentNodeMap = new HashMap<Integer, RenderNode>();
 		parentNodeMap.put(1, root);
@@ -34,11 +52,23 @@ public class HTMLRendererTest {
 		parentNodeMap.put(3, div);
 		parentNodeMap.put(4, div);
 		parentNodeMap.put(5, div);
+		parentNodeMap.put(6, div);
+		parentNodeMap.put(7, ul);
+		parentNodeMap.put(8, ul);
+		parentNodeMap.put(9, ul);
+		
+		h1.style.color = new CSSColor("SeaGreen");
+		h1.style.fontFamily = "Courier New";
+		
+		h2.style.fontStyle = CSSStyle.fontStyleType.ITALICS;
 		
 		div.style.paddingTop = 5;
 		div.style.paddingBottom = 5;
 		div.style.paddingRight = 5;
 		div.style.paddingLeft = 5;
+		
+		div.box.fixedWidth = true;
+		div.box.width = 300;
 		
 		h2.style.marginTop = 5;
 		p1.style.marginTop = 15;
@@ -46,7 +76,7 @@ public class HTMLRendererTest {
 		p2.style.marginTop = 15;
 		p2.style.marginBottom = 5;
 		
-		p2.style.backgroundColor = new CSSColor("gray");
+		p2.style.backgroundColor = new CSSColor("LightGray");
 		
 //		root.box.x = 0;		root.box.y = 0;		root.box.width = 200f;			root.box.height = 100f;
 //		h1.box.x = 0;		h1.box.y = 0;		h1.box.width = 32.75f;			h1.box.height = 15.96f;
@@ -60,17 +90,27 @@ public class HTMLRendererTest {
 		h2.id = 3;			h2.depth = 2;
 		p1.id = 4;			p1.depth = 2;
 		p2.id = 5;			p2.depth = 2;
+		ul.id = 6;			ul.depth = 2;
+		li1.id = 7;			li1.depth = 3;
+		li2.id = 8;			li1.depth = 3;
+		li3.id = 9;			li1.depth = 3;
+//		img.id = 6;			p2.depth = 2;
 		
 		h1.text = "A Title";
 		h2.text = "A subtitle.";
 		p1.text = "The second, much longer, paragraph.";
-		p2.text = "Some other text, later on, second paragraph.";
+		p2.text = "Menhir is a LR(1) parser generator for the OCaml programming language. That is, Menhir compiles LR(1) grammar specifications down to OCaml code. Menhir was designed and implemented by François Pottier and Yann Régis-Gianas.";
 		
 		root.children.add(h1);
 		root.children.add(div);
 		div.children.add(h2);
 		div.children.add(p1);
 		div.children.add(p2);
+		div.children.add(ul);
+		ul.children.add(li1);
+		ul.children.add(li2);
+		ul.children.add(li3);
+//		div.children.add(img);
 		
 		return root;
 	}
@@ -126,11 +166,15 @@ public class HTMLRendererTest {
 	}
 	
 	public static void render(GraphicsContext gc, double width, double height) {
-		RenderNode root = createSimpleRenderTree();
 		DefaultColors.init();
+		ImageCache.loadDefaultImages();
+		ImageCache.loadImage("https://upload.wikimedia.org/wikipedia/en/9/90/ElderScrollsOblivionScreenshot11.jpg");
+		RenderNode root = createSimpleRenderTree();
 //		RenderNode root = createTree4();
 		DefaultCSSLoader.loadDefaults(root);
 		BoxLayoutCalculator blc = new BoxLayoutCalculator(parentNodeMap, 500f);
+		RenderTreeGenerator rtg = new RenderTreeGenerator();
+		rtg.transformNode(root);
 		blc.setBoxBounds(root);
 		blc.propagateMaxSizes(root);
 		blc.calculateBoxes(root);

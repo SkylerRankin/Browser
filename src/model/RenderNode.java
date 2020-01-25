@@ -1,7 +1,9 @@
 package model;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import css.CSSStyle;
 
@@ -19,6 +21,7 @@ public class RenderNode {
     public Float maxWidth = null;
     public Float maxHeight = null;
     public String cssAttribute = null;
+    public Map<String, String> attributes;
     
     // False until the BoxLayoutCalculator sets this node's box object correctly
     // This way we don't consider nodes to be at position (0, 0) when they are 
@@ -33,6 +36,7 @@ public class RenderNode {
         maxHeight = null;
         cssAttribute = null;
         style = new CSSStyle();
+        attributes = new HashMap<String, String>();
     }
     
     public RenderNode(DOMNode dom, int id, int depth) {
@@ -43,6 +47,7 @@ public class RenderNode {
         children = new ArrayList<RenderNode>();
         cssAttribute = dom.attributes.get("style");
         style = new CSSStyle();
+        attributes = new HashMap<String, String>();
     }
     
     public void render() {}

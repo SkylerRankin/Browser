@@ -12,3 +12,15 @@ h3 {
 	font-size: 30;
 	font-weight: bold;
 }
+
+a {
+	color: blue;
+}
+
+b {
+	font-weight: bold;
+}
+
+span {
+	display: inline;
+}

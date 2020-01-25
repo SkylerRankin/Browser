@@ -55,8 +55,7 @@ public class CSSColor {
 		}
 		
 		if (hex == null || rgb.length == 0) {
-			System.err.printf("Invalid color %s\n", color);
-			
+			System.err.printf("CSSColor : Invalid color %s\n", color);
 		}
 	}
 	

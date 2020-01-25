@@ -23,7 +23,6 @@ DarkBlue #00008B
 DarkCyan #008B8B
 DarkGoldenRod #B8860B
 DarkGray #A9A9A9
-DarkGrey #A9A9A9
 DarkGreen #006400
 DarkKhaki #BDB76B
 DarkMagenta #8B008B
@@ -40,7 +39,6 @@ DarkViolet #9400D3
 DeepPink #FF1493
 DeepSkyBlue #00BFFF
 DimGray #696969
-DimGrey #696969
 DodgerBlue #1E90FF
 FireBrick #B22222
 FloralWhite #FFFAF0

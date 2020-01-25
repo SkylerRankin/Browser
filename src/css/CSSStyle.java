@@ -9,10 +9,10 @@ public class CSSStyle {
 	
     public static enum dimensionType {PIXEL, PERCENTAGE};
     public static enum displayType {BLOCK, INLINE};
-    public static enum fontStyleType {NORMAL, ITALICS, OBLIQUE};
+    public static enum fontStyleType {NORMAL, ITALICS};
     public static enum fontWeightType {NORMAL, BOLD, OTHER};
     public static enum textAlignType {LEFT, CENTER, RIGHT};
-    public static enum textDecorationType {NONE, OVERLINE, LINETHROUGH, UNDERLINE};
+//    public static enum textDecorationType {NONE, OVERLINE, LINETHROUGH, UNDERLINE};
     public static enum wordWrapType {NORMAL, BREAKWORD};
     
     public CSSColor backgroundColor = new CSSColor("white");
@@ -53,7 +53,7 @@ public class CSSStyle {
     public dimensionType widthType = dimensionType.PIXEL;
     public Float width = null;
     
-    public textDecorationType textDecoration = textDecorationType.NONE;
+//    public textDecorationType textDecoration = textDecorationType.NONE;
     
     public wordWrapType wordWrap = wordWrapType.NORMAL;
     

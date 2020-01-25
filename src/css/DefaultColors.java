@@ -31,7 +31,7 @@ public class DefaultColors {
 	}
 	
 	public static String getHex(String name) {
-		return defaultColors.get(name);
+		return defaultColors.get(name.toLowerCase());
 	}
 
 }

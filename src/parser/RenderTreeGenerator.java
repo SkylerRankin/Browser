@@ -14,6 +14,7 @@ public class RenderTreeGenerator {
 
 	public RenderNode generateRenderTree(DOMNode dom, Float screenWidth) {
 		RenderNode renderTree = domTreeToRenderTree(dom);
+		transformNode(renderTree);
 		BoxLayoutCalculator boxLayoutCalculator = new BoxLayoutCalculator(parentRenderNodeMap, screenWidth);
 		boxLayoutCalculator.setBoxBounds(renderTree);
 		boxLayoutCalculator.propagateMaxSizes(renderTree);
@@ -43,6 +44,7 @@ public class RenderTreeGenerator {
 	
 	private RenderNode copyTree(DOMNode dom, Integer parentID, int depth) {
 		RenderNode renderNode = new RenderNode(dom, nodeID, depth);
+		renderNode.attributes = dom.attributes;
 		if (parentID != null) parentRenderNodeMap.put(parentID, renderNode);
 		nodeID++;
 		for (DOMNode child : dom.children) {
@@ -50,5 +52,47 @@ public class RenderTreeGenerator {
 		}
 		return renderNode;
 	}
+	
+	public void splitLongText(RenderNode root) {
+		
+	}
+	
+	/**
+	 * Some elements need to be transformed into what actually gets rendered: for instance, 
+	 * multiple lines need to get broken up, and list elements need to be assigned numbers.
+	 * @param root
+	 */
+	public void transformNode(RenderNode root) {
+		
+		switch (root.type) {
+		case "ol":
+			transformOL(root);
+			break;
+		case "ul":
+			transformUL(root);
+			break;
+		}
+		
+		for (RenderNode child : root.children) {
+			transformNode(child);
+		}
+	}
+	
+	// Methods for transforming specific elements
+	
+	private void transformUL(RenderNode root) {
+		for (RenderNode item : root.children) {
+			item.text = String.format("\t• %s", item.text);
+		}
+	}
+	
+	private void transformOL(RenderNode root) {
+		for (int i = 0; i < root.children.size(); i++) {
+			RenderNode item = root.children.get(i);
+			item.text = String.format("\t%d. %s", i + 1, item.text);
+		}
+	}
+	
+	
 	
 }

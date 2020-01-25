@@ -37,5 +37,17 @@ public class CSSColorTest {
 		color = new CSSColor("rgb(34, 139, 34)");
 		assertEquals("228B22", color.getHex());
 	}
+	
+	@Test
+	public void constructorHexTest() {
+		CSSColor color = new CSSColor("#DC143C");
+		assertEquals(220, color.getRGB()[0]);
+		assertEquals(20, color.getRGB()[1]);
+		assertEquals(60, color.getRGB()[2]);
+		color = new CSSColor("#228B22");
+		assertEquals(34, color.getRGB()[0]);
+		assertEquals(139, color.getRGB()[1]);
+		assertEquals(34, color.getRGB()[2]);
+	}
 
 }

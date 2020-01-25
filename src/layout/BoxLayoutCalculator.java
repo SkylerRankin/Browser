@@ -203,5 +203,14 @@ public class BoxLayoutCalculator {
         	}
         }
     }
+    
+    /**
+     * Once all dimensions and max sizes are set, check if any lines of text are too large for their
+     * containing element. For these, split them into multiple lines by making new render nodes.
+     * @param root
+     */
+    public void breakLines(RenderNode root) {
+    	
+    }
 
 }

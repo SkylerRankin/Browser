@@ -1,9 +1,19 @@
 package network;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
 import java.net.URL;
+
+import javafx.scene.image.Image;
 
 public class HTTPClient {
     
@@ -37,6 +47,18 @@ public class HTTPClient {
             e.printStackTrace();
         }
         return null;
+    }
+    
+    public static Image downloadImage(String urlString) {
+    	try {
+			URL url = new URL(formatURL(urlString));
+			InputStream in = new BufferedInputStream(url.openStream());
+			return new Image(in);
+		} catch (IOException e) {
+			System.err.println("HTTPClient: error downloading image");
+			e.printStackTrace();
+		}
+    	return null;
     }
     
     public static String formatURL(String url) {
