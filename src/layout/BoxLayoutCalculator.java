@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import css.CSSStyle;
+import model.Box;
 import model.RenderNode;
 import model.Vector2;
 
@@ -18,6 +19,13 @@ public class BoxLayoutCalculator {
     	this.screenWidth = screenWidth;
     	this.parentNodeMap = parentNodeMap;
         this.lastAddedChildMap = new HashMap<Integer, RenderNode>();
+    }
+    
+    public void clearBoxBounds(RenderNode root) {
+    	root.box = new Box();
+    	for (RenderNode child : root.children) {
+    		clearBoxBounds(child);
+    	}
     }
     
     /**

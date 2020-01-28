@@ -22,7 +22,7 @@ public class TextDimensionCalculatorTest {
 	@Test
 	public void splitToWidthTest() {
 		CSSStyle style = new CSSStyle();
-		List<String> lines = TextDimensionCalculator.splitToWidth("testing", style, 25);
+		List<String> lines = TextDimensionCalculator.splitToWidth("testing1testing2f", style, 20);
 	}
 
 }

@@ -45,20 +45,24 @@ public class TextDimensionCalculator {
     		return lines;
     	}
     	System.out.printf("max=%f, total=%f stringlength=%d\n", maxWidth, totalWidth, s.length());
+    	int count = 0;
     	
     	// Search for the largest prefix that fits the width
     	
+    	int lineStart = 0;
     	int startIndex = 0;
     	int endIndex = s.length() - 1;
     	// Make initial guess based on a mono-spaced font
     	int currentIndex = Math.round(s.length() / totalWidth * maxWidth);
     	
+    	System.out.printf("Initial guess = %d\n", currentIndex);
+    	
     	while (startIndex < s.length()) {
     		// Binary search for largest substring that fits in width and starts at startIndex
-    		System.out.printf("start=%d, curr=%d end=%d\n", startIndex, currentIndex, endIndex);
+    		System.out.printf("\nlineStart=%d, start=%d, curr=%d end=%d\n", lineStart, startIndex, currentIndex, endIndex);
     		
-    		while (startIndex < endIndex) {
-    			float currentWidth = getTextDimension(s.substring(startIndex, currentIndex), style).x;
+    		while (startIndex < endIndex && count++ < 20) {
+    			float currentWidth = getTextDimension(s.substring(lineStart, currentIndex), style).x;
     			System.out.printf("Search iteration: currentWidth = %f\n", currentWidth);
     			float nextWidth = -1;
     			
@@ -71,7 +75,7 @@ public class TextDimensionCalculator {
     			// Check if this index is correct: fits within width, but adding one more letter goes beyond max width for a line
         		if (currentWidth <= maxWidth && currentIndex < s.length()) {
         			System.out.printf("Current width passed\n");
-            		nextWidth = getTextDimension(s.substring(startIndex, currentIndex + 1), style).x;
+            		nextWidth = getTextDimension(s.substring(lineStart, currentIndex + 1), style).x;
             		if (nextWidth > maxWidth) {
             			System.out.printf("Next Width fails\nFound correct index\n");
             			break;
@@ -82,20 +86,22 @@ public class TextDimensionCalculator {
         		if (currentWidth <= maxWidth && nextWidth <= maxWidth) {
         			// If both the current string and one more letter fit, then continue searching from the current index
         			startIndex = currentIndex;
-        			currentIndex = (endIndex - startIndex) / 2;
+        			currentIndex = startIndex + (endIndex - startIndex) / 2;
         			System.out.printf("Both fit more; updating start to %d, current to %d\n", startIndex, currentIndex);
         		} else if (currentWidth > maxWidth) {
         			// If neither fit, reduce the upper bound. If currentWidth is too large, nextWidth is definitely too large
         			endIndex = currentIndex;
-        			currentIndex = (endIndex - startIndex) / 2;
+        			currentIndex = startIndex + (endIndex - startIndex) / 2;
         			System.out.printf("Neither fit more; updating end to %d, current to %d\n", endIndex, currentIndex);
+        			System.out.printf("start=%d curr=%d end=%d\n", startIndex, currentIndex, endIndex);
         		}
     		}
     		
-    		System.out.printf("start = %d, curr = %d, end = %d\n", startIndex, currentIndex, endIndex);
-    		System.out.printf("Found index %d, adding segment [%s]\n", currentIndex, s.substring(startIndex, currentIndex + 1));
-    		lines.add(s.substring(startIndex, currentIndex + 1));
+    		System.out.printf("lineStart = %d, start = %d, curr = %d, end = %d\n", lineStart, startIndex, currentIndex, endIndex);
+    		System.out.printf("Found index %d, adding segment [%s]\n", currentIndex, s.substring(lineStart, currentIndex + 1));
+    		lines.add(s.substring(lineStart, currentIndex + 1));
     		startIndex = currentIndex + 1;
+    		lineStart = startIndex;
     		currentIndex = Math.min((lines.size() + 1) * lines.get(0).length(), s.length() - 1);
     		endIndex = s.length() - 1;
     		

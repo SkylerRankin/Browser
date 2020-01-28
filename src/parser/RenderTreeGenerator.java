@@ -1,11 +1,15 @@
 package parser;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import layout.BoxLayoutCalculator;
+import layout.TextDimensionCalculator;
 import model.DOMNode;
 import model.RenderNode;
+import model.Vector2;
 
 public class RenderTreeGenerator {
 	
@@ -53,8 +57,56 @@ public class RenderTreeGenerator {
 		return renderNode;
 	}
 	
+	public void splitLongText(RenderNode root, Map<Integer, RenderNode> parentRenderNodeMap) {
+		this.parentRenderNodeMap = parentRenderNodeMap;
+		splitLongText(root);
+	}
+	
+	/**
+	 * Splits lines that go over their max width. Requires the parent map to be populated.
+	 * @param root
+	 */
 	public void splitLongText(RenderNode root) {
+		System.out.printf("splitLongText: root = %s\n", root.type);
+		if (root.text != null && root.box.width > root.maxWidth) {
+			System.out.printf("splitLongText: %s is too long\n", root.type);
+
+			List<String> lines = TextDimensionCalculator.splitToWidth(root.text, root.style, root.maxWidth);
+			
+			// Replace this node with new nodes, each containing one line of the text
+			RenderNode parent = parentRenderNodeMap.get(root.id);
+			List<RenderNode> newChildren = new ArrayList<RenderNode>();
+			
+			if (parent != null) {
+				for (RenderNode child : parent.children) {
+					if (child.id != root.id) {
+						newChildren.add(child);
+					} else {
+						for (String line : lines) {
+							RenderNode newNode = new RenderNode(root.type);
+							newNode.style = root.style;
+							newNode.id = ++nodeID;
+							newNode.depth = root.depth;
+							newNode.attributes = root.attributes;
+							newNode.text = line;
+							newNode.maxWidth = root.maxWidth;
+							newNode.maxHeight = root.maxHeight;
+							Vector2 size = TextDimensionCalculator.getTextDimension(line, root.style);
+							newNode.box.fixedWidth = true;
+							newNode.box.width = size.x;
+							newNode.box.fixedHeight = true;
+							newNode.box.height = size.y;
+							newChildren.add(newNode);
+						}
+					}
+				}
+				parent.children = newChildren;
+			}
+		}
 		
+		for (RenderNode child : root.children) {
+			splitLongText(child);
+		}
 	}
 	
 	/**

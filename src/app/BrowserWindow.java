@@ -1,13 +1,17 @@
 package app;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import app.BrowserTab.TabType;
 import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
@@ -15,10 +19,18 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import tasks.CalculateLayoutTask;
@@ -29,10 +41,16 @@ import tasks.RenderWebpageTask;
 public class BrowserWindow extends Application {
     
     private GraphicsContext gc;
-    private Label statusLabel;
-    private Button searchButton;
-    private TextField urlInput;
     
+    private AnchorPane anchor;
+    private TabPane tabPane;
+    
+    private Footer footer;
+    
+    private List<BrowserTab> tabs;
+    private int currentTab;
+    
+    private boolean settingsTabOpen;
     private AtomicBoolean loading;
     
     private long currentTime;
@@ -40,66 +58,178 @@ public class BrowserWindow extends Application {
     
     private void setupUI(Stage stage) {
         stage.setTitle("Browser");
+        tabs = new ArrayList<BrowserTab>();
+        currentTab = 0;
+        settingsTabOpen = false;
         
-        GridPane grid = new GridPane();
+        SearchTab startingTab = new SearchTab(stage);
+        NewTab newTab = new NewTab();
         
-        searchButton = new Button();
-        searchButton.setText("Search");
+        setTabCloseListener(startingTab);
+        setTabCloseListener(newTab);
         
-        urlInput = new TextField();
+        tabs.add(startingTab);
+        tabs.add(newTab);
         
-        statusLabel = new Label("Loading  ");
+        tabPane = new TabPane();
+        tabPane.getTabs().add(tabs.get(currentTab).getActor());
+        tabPane.getTabs().add(tabs.get(1).getActor());
+
+        tabPane.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Tab>() {
+			@Override
+			public void changed(ObservableValue<? extends Tab> observable, Tab oldValue, Tab newValue) {
+				if (newValue.getId() != null && newValue.getId().equals(TabType.NEW.toString())) {
+					addNewTab(stage, TabType.SEARCH);
+				}
+			}
+        });
         
-        Canvas canvas = new Canvas();
-        gc = canvas.getGraphicsContext2D();
+        SettingsButton settingsButton = new SettingsButton();
+        setSettingsButtonListener(settingsButton, stage);
         
-        ScrollPane scroll = new ScrollPane();
-        scroll.setContent(canvas);
+        HBox hbox = new HBox();
+        hbox.getChildren().addAll(settingsButton);
         
-        grid.add(searchButton, 0, 0);
-        grid.add(urlInput, 1, 0);
-        grid.add(statusLabel, 2, 0);
-        grid.add(scroll, 0, 1, 3, 1);
+        anchor = new AnchorPane();
+        anchor.getChildren().addAll(tabPane, hbox);
         
-        Scene scene = new Scene(grid, 800, 600);
-        scene.getStylesheets().add("app//style.css");
+        
+        
+        AnchorPane.setTopAnchor(hbox, 3.0);
+        AnchorPane.setRightAnchor(hbox, 3.0);
+        
+        BorderPane root = new BorderPane();
+        root.setCenter(anchor);
+        
+        footer = new Footer();
+        
+        root.setBottom(footer);
+        
+        Scene scene = new Scene(root, 800, 600);
+        
+        tabPane.setPrefWidth(scene.getWidth());
+        
+        File cssFile = new File("./res/css/javafx_window.css");
+        String path = cssFile.toURI().toString();
+        scene.getStylesheets().add(path);
+        
+        setKeyListener(scene, stage);
 
         stage.setScene(scene);
+        
         stage.show();
         
-        scroll.setPrefSize(800, stage.getHeight() - searchButton.getHeight());
-        urlInput.setPrefWidth(stage.getWidth() - searchButton.getWidth() - statusLabel.getWidth() - 20);
-        canvas.setWidth(stage.getWidth());
-        canvas.setHeight(stage.getHeight() - searchButton.getHeight());
         
-        gc.strokeLine(0, 0, canvas.getWidth(), canvas.getHeight());
-        gc.setFont(new Font("Arial", 40));
-        gc.fillText("Google", 10, 100);
+        
+//        gc.strokeLine(0, 0, canvas.getWidth(), canvas.getHeight());
+//        gc.setFont(new Font("Arial", 40));
+//        gc.fillText("Google", 10, 100);
         
         ChangeListener<Number> stageSizeListener = (obs, oldValue, newValue) -> {
-            statusLabel.setText(String.valueOf(stage.getWidth()));
-            urlInput.setPrefWidth(stage.getWidth() - searchButton.getWidth() - statusLabel.getWidth() - 20);
-            canvas.setWidth(stage.getWidth());
-            canvas.setHeight(stage.getHeight() - searchButton.getHeight());
+        	System.out.println("browserwindow stagesizelistener");
+        	System.out.println(stage.getWidth());
+        	tabPane.setPrefWidth(stage.getWidth() - 20);
+        	footer.setPrefWidth(stage.getWidth());
+        	for (BrowserTab tab : tabs) {
+//        		tab.onResize(stage);
+        	}
+//            statusLabel.setText(String.valueOf(stage.getWidth()));
+//            urlInput.setPrefWidth(stage.getWidth() - searchButton.getWidth() - statusLabel.getWidth() - 20);
+//            canvas.setWidth(stage.getWidth());
+//            canvas.setHeight(stage.getHeight() - searchButton.getHeight());
         };
             
-
+//
         stage.widthProperty().addListener(stageSizeListener);
-        stage.heightProperty().addListener(stageSizeListener); 
+//        stage.heightProperty().addListener(stageSizeListener); 
+    }
+    
+    private void addNewTab(Stage stage, TabType type) {
+    	BrowserTab newTab;
+    	if (type.equals(TabType.SETTINGS)) {
+    		newTab = new SettingsTab(stage);
+    	} else {
+    		newTab = new SearchTab(stage);
+    	}
+    	newTab.onResize(stage);
+    	setTabCloseListener(newTab);
+    	tabs.add(tabs.size() - 1, newTab);
+    	currentTab = tabs.size() - 2;
+    	tabPane.getTabs().add(tabs.size() - 2, newTab.getActor());
+    	tabPane.getSelectionModel().select(currentTab);
+    	
+    }
+    
+    private void setTabCloseListener(BrowserTab tab) {
+    	tab.getActor().setOnClosed(new EventHandler<Event>() {
+			@Override
+			public void handle(Event event) {
+				tabs.remove(tabs.indexOf(tab));
+				if (tab.type.equals(TabType.SETTINGS)) {
+					settingsTabOpen = false;
+				}
+//				for (BrowserTab t : tabs) {
+//					System.out.printf("%s, ", t.getActor().getId());
+//				}
+//				System.out.printf("\n");
+			}
+    	});
     }
 
+    private void setSettingsButtonListener(Button button, Stage stage) {
+    	button.setOnAction(new EventHandler<ActionEvent>() {
+
+			@Override
+			public void handle(ActionEvent arg0) {
+				if (!settingsTabOpen) {
+					addNewTab(stage, TabType.SETTINGS);
+					settingsTabOpen = true;
+				} else {
+					for (int i = 0; i < tabs.size(); i++) {
+						if (tabs.get(i).type.equals(TabType.SETTINGS)) {
+							tabPane.getSelectionModel().select(i);
+							break;
+						}
+					}
+				}
+			}
+    		
+    	});
+    }
+    
+    private void setKeyListener(Scene scene, Stage stage) {
+    	KeyCodeCombination ctrlW = new KeyCodeCombination(KeyCode.W, KeyCodeCombination.CONTROL_DOWN);
+    	KeyCodeCombination ctrlT = new KeyCodeCombination(KeyCode.T, KeyCodeCombination.CONTROL_DOWN);
+    	KeyCodeCombination ctrlR = new KeyCodeCombination(KeyCode.R, KeyCodeCombination.CONTROL_DOWN);
+    	
+    	scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
+
+			@Override
+			public void handle(KeyEvent event) {
+				if (ctrlW.match(event)) {
+					System.out.println("ctrl w");
+				} else if (ctrlT.match(event)) {
+					addNewTab(stage, TabType.SEARCH);
+				} else if (ctrlR.match(event)) {
+					System.out.println("ctrl r");
+				}
+			}
+    		
+    	});
+    }
+    
     private void startLoadWebpageTask() {
-        currentTime = System.nanoTime();
-        LoadWebpageTask lwt = new LoadWebpageTask(urlInput.getText());
-        lwt.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
-            @Override
-            public void handle(WorkerStateEvent event) {
-                System.out.println(lwt.getValue());
-                recordTimeDuration();
-                startCalculateLayoutsTask();
-            }
-        });
-        new Thread(lwt).start();
+//        currentTime = System.nanoTime();
+//        LoadWebpageTask lwt = new LoadWebpageTask(urlInput.getText());
+//        lwt.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
+//            @Override
+//            public void handle(WorkerStateEvent event) {
+//                System.out.println(lwt.getValue());
+//                recordTimeDuration();
+//                startCalculateLayoutsTask();
+//            }
+//        });
+//        new Thread(lwt).start();
     }
     
     private void startCalculateLayoutsTask() {
@@ -120,7 +250,7 @@ public class BrowserWindow extends Application {
             @Override
             public void handle(WorkerStateEvent event) {
                 loading.set(false);
-                statusLabel.setText("Loaded");
+//                statusLabel.setText("Loaded");
                 recordTimeDuration();
                 String[] labels = {"Fetch", "Layout", "Render"};
                 for (int i = 0; i < 3; ++i) {
@@ -131,34 +261,34 @@ public class BrowserWindow extends Application {
         new Thread(rwt).start();
     }
     
-    private void registerSearchListener() {
-        searchButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                String url = urlInput.getText();
-                if (url.length() > 0) {
-                    loading.set(true);
-                    statusLabel.setText("Loading   ");
-                    taskDurations.clear();
-                    startLoadWebpageTask();
-                    LoadingAnimationTask lat = new LoadingAnimationTask(loading, statusLabel);
-                    new Thread(lat).start();
-                }
-            }
-            
-        });
-    }
-    
-    private void registerURLBarListener() {
-        urlInput.setOnKeyPressed(new EventHandler<KeyEvent>() {
-            @Override
-            public void handle(KeyEvent event) {
-                if (event.getCode().equals(KeyCode.ENTER)) {
-                    searchButton.fire();
-                }
-            }
-        });
-    }
+//    private void registerSearchListener(int tab) {
+//        tabs.get(tab).getSearchButton().setOnAction(new EventHandler<ActionEvent>() {
+//            @Override
+//            public void handle(ActionEvent event) {
+//                String url = tabs.get(tab).getURLInput().getText();
+//                if (url.length() > 0) {
+//                    loading.set(true);
+////                    statusLabel.setText("Loading   ");
+//                    taskDurations.clear();
+//                    startLoadWebpageTask();
+////                    LoadingAnimationTask lat = new LoadingAnimationTask(loading, statusLabel);
+////                    new Thread(lat).start();
+//                }
+//            }
+//            
+//        });
+//    }
+//    
+//    private void registerURLBarListener(int tab) {
+//        tabs.get(tab).getURLInput().setOnKeyPressed(new EventHandler<KeyEvent>() {
+//            @Override
+//            public void handle(KeyEvent event) {
+//                if (event.getCode().equals(KeyCode.ENTER)) {
+//                    tabs.get(tab).getSearchButton().fire();
+//                }
+//            }
+//        });
+//    }
     
     private void recordTimeDuration() {
         long now = System.nanoTime();
@@ -169,8 +299,8 @@ public class BrowserWindow extends Application {
     @Override
     public void start(Stage stage) throws Exception {
         setupUI(stage);
-        registerSearchListener();
-        registerURLBarListener();
+//        registerSearchListener(0);
+//        registerURLBarListener(0);
         loading = new AtomicBoolean();
         taskDurations = new ArrayList<Long>();
     }

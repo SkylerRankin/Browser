@@ -1,0 +1,27 @@
+* {
+	-fx-focus-color: transparent;
+	-fx-faint-focus-color: transparent;
+}
+
+.settings-button {
+    -fx-border-width: 0;
+    -fx-background-radius: 0;
+    -fx-background-color: transparent;
+    -fx-content-display: graphic-only;
+}
+
+.settings-button:hover {
+    -fx-background-color: white;
+}
+
+.footer {
+    -fx-background-color: lightgray;
+}
+
+.tab {
+    -fx-background-radius: 0;
+}
+
+.search-bar {
+    -fx-background-radius: 10;
+}

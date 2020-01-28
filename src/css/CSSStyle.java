@@ -15,16 +15,16 @@ public class CSSStyle {
 //    public static enum textDecorationType {NONE, OVERLINE, LINETHROUGH, UNDERLINE};
     public static enum wordWrapType {NORMAL, BREAKWORD};
     
-    public CSSColor backgroundColor = new CSSColor("white");
+    public CSSColor backgroundColor = new CSSColor("White");
     
-    public CSSColor borderColor = new CSSColor("white");
+    public CSSColor borderColor = new CSSColor("White");
     public int borderWidth = 1;
     public int borderWidthTop = 1;
     public int borderWidthRight = 1;
     public int borderWidthBottom = 1;
     public int borderWidthLeft = 1;
     
-    public CSSColor color = new CSSColor("black");
+    public CSSColor color = new CSSColor("Black");
     
     public displayType diplay = displayType.BLOCK;
     

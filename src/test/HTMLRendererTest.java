@@ -39,12 +39,12 @@ public class HTMLRendererTest {
 		li2.text = "second item";
 		li3.text = "third item";
 		
-//		img.box.fixedWidth = true;
-//		img.box.width = 300;
-//		img.box.fixedHeight = true;
-//		img.box.height = 200;
-//		
-//		img.attributes.put("src", "https://upload.wikimedia.org/wikipedia/en/9/90/ElderScrollsOblivionScreenshot11.jpg");
+		img.box.fixedWidth = true;
+		img.box.width = 250;
+		img.box.fixedHeight = true;
+		img.box.height = 200;
+		
+		img.attributes.put("src", "https://upload.wikimedia.org/wikipedia/en/9/90/ElderScrollsOblivionScreenshot11.jpg");
 		
 		parentNodeMap = new HashMap<Integer, RenderNode>();
 		parentNodeMap.put(1, root);
@@ -56,6 +56,7 @@ public class HTMLRendererTest {
 		parentNodeMap.put(7, ul);
 		parentNodeMap.put(8, ul);
 		parentNodeMap.put(9, ul);
+		parentNodeMap.put(10, div);
 		
 		h1.style.color = new CSSColor("SeaGreen");
 		h1.style.fontFamily = "Courier New";
@@ -94,12 +95,15 @@ public class HTMLRendererTest {
 		li1.id = 7;			li1.depth = 3;
 		li2.id = 8;			li1.depth = 3;
 		li3.id = 9;			li1.depth = 3;
-//		img.id = 6;			p2.depth = 2;
+//		img.id = 10;			p2.depth = 2;
 		
 		h1.text = "A Title";
 		h2.text = "A subtitle.";
 		p1.text = "The second, much longer, paragraph.";
-		p2.text = "Menhir is a LR(1) parser generator for the OCaml programming language. That is, Menhir compiles LR(1) grammar specifications down to OCaml code. Menhir was designed and implemented by François Pottier and Yann Régis-Gianas.";
+//		p2.text = "Menhir is a LR(1) parser generator fo.";
+
+//		p2.text = "Menhir is a LR(1) parser generator for the OCaml programming language. That is, Menhir compiles LR(1) grammar specifications down to OCaml code.";
+		p2.text = "Menhir is a LR(1) parser generator for the OCaml programming language.";
 		
 		root.children.add(h1);
 		root.children.add(div);
@@ -177,6 +181,12 @@ public class HTMLRendererTest {
 		rtg.transformNode(root);
 		blc.setBoxBounds(root);
 		blc.propagateMaxSizes(root);
+		blc.printBoxes(root);
+		rtg.splitLongText(root, parentNodeMap);
+//		blc.clearBoxBounds(root);
+//		blc.setBoxBounds(root);
+		blc.printBoxes(root);
+		
 		blc.calculateBoxes(root);
 		blc.printBoxes(root);
 		HTMLRenderer.render(gc, root);
