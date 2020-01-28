@@ -1,12 +1,14 @@
 package app;
 
-import javafx.beans.value.ChangeListener;
+import javafx.scene.Scene;
 import javafx.scene.control.Tab;
 import javafx.stage.Stage;
 
 public class BrowserTab {
 	
 	public static enum TabType {SEARCH, NEW, SETTINGS};
+	
+	public Scene scene;
 	
 	protected Tab tab;
 	protected TabType type;

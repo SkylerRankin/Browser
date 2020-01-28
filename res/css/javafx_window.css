@@ -22,6 +22,23 @@
     -fx-background-radius: 0;
 }
 
-.search-bar {
+.text-field {
+    -fx-border-color: lightgray;
+    -fx-border-radius: 10;
     -fx-background-radius: 10;
+}
+
+.text-field:focused {
+    -fx-border-color: lightgray;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+}
+
+.debug {
+	-fx-background-color: yellow;
+}
+
+.settings-row {
+	-fx-background-color: gray;
+	-fx-margin: 20;
 }

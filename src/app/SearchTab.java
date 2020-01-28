@@ -1,15 +1,23 @@
 package app;
 
 import javafx.beans.value.ChangeListener;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
+import javafx.scene.Node;
+import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollBar;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TextField;
+import javafx.scene.control.ScrollPane.ScrollBarPolicy;
+import javafx.scene.input.SwipeEvent;
 import javafx.scene.layout.GridPane;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
 public class SearchTab extends BrowserTab {
@@ -31,16 +39,18 @@ public class SearchTab extends BrowserTab {
         searchButton = new Button();
         searchButton.setText("Search");
         urlInput = new TextField();
-        urlInput.getStyleClass().add("search-bar");
+//        urlInput.getStyleClass().add("search-bar");
         statusLabel = new Label("Loading  ");
         
         canvas = new Canvas();
         gc = canvas.getGraphicsContext2D();
         
         scroll = new ScrollPane();
+        scroll.setVbarPolicy(ScrollBarPolicy.ALWAYS);
+        scroll.setHbarPolicy(ScrollBarPolicy.NEVER);
         scroll.setContent(canvas);
+        scroll.setFitToWidth(true);
         
-//        grid.add(searchButton, 0, 0);
         grid.add(urlInput, 0, 0);
         grid.add(scroll, 0, 1, 1, 1);
         
@@ -50,24 +60,39 @@ public class SearchTab extends BrowserTab {
 		tab.setId(TabType.SEARCH.toString());
 		
 		ChangeListener<Number> stageSizeListener = (obs, oldValue, newValue) -> {
-			setSizing();
+			onResize(stage);
         };
+        
 		stage.widthProperty().addListener(stageSizeListener);
-//		setSizing();
-
 	}
+	
 	
 	@Override
 	public void onResize(Stage stage) {
-		setSizing();
-	}
-	
-	private void setSizing() {
 		grid.setPrefWidth(stage.getWidth());
-		scroll.setPrefSize(stage.getWidth(), stage.getHeight() - searchButton.getHeight());
         urlInput.setPrefWidth(stage.getWidth() - statusLabel.getWidth() - 20);
-//        canvas.setWidth(stage.getWidth());
-//        canvas.setHeight(stage.getHeight() - searchButton.getHeight());
+        if (scene != null) {
+    		scroll.setPrefSize(scene.getWidth(), scene.getHeight() - urlInput.getHeight() - 20);
+    		
+    		for (Node child : scroll.getChildrenUnmodifiable()) {
+    			if (child instanceof ScrollBar) {
+    				ScrollBar bar = (ScrollBar) child;
+    				System.out.printf("%f, %f %s\n", bar.getHeight(), bar.getWidth(), bar.getOrientation().toString());
+    			}
+            	System.out.println(child);
+            }
+    		
+//    		System.out.println(scroll.getWidth());
+        	canvas.setWidth(scene.getWidth() - 20);
+        	canvas.setHeight(scene.getHeight() - urlInput.getHeight() - 20 - 40);
+            gc.setFill(Color.BLUE);
+            gc.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
+            gc.setFill(Color.WHITE);
+            gc.fillRect(10, 10, canvas.getWidth() - 20, canvas.getHeight() - 20);
+        	System.out.println(scroll.getViewportBounds());
+
+            System.out.printf("canvas size = (%f, %f)\n", scene.getWidth(), scene.getHeight());
+        }
 	}
 	
 	public Tab getActor() {

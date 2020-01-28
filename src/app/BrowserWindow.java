@@ -25,6 +25,8 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.input.SwipeEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
@@ -39,9 +41,9 @@ import tasks.LoadingAnimationTask;
 import tasks.RenderWebpageTask;
 
 public class BrowserWindow extends Application {
-    
-    private GraphicsContext gc;
-    
+        
+	private Scene scene;
+	
     private AnchorPane anchor;
     private TabPane tabPane;
     
@@ -93,8 +95,6 @@ public class BrowserWindow extends Application {
         anchor = new AnchorPane();
         anchor.getChildren().addAll(tabPane, hbox);
         
-        
-        
         AnchorPane.setTopAnchor(hbox, 3.0);
         AnchorPane.setRightAnchor(hbox, 3.0);
         
@@ -105,9 +105,19 @@ public class BrowserWindow extends Application {
         
         root.setBottom(footer);
         
-        Scene scene = new Scene(root, 800, 600);
+        scene = new Scene(root, 1000, 600);
         
         tabPane.setPrefWidth(scene.getWidth());
+        tabPane.setPrefHeight(scene.getHeight() - 20);
+        
+        // Prevent swiping from making new tabs
+        tabPane.addEventFilter(SwipeEvent.ANY, new EventHandler<SwipeEvent>() {
+			@Override
+			public void handle(SwipeEvent event) {
+				System.out.println("swipe");
+				event.consume();
+			}
+        });
         
         File cssFile = new File("./res/css/javafx_window.css");
         String path = cssFile.toURI().toString();
@@ -116,32 +126,35 @@ public class BrowserWindow extends Application {
         setKeyListener(scene, stage);
 
         stage.setScene(scene);
-        
         stage.show();
         
+        scene.addEventFilter(Event.ANY, new EventHandler<Event>() {
+			@Override
+			public void handle(Event event) {
+//				System.out.println(event);
+//				event.consume();
+			}
+        });
         
-        
-//        gc.strokeLine(0, 0, canvas.getWidth(), canvas.getHeight());
-//        gc.setFont(new Font("Arial", 40));
-//        gc.fillText("Google", 10, 100);
+        for (BrowserTab tab : tabs) {
+        	tab.scene = scene;
+        	tab.onResize(stage);
+        }
         
         ChangeListener<Number> stageSizeListener = (obs, oldValue, newValue) -> {
-        	System.out.println("browserwindow stagesizelistener");
-        	System.out.println(stage.getWidth());
-        	tabPane.setPrefWidth(stage.getWidth() - 20);
-        	footer.setPrefWidth(stage.getWidth());
+        	tabPane.setPrefWidth(scene.getWidth());
+        	tabPane.setPrefHeight(scene.getHeight() - 20);
+        	footer.setPrefWidth(scene.getWidth());
         	for (BrowserTab tab : tabs) {
-//        		tab.onResize(stage);
+        		tab.onResize(stage);
         	}
 //            statusLabel.setText(String.valueOf(stage.getWidth()));
 //            urlInput.setPrefWidth(stage.getWidth() - searchButton.getWidth() - statusLabel.getWidth() - 20);
 //            canvas.setWidth(stage.getWidth());
 //            canvas.setHeight(stage.getHeight() - searchButton.getHeight());
         };
-            
-//
         stage.widthProperty().addListener(stageSizeListener);
-//        stage.heightProperty().addListener(stageSizeListener); 
+        stage.heightProperty().addListener(stageSizeListener); 
     }
     
     private void addNewTab(Stage stage, TabType type) {
@@ -151,13 +164,13 @@ public class BrowserWindow extends Application {
     	} else {
     		newTab = new SearchTab(stage);
     	}
+    	newTab.scene = scene;
     	newTab.onResize(stage);
     	setTabCloseListener(newTab);
     	tabs.add(tabs.size() - 1, newTab);
     	currentTab = tabs.size() - 2;
     	tabPane.getTabs().add(tabs.size() - 2, newTab.getActor());
     	tabPane.getSelectionModel().select(currentTab);
-    	
     }
     
     private void setTabCloseListener(BrowserTab tab) {
@@ -168,17 +181,12 @@ public class BrowserWindow extends Application {
 				if (tab.type.equals(TabType.SETTINGS)) {
 					settingsTabOpen = false;
 				}
-//				for (BrowserTab t : tabs) {
-//					System.out.printf("%s, ", t.getActor().getId());
-//				}
-//				System.out.printf("\n");
 			}
     	});
     }
 
     private void setSettingsButtonListener(Button button, Stage stage) {
     	button.setOnAction(new EventHandler<ActionEvent>() {
-
 			@Override
 			public void handle(ActionEvent arg0) {
 				if (!settingsTabOpen) {
@@ -201,6 +209,7 @@ public class BrowserWindow extends Application {
     	KeyCodeCombination ctrlW = new KeyCodeCombination(KeyCode.W, KeyCodeCombination.CONTROL_DOWN);
     	KeyCodeCombination ctrlT = new KeyCodeCombination(KeyCode.T, KeyCodeCombination.CONTROL_DOWN);
     	KeyCodeCombination ctrlR = new KeyCodeCombination(KeyCode.R, KeyCodeCombination.CONTROL_DOWN);
+    	KeyCodeCombination ctrlTab = new KeyCodeCombination(KeyCode.TAB, KeyCodeCombination.CONTROL_DOWN);
     	
     	scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
 
@@ -209,9 +218,12 @@ public class BrowserWindow extends Application {
 				if (ctrlW.match(event)) {
 					System.out.println("ctrl w");
 				} else if (ctrlT.match(event)) {
-					addNewTab(stage, TabType.SEARCH);
+//					addNewTab(stage, TabType.SEARCH);
 				} else if (ctrlR.match(event)) {
 					System.out.println("ctrl r");
+				} else if (ctrlTab.match(event)) {
+					System.out.println("ctrl tab");
+					event.consume();
 				}
 			}
     		
