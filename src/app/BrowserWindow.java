@@ -5,7 +5,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import app.BrowserTab.TabType;
+import app.ui.BrowserTab;
+import app.ui.Footer;
+import app.ui.NewTab;
+import app.ui.SearchTab;
+import app.ui.SettingsButton;
+import app.ui.SettingsTab;
+import app.ui.BrowserTab.TabType;
 import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -178,7 +184,7 @@ public class BrowserWindow extends Application {
 			@Override
 			public void handle(Event event) {
 				tabs.remove(tabs.indexOf(tab));
-				if (tab.type.equals(TabType.SETTINGS)) {
+				if (tab.getType().equals(TabType.SETTINGS)) {
 					settingsTabOpen = false;
 				}
 			}
@@ -194,7 +200,7 @@ public class BrowserWindow extends Application {
 					settingsTabOpen = true;
 				} else {
 					for (int i = 0; i < tabs.size(); i++) {
-						if (tabs.get(i).type.equals(TabType.SETTINGS)) {
+						if (tabs.get(i).getType().equals(TabType.SETTINGS)) {
 							tabPane.getSelectionModel().select(i);
 							break;
 						}

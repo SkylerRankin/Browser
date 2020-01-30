@@ -36,11 +36,11 @@ public class BoxLayoutCalculatorTest {
 		RenderNode span4 = new RenderNode("span");
 		RenderNode span5 = new RenderNode("span");
 		
-		span1.style.diplay = CSSStyle.displayType.INLINE;
-		span2.style.diplay = CSSStyle.displayType.INLINE;
-		span3.style.diplay = CSSStyle.displayType.INLINE;
-		span4.style.diplay = CSSStyle.displayType.INLINE;
-		span5.style.diplay = CSSStyle.displayType.INLINE;
+		span1.style.display = CSSStyle.displayType.INLINE;
+		span2.style.display = CSSStyle.displayType.INLINE;
+		span3.style.display = CSSStyle.displayType.INLINE;
+		span4.style.display = CSSStyle.displayType.INLINE;
+		span5.style.display = CSSStyle.displayType.INLINE;
 		
 		span1.box.fixedWidth = true;
 		span2.box.fixedWidth = true;
@@ -97,9 +97,9 @@ public class BoxLayoutCalculatorTest {
 		RenderNode E = new RenderNode("div");
 		RenderNode F = new RenderNode("div");
 		
-		D.style.diplay = CSSStyle.displayType.INLINE;
-		E.style.diplay = CSSStyle.displayType.INLINE;
-		F.style.diplay = CSSStyle.displayType.INLINE;
+		D.style.display = CSSStyle.displayType.INLINE;
+		E.style.display = CSSStyle.displayType.INLINE;
+		F.style.display = CSSStyle.displayType.INLINE;
 		
 		A.box.fixedWidth = true;
 		B.box.fixedWidth = true;

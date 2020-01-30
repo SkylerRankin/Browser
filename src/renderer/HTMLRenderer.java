@@ -18,7 +18,7 @@ import model.RenderNode;
 public class HTMLRenderer {
     
     public static void render(GraphicsContext gc, RenderNode root) {
-    	System.out.printf("rendering: %s %f %f\n", root.type, root.box.x, root.box.y);
+//    	System.out.printf("rendering: %s %f %f\n", root.type, root.box.x, root.box.y);
     	
     	if (root.type.equals("img")) {
     		renderImage(gc, root);

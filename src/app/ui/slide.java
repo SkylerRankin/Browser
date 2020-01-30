@@ -1,4 +1,4 @@
-package app;
+package app.ui;
 
 import javafx.animation.Animation;
 import javafx.animation.Transition;

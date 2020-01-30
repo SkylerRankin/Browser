@@ -12,17 +12,12 @@ import model.RenderNode;
 import model.Vector2;
 
 public class RenderTreeGenerator {
-	
-	private int nodeID = 0;
+	// has to be changed for testing, making it private later?
+	public int nodeID = 0;
 	private Map<Integer, RenderNode> parentRenderNodeMap = new HashMap<Integer, RenderNode>();
 
 	public RenderNode generateRenderTree(DOMNode dom, Float screenWidth) {
 		RenderNode renderTree = domTreeToRenderTree(dom);
-		transformNode(renderTree);
-		BoxLayoutCalculator boxLayoutCalculator = new BoxLayoutCalculator(parentRenderNodeMap, screenWidth);
-		boxLayoutCalculator.setBoxBounds(renderTree);
-		boxLayoutCalculator.propagateMaxSizes(renderTree);
-		boxLayoutCalculator.calculateBoxes(renderTree);
 		return renderTree;
     }
 	
@@ -46,16 +41,29 @@ public class RenderTreeGenerator {
         return copyTree(body, null, 0);
 	}
 	
-	private RenderNode copyTree(DOMNode dom, Integer parentID, int depth) {
+	private RenderNode copyTree(DOMNode dom, RenderNode parent, int depth) {
 		RenderNode renderNode = new RenderNode(dom, nodeID, depth);
 		renderNode.attributes = dom.attributes;
-		if (parentID != null) parentRenderNodeMap.put(parentID, renderNode);
+//		if (parentID != null) parentRenderNodeMap.put(parentID, renderNode);
+		if (parent != null) parentRenderNodeMap.put(nodeID, parent);
 		nodeID++;
 		for (DOMNode child : dom.children) {
-			renderNode.children.add(copyTree(child, nodeID - 1, depth + 1));
+			renderNode.children.add(copyTree(child, renderNode, depth + 1));
 		}
 		return renderNode;
 	}
+	
+//	private RenderNode copyTree(DOMNode dom, Integer parentID, int depth) {
+//		RenderNode renderNode = new RenderNode(dom, nodeID, depth);
+//		renderNode.attributes = dom.attributes;
+////		if (parentID != null) parentRenderNodeMap.put(parentID, renderNode);
+//		if (parentID != null) parentRenderNodeMap.put(parentID, renderNode);
+//		nodeID++;
+//		for (DOMNode child : dom.children) {
+//			renderNode.children.add(copyTree(child, nodeID - 1, depth + 1));
+//		}
+//		return renderNode;
+//	}
 	
 	public void splitLongText(RenderNode root, Map<Integer, RenderNode> parentRenderNodeMap) {
 		this.parentRenderNodeMap = parentRenderNodeMap;
@@ -72,7 +80,7 @@ public class RenderTreeGenerator {
 			System.out.printf("splitLongText: %s is too long\n", root.type);
 
 			List<String> lines = TextDimensionCalculator.splitToWidth(root.text, root.style, root.maxWidth);
-			
+			System.out.printf("Splitting text into %d lines\n", lines.size());
 			// Replace this node with new nodes, each containing one line of the text
 			RenderNode parent = parentRenderNodeMap.get(root.id);
 			List<RenderNode> newChildren = new ArrayList<RenderNode>();
@@ -86,6 +94,7 @@ public class RenderTreeGenerator {
 							RenderNode newNode = new RenderNode(root.type);
 							newNode.style = root.style;
 							newNode.id = ++nodeID;
+							parentRenderNodeMap.put(newNode.id, parent);
 							newNode.depth = root.depth;
 							newNode.attributes = root.attributes;
 							newNode.text = line;
@@ -106,6 +115,17 @@ public class RenderTreeGenerator {
 		
 		for (RenderNode child : root.children) {
 			splitLongText(child);
+		}
+	}
+	
+	
+	public void cleanUpText(RenderNode root) {
+		if (root.text != null) {
+			root.text = root.text.replaceAll("[\n\r]", " ");
+			root.text = root.text.replaceAll("\\s+", " ");
+		}
+		for (RenderNode child : root.children) {
+			cleanUpText(child);
 		}
 	}
 	
@@ -134,7 +154,11 @@ public class RenderTreeGenerator {
 	
 	private void transformUL(RenderNode root) {
 		for (RenderNode item : root.children) {
-			item.text = String.format("\t• %s", item.text);
+			if (item.type.equals("li")) {
+				RenderNode text = item.children.get(0);
+				text.text = String.format("\t• %s", text.text);
+			}
+			
 		}
 	}
 	
@@ -143,6 +167,10 @@ public class RenderTreeGenerator {
 			RenderNode item = root.children.get(i);
 			item.text = String.format("\t%d. %s", i + 1, item.text);
 		}
+	}
+	
+	public Map<Integer, RenderNode> getParentRenderNodeMap() {
+		return this.parentRenderNodeMap;
 	}
 	
 	

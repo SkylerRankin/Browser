@@ -57,7 +57,7 @@ public class BoxLayoutCalculator {
     
     public void printBoxes(RenderNode root) {
     	System.out.printf("BoxLayoutCalculator: printing boxes\n\n");
-    	System.out.printf("[%s] (%.2f, %.2f), (%.2f, %.2f)\n", root.type, root.box.x, root.box.y, root.box.width, root.box.height);
+    	System.out.printf("[%d:%s] (%.2f, %.2f), (%.2f, %.2f)\n", root.id, root.type, root.box.x, root.box.y, root.box.width, root.box.height);
     	for (RenderNode child : root.children) {
     		printBoxes(child, "\t");
     	}
@@ -65,7 +65,7 @@ public class BoxLayoutCalculator {
     }
     
     private void printBoxes(RenderNode root, String pad) {
-    	System.out.printf("%s[%s] (%.2f, %.2f), (%.2f, %.2f), max(%.2f, %.2f)\n", pad, root.type, root.box.x, root.box.y, root.box.width, root.box.height, root.maxWidth, root.maxHeight);
+    	System.out.printf("%s[%d:%s] (%.2f, %.2f), (%.2f, %.2f), max(%.2f, %.2f)\n", pad, root.id, root.type, root.box.x, root.box.y, root.box.width, root.box.height, root.maxWidth, root.maxHeight);
     	for (RenderNode child : root.children) {
     		printBoxes(child, pad+"\t");
     	}
@@ -179,7 +179,7 @@ public class BoxLayoutCalculator {
     }
     
     public Vector2 nextPosition(RenderNode node, RenderNode parent) {
-    	CSSStyle.displayType displayType = node.style.diplay;
+    	CSSStyle.displayType displayType = node.style.display;
         RenderNode lastAddedChild = lastAddedChildMap.get(parent.id);
         if (lastAddedChild == null) {
         	// If this is the first child, then it gets added in the top right of parent
@@ -194,7 +194,8 @@ public class BoxLayoutCalculator {
         		// Try in-line, but if it needs more space, continue to block case
         		float x = lastAddedChild.box.x + lastAddedChild.box.width + node.style.marginLeft;
         		float boundary = parent.maxWidth - parent.style.paddingRight - node.style.marginRight;
-        		if (parent != null && x + node.box.width <= boundary) {
+        		boolean resizable = node.type.equals("text");
+        		if (parent != null && (x + node.box.width <= boundary || resizable)) {
         			return new Vector2(x, lastAddedChild.box.y);
         		}
         	case BLOCK:

@@ -45,6 +45,7 @@ public class RenderNode {
         this.depth = depth;
         this.id = id;
         children = new ArrayList<RenderNode>();
+        box = new Box();
         cssAttribute = dom.attributes.get("style");
         style = new CSSStyle();
         attributes = new HashMap<String, String>();

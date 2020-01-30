@@ -1,4 +1,4 @@
-package app;
+package app.ui;
 
 import javafx.scene.Scene;
 import javafx.scene.control.Tab;

@@ -1,4 +1,4 @@
-package app;
+package app.ui;
 
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;

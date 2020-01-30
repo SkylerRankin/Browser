@@ -1,5 +1,6 @@
-package app;
+package app.ui;
 
+import app.ui.BrowserTab.TabType;
 import javafx.geometry.Insets;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tab;

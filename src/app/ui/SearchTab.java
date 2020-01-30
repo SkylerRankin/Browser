@@ -1,5 +1,6 @@
-package app;
+package app.ui;
 
+import app.ui.BrowserTab.TabType;
 import javafx.beans.value.ChangeListener;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;

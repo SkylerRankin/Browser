@@ -15,12 +15,23 @@ h3 {
 
 a {
 	color: blue;
+	display: inline;
 }
 
 b {
 	font-weight: bold;
+	display: inline;
 }
 
 span {
 	display: inline;
+}
+
+text {
+	display: inline;
+}
+
+tt {
+	display: inline;
+	font-family: Consolas;
 }

@@ -5,8 +5,9 @@ import java.util.Map;
 
 import org.junit.Test;
 
+import app.Pipeline;
 import css.CSSStyle;
-import css.DefaultCSSLoader;
+import css.CSSLoader;
 import css.DefaultColors;
 import javafx.application.Application;
 import javafx.scene.canvas.GraphicsContext;
@@ -102,8 +103,7 @@ public class HTMLRendererTest {
 		p1.text = "The second, much longer, paragraph.";
 //		p2.text = "Menhir is a LR(1) parser generator fo.";
 
-//		p2.text = "Menhir is a LR(1) parser generator for the OCaml programming language. That is, Menhir compiles LR(1) grammar specifications down to OCaml code.";
-		p2.text = "Menhir is a LR(1) parser generator for the OCaml programming language.";
+		p2.text = "Menhir is a LR(1) parser generator for the OCaml programming language. That is, Menhir compiles LR(1) grammar specifications down to OCaml code.";
 		
 		root.children.add(h1);
 		root.children.add(div);
@@ -169,15 +169,17 @@ public class HTMLRendererTest {
 		Application.launch(RenderTestCanvas.class, args);
 	}
 	
-	public static void render(GraphicsContext gc, double width, double height) {
+	public static void render2(GraphicsContext gc, double width, double height) {
 		DefaultColors.init();
 		ImageCache.loadDefaultImages();
 		ImageCache.loadImage("https://upload.wikimedia.org/wikipedia/en/9/90/ElderScrollsOblivionScreenshot11.jpg");
 		RenderNode root = createSimpleRenderTree();
 //		RenderNode root = createTree4();
-		DefaultCSSLoader.loadDefaults(root);
+		CSSLoader cssLoader = new CSSLoader(parentNodeMap);
+		cssLoader.loadDefaults(root);
 		BoxLayoutCalculator blc = new BoxLayoutCalculator(parentNodeMap, 500f);
 		RenderTreeGenerator rtg = new RenderTreeGenerator();
+		rtg.nodeID = 11;
 		rtg.transformNode(root);
 		blc.setBoxBounds(root);
 		blc.propagateMaxSizes(root);
@@ -190,6 +192,16 @@ public class HTMLRendererTest {
 		blc.calculateBoxes(root);
 		blc.printBoxes(root);
 		HTMLRenderer.render(gc, root);
+		
+	}
+	
+	public static void render(GraphicsContext gc, double width) {
+		
+		Pipeline pipeline = new Pipeline();
+		Pipeline.init();
+		pipeline.loadWebpage("http://gallium.inria.fr/~fpottier/menhir/");
+		pipeline.calculateLayout((float) width);
+		pipeline.render(gc);
 		
 	}
 

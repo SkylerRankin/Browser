@@ -10,10 +10,15 @@ import model.RenderNode;
 import parser.CSSParser;
 import parser.CSSParser.Selector;
 
-public class DefaultCSSLoader {
+public class CSSLoader {
 	
-	public static void loadDefaults(RenderNode root) {
-		
+	private Map<Integer, RenderNode> parentRenderNodeMap;
+	
+	public CSSLoader(Map<Integer, RenderNode> parentRenderNodeMap) {
+		this.parentRenderNodeMap = parentRenderNodeMap;
+	}
+	
+	public void loadDefaults(RenderNode root) {
 		CSSParser parser = new CSSParser();
 		String cssString = "";
 		try {
@@ -33,9 +38,11 @@ public class DefaultCSSLoader {
 		}
 		
 		applyRules(root, rules);
+		propagateCSS(root);
+		finalizeCSS(root);
 	}
-	
-	// TODO handle selectors for nested elements; this is just 1 level
+
+	//TODO handle selectors for nested elements; this is just 1 level
 	private static void applyRules(RenderNode node, Map<Selector, Map<String, String>> rules) {
 		// Create some representative selectors for this node
 		CSSParser.Selector elementSelector = (new CSSParser()).new Selector(CSSParser.SelectorType.ELEMENT);
@@ -49,6 +56,42 @@ public class DefaultCSSLoader {
 		
 		for (RenderNode child : node.children) {
 			applyRules(child, rules);
+		}
+	}
+	
+	public void propagateCSS(RenderNode root) {
+		RenderNode parent = parentRenderNodeMap.get(root.id);
+		
+		if (parent != null) {
+			for (Entry<String, String> e : parent.style.getAllProperties().entrySet()) {
+				if (!root.style.hasPropertySet(e.getKey())) {
+					root.style.setProperty(e.getKey(), e.getValue());
+				}
+			}
+		}
+		
+		for (RenderNode child : root.children) {
+			propagateCSS(child);
+		}
+	}
+	
+	
+	/**
+	 * Clears the set that stores which properties have been set. Does not actually remove
+	 * the values themselves.
+	 * @param root
+	 */
+	public void resetSetProperties(RenderNode root) {
+		root.style.resetSetProperties();;
+		for (RenderNode child : root.children) {
+			resetSetProperties(child);
+		}
+	}
+	
+	public void finalizeCSS(RenderNode root) {
+		root.style.finalizeCSS();
+		for (RenderNode child : root.children) {
+			finalizeCSS(child);
 		}
 	}
 
