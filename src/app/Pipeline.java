@@ -40,15 +40,17 @@ public class Pipeline {
 	public void calculateLayout(float screenWidth) {
 		RenderTreeGenerator rtg = new RenderTreeGenerator();
 		renderRoot = rtg.generateRenderTree(domRoot, screenWidth);
-		rtg.cleanUpText(renderRoot);
+		rtg.cleanUpText(renderRoot, false);
 		CSSLoader cssLoader = new CSSLoader(rtg.getParentRenderNodeMap());
-		cssLoader.loadDefaults(renderRoot);
+		cssLoader.applyAllCSS(renderRoot);
 		BoxLayoutCalculator blc = new BoxLayoutCalculator(rtg.getParentRenderNodeMap(), screenWidth);
 		rtg.transformNode(renderRoot);
 		blc.setBoxBounds(renderRoot);
 		blc.propagateMaxSizes(renderRoot);
-		blc.printBoxes(renderRoot);
+		blc.finalizeDimensions(renderRoot);
+//		blc.printBoxes(renderRoot);
 		blc.calculateBoxes(renderRoot);
+		blc.applyJustification(renderRoot);
 //		rtg.splitLongText(renderRoot);
 	}
 	

@@ -28,7 +28,7 @@ public class HTMLRendererTest {
 		RenderNode h1 = new RenderNode("h1");
 		RenderNode div = new RenderNode("div");
 		RenderNode h2 = new RenderNode("h2");
-		RenderNode p1 = new RenderNode("p");
+		RenderNode hr = new RenderNode("hr");
 		RenderNode p2 = new RenderNode("p");
 		RenderNode img = new RenderNode("img");
 		RenderNode ul = new RenderNode("ol");
@@ -73,8 +73,8 @@ public class HTMLRendererTest {
 		div.box.width = 300;
 		
 		h2.style.marginTop = 5;
-		p1.style.marginTop = 15;
-		p1.style.marginBottom = 15;
+		hr.style.marginTop = 15;
+		hr.style.marginBottom = 15;
 		p2.style.marginTop = 15;
 		p2.style.marginBottom = 5;
 		
@@ -90,7 +90,7 @@ public class HTMLRendererTest {
 		h1.id = 1;			h1.depth = 1;
 		div.id = 2;			div.depth = 1;
 		h2.id = 3;			h2.depth = 2;
-		p1.id = 4;			p1.depth = 2;
+		hr.id = 4;			hr.depth = 2;
 		p2.id = 5;			p2.depth = 2;
 		ul.id = 6;			ul.depth = 2;
 		li1.id = 7;			li1.depth = 3;
@@ -100,7 +100,6 @@ public class HTMLRendererTest {
 		
 		h1.text = "A Title";
 		h2.text = "A subtitle.";
-		p1.text = "The second, much longer, paragraph.";
 //		p2.text = "Menhir is a LR(1) parser generator fo.";
 
 		p2.text = "Menhir is a LR(1) parser generator for the OCaml programming language. That is, Menhir compiles LR(1) grammar specifications down to OCaml code.";
@@ -108,7 +107,7 @@ public class HTMLRendererTest {
 		root.children.add(h1);
 		root.children.add(div);
 		div.children.add(h2);
-		div.children.add(p1);
+		div.children.add(hr);
 		div.children.add(p2);
 		div.children.add(ul);
 		ul.children.add(li1);
@@ -169,7 +168,7 @@ public class HTMLRendererTest {
 		Application.launch(RenderTestCanvas.class, args);
 	}
 	
-	public static void render2(GraphicsContext gc, double width, double height) {
+	public static void render1(GraphicsContext gc, double width) {
 		DefaultColors.init();
 		ImageCache.loadDefaultImages();
 		ImageCache.loadImage("https://upload.wikimedia.org/wikipedia/en/9/90/ElderScrollsOblivionScreenshot11.jpg");
@@ -199,7 +198,10 @@ public class HTMLRendererTest {
 		
 		Pipeline pipeline = new Pipeline();
 		Pipeline.init();
-		pipeline.loadWebpage("http://gallium.inria.fr/~fpottier/menhir/");
+//		pipeline.loadWebpage("http://gallium.inria.fr/~fpottier/menhir/");
+//		pipeline.loadWebpage("http://man7.org/linux/man-pages/man0/aio.h.0p.html");
+//		pipeline.loadWebpage("https://www.cis.upenn.edu/~cis341/current/");
+		pipeline.loadWebpage("https://sites.google.com/site/forgottenemployee/");
 		pipeline.calculateLayout((float) width);
 		pipeline.render(gc);
 		

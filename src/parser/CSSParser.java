@@ -211,6 +211,17 @@ public class CSSParser {
         return selector;
     }
     
+    public void printRules() {
+    	System.out.printf("--- CSSParser: %d Rules ---\n", rules.size());
+    	for (Entry<Selector, Map<String, String>> entry : rules.entrySet()) {
+    		System.out.printf("%s:\n", entry.getKey().toString());
+    		for (Entry<String, String> rule : entry.getValue().entrySet()) {
+    			System.out.printf("\t%s: %s\n", rule.getKey(), rule.getValue());
+    		}
+    	}
+    	System.out.println("---------------------------\n");
+    }
+    
     public class Selector {
         public SelectorType type;
         public List<String> values;

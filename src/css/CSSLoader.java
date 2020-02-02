@@ -18,6 +18,12 @@ public class CSSLoader {
 		this.parentRenderNodeMap = parentRenderNodeMap;
 	}
 	
+	public void applyAllCSS(RenderNode root) {
+		loadDefaults(root);
+		applyInline(root);
+		finalizeCSS(root);
+	}
+	
 	public void loadDefaults(RenderNode root) {
 		CSSParser parser = new CSSParser();
 		String cssString = "";
@@ -29,42 +35,58 @@ public class CSSLoader {
 		parser.parse(cssString);
 		Map<Selector, Map<String, String>> rules = parser.getRules();
 		
-		System.out.printf("DefaultCSSLoader : loaded %d rules\n", rules.size());
-		for (Entry<Selector, Map<String, String>> e : rules.entrySet()) {
-			System.out.printf("\t%s\n", e.getKey());
-			for (Entry<String, String> e2 : e.getValue().entrySet()) {
-				System.out.printf("\t\t%s: %s\n", e2.getKey(), e2.getValue());
-			}
-		}
+		parser.printRules();
 		
 		applyRules(root, rules);
 		propagateCSS(root);
-		finalizeCSS(root);
+	}
+	
+	public void applyInline(RenderNode root) {
+		
+		if (root.attributes.containsKey("style")) {
+			CSSParser parser = new CSSParser();
+			String style = root.attributes.get("style");
+			parser.parse(String.format("%s { %s }", root.type, style));
+			parser.printRules();
+			applyRules(root, parser.getRules());
+		}
+		
+		for (RenderNode child : root.children) {
+			applyInline(child);
+		}
 	}
 
 	//TODO handle selectors for nested elements; this is just 1 level
 	private static void applyRules(RenderNode node, Map<Selector, Map<String, String>> rules) {
 		// Create some representative selectors for this node
+		CSSParser.Selector allSelector = (new CSSParser()).new Selector(CSSParser.SelectorType.ALL);
 		CSSParser.Selector elementSelector = (new CSSParser()).new Selector(CSSParser.SelectorType.ELEMENT);
 		elementSelector.values.add(node.type);
 		
+		Map<String, String> allRule = rules.get(allSelector);
 		Map<String, String> elementRule = rules.get(elementSelector);
 		
-		if (elementRule != null) {
-			node.style.apply(elementRule);
-		}
+		if (allRule != null) node.style.apply(allRule);
+		if (elementRule != null) node.style.apply(elementRule);
 		
 		for (RenderNode child : node.children) {
 			applyRules(child, rules);
 		}
 	}
 	
+	/**
+	 * Apply most of the rules of the parent to the child. In some cases, the CSS is not supposed 
+	 * to be inherited, such as with dimensions. Also, if the child has already set this property,
+	 * then the parent should not override it.
+	 * @param root
+	 */
 	public void propagateCSS(RenderNode root) {
 		RenderNode parent = parentRenderNodeMap.get(root.id);
 		
 		if (parent != null) {
 			for (Entry<String, String> e : parent.style.getAllProperties().entrySet()) {
-				if (!root.style.hasPropertySet(e.getKey())) {
+//				if (root.type.equals("tt")) System.out.printf("tt %s:%s, %b\n", e.getKey(), e.getValue(), CSSStyle.propagateAttribute(e.getKey()));
+				if (!root.style.hasPropertySet(e.getKey()) && CSSStyle.propagateAttribute(e.getKey())) {
 					root.style.setProperty(e.getKey(), e.getValue());
 				}
 			}

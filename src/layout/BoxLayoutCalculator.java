@@ -2,11 +2,13 @@ package layout;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import css.CSSStyle;
 import model.Box;
 import model.RenderNode;
 import model.Vector2;
+import renderer.ImageCache;
 
 public class BoxLayoutCalculator {
     
@@ -43,10 +45,21 @@ public class BoxLayoutCalculator {
     		root.maxWidth = parent.maxWidth;
     	}
     	
+    	/* Cases of elements that have distinct widths
+    	 * 	- text
+    	 * 	- image
+    	 */
+    	
     	if (root.text != null) {
     		Vector2 textSize = TextDimensionCalculator.getTextDimension(root.text, root.style);
     		root.box.width = textSize.x;
     		root.box.height = textSize.y;
+    	} else if (root.type.equals("img")) {
+    		root.box.width = root.attributes.containsKey("width") ? Float.parseFloat(root.attributes.get("width")) : 50;
+    		root.box.height = root.attributes.containsKey("height") ? Float.parseFloat(root.attributes.get("height")) : 50;
+    		ImageCache.loadImage(root.attributes.get("src"));
+    	} else if (root.type.equals("hr")) {
+    		root.box.height = 5;
     	}
     	
     	for (RenderNode child : root.children) {
@@ -109,21 +122,38 @@ public class BoxLayoutCalculator {
     		root.maxWidth = this.screenWidth;
     		root.maxHeight = null;
     	} else {
+//    		2020 walnut
+    		
     		if (root.box.fixedWidth) {
-    			root.maxWidth = root.box.width + root.style.marginLeft + root.style.marginRight;
+    			// Percentage based width depends on parent, only if parent specifies a width
+    			if (root.style.widthType.equals(CSSStyle.dimensionType.PERCENTAGE) && parent.maxWidth != null) {
+    				float parentAvailableWidth = parent.maxWidth - parent.style.paddingLeft - parent.style.paddingRight - root.style.marginLeft - root.style.marginRight;
+    				root.maxWidth = parentAvailableWidth * root.box.width / 100f;
+    			} else {
+    				root.maxWidth = root.box.width + root.style.marginLeft + root.style.marginRight;
+    			}
     		} else if (parent.maxWidth != null) {
     			root.maxWidth = parent.maxWidth - parent.style.paddingLeft - parent.style.paddingRight - root.style.marginLeft - root.style.marginRight;
     		}
     		
     		if (root.box.fixedHeight) {
-    			root.maxHeight = root.box.height + root.style.marginTop + root.style.marginBottom;
+    			// Percentage based height depends on parent, only if parent specifies a height
+    			if (root.style.heightType.equals(CSSStyle.dimensionType.PERCENTAGE) && parent.maxHeight != null) {
+    				float parentAvailableHeight = parent.maxWidth - parent.style.paddingTop - parent.style.paddingBottom - root.style.marginTop - root.style.marginBottom;
+    				root.maxHeight = parentAvailableHeight * root.box.width / 100f;
+    			} else {
+    				root.maxHeight = root.box.height + root.style.marginTop + root.style.marginBottom;
+    			}
     		} else if (parent.maxHeight != null) {
     			root.maxHeight = parent.maxHeight - parent.style.paddingTop - parent.style.paddingBottom - root.style.marginTop - root.style.marginBottom;
     		}
+    		
     	}
+    	
     	for (RenderNode child : root.children) {
     		propagateMaxSizes(child);
     	}
+    	
     }
     
     /**
@@ -178,6 +208,14 @@ public class BoxLayoutCalculator {
     	propagateSize(parent);
     }
     
+    /**
+     * Calculates the next valid position for an element, in relation to its parent and the other
+     * previously added elements. Does not consider text alignment; everything is left justified
+     * here and later shifted by the function applyJustification.
+     * @param node
+     * @param parent
+     * @return
+     */
     public Vector2 nextPosition(RenderNode node, RenderNode parent) {
     	CSSStyle.displayType displayType = node.style.display;
         RenderNode lastAddedChild = lastAddedChildMap.get(parent.id);
@@ -211,6 +249,95 @@ public class BoxLayoutCalculator {
         				parent.box.y + parent.box.height + node.style.marginTop - bottomPaddingCorrection);
         	}
         }
+    }
+    
+    /**
+     * Convert percentage based dimensions into raw pixels.
+     * @param root
+     */
+    public void finalizeDimensions(RenderNode root) {
+    	
+    	RenderNode parent = parentNodeMap.get(root.id);
+    	
+    	if (root.style.widthType.equals(CSSStyle.dimensionType.PERCENTAGE) && parent != null) {
+    		root.box.fixedWidth = true;
+    		root.box.width = parent.box.width * root.style.width / 100.0f;
+    	}
+    	
+		if (root.style.heightType.equals(CSSStyle.dimensionType.PERCENTAGE)) {
+			root.box.fixedHeight = true;
+    		root.box.height = parent.box.height * root.style.height / 100.0f;
+    	}
+    	
+    	for (RenderNode child : root.children) {
+    		finalizeDimensions(child);
+    	}
+    }
+    
+    /**
+     * Apply shifts for the text-Align CSS property. Since this property doesn't actually change
+     * the sizes of containing elements, it can be applied after the boxes are calculated and
+     * work just fine. The logic here is to find the left most and right most elements and check
+     * what is the most that they can be moved left and right respectively. We then shift every
+     * child element by that amount, in the specified direction.
+     * TODO this is a costly function, should improve the runtime
+     * @param root
+     */
+    public void applyJustification(RenderNode root) {
+    	CSSStyle.textAlignType alignment = root.style.textAlign;
+    	if (!alignment.equals(CSSStyle.textAlignType.LEFT) && root.children.size() > 0) {
+    		RenderNode parent = parentNodeMap.get(root.id);
+    		RenderNode leftMost = null;
+    		RenderNode rightMost = null;
+    		
+    		for (RenderNode child : root.children) {
+    			if (leftMost == null || child.box.x < leftMost.box.x) leftMost = child;
+    			if (rightMost == null || child.box.x > rightMost.box.x) rightMost = child;
+    		}
+    		
+    		float leftSpace = 0;
+    		float rightSpace = 0;
+    		
+    		if (leftMost != null && rightMost != null) {
+    			leftSpace = (leftMost.box.x - leftMost.style.marginLeft) - (parent.box.x + parent.style.paddingLeft);
+    			rightSpace =  (parent.box.x + parent.box.width - parent.style.paddingRight) - (rightMost.box.x + rightMost.box.width + rightMost.style.marginRight);
+    		}
+    		
+//    		System.out.printf("leftMost=%s rightMost=%s leftSpace=%f rightSpace=%f\n", leftMost.type, rightMost.type, leftSpace, rightSpace);
+    		
+    		// Should left space always be 0? since calculateBoxes does left justification?
+    		
+    		float xShift = 0;
+    		
+    		if (alignment.equals(CSSStyle.textAlignType.CENTER)) {
+    			xShift = (leftSpace + rightSpace) / 2.0f;
+    		} else if (alignment.equals(CSSStyle.textAlignType.RIGHT)) {
+    			xShift = leftSpace + rightSpace;
+    		}
+    		
+    		for (RenderNode child : root.children) {
+        		applyShift(child, xShift, 0f);
+        	}
+    		
+    	}
+    	
+    	for (RenderNode child : root.children) {
+    		applyJustification(child);
+    	}
+    }
+    
+    /**
+     * Shifts every element in the root including the root by x and y.
+     * @param root
+     * @param x
+     * @param y
+     */
+    public void applyShift(RenderNode root, float x, float y) {
+    	root.box.x += x;
+    	root.box.y += y;
+    	for (RenderNode child : root.children) {
+    		applyShift(child, x, y);
+    	}
     }
     
     /**

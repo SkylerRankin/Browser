@@ -1,16 +1,26 @@
+* {
+	font-family: Times New Roman;
+}
+
 h1 {
-	font-size: 100;
+	font-size: 40;
 	font-weight: bold;
+	margin-bottom: 10;
 }
 
 h2 {
-	font-size: 50;
+	font-size: 20;
 	font-weight: bold;
 }
 
 h3 {
-	font-size: 30;
+	font-size: 15;
 	font-weight: bold;
+}
+
+p {
+	display: block;
+	width: 100%;
 }
 
 a {
@@ -33,5 +43,9 @@ text {
 
 tt {
 	display: inline;
+	font-family: Consolas;
+}
+
+pre {
 	font-family: Consolas;
 }

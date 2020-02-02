@@ -32,8 +32,9 @@ public class HTMLElements {
     public static final String TABLE = "table";
     public static final String TR = "tr";
     public static final String TD = "td";
+    public static final String PRE = "pre";
     
-    public static final String[] RENDER_TREE_ELEMENTS = {BODY, TEXT, H1, H2, H3, H4, H5, H6, DIV, P, INPUT, SPAN};
+    public static final String[] RENDER_TREE_ELEMENTS = {BODY, TEXT, H1, H2, H3, H4, H5, H6, DIV, P, INPUT, SPAN, HR, PRE};
     public static final String[] BLOCK_LEVEL_ELEMENTS = {H1, H2, H3, H4, H5, H6, DIV, P};
     
     public boolean isValidElement(String element) {

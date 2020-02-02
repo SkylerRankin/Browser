@@ -20,8 +20,12 @@ public class HTMLRenderer {
     public static void render(GraphicsContext gc, RenderNode root) {
 //    	System.out.printf("rendering: %s %f %f\n", root.type, root.box.x, root.box.y);
     	
-    	if (root.type.equals("img")) {
+    	switch (root.type) {
+    	case "img":
     		renderImage(gc, root);
+    		return;
+    	case "hr":
+    		fillRect(gc, new CSSColor("black"), root.box.x, root.box.y, root.box.width, 5);
     		return;
     	}
     	
@@ -29,20 +33,20 @@ public class HTMLRenderer {
     	fillRect(gc, root.style.backgroundColor, root.box.x, root.box.y, root.box.width, root.box.height);
     	
     	// Draw the padding
-    	CSSColor paddingColor = new CSSColor("SteelBlue");
-    	fillRect(gc, paddingColor, root.box.x, root.box.y, root.box.width, root.style.paddingTop);
-    	fillRect(gc, paddingColor, root.box.x, root.box.y + root.box.height - root.style.paddingBottom, root.box.width, root.style.paddingBottom);
-    	fillRect(gc, paddingColor, root.box.x, root.box.y, root.style.paddingLeft, root.box.height);
-    	fillRect(gc, paddingColor, root.box.x + root.box.width - root.style.paddingRight, root.box.y, root.style.paddingRight, root.box.height);
-    	
-    	// Draw the margins
-    	CSSColor marginColor = new CSSColor("Gold");
-    	fillRect(gc, marginColor, root.box.x, root.box.y - root.style.marginTop, root.box.width, root.style.marginTop);
-    	fillRect(gc, marginColor, root.box.x, root.box.y + root.box.height, root.box.width, root.style.marginBottom);
-    	fillRect(gc, marginColor, root.box.x - root.style.marginLeft, root.box.y, root.style.marginLeft, root.box.height);
-    	fillRect(gc, marginColor, root.box.x + root.box.width, root.box.y, root.style.marginRight, root.box.height);
-    	
-    	// Draw a box outline
+//    	CSSColor paddingColor = new CSSColor("SteelBlue");
+//    	fillRect(gc, paddingColor, root.box.x, root.box.y, root.box.width, root.style.paddingTop);
+//    	fillRect(gc, paddingColor, root.box.x, root.box.y + root.box.height - root.style.paddingBottom, root.box.width, root.style.paddingBottom);
+//    	fillRect(gc, paddingColor, root.box.x, root.box.y, root.style.paddingLeft, root.box.height);
+//    	fillRect(gc, paddingColor, root.box.x + root.box.width - root.style.paddingRight, root.box.y, root.style.paddingRight, root.box.height);
+//    	
+//    	// Draw the margins
+//    	CSSColor marginColor = new CSSColor("Gold");
+//    	fillRect(gc, marginColor, root.box.x, root.box.y - root.style.marginTop, root.box.width, root.style.marginTop);
+//    	fillRect(gc, marginColor, root.box.x, root.box.y + root.box.height, root.box.width, root.style.marginBottom);
+//    	fillRect(gc, marginColor, root.box.x - root.style.marginLeft, root.box.y, root.style.marginLeft, root.box.height);
+//    	fillRect(gc, marginColor, root.box.x + root.box.width, root.box.y, root.style.marginRight, root.box.height);
+//    	
+//    	// Draw a box outline
 //    	drawBoxOutline(gc, root.box);
     	
     	if (root.text != null) drawText(gc, root);

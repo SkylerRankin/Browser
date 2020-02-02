@@ -80,6 +80,30 @@ public class HTMLParserTest {
     }
     
     @Test
+    public void testGetAttributes_realworld1() {
+    	HTMLParser parser = new HTMLParser();
+        Map<String, String> attributes = parser.getAttributes("width=\"180\" alt=\"Photo by Lionel Pottier\" src=\"petit-menhir.jpg\" height=\"240\"");
+        assertEquals(4, attributes.size());
+        assertTrue(attributes.containsKey("width"));
+        assertEquals(attributes.get("width"), "180");
+        assertTrue(attributes.containsKey("alt"));
+        assertEquals(attributes.get("alt"), "Photo by Lionel Pottier");
+        assertTrue(attributes.containsKey("src"));
+        assertEquals(attributes.get("src"), "petit-menhir.jpg");
+        assertTrue(attributes.containsKey("height"));
+        assertEquals(attributes.get("height"), "240");
+    }
+    
+    @Test
+    public void testGetAttributes_realworld2() {
+    	HTMLParser parser = new HTMLParser();
+        Map<String, String> attributes = parser.getAttributes("style=\"text-align: center;\"");
+        assertEquals(1, attributes.size());
+        assertTrue(attributes.containsKey("style"));
+        assertEquals(attributes.get("style"), "text-align: center;");
+    }
+    
+    @Test
     public void testRemoveUselessSpaces() {
         HTMLParser parser = new HTMLParser();
         String result = parser.removeUselessSpaces("test");

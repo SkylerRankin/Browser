@@ -186,6 +186,59 @@ public class BoxLayoutCalculatorTest {
 		parentMap.put(3, B);
 	}
 	
+	private void createTree5() {
+		// Has some relative sizes, three nested divs
+		
+		parentMap = new HashMap<Integer, RenderNode>();
+		
+		root = new RenderNode("body");
+		RenderNode A = new RenderNode("div");
+		RenderNode B = new RenderNode("div");
+		RenderNode C = new RenderNode("div");
+		
+		A.box.fixedWidth = true;
+		A.box.width = 210;
+		
+		B.box.fixedWidth = true;
+		B.box.fixedHeight = true;
+		B.box.width = 50;
+		B.style.widthType = CSSStyle.dimensionType.PERCENTAGE;
+		B.box.height = 100;
+		
+		C.box.fixedWidth = true;
+		C.box.width = 20;
+		C.style.widthType = CSSStyle.dimensionType.PERCENTAGE;
+		C.box.fixedHeight = true;
+		C.box.height = 10;
+		C.style.heightType = CSSStyle.dimensionType.PERCENTAGE;
+		
+		A.style.paddingTop = 5;
+		A.style.paddingBottom = 5;
+		A.style.paddingLeft = 5;
+		A.style.paddingRight = 5;
+		
+		B.style.paddingTop = 5;
+		B.style.paddingBottom = 5;
+		B.style.paddingLeft = 10;
+		B.style.paddingRight = 10;
+		
+		C.style.marginTop = 5;
+		C.style.marginBottom = 5;
+		
+		root.id = 0;	root.depth = 0;
+		A.id = 1;		A.depth = 1;
+		B.id = 2;		B.depth = 2;
+		C.id = 3;		C.depth = 3;
+		
+		root.children.add(A);
+		A.children.add(B);
+		B.children.add(C);
+		
+		parentMap.put(1, root);
+		parentMap.put(2, A);
+		parentMap.put(3, B);
+	}
+	
 	@Test
 	public void calculateBoxesTestTree2() {
 		createTree2();
@@ -302,6 +355,22 @@ public class BoxLayoutCalculatorTest {
 		assertNull(C.maxHeight);
 		assertEquals((Float) 90f, C.maxWidth);
 
+	}
+	
+	@Test
+	public void propagateMaxSizesTrestTree5() {
+		createTree5();
+		BoxLayoutCalculator blc = new BoxLayoutCalculator(parentMap, 300f);
+		blc.propagateMaxSizes(root);
+		RenderNode A = findRenderNode(1, root);
+		RenderNode B = findRenderNode(2, root);
+		RenderNode C = findRenderNode(3, root);
+		assertEquals((Float) 210f, A.maxWidth);
+		assertEquals((Float) 100f, B.maxWidth);
+		assertEquals((Float) 100f, B.maxHeight);
+		assertEquals((Float) 16f, C.maxWidth);
+		assertEquals((Float) 16f, C.maxHeight);
+		
 	}
 	
 	@Test

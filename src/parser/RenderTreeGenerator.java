@@ -119,13 +119,19 @@ public class RenderTreeGenerator {
 	}
 	
 	
-	public void cleanUpText(RenderNode root) {
-		if (root.text != null) {
+	/**
+	 * Remove all new lines, carriage returns, and extra spaces from text. The only place
+	 * that these should be left as is is inside a 'pre' tag.
+	 * @param root
+	 * @param inPre
+	 */
+	public void cleanUpText(RenderNode root, boolean inPre) {
+		if (root.text != null && !inPre) {
 			root.text = root.text.replaceAll("[\n\r]", " ");
 			root.text = root.text.replaceAll("\\s+", " ");
 		}
 		for (RenderNode child : root.children) {
-			cleanUpText(child);
+			cleanUpText(child, inPre || root.type.equals("pre"));
 		}
 	}
 	
