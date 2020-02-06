@@ -45,7 +45,7 @@ public class BoxLayoutCalculator {
     		root.maxWidth = parent.maxWidth;
     	}
     	
-    	/* Cases of elements that have distinct widths
+    	/* Cases of elements that have set widths
     	 * 	- text
     	 * 	- image
     	 */
@@ -229,6 +229,7 @@ public class BoxLayoutCalculator {
         	switch (displayType) {
         	case INLINE:
         		// TODO handle stacking padding
+        		// TODO put new lines in a horizontal row NO MATTER WHAT, text splitter handles putting them on new lines
         		// Try in-line, but if it needs more space, continue to block case
         		float x = lastAddedChild.box.x + lastAddedChild.box.width + node.style.marginLeft;
         		float boundary = parent.maxWidth - parent.style.paddingRight - node.style.marginRight;
@@ -281,6 +282,7 @@ public class BoxLayoutCalculator {
      * what is the most that they can be moved left and right respectively. We then shift every
      * child element by that amount, in the specified direction.
      * TODO this is a costly function, should improve the runtime
+     * TODO this will run multiple times on nodes that are next to each other, only needs to calculate the shifts from one of them
      * @param root
      */
     public void applyJustification(RenderNode root) {

@@ -4,31 +4,44 @@ import java.util.ArrayList;
 import java.util.List;
 
 import css.CSSStyle;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
-import javafx.scene.text.Text;
-import model.Vector2;
+import model.RenderNode;
 
-public class TextDimensionCalculator {
-    
-    /**
-     * Determine the width and height of the box containing some text based on its CSS styling.
-     * @param text
-     * @param style
-     * @return
-     */
-    public static Vector2 getTextDimension(String s, CSSStyle style) {
-    	Text text = new Text(s);
-    	FontWeight fontWeight = FontWeight.NORMAL;
-    	if (style.fontWeight == CSSStyle.fontWeightType.BOLD) {
-    		fontWeight = FontWeight.BOLD;
-    	}
-    	text.setFont(Font.font(style.fontFamily, fontWeight, style.fontSize));
-    	float width = (float) text.getBoundsInLocal().getWidth();
-    	float height = (float) text.getBoundsInLocal().getHeight();
-        return new Vector2(width, height);
-    }
-    
+import static layout.TextDimensionCalculator.getTextDimension;
+
+public class TextSplitter {
+	
+	public void splitAllText(RenderNode node) {
+		
+	}
+	
+	/**
+	 * Finds the horizontal rows of text that exit at a depth of 1 in the root.
+	 * A row of text is defined as consecutive nodes where the vertical boundaries of
+	 * the left node are equal to or overlapping those of the right node. If those boundaries
+	 * are totally disjoint, then its in a different row.
+	 * 
+	 * @param root		The node to search
+	 * @return			A list of lists, each representing a row that contains many render nodes
+	 */
+	public List<List<RenderNode>> getTextRows(RenderNode root) {
+		List<List<RenderNode>> rows = new ArrayList<>();
+		List<RenderNode> currentRow = null;
+		RenderNode lastInRow = null;
+		
+		for (RenderNode child : root.children) {
+			if (currentRow == null) {
+				currentRow = new ArrayList<RenderNode>();
+				currentRow.add(child);
+			} else {
+				
+				
+				
+			}
+		}
+		
+		return rows;
+	}
+	
     /**
      * Split a string into segments such that each segment's width is as large as possible without
      * violating the maximum width.
@@ -37,7 +50,7 @@ public class TextDimensionCalculator {
      * @param maxWidth
      * @return
      */
-    public static List<String> splitToWidth(String s, CSSStyle style, float maxWidth) {
+    public List<String> splitToWidth(String s, CSSStyle style, float maxWidth) {
     	List<String> lines = new ArrayList<String>();
     	float totalWidth = getTextDimension(s, style).x;
     	if (totalWidth <= maxWidth) {
@@ -113,6 +126,4 @@ public class TextDimensionCalculator {
     	return lines;
     }
 
-    
-    
 }

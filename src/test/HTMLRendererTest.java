@@ -198,10 +198,10 @@ public class HTMLRendererTest {
 		
 		Pipeline pipeline = new Pipeline();
 		Pipeline.init();
-//		pipeline.loadWebpage("http://gallium.inria.fr/~fpottier/menhir/");
+		pipeline.loadWebpage("http://gallium.inria.fr/~fpottier/menhir/");
 //		pipeline.loadWebpage("http://man7.org/linux/man-pages/man0/aio.h.0p.html");
 //		pipeline.loadWebpage("https://www.cis.upenn.edu/~cis341/current/");
-		pipeline.loadWebpage("https://sites.google.com/site/forgottenemployee/");
+//		pipeline.loadWebpage("https://sites.google.com/site/forgottenemployee/");
 		pipeline.calculateLayout((float) width);
 		pipeline.render(gc);
 		

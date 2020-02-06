@@ -75,7 +75,7 @@ public class RenderTreeGenerator {
 	 * @param root
 	 */
 	public void splitLongText(RenderNode root) {
-		System.out.printf("splitLongText: root = %s\n", root.type);
+//		System.out.printf("splitLongText: root = %s\n", root.type);
 		if (root.text != null && root.box.width > root.maxWidth) {
 			System.out.printf("splitLongText: %s is too long\n", root.type);
 
