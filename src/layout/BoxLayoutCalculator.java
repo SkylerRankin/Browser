@@ -1,6 +1,7 @@
 package layout;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -16,11 +17,13 @@ public class BoxLayoutCalculator {
     
     private Map<Integer, RenderNode> lastAddedChildMap;
     private Map<Integer, RenderNode> parentNodeMap;
+    private TextSplitter textSplitter;
         
     public BoxLayoutCalculator(Map<Integer, RenderNode> parentNodeMap, float screenWidth) {
     	this.screenWidth = screenWidth;
     	this.parentNodeMap = parentNodeMap;
         this.lastAddedChildMap = new HashMap<Integer, RenderNode>();
+        textSplitter = new TextSplitter(parentNodeMap);
     }
     
     public void clearBoxBounds(RenderNode root) {
@@ -106,8 +109,12 @@ public class BoxLayoutCalculator {
     		lastAddedChildMap.put(parent.id, root);
     	}
     	
-    	for (RenderNode child : root.children) {
-    		calculateBoxes(child);
+    	/* When splitting lines, more RenderNodes can be added to a nodes children, meaning
+    	 * root.childen.size() can change over the course of the loop. Have to use for loop
+    	 * over indices to avoid concurrent modification exception.
+    	 */
+    	for (int i = 0; i < root.children.size(); i++) {
+    		calculateBoxes(root.children.get(i));
     	}
     }
     
@@ -220,31 +227,48 @@ public class BoxLayoutCalculator {
     	CSSStyle.displayType displayType = node.style.display;
         RenderNode lastAddedChild = lastAddedChildMap.get(parent.id);
         if (lastAddedChild == null) {
+        	
+        	float availableWidth = parent.maxWidth - (parent.style.paddingLeft + node.style.marginLeft + node.style.marginRight + parent.style.paddingRight);
+        	
+        	if (node.type.equals("text") && availableWidth < node.box.width) {
+        		textSplitter.splitTextNode(node, parent, availableWidth, availableWidth);
+        	}
+        	
         	// If this is the first child, then it gets added in the top right of parent
             return new Vector2(
             		parent.box.x + parent.style.paddingLeft + node.style.marginLeft,
             		parent.box.y + parent.style.paddingTop + node.style.marginTop
             );
+        	
         } else {
         	switch (displayType) {
         	case INLINE:
         		// TODO handle stacking padding
         		// TODO put new lines in a horizontal row NO MATTER WHAT, text splitter handles putting them on new lines
+        		// Why check if parent is null? there would already have been a null pointer exception
         		// Try in-line, but if it needs more space, continue to block case
-        		float x = lastAddedChild.box.x + lastAddedChild.box.width + node.style.marginLeft;
+        		
+        		float x = lastAddedChild.box.x + lastAddedChild.box.width + lastAddedChild.style.marginRight + node.style.marginLeft;
         		float boundary = parent.maxWidth - parent.style.paddingRight - node.style.marginRight;
-        		boolean resizable = node.type.equals("text");
-        		if (parent != null && (x + node.box.width <= boundary || resizable)) {
+
+        		if (parent != null && (x + node.box.width <= boundary)) {
         			return new Vector2(x, lastAddedChild.box.y);
+        		}
+        		else if (node.type.equals("text")) {
+        			float availableWidth = boundary - x;
+        			
+        			if (textSplitter.canBreak(node, availableWidth)) {
+        				float fullWidth = parent.maxWidth - (parent.style.paddingLeft + node.style.marginLeft + node.style.marginRight + parent.style.paddingRight);
+                    	textSplitter.splitTextNode(node, parent, availableWidth, fullWidth);
+            			return new Vector2(x, lastAddedChild.box.y);
+        			}
         		}
         	case BLOCK:
         	default:
         		// Default block elements get put to the left, and right below all the other elements. The height gets updated later.
         		// Bottom padding no longer impacts the last added child, so have to subtract that when finding the new values
         		// TODO probably other sides' padding have a stacking effect that needs to be managed
-        		
         		float bottomPaddingCorrection = parent.style.paddingBottom;
-        		
         		return new Vector2(
         				parent.box.x + parent.style.paddingLeft + node.style.marginLeft,
         				parent.box.y + parent.box.height + node.style.marginTop - bottomPaddingCorrection);

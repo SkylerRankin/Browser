@@ -40,7 +40,7 @@ public class CSSStyle {
     
     public displayType display = displayType.BLOCK;
     
-    public String fontFamily = "Arial";
+    public String fontFamily = "Times New Roman";
     public int fontSize = 15;
     public fontStyleType fontStyle = fontStyleType.NORMAL;
     public fontWeightType fontWeight = fontWeightType.NORMAL;

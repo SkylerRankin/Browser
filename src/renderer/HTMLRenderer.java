@@ -68,7 +68,7 @@ public class HTMLRenderer {
     }
     
     public static void drawBoxOutline(GraphicsContext gc, Box box) {
-    	gc.setFill(Color.BLACK);
+    	gc.setStroke(Color.GRAY);
     	gc.strokeRect(box.x, box.y, box.width, box.height);
     }
     

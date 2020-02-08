@@ -162,6 +162,80 @@ public class HTMLRendererTest {
 		return root;
 	}
 	
+	private static RenderNode createTree_textwrap() {
+		// Single long line of text in a width-constrained p
+		parentNodeMap = new HashMap<Integer, RenderNode>();
+		
+		RenderNode root = new RenderNode("body");
+		RenderNode div = new RenderNode("div");
+		RenderNode p = new RenderNode("p");
+		RenderNode text = new RenderNode("text");
+		
+		text.text = "An elegant weapon for a more civilized time. For over a thousand generations the Jedi Knights were the guardians of peace and justice in the Old Republic. Before the dark times, before the Empire.";
+		
+		div.box.fixedWidth = true;
+		div.box.width = 300;
+		
+		root.id = 0;	root.depth = 0;
+		div.id = 1;		div.depth = 1;
+		p.id = 2;		p.depth = 2;
+		text.id = 3;	text.depth = 3;
+		
+		root.children.add(div);
+		div.children.add(p);
+		p.children.add(text);
+		
+		parentNodeMap.put(1, root);
+		parentNodeMap.put(2, div);
+		parentNodeMap.put(3, p);
+		return root;
+	}
+	
+	private static RenderNode createTree_textwrapbold() {
+		// One line of text with two bolded words.
+		parentNodeMap = new HashMap<Integer, RenderNode>();
+		
+		RenderNode root = new RenderNode("body");
+		RenderNode div = new RenderNode("div");
+		RenderNode p = new RenderNode("p");
+		RenderNode text1 = new RenderNode("text");
+		RenderNode b = new RenderNode("b");
+		RenderNode text2 = new RenderNode("text");
+		RenderNode text3 = new RenderNode("text");
+		
+		text1.text = "An elegant weapon for a more civilized time. For over a thousand generations the ";
+		text2.text = "Jedi Knights ";
+		text3.text = "were the guardians of peace and justice in the Old Republic. Before the dark times, before the Empire.";
+		
+		div.box.fixedWidth = true;
+		div.box.width = 400;
+		
+		root.id = 0;	root.depth = 0;
+		div.id = 1;		div.depth = 1;
+		p.id = 2;		p.depth = 2;
+		text1.id = 3;	text1.depth = 3;
+		b.id = 4;		b.depth = 3;
+		text2.id = 5;	text2.depth = 4;
+		text3.id = 6;	text3.depth = 3;
+
+		
+		root.children.add(div);
+		div.children.add(p);
+		p.children.add(text1);
+		p.children.add(b);
+		b.children.add(text2);
+		p.children.add(text3);
+		
+		parentNodeMap.put(1, root);
+		parentNodeMap.put(2, div);
+		parentNodeMap.put(3, p);
+		parentNodeMap.put(4, p);
+		parentNodeMap.put(5, b);
+		parentNodeMap.put(6, p);
+
+		return root;
+	}
+	
 	@Test
 	public void test() {
 		String[] args = new String[] {};
@@ -192,6 +266,30 @@ public class HTMLRendererTest {
 		blc.printBoxes(root);
 		HTMLRenderer.render(gc, root);
 		
+	}
+	
+	public static void render3(GraphicsContext gc, double width) {
+		DefaultColors.init();
+
+//		RenderNode renderRoot = createTree_textwrap();
+		RenderNode renderRoot = createTree_textwrapbold();
+		
+		RenderTreeGenerator rtg = new RenderTreeGenerator();
+		rtg.cleanUpText(renderRoot, false);
+		// For the test, consume the first 4 node IDs
+		for (int i = 0; i < 4; i++) RenderTreeGenerator.getNextID();
+		
+		CSSLoader cssLoader = new CSSLoader(parentNodeMap);
+		cssLoader.applyAllCSS(renderRoot);
+		BoxLayoutCalculator blc = new BoxLayoutCalculator(parentNodeMap, (float) width);
+		rtg.transformNode(renderRoot);
+		blc.setBoxBounds(renderRoot);
+		blc.propagateMaxSizes(renderRoot);
+		blc.finalizeDimensions(renderRoot);
+		blc.calculateBoxes(renderRoot);
+		blc.applyJustification(renderRoot);
+		blc.printBoxes(renderRoot);
+		HTMLRenderer.render(gc, renderRoot);
 	}
 	
 	public static void render(GraphicsContext gc, double width) {

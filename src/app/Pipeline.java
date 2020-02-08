@@ -40,6 +40,7 @@ public class Pipeline {
 	public void calculateLayout(float screenWidth) {
 		RenderTreeGenerator rtg = new RenderTreeGenerator();
 		renderRoot = rtg.generateRenderTree(domRoot, screenWidth);
+//		renderRoot.print();
 		rtg.cleanUpText(renderRoot, false);
 		CSSLoader cssLoader = new CSSLoader(rtg.getParentRenderNodeMap());
 		cssLoader.applyAllCSS(renderRoot);

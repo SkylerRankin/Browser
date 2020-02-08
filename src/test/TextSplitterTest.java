@@ -68,18 +68,6 @@ public class TextSplitterTest {
 		
 		return p;
 	}
-	
-	@Test
-	public void getTextRowsTest_SingleLevelText() {
-		RenderNode root = singleLevelTree();
-		TextSplitter splitter = new TextSplitter();
-		List<List<RenderNode>> rows = splitter.getTextRows(root);
-		assertEquals(1, rows.size());
-		assertEquals(6, rows.get(0).size());
-		for (int i = 0; i < 6; i++) {
-			assertEquals(i + 1, rows.get(0).get(i).id);
-		}
-		
-	}
+
 
 }

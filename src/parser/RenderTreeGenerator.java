@@ -13,13 +13,17 @@ import model.Vector2;
 
 public class RenderTreeGenerator {
 	// has to be changed for testing, making it private later?
-	public int nodeID = 0;
+	public static int nodeID = 0;
 	private Map<Integer, RenderNode> parentRenderNodeMap = new HashMap<Integer, RenderNode>();
 
 	public RenderNode generateRenderTree(DOMNode dom, Float screenWidth) {
 		RenderNode renderTree = domTreeToRenderTree(dom);
 		return renderTree;
     }
+	
+	public static int getNextID() {
+		return nodeID++;
+	}
 	
 	public DOMNode getBodyNode(DOMNode dom) {
         if (dom.type.equals(HTMLElements.BODY)) return dom;

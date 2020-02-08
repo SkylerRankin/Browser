@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import css.CSSStyle;
+import parser.RenderTreeGenerator;
 
 public class RenderNode {
     
@@ -49,6 +50,18 @@ public class RenderNode {
         cssAttribute = dom.attributes.get("style");
         style = new CSSStyle();
         attributes = new HashMap<String, String>();
+    }
+    
+    public RenderNode(RenderNode node) {
+    	type = node.type;
+    	text = node.text;
+    	depth = node.depth;
+    	id = RenderTreeGenerator.getNextID();
+        children = new ArrayList<RenderNode>();
+        box = new Box();
+        cssAttribute = node.cssAttribute;
+        style = node.style;
+        attributes = node.attributes;
     }
     
     public void render() {}
