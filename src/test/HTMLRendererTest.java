@@ -1,5 +1,6 @@
 package test;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -248,7 +249,7 @@ public class HTMLRendererTest {
 		ImageCache.loadImage("https://upload.wikimedia.org/wikipedia/en/9/90/ElderScrollsOblivionScreenshot11.jpg");
 		RenderNode root = createSimpleRenderTree();
 //		RenderNode root = createTree4();
-		CSSLoader cssLoader = new CSSLoader(parentNodeMap);
+		CSSLoader cssLoader = new CSSLoader(null, parentNodeMap, new ArrayList<String>());
 		cssLoader.loadDefaults(root);
 		BoxLayoutCalculator blc = new BoxLayoutCalculator(parentNodeMap, 500f);
 		RenderTreeGenerator rtg = new RenderTreeGenerator();
@@ -279,7 +280,7 @@ public class HTMLRendererTest {
 		// For the test, consume the first 4 node IDs
 		for (int i = 0; i < 4; i++) RenderTreeGenerator.getNextID();
 		
-		CSSLoader cssLoader = new CSSLoader(parentNodeMap);
+		CSSLoader cssLoader = new CSSLoader(null, parentNodeMap, new ArrayList<String>());
 		cssLoader.applyAllCSS(renderRoot);
 		BoxLayoutCalculator blc = new BoxLayoutCalculator(parentNodeMap, (float) width);
 		rtg.transformNode(renderRoot);
@@ -296,10 +297,12 @@ public class HTMLRendererTest {
 		
 		Pipeline pipeline = new Pipeline();
 		Pipeline.init();
-		pipeline.loadWebpage("http://gallium.inria.fr/~fpottier/menhir/");
+		pipeline.loadWebpage("file://res/html/error_page.html");
+//		pipeline.loadWebpage("http://gallium.inria.fr/~fpottier/menhir/");
 //		pipeline.loadWebpage("http://man7.org/linux/man-pages/man0/aio.h.0p.html");
 //		pipeline.loadWebpage("https://www.cis.upenn.edu/~cis341/current/");
 //		pipeline.loadWebpage("https://sites.google.com/site/forgottenemployee/");
+//		pipeline.loadWebpage("https://caml.inria.fr/pub/docs/manual-ocaml/libref/Option.html");
 		pipeline.calculateLayout((float) width);
 		pipeline.render(gc);
 		

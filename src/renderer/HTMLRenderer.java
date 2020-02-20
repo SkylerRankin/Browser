@@ -19,18 +19,17 @@ public class HTMLRenderer {
     
     public static void render(GraphicsContext gc, RenderNode root) {
 //    	System.out.printf("rendering: %s %f %f\n", root.type, root.box.x, root.box.y);
-    	
     	switch (root.type) {
     	case "img":
     		renderImage(gc, root);
     		return;
     	case "hr":
-    		fillRect(gc, new CSSColor("black"), root.box.x, root.box.y, root.box.width, 5);
+    		fillRect(gc, new CSSColor("black"), root.box.x, root.box.y, root.box.width, root.box.height);
     		return;
     	}
     	
     	// Draw box background
-    	fillRect(gc, root.style.backgroundColor, root.box.x, root.box.y, root.box.width, root.box.height);
+//    	fillRect(gc, root.style.backgroundColor, root.box.x, root.box.y, root.box.width, root.box.height);
     	
     	// Draw the padding
 //    	CSSColor paddingColor = new CSSColor("SteelBlue");
@@ -47,7 +46,7 @@ public class HTMLRenderer {
 //    	fillRect(gc, marginColor, root.box.x + root.box.width, root.box.y, root.style.marginRight, root.box.height);
 //    	
 //    	// Draw a box outline
-//    	drawBoxOutline(gc, root.box);
+    	drawBoxOutline(gc, root.box);
     	
     	if (root.text != null) drawText(gc, root);
     	for (RenderNode child : root.children) {
@@ -83,7 +82,8 @@ public class HTMLRenderer {
     }
     
     public static void fillRect(GraphicsContext gc, CSSColor color, float x, float y, float w, float h) {
-    	if (w <= 0f || h <= 0f) return;
+        System.out.printf("HTMLRenderer: %f %f, %fx%f\n", x, y, w, h);
+        if (w <= 0f || h <= 0f) return;
     	gc.setFill(color.toPaint());
     	gc.fillRect(x, y, w, h);
     }

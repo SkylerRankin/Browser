@@ -8,6 +8,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Map;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import model.DOMNode;
@@ -17,9 +18,14 @@ import parser.HTMLElements;
 
 public class HTMLParserTest {
     
+    @Before
+    public void before() {
+        HTMLElements.init();
+    }
+    
     @Test
     public void testIsSingular() {
-        HTMLParser parser = new HTMLParser();
+        HTMLParser parser = new HTMLParser(null);
         assertFalse(parser.isSingular("<h1>"));
         assertFalse(parser.isSingular("</h1>"));
         assertTrue(parser.isSingular("<input />"));
@@ -29,7 +35,7 @@ public class HTMLParserTest {
     
     @Test
     public void testGetAttributes_keyValues() {
-        HTMLParser parser = new HTMLParser();
+        HTMLParser parser = new HTMLParser(null);
         Map<String, String> attributes = parser.getAttributes("id=\"title\" class=\"centered pointer\"");
         assertEquals(2, attributes.size());
         assertTrue(attributes.containsKey("id"));
@@ -40,7 +46,7 @@ public class HTMLParserTest {
     
     @Test
     public void testGetAttributes_singleValues() {
-        HTMLParser parser = new HTMLParser();
+        HTMLParser parser = new HTMLParser(null);
         Map<String, String> attributes = parser.getAttributes("disabled mixed clear-block");
         assertEquals(3, attributes.size());
         assertTrue(attributes.containsKey("disabled"));
@@ -53,7 +59,7 @@ public class HTMLParserTest {
     
     @Test
     public void testGetAttributes_mixed() {
-        HTMLParser parser = new HTMLParser();
+        HTMLParser parser = new HTMLParser(null);
         Map<String, String> attributes = parser.getAttributes("disabled id=\"title\" mixed clear-block class=\"centered pointer\"");
         assertEquals(5, attributes.size());
         assertTrue(attributes.containsKey("disabled"));
@@ -70,7 +76,7 @@ public class HTMLParserTest {
     
     @Test
     public void testGetAttributes_strangeSpacing() {
-        HTMLParser parser = new HTMLParser();
+        HTMLParser parser = new HTMLParser(null);
         Map<String, String> attributes = parser.getAttributes("   disabled   id =  \"title    \"   ");
         assertEquals(2, attributes.size());
         assertTrue(attributes.containsKey("disabled"));
@@ -81,7 +87,7 @@ public class HTMLParserTest {
     
     @Test
     public void testGetAttributes_realworld1() {
-    	HTMLParser parser = new HTMLParser();
+    	HTMLParser parser = new HTMLParser(null);
         Map<String, String> attributes = parser.getAttributes("width=\"180\" alt=\"Photo by Lionel Pottier\" src=\"petit-menhir.jpg\" height=\"240\"");
         assertEquals(4, attributes.size());
         assertTrue(attributes.containsKey("width"));
@@ -96,7 +102,7 @@ public class HTMLParserTest {
     
     @Test
     public void testGetAttributes_realworld2() {
-    	HTMLParser parser = new HTMLParser();
+    	HTMLParser parser = new HTMLParser(null);
         Map<String, String> attributes = parser.getAttributes("style=\"text-align: center;\"");
         assertEquals(1, attributes.size());
         assertTrue(attributes.containsKey("style"));
@@ -105,7 +111,7 @@ public class HTMLParserTest {
     
     @Test
     public void testRemoveUselessSpaces() {
-        HTMLParser parser = new HTMLParser();
+        HTMLParser parser = new HTMLParser(null);
         String result = parser.removeUselessSpaces("test");
         assertEquals("test", result);
         result = parser.removeUselessSpaces("  test   ");
@@ -126,7 +132,7 @@ public class HTMLParserTest {
     
     @Test
     public void testSplitOnAttributes() {
-        HTMLParser parser = new HTMLParser();
+        HTMLParser parser = new HTMLParser(null);
         String[] results = parser.splitOnAttributes("id=\"title\" value=\"time zone\"");
         String[] expected = {"id=\"title\"", "value=\"time zone\""};
         assertArrayEquals(expected, results);
@@ -155,7 +161,7 @@ public class HTMLParserTest {
     @Test
     public void testGenerateDOMTree_Basic() {
         String htmlText = "<!doctype html><html><head><title>Watchmen</title></head><body><h1 id=\"title\">Rorschach's Journal</h1><div><input disabled/><h2 class=\"centered linked\">October 12th, 1985</h2><p>Tonight, a comedian died in New York.</p></div></body></html>";
-        HTMLParser parser = new HTMLParser();
+        HTMLParser parser = new HTMLParser(null);
         DOMNode dom = parser.generateDOMTree(htmlText);
         
         DOMNode expected = new DOMNode("root");
@@ -203,7 +209,7 @@ public class HTMLParserTest {
     @Test
     public void testGenerateDOMTree_weirdAttributeSpacing() {
         String htmlText = "<!doctype html><html><head><title  required   status=\"bold \">Watchmen</title></head><body><h1 id  =  \"2\"   class   =\"none\" res>Rorschach's Journal</h1></body></html>";
-        HTMLParser parser = new HTMLParser();
+        HTMLParser parser = new HTMLParser(null);
         DOMNode dom = parser.generateDOMTree(htmlText);
         
         DOMNode expected = new DOMNode("root");
@@ -239,7 +245,7 @@ public class HTMLParserTest {
     @Test
     public void testGenerateDOMTree_weirdHTMLSpacing() {
         String htmlText = "<!doctype html>  <html><head>    <title required> Watchmen 2008</title></head> <body>  <h1>Rorschach's Journal</h1></body>  </html> ";
-        HTMLParser parser = new HTMLParser();
+        HTMLParser parser = new HTMLParser(null);
         DOMNode dom = parser.generateDOMTree(htmlText);
         
         DOMNode expected = new DOMNode("root");
@@ -271,7 +277,7 @@ public class HTMLParserTest {
     @Test
     public void testGenerateDOMTree_multipleTextElements() {
         String htmlText = "<html><body><div>before<p>middle</p>after</div></body></html>";
-        HTMLParser parser = new HTMLParser();
+        HTMLParser parser = new HTMLParser(null);
         DOMNode dom = parser.generateDOMTree(htmlText);
         
         DOMNode expected = new DOMNode("root");
@@ -298,6 +304,40 @@ public class HTMLParserTest {
     }
     
     @Test
+    public void testGenerateDOMTree_empty_tags() {
+        String htmlText = "<html><link href=\"sd\"><body><link href=0/><div><p>paragraph<br></p>after</div><img></body></html>";
+        HTMLParser parser = new HTMLParser(null);
+        DOMNode dom = parser.generateDOMTree(htmlText);
+        
+        DOMNode expected = new DOMNode("root");
+        DOMNode html = new DOMNode(HTMLElements.HTML);
+        DOMNode body = new DOMNode(HTMLElements.BODY);
+        DOMNode link1 = new DOMNode(HTMLElements.LINK);
+        DOMNode link2 = new DOMNode(HTMLElements.LINK);
+        DOMNode div = new DOMNode(HTMLElements.DIV);
+        DOMNode p = new DOMNode(HTMLElements.P);
+        DOMNode text1 = new DOMNode(HTMLElements.TEXT);
+        text1.content = "paragraph";
+        DOMNode br = new DOMNode(HTMLElements.BR);
+        DOMNode text2 = new DOMNode(HTMLElements.TEXT);
+        text2.content = "after";
+        DOMNode img = new DOMNode(HTMLElements.IMG);
+        
+        expected.addChild(html);
+        html.addChild(link1);
+        html.addChild(body);
+        body.addChild(link2);
+        body.addChild(div);
+        body.addChild(img);
+        div.addChild(p);
+        div.addChild(text2);
+        p.addChild(text1);
+        p.addChild(br);
+        
+        assertEquals(expected, dom);
+    }
+    
+    @Test
     public void testGetBodyNode() {
         DOMNode dom = new DOMNode("root");
         DOMNode html = new DOMNode(HTMLElements.HTML);
@@ -319,7 +359,7 @@ public class HTMLParserTest {
         div.addChild(afterText);
         p.addChild(pText);
         
-        HTMLParser parser = new HTMLParser();
+        HTMLParser parser = new HTMLParser(null);
         DOMNode bodyNode = parser.getBodyNode(dom);
         assertEquals(body, bodyNode);
     }
@@ -344,9 +384,46 @@ public class HTMLParserTest {
         div.addChild(afterText);
         p.addChild(pText);
         
-        HTMLParser parser = new HTMLParser();
+        HTMLParser parser = new HTMLParser(null);
         DOMNode bodyNode = parser.getBodyNode(dom);
         assertEquals(null, bodyNode);
+    }
+    
+    @Test
+    public void testRemoveComments() {
+        String html1 = "<div>testing<a>a link <!-- comment! --> </a> <!--closing   the div--></div>";
+        String expected1 = "<div>testing<a>a link  </a> </div>";
+        String actual1 = new HTMLParser(null).removeComments(html1);
+        
+        String html2 = "<div><<<a>a link <!-- -- ><&& --><!----> </a>test";
+        String expected2 = "<div><<<a>a link  </a>test";
+        String actual2 = new HTMLParser(null).removeComments(html2);
+        
+        assertEquals(expected1, actual1);
+        assertEquals(expected2, actual2);
+
+    }
+    
+    @Test
+    public void testRemoveUnknownElements() {
+        String html1 = "<html><head><script>var x = 1</script><title>test</title></head><table><tr><td/><td/></tr></table></html>";
+        String expected1 = "<html><head><title>test</title></head></html>";
+        HTMLParser parser = new HTMLParser(null);
+        DOMNode actual = parser.generateDOMTree(html1);
+        parser.removeUnknownElements(actual);
+        DOMNode expected = parser.generateDOMTree(expected1);
+        parser.removeUnknownElements(expected);
+        assertTrue(expected.equals(actual));
+    }
+    
+    @Test
+    public void testRemoveDoctype() {
+        HTMLParser parser = new HTMLParser(null);
+        String html1 = "<!DOCTYPE html  PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\"><head><style type=\"text/css\">img {border-width: 0}</style><title>Menhir</title>";
+        String expected1 = "<head><style type=\"text/css\">img {border-width: 0}</style><title>Menhir</title>";
+        String actual1 = parser.removeDoctype(html1);
+        
+        assertEquals(expected1, actual1);
     }
         
 }

@@ -69,14 +69,13 @@ public class CSSStyle {
     
     public wordWrapType wordWrap = wordWrapType.NORMAL;
     
+    public static String[] inheritedProperties = {"color", "font-family", "font-size", "font-style", "font-weight", "text-align"};
+    
     public static boolean propagateAttribute(String attribute) {
-    	return (
-    				!attribute.equals("width") &&
-    				!attribute.equals("height") &&
-    				!attribute.equals("widthType") &&
-    				!attribute.equals("heightType") &&
-    				!attribute.equals("display")
-    			);
+        for (String s : inheritedProperties) {
+            if (s.equals(attribute)) return true;
+        }
+        return false;
     }
     
     /**

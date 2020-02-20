@@ -179,6 +179,37 @@ public class CSSParserTest {
     }
     
     @Test
+    public void testGetRules_no_last_semicolon() {
+        final String css = 
+                "h1 { color: black; font-size: 120% }" + 
+                "h2, h3 {float: right}";
+        
+        CSSParser parser = new CSSParser();
+        parser.parse(css);
+        Map<Selector, Map<String, String>> actual = parser.getRules();
+        Map<Selector, Map> expected = new HashMap<Selector, Map>();
+        
+        Selector s1 = parser.new Selector(CSSParser.SelectorType.ELEMENT);
+        s1.values.add("h1");
+        Map<String, String> m1 = new HashMap<String, String>();
+        m1.put("color", "black");
+        m1.put("font-size", "120%");
+        expected.put(s1, m1);
+        
+        Selector s2 = parser.new Selector(CSSParser.SelectorType.ELEMENT);
+        s2.values.add("h2");
+        s2.values.add("h3");
+        Map<String, String> m2 = new HashMap<String, String>();
+        m2.put("float", "right");
+        expected.put(s2, m2);
+        
+        for (Entry<Selector, Map> e : expected.entrySet()) {
+            assertTrue(actual.keySet().contains(e.getKey()));
+            assertTrue(actual.get(e.getKey()).equals(e.getValue()));
+        }
+    }
+    
+    @Test
     public void testGenerateIDMap_Empty() {
         final String css =
                 "h1 { color: black; font-size: 120%; }" + 

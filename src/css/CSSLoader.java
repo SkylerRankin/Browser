@@ -3,24 +3,60 @@ package css;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import model.DOMNode;
 import model.RenderNode;
 import parser.CSSParser;
 import parser.CSSParser.Selector;
+import parser.HTMLElements;
 
 public class CSSLoader {
 	
 	private Map<Integer, RenderNode> parentRenderNodeMap;
+	private List<String> externalCSS;
+	private List<String> styleTagCSS;
+	private final boolean debug = true;
 	
-	public CSSLoader(Map<Integer, RenderNode> parentRenderNodeMap) {
+	public CSSLoader(DOMNode dom, Map<Integer, RenderNode> parentRenderNodeMap, List<String> externalCSS) {
 		this.parentRenderNodeMap = parentRenderNodeMap;
+		this.externalCSS = externalCSS;
+		styleTagCSS = new ArrayList<String>();
+		findStyleTagCSS(dom);
+	}
+	
+	/**
+	 * Searches through the DOM tree for all style elements and adds their contents to the 
+	 * styleTagCSS list. Assumes that the first and only child of a style element is a text
+	 * element containing the CSS.
+	 * @param root
+	 */
+	private void findStyleTagCSS(DOMNode root) {
+	    if (root == null) return;
+	    if (root.type.equals(HTMLElements.STYLE)) {
+	        DOMNode text = root.children.get(0);
+	        if (text != null) {
+	            styleTagCSS.add(text.content);
+	            if (debug) System.out.printf("");
+	        } else {
+	            System.err.println("CSSLoader: findStyleTagCSS: style node had no child text");
+	        }
+	    } else {
+	        for (DOMNode child : root.children) {
+	            findStyleTagCSS(child);
+	        }
+	    }
 	}
 	
 	public void applyAllCSS(RenderNode root) {
 		loadDefaults(root);
+		loadExternalCSS(root);
+		loadStyleTags(root);
 		applyInline(root);
+		propagateCSS(root);
 		finalizeCSS(root);
 	}
 	
@@ -30,6 +66,7 @@ public class CSSLoader {
 		try {
 			cssString = new String(Files.readAllBytes(Paths.get("./src/css/default.css")));
 		} catch (IOException e) {
+		    System.err.println("CSSLoader: failed to load default.css");
 			e.printStackTrace();
 		}
 		parser.parse(cssString);
@@ -38,9 +75,36 @@ public class CSSLoader {
 		parser.printRules();
 		
 		applyRules(root, rules);
-		propagateCSS(root);
 	}
 	
+	public void loadExternalCSS(RenderNode root) {
+	    for (String cssString : externalCSS) {
+	        CSSParser parser = new CSSParser();
+	        parser.parse(cssString);
+	        Map<Selector, Map<String, String>> rules = parser.getRules();
+	        
+	        parser.printRules();
+	        
+	        applyRules(root, rules);
+	    }
+	    
+	}
+	
+	public void loadStyleTags(RenderNode root) {
+	    for (String cssString : styleTagCSS) {
+	        CSSParser parser = new CSSParser();
+	        parser.parse(cssString);
+	        Map<Selector, Map<String, String>> rules = parser.getRules();
+	        parser.printRules();
+	        applyRules(root, rules);
+	    }
+	}
+	
+	/**
+	 * Parse the inline style attribute and apple that style.
+	 * TODO should not apply to every node of this type, just this node specifically
+	 * @param root
+	 */
 	public void applyInline(RenderNode root) {
 		
 		if (root.attributes.containsKey("style")) {
@@ -85,7 +149,6 @@ public class CSSLoader {
 		
 		if (parent != null) {
 			for (Entry<String, String> e : parent.style.getAllProperties().entrySet()) {
-//				if (root.type.equals("tt")) System.out.printf("tt %s:%s, %b\n", e.getKey(), e.getValue(), CSSStyle.propagateAttribute(e.getKey()));
 				if (!root.style.hasPropertySet(e.getKey()) && CSSStyle.propagateAttribute(e.getKey())) {
 					root.style.setProperty(e.getKey(), e.getValue());
 				}

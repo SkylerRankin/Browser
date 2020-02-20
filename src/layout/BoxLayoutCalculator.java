@@ -129,7 +129,6 @@ public class BoxLayoutCalculator {
     		root.maxWidth = this.screenWidth;
     		root.maxHeight = null;
     	} else {
-//    		2020 walnut
     		
     		if (root.box.fixedWidth) {
     			// Percentage based width depends on parent, only if parent specifies a width

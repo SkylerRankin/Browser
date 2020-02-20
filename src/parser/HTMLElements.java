@@ -1,5 +1,10 @@
 package parser;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 public class HTMLElements {
     
     public static final String TEXT = "text";
@@ -33,12 +38,32 @@ public class HTMLElements {
     public static final String TR = "tr";
     public static final String TD = "td";
     public static final String PRE = "pre";
+    public static final String TT = "tt";
+    public static final String BR = "br";
+    public static final String LINK = "link";
     
+    private static final String[] VALID_ELEMENTS = {TEXT, HTML, HEAD, STYLE, TITLE, BODY, H1, H2, H3, H4, H5, H6, DIV, SPAN, P, UL, OL, LI, HR, B, IMG, A, PRE, TT};
+    private static final String[] EMPTY_ELEMENTS = {DOCTYPE, IMG, BR, LINK, BR, INPUT, META, HR};
     public static final String[] RENDER_TREE_ELEMENTS = {BODY, TEXT, H1, H2, H3, H4, H5, H6, DIV, P, INPUT, SPAN, HR, PRE};
     public static final String[] BLOCK_LEVEL_ELEMENTS = {H1, H2, H3, H4, H5, H6, DIV, P};
     
-    public boolean isValidElement(String element) {
-        return false;
+    private static Set<String> validElements;
+    private static Set<String> emptyElements;
+    
+    public static void init() {
+        validElements = new HashSet<String>();
+        emptyElements = new HashSet<String>();
+
+        validElements.addAll(Arrays.asList(VALID_ELEMENTS));
+        emptyElements.addAll(Arrays.asList(EMPTY_ELEMENTS));
+    }
+    
+    public static boolean isValidElement(String element) {
+        return element.equals(DOCTYPE) || validElements.contains(element);
+    }
+    
+    public static boolean isEmptyElement(String element) {
+        return emptyElements.contains(element);
     }
     
     public static boolean usedInRenderTree(String element) {

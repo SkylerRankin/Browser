@@ -133,28 +133,50 @@ public class CSSParser {
         return css.replaceAll(commentsRegex, "");
     }
     
+    /**
+     * Parses some string of CSS into a map from selectors to sets of declarations.
+     * @param css
+     * @return
+     */
     public Map<Selector, Map<String, String>> parseRules(String css) {
         final String ruleRegex = "[#a-zA-Z0-9,\\*\\s+?]+\\{(.|\r\n)*?\\}";
         final String declarationRegex = ".+:\\s*.+;";
+        final String lastDeclarationRegex = ".+:\\s*.+;?";
+        
+        Pattern declarationPattern = Pattern.compile(declarationRegex);
+        Pattern lastDeclarationPattern = Pattern.compile(lastDeclarationRegex);
+        
         Map<Selector, Map<String, String>> rules = new HashMap<Selector, Map<String, String>>();
         Matcher ruleMatcher = Pattern.compile(ruleRegex).matcher(css);
         
         while (ruleMatcher.find()) {
             String match = ruleMatcher.group();
             Map<String, String> declarations = new HashMap<String, String>();
-            Matcher declarationMatcher = Pattern.compile(declarationRegex).matcher(
-                    match.substring(match.indexOf("{")+1, match.indexOf("}")));
+            String declarationText = match.substring(match.indexOf("{")+1, match.indexOf("}"));
+            Matcher declarationMatcher = declarationPattern.matcher(declarationText);
             
             Selector selector = parseSelector(match.substring(0, match.indexOf("{")).trim());
             
+            int lastIndex = 0;
+            
+            // Match each declaration. Requires a semicolon at the end
             while (declarationMatcher.find()) {
                String declarationsText = declarationMatcher.group().trim();
+               lastIndex = declarationMatcher.end();
                for (String declaration : declarationsText.split(";")) {
                    declarations.put(
                            declaration.substring(0, declaration.indexOf(":")).trim(),
                            declaration.substring(declaration.indexOf(":") + 1).trim());
                }
-               
+            }
+            
+            // Try to match for a last declaration that has an optional semicolon.
+            Matcher lastDeclarationMatcher = lastDeclarationPattern.matcher(declarationText.substring(lastIndex));
+            if (lastDeclarationMatcher.find()) {
+                String lastDeclaration = lastDeclarationMatcher.group().trim();
+                declarations.put(
+                        lastDeclaration.substring(0, lastDeclaration.indexOf(":")).trim(),
+                        lastDeclaration.substring(lastDeclaration.indexOf(":") + 1).trim());
             }
             
             // If the selector was already parsed, then merge the declarations.

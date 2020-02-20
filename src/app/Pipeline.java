@@ -7,6 +7,8 @@ import layout.BoxLayoutCalculator;
 import model.DOMNode;
 import model.RenderNode;
 import network.HTTPClient;
+import network.ResourceLoader;
+import parser.HTMLElements;
 import parser.HTMLParser;
 import parser.RenderTreeGenerator;
 import renderer.HTMLRenderer;
@@ -15,12 +17,14 @@ import renderer.ImageCache;
 public class Pipeline {
 	
 	private String url;
+	private ResourceLoader resourceLoader;
 	private DOMNode domRoot;
 	private RenderNode renderRoot;
 	
 	public static void init() {
 		DefaultColors.init();
 		ImageCache.loadDefaultImages();
+		HTMLElements.init();
 	}
 	
 	/**
@@ -28,9 +32,9 @@ public class Pipeline {
 	 * @param url		URL to visit.
 	 */
 	public void loadWebpage(String url) {
-		String html = HTTPClient.requestPage(url);
-		HTMLParser parser = new HTMLParser();
-		domRoot = parser.generateDOMTree(html);
+	    resourceLoader = new ResourceLoader();
+	    resourceLoader.loadWebpage(url);
+		domRoot = resourceLoader.getDOM();
 	}
 	
 	/**
@@ -42,16 +46,16 @@ public class Pipeline {
 		renderRoot = rtg.generateRenderTree(domRoot, screenWidth);
 //		renderRoot.print();
 		rtg.cleanUpText(renderRoot, false);
-		CSSLoader cssLoader = new CSSLoader(rtg.getParentRenderNodeMap());
+		CSSLoader cssLoader = new CSSLoader(domRoot, rtg.getParentRenderNodeMap(), resourceLoader.getExternalCSS());
 		cssLoader.applyAllCSS(renderRoot);
 		BoxLayoutCalculator blc = new BoxLayoutCalculator(rtg.getParentRenderNodeMap(), screenWidth);
 		rtg.transformNode(renderRoot);
 		blc.setBoxBounds(renderRoot);
 		blc.propagateMaxSizes(renderRoot);
 		blc.finalizeDimensions(renderRoot);
-//		blc.printBoxes(renderRoot);
 		blc.calculateBoxes(renderRoot);
 		blc.applyJustification(renderRoot);
+	    blc.printBoxes(renderRoot);
 //		rtg.splitLongText(renderRoot);
 	}
 	

@@ -27,9 +27,13 @@ public class DOMNode {
         n.parent = this;
     }
     
+    public void print() {
+        print("");
+    }
+    
     public void print(String pad) {
         if (this.type.equals((HTMLElements.TEXT))) {
-            System.out.println(pad+content);
+            System.out.printf("%sTEXT: %s\n", pad, content);
         } else {
             System.out.print(pad+type);
             for (Entry<String, String> entry : this.attributes.entrySet()) {

@@ -27,6 +27,9 @@ public class HTTPClient {
         try {
             URL url = new URL(urlString);
             baseURL = urlString;
+            if (urlString.endsWith("html")) {
+                baseURL = urlString.substring(0, baseURL.lastIndexOf("/"));
+            }
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestProperty("Content-Type", "application/json");
             conn.setRequestMethod("GET");
@@ -53,6 +56,14 @@ public class HTTPClient {
             e.printStackTrace();
         }
         return null;
+    }
+    
+    public static String requestResource(String url) {
+        if (url.startsWith("http")) {
+            return requestPage(url);
+        } else {
+            return requestPage(String.format("%s//%s", baseURL, url));
+        }
     }
     
     public static Image downloadImage(String urlString) {

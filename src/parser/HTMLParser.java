@@ -11,14 +11,25 @@ import java.util.regex.Pattern;
 import css.CSSStyle;
 import model.DOMNode;
 import model.RenderNode;
+import network.ResourceLoader;
 
 public class HTMLParser {
+    
+    private ResourceLoader loader;
+    private final boolean debug = true;
+    
+    public HTMLParser(ResourceLoader loader) {
+        this.loader = loader;
+    }
     
     public DOMNode generateDOMTree(String html) {
         
         // Trim white space and remove empty spaces between tags;
         html = html.trim();
         html = html.replaceAll(">\\s+<", "><");
+        html = removeComments(html);
+        html = removeXML(html);
+        html = removeDoctype(html);
         
         int index = 0;
         DOMNode root = new DOMNode("root");
@@ -45,13 +56,20 @@ public class HTMLParser {
                     } else {
                         n = new DOMNode(content.substring(0, spaceIndex));
                         n.attributes = getAttributes(content.substring(spaceIndex));
+                        if (loader != null) {
+                            loader.checkAttributes(content.substring(0, spaceIndex), n.attributes);
+                        }
                     }
                     
                     n.parent = current;
                     current.children.add(n);
-                    if (!isSingular(fullTag)) {
+                    if (!HTMLElements.isEmptyElement(n.type)) {
                         current = n;
                     }
+//                    System.out.printf("node = %s, current = %s, isEmpty = %b\n", n.type, current.type, HTMLElements.isEmptyElement(n.type));
+//                    if (!isSingular(fullTag)) {
+//                        current = n;
+//                    }
                 }
                 index+=(end - index+1);
             } else {
@@ -78,6 +96,21 @@ public class HTMLParser {
             if (d != null) bodyCandidate = d;
         }
         return bodyCandidate;
+    }
+    
+    public void removeUnknownElements(DOMNode dom) {
+        List<DOMNode> newChildren = new ArrayList<DOMNode>();
+        for (DOMNode child : dom.children) {
+            if (HTMLElements.isValidElement(child.type)) {
+                newChildren.add(child);
+                removeUnknownElements(child);
+            } else {
+                if (debug) {
+                    System.out.printf("HTMLParser: ignoring unknown element %s, %d children\n", child.type, child.children.size());
+                }
+            }
+        }
+        dom.children = newChildren;
     }
     
     public boolean isSingular(String content) {
@@ -166,6 +199,59 @@ public class HTMLParser {
             attributes.add(matcher.group());
         }
         return attributes.toArray(new String[0]);
+    }
+    
+    /**
+     * Remove the comments from some HTML. Does not accept nested comments. Should replace with a 
+     * better regular expression.
+     * @param s
+     * @return
+     */
+    public String removeComments(String s) {
+        return removeTag(s, "<!--", "-->", true);
+    }
+    
+    public String removeXML(String s) {
+        return removeTag(s, "<\\?", "\\?>", true);
+    }
+    
+    public String removeDoctype(String s) {
+        return removeTag(s, "<\\!DOCTYPE", ">", false);
+    }
+    
+    /**
+     * Removes some arbitrary tag with a start and end, including all the content between.
+     * For comments, set exact to true, since each comment needs an ending tag and ending tags
+     * are only used for comments. For other patterns, where the ending tag might appear elsewhere
+     * without the start tag, exact is false so that these other ending tags are left for later.
+     * @param s
+     * @param startPattern
+     * @param endPattern
+     * @param exact         If starting and ending patterns must pair up exactly.
+     * @return
+     */
+    public String removeTag(String s, String startPattern, String endPattern, boolean exact) {
+        Matcher startMatcher = Pattern.compile(startPattern).matcher(s);
+        Matcher endMatcher = Pattern.compile(endPattern).matcher(s);
+        List<Integer> starts = new ArrayList<Integer>();
+        List<Integer> ends = new ArrayList<Integer>();
+        while (startMatcher.find()) starts.add(startMatcher.start());
+        while (endMatcher.find()) ends.add(endMatcher.end());
+        
+        StringBuilder html = new StringBuilder();
+
+        if ((exact && starts.size() != ends.size()) || starts.size() > ends.size()) {
+            System.err.printf("HTMLParser: unmatched comments, %d started, %d ended\n", starts.size(), ends.size());
+        } else {
+            int current_start = 0;
+            for (int i = 0; i < starts.size(); i++) {
+                html.append(s.substring(current_start, starts.get(i)));
+                current_start = ends.get(i);
+            }
+            html.append(s.substring(current_start));
+        }
+        
+        return html.toString();
     }
 
 }
