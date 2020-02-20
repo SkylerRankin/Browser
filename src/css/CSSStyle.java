@@ -26,6 +26,7 @@ public class CSSStyle {
     public static enum textAlignType {LEFT, CENTER, RIGHT};
 //    public static enum textDecorationType {NONE, OVERLINE, LINETHROUGH, UNDERLINE};
     public static enum wordWrapType {NORMAL, BREAKWORD};
+    public static enum marginSizeType {AUTO, PIXEL};
     
     public CSSColor backgroundColor = new CSSColor("White");
     
@@ -48,6 +49,7 @@ public class CSSStyle {
     public dimensionType heightType = dimensionType.PIXEL;
     public Float height = null;
     
+    public marginSizeType marginType = marginSizeType.PIXEL;
     public int margin = 0;
     public int marginTop = 0;
     public int marginRight = 0;
@@ -151,16 +153,29 @@ public class CSSStyle {
 							    		heightType = value.contains("%") ? 
 												dimensionType.PERCENTAGE : 
 												dimensionType.PIXEL; break;
+    		case "margin":              marginType = value.equals("auto") ?
+    		                                    marginSizeType.AUTO :
+    		                                    marginSizeType.PIXEL;
+    		                            if (marginType.equals(marginSizeType.PIXEL)) {
+    		                                marginTop = parseDimension(value);
+    		                                marginRight = parseDimension(value);
+    		                                marginBottom = parseDimension(value);
+    		                                marginLeft = parseDimension(value);
+    		                            } break;
     		case "margin-top":			marginTop = parseDimension(value);  break;
     		case "margin-right":		marginRight = parseDimension(value);  break;
     		case "margin-bottom":		marginBottom = parseDimension(value);  break;
     		case "margin-left":			marginLeft = parseDimension(value);  break;
+    		case "padding":             paddingTop = parseDimension(value);
+    		                            paddingRight = parseDimension(value);
+    		                            paddingBottom = parseDimension(value);
+    		                            paddingLeft = parseDimension(value); break;
     		case "padding-top":			paddingTop = parseDimension(value);  break;
     		case "padding-right":		paddingRight = parseDimension(value);  break;
     		case "padding-bottom":		paddingBottom = parseDimension(value);  break;
     		case "padding-left":		paddingLeft = parseDimension(value);  break;
     		case "text-align":			textAlign = textAlignType.valueOf(value.toUpperCase()); break;
-    		case "width":				width = Float.parseFloat(value.endsWith("%") ? value.substring(0, value.length() - 1) : value);
+    		case "width":				width = (float) parseDimension(value);
     									widthType = value.contains("%") ? 
     											dimensionType.PERCENTAGE : 
     											dimensionType.PIXEL; break;

@@ -61,9 +61,10 @@ public class BoxLayoutCalculator {
     		root.box.width = root.attributes.containsKey("width") ? Float.parseFloat(root.attributes.get("width")) : 50;
     		root.box.height = root.attributes.containsKey("height") ? Float.parseFloat(root.attributes.get("height")) : 50;
     		ImageCache.loadImage(root.attributes.get("src"));
-    	} else if (root.type.equals("hr")) {
-    		root.box.height = 5;
     	}
+    	
+    	if (root.style.height != null) root.box.height = root.style.height;
+        if (root.style.width != null) root.box.width = root.style.width;
     	
     	for (RenderNode child : root.children) {
     		setBoxBounds(child);
@@ -285,12 +286,16 @@ public class BoxLayoutCalculator {
     	
     	if (root.style.widthType.equals(CSSStyle.dimensionType.PERCENTAGE) && parent != null) {
     		root.box.fixedWidth = true;
-    		root.box.width = parent.box.width * root.style.width / 100.0f;
+    		root.box.width = (parent.box.width * root.style.width / 100.0f)
+    		        - root.style.marginLeft - root.style.marginRight
+    		        - parent.style.paddingLeft - parent.style.paddingRight;
     	}
     	
 		if (root.style.heightType.equals(CSSStyle.dimensionType.PERCENTAGE)) {
 			root.box.fixedHeight = true;
-    		root.box.height = parent.box.height * root.style.height / 100.0f;
+    		root.box.height = (parent.box.height * root.style.height / 100.0f)
+    		        - root.style.marginTop - root.style.marginBottom
+    		        - parent.style.paddingTop - parent.style.paddingBottom;
     	}
     	
     	for (RenderNode child : root.children) {
@@ -323,13 +328,17 @@ public class BoxLayoutCalculator {
     		float leftSpace = 0;
     		float rightSpace = 0;
     		
+            float parentWidth = parent == null ? root.box.width : parent.box.width;
+    		float parentX = parent == null ? 0 : parent.box.x;
+            int parentPaddingLeft = parent == null ? 0 : parent.style.paddingLeft;
+    		int parentPaddingRight = parent == null ? 0 : parent.style.paddingRight;
+    		
     		if (leftMost != null && rightMost != null) {
-    			leftSpace = (leftMost.box.x - leftMost.style.marginLeft) - (parent.box.x + parent.style.paddingLeft);
-    			rightSpace =  (parent.box.x + parent.box.width - parent.style.paddingRight) - (rightMost.box.x + rightMost.box.width + rightMost.style.marginRight);
+    			leftSpace = (leftMost.box.x - leftMost.style.marginLeft) - (parentX + parentPaddingLeft);
+    			rightSpace =  (parentX + parentWidth - parentPaddingRight) - (rightMost.box.x + rightMost.box.width + rightMost.style.marginRight);
     		}
     		
 //    		System.out.printf("leftMost=%s rightMost=%s leftSpace=%f rightSpace=%f\n", leftMost.type, rightMost.type, leftSpace, rightSpace);
-    		
     		// Should left space always be 0? since calculateBoxes does left justification?
     		
     		float xShift = 0;
@@ -339,7 +348,7 @@ public class BoxLayoutCalculator {
     		} else if (alignment.equals(CSSStyle.textAlignType.RIGHT)) {
     			xShift = leftSpace + rightSpace;
     		}
-    		
+    		    		
     		for (RenderNode child : root.children) {
         		applyShift(child, xShift, 0f);
         	}
