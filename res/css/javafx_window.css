@@ -3,33 +3,19 @@
 	-fx-faint-focus-color: transparent;
 }
 
-.settings-button {
-    -fx-border-width: 0;
-    -fx-background-radius: 0;
-    -fx-background-color: transparent;
-    -fx-content-display: graphic-only;
-}
-
-.settings-button:hover {
-    -fx-background-color: white;
-}
-
 .footer {
     -fx-background-color: lightgray;
 }
 
-.tab {
-    -fx-background-radius: 0;
-}
-
 .text-field {
-    -fx-border-color: lightgray;
+    -fx-text-fill: white;
+	-fx-background-color: rgb(41, 42, 46);
     -fx-border-radius: 10;
     -fx-background-radius: 10;
 }
 
 .text-field:focused {
-    -fx-border-color: lightgray;
+	-fx-background-color: rgb(41, 42, 46);
     -fx-border-radius: 10;
     -fx-background-radius: 10;
 }
@@ -42,3 +28,74 @@
 	-fx-background-color: gray;
 	-fx-margin: 20;
 }
+
+.tab-pane *.tab-header-background {
+    -fx-background-color: rgb(32, 33, 37);
+    -fx-effect: none;
+}
+
+.tab-pane {
+	-fx-background-color: rgb(50, 54, 57);
+}
+
+.tab {
+	-fx-background-color: rgb(50, 54, 57);
+	-fx-background-radius: 0;
+	-fx-pref-height: 30px;
+}
+
+.new_tab {
+	-fx-pref-width: 30px;
+}
+
+.search_tab {
+	-fx-pref-width: 200px;
+}
+
+.tab-label {
+	-fx-text-fill: white;
+	-fx-font-size: 120%;
+	-fx-margin: 5px;
+}
+
+.new_tab {
+	-fx-pref-width: 30px;
+	-fx-font-weight: bold;
+}
+
+/* CSS for the various buttons */
+
+.close-button {
+    -fx-border-width: 0;
+    -fx-background-radius: 0;
+    -fx-background-color: transparent;
+    -fx-content-display: graphic-only;
+}
+
+.close-button:hover {
+	-fx-background-color: red;
+}
+
+.window-bar-button {
+    -fx-border-width: 0;
+    -fx-background-radius: 0;
+    -fx-background-color: transparent;
+    -fx-content-display: graphic-only;
+}
+
+.window-bar-button:hover {
+	-fx-background-color: rgb(50, 54, 57);
+}
+
+.settings-button {
+    -fx-border-width: 0;
+    -fx-background-radius: 0;
+    -fx-background-color: transparent;
+    -fx-content-display: graphic-only;
+}
+
+.settings-button:hover {
+    -fx-background-color: white;
+}
+
+

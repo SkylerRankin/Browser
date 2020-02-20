@@ -165,7 +165,10 @@ public class BoxLayoutCalculator {
     
     /**
      * When a render node's dimensions are updated, this information must be send upwards through
-     * the tree, such that the higher nodes expand to accommodate the now larger child node.
+     * the tree, such that the higher nodes expand to accommodate the now larger child node. For
+     * nodes with percentage based sizes, if the parent gets larger, these nodes must also get 
+     * larger to make sure the occupy the correct percentage. These changes only apply to nodes
+     * that do not already have their width fixed.
      * @param node      The node with a newly updated dimension.
      */
     public void propagateSize(RenderNode node) {

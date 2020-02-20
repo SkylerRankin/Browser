@@ -14,6 +14,7 @@ public class NewTab extends BrowserTab {
 		tab = new Tab("+", new Label(""));
 		tab.setId(TabType.NEW.toString());
 		tab.setClosable(false);
+	    tab.getStyleClass().add("new_tab");
 	}
 	
 	public Tab getActor() {

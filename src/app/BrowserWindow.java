@@ -19,6 +19,7 @@ import javafx.concurrent.WorkerStateEvent;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
+import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -28,6 +29,9 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TabPane.TabClosingPolicy;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyEvent;
@@ -41,6 +45,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import tasks.CalculateLayoutTask;
 import tasks.LoadWebpageTask;
 import tasks.LoadingAnimationTask;
@@ -64,8 +69,12 @@ public class BrowserWindow extends Application {
     private long currentTime;
     private List<Long> taskDurations;
     
+    private double offsetX = 0;
+    private double offsetY = 0;
+    
     private void setupUI(Stage stage) {
         stage.setTitle("Browser");
+        stage.initStyle(StageStyle.UNDECORATED);
         tabs = new ArrayList<BrowserTab>();
         currentTab = 0;
         settingsTabOpen = false;
@@ -96,7 +105,8 @@ public class BrowserWindow extends Application {
         setSettingsButtonListener(settingsButton, stage);
         
         HBox hbox = new HBox();
-        hbox.getChildren().addAll(settingsButton);
+//        hbox.getChildren().addAll(settingsButton);
+        addWindowButtons(hbox, stage);
         
         anchor = new AnchorPane();
         anchor.getChildren().addAll(tabPane, hbox);
@@ -115,6 +125,7 @@ public class BrowserWindow extends Application {
         
         tabPane.setPrefWidth(scene.getWidth());
         tabPane.setPrefHeight(scene.getHeight() - 20);
+        tabPane.setTabClosingPolicy(TabClosingPolicy.ALL_TABS);
         
         // Prevent swiping from making new tabs
         tabPane.addEventFilter(SwipeEvent.ANY, new EventHandler<SwipeEvent>() {
@@ -123,6 +134,22 @@ public class BrowserWindow extends Application {
 				System.out.println("swipe");
 				event.consume();
 			}
+        });
+        
+        tabPane.setOnMousePressed(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                offsetX = stage.getX() - event.getScreenX();
+                offsetY = stage.getY() - event.getScreenY();
+            }
+        });
+        
+        tabPane.setOnMouseDragged(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                stage.setX(event.getScreenX() + offsetX);
+                stage.setY(event.getScreenY() + offsetY);
+            }
         });
         
         File cssFile = new File("./res/css/javafx_window.css");
@@ -189,6 +216,42 @@ public class BrowserWindow extends Application {
 				}
 			}
     	});
+    }
+    
+    private void addWindowButtons(HBox hbox, Stage stage) {
+        Button closeButton = createImageButton("./res/images/browser_close_16.png", "close-button");
+        Button windowedButton = createImageButton("./res/images/browser_maximize_16.png", "window-bar-button");
+        Button minimizeButton = createImageButton("./res/images/browser_minimize_16.png", "window-bar-button");
+        
+        closeButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent arg0) {
+                System.exit(0);
+            }
+        });
+        
+        minimizeButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                stage.setIconified(true);
+            }
+        });
+        
+        hbox.getChildren().addAll(minimizeButton, windowedButton, closeButton);
+
+    }
+    
+    private Button createImageButton(String imagePath, String styleClass) {
+        Button button = new Button();
+        File iconFile = new File(imagePath);
+        ImageView image = new ImageView(new Image(iconFile.toURI().toString(), 256, 256, false, false));
+        image.setFitHeight(16);
+        image.setFitWidth(16);
+        button.getStyleClass().add(styleClass);
+        button.setGraphic(image);
+        button.setPrefWidth(50);
+        button.setPadding(new Insets(5, 5, 5, 5));
+        return button;
     }
 
     private void setSettingsButtonListener(Button button, Stage stage) {

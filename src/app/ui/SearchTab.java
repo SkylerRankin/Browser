@@ -17,6 +17,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.ScrollPane.ScrollBarPolicy;
 import javafx.scene.input.SwipeEvent;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
@@ -52,13 +53,18 @@ public class SearchTab extends BrowserTab {
         scroll.setContent(canvas);
         scroll.setFitToWidth(true);
         
+        HBox hbox = new HBox();
+        ImageButton settingsButton;
+        
         grid.add(urlInput, 0, 0);
+        grid.add(hbox, 1, 0);
         grid.add(scroll, 0, 1, 1, 1);
         
         GridPane.setMargin(urlInput, new Insets(5));
         
 		tab = new Tab("New Tab", grid);
 		tab.setId(TabType.SEARCH.toString());
+		tab.getStyleClass().add("search_tab");
 		
 		ChangeListener<Number> stageSizeListener = (obs, oldValue, newValue) -> {
 			onResize(stage);
@@ -83,7 +89,6 @@ public class SearchTab extends BrowserTab {
             	System.out.println(child);
             }
     		
-//    		System.out.println(scroll.getWidth());
         	canvas.setWidth(scene.getWidth() - 20);
         	canvas.setHeight(scene.getHeight() - urlInput.getHeight() - 20 - 40);
             gc.setFill(Color.BLUE);
