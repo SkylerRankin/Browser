@@ -98,4 +98,14 @@
     -fx-background-color: white;
 }
 
+.resize-button {
+	-fx-background-color: transparent;
+	
+	-fx-padding: 10px;
+}
+
+.resize-button:hover {
+	-fx-background-color: red;
+}
+
 

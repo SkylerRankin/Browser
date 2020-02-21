@@ -8,6 +8,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import app.ui.BrowserTab;
 import app.ui.Footer;
 import app.ui.NewTab;
+import app.ui.ResizeButton;
+import app.ui.ResizeOverlay;
 import app.ui.SearchTab;
 import app.ui.SettingsButton;
 import app.ui.SettingsTab;
@@ -42,6 +44,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
@@ -105,7 +108,7 @@ public class BrowserWindow extends Application {
         setSettingsButtonListener(settingsButton, stage);
         
         HBox hbox = new HBox();
-//        hbox.getChildren().addAll(settingsButton);
+        hbox.getChildren().addAll(settingsButton);
         addWindowButtons(hbox, stage);
         
         anchor = new AnchorPane();
@@ -121,7 +124,10 @@ public class BrowserWindow extends Application {
         
         root.setBottom(footer);
         
-        scene = new Scene(root, 1000, 600);
+        StackPane stack = new StackPane();
+        stack.getChildren().addAll(root, new ResizeOverlay(stage));
+        
+        scene = new Scene(stack, 1000, 600);
         
         tabPane.setPrefWidth(scene.getWidth());
         tabPane.setPrefHeight(scene.getHeight() - 20);
@@ -161,13 +167,6 @@ public class BrowserWindow extends Application {
         stage.setScene(scene);
         stage.show();
         
-        scene.addEventFilter(Event.ANY, new EventHandler<Event>() {
-			@Override
-			public void handle(Event event) {
-//				System.out.println(event);
-//				event.consume();
-			}
-        });
         
         for (BrowserTab tab : tabs) {
         	tab.scene = scene;
@@ -178,6 +177,8 @@ public class BrowserWindow extends Application {
         	tabPane.setPrefWidth(scene.getWidth());
         	tabPane.setPrefHeight(scene.getHeight() - 20);
         	footer.setPrefWidth(scene.getWidth());
+        	AnchorPane.setTopAnchor(hbox, 3.0);
+            AnchorPane.setRightAnchor(hbox, 3.0);
         	for (BrowserTab tab : tabs) {
         		tab.onResize(stage);
         	}

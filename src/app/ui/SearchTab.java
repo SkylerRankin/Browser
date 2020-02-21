@@ -67,7 +67,7 @@ public class SearchTab extends BrowserTab {
 		tab.getStyleClass().add("search_tab");
 		
 		ChangeListener<Number> stageSizeListener = (obs, oldValue, newValue) -> {
-			onResize(stage);
+//			onResize(stage);
         };
         
 		stage.widthProperty().addListener(stageSizeListener);
@@ -84,9 +84,7 @@ public class SearchTab extends BrowserTab {
     		for (Node child : scroll.getChildrenUnmodifiable()) {
     			if (child instanceof ScrollBar) {
     				ScrollBar bar = (ScrollBar) child;
-    				System.out.printf("%f, %f %s\n", bar.getHeight(), bar.getWidth(), bar.getOrientation().toString());
     			}
-            	System.out.println(child);
             }
     		
         	canvas.setWidth(scene.getWidth() - 20);
@@ -95,9 +93,6 @@ public class SearchTab extends BrowserTab {
             gc.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
             gc.setFill(Color.WHITE);
             gc.fillRect(10, 10, canvas.getWidth() - 20, canvas.getHeight() - 20);
-        	System.out.println(scroll.getViewportBounds());
-
-            System.out.printf("canvas size = (%f, %f)\n", scene.getWidth(), scene.getHeight());
         }
 	}
 	
