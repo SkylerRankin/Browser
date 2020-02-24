@@ -137,10 +137,7 @@ public class HTMLParser {
                 attributes.put(attribute, null);
             }
         }
-//        for (Entry<String, String> e : attributes.entrySet()) {
-//        	System.out.printf("%s:%s ", e.getKey(), e.getValue());
-//        }
-//        System.out.println();
+        
         return attributes;
     }
     
@@ -192,7 +189,7 @@ public class HTMLParser {
      */
     public String[] splitOnAttributes(String s) {
         // Pattern Examples: "x", ".. x", ".. x ..", "x="some stuff""
-        Pattern pattern = Pattern.compile("(^[\\w-]+$)|([\\w-]+$)|([\\w-]+?(?=\\s))|([\\w-]+=\"[\\s\\w\\.\\-\\:\\;]+\")");
+        Pattern pattern = Pattern.compile("(^[\\w-]+$)|([\\w-]+$)|([\\w-]+?(?=\\s))|([\\w-]+=\"[\\s\\w\\.\\-\\:\\;%]+\")");
         Matcher matcher = pattern.matcher(s);
         List<String> attributes = new ArrayList<String>();
         while (matcher.find()) {

@@ -139,7 +139,7 @@ public class CSSParser {
      * @return
      */
     public Map<Selector, Map<String, String>> parseRules(String css) {
-        final String ruleRegex = "[#a-zA-Z0-9,\\*\\s+?]+\\{(.|\r\n)*?\\}";
+        final String ruleRegex = "[\\:@\\.#a-zA-Z0-9,\\*\\s+?]+\\{(.|\r\n)*?\\}";
         final String declarationRegex = ".+:\\s*.+;";
         final String lastDeclarationRegex = ".+:\\s*.+;?";
         
@@ -186,8 +186,10 @@ public class CSSParser {
                     prevDeclarations.put(e.getKey(), e.getValue());
                 }
                 rules.put(selector, prevDeclarations);
-            } else {
+            } else if (selector != null) {
                 rules.put(selector, declarations);
+            } else {
+                System.out.printf("CSSParser: selector was null. was not parsed correctly. %s\n", declarations);
             }
             
         }
@@ -236,6 +238,7 @@ public class CSSParser {
     public void printRules() {
     	System.out.printf("--- CSSParser: %d Rules ---\n", rules.size());
     	for (Entry<Selector, Map<String, String>> entry : rules.entrySet()) {
+    	    
     		System.out.printf("%s:\n", entry.getKey().toString());
     		for (Entry<String, String> rule : entry.getValue().entrySet()) {
     			System.out.printf("\t%s: %s\n", rule.getKey(), rule.getValue());
@@ -275,8 +278,8 @@ public class CSSParser {
         
         @Override
         public int hashCode() {
-            int hash = 0;
-            for (String s : values) hash += s.hashCode();
+            int hash = type.toString().hashCode();
+            for (String s : values) hash += s == null ? 0 : s.hashCode();
             return hash;
         }
     }

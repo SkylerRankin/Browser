@@ -53,10 +53,15 @@ tt {
 
 pre {
 	font-family: Consolas;
+	width: 100%;
 }
 
 hr {
 	height: 2;
 	margin: 5px;
 	width: 100%;
+}
+
+code {
+	display: inline;
 }

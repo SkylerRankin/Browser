@@ -17,7 +17,7 @@ import model.RenderNode;
 
 public class HTMLRenderer {
     
-    private static final boolean drawOutlines = false;
+    private static final boolean drawOutlines = true;
     private static final boolean drawPadding = false;
     private static final boolean drawMargins = false;
     

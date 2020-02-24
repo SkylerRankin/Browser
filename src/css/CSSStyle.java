@@ -86,13 +86,13 @@ public class CSSStyle {
      * @return
      */
     public boolean hasPropertySet(String property) {
-//    	return setProperties.contains(property);
-    	return false;
+//    	return properties.containsKey(property);
+        return setProperties.contains(property);
     }
     
     public void setProperty(String property, String value) {
     	properties.put(property, value);
-//    	setProperties.add(property);
+    	setProperties.add(property);
     }
     
     public Map<String, String> getAllProperties() {
@@ -134,9 +134,13 @@ public class CSSStyle {
     	return Integer.parseInt(value.substring(0, value.length() - offset));
     }
     
+    private int parseFontSizeValue(String value) {
+        if (value.matches("\\d+")) return Integer.parseInt(value);
+        else return 16;
+    }
+    
     /**
      * Convert the string properties and values to actual properties on this class
-     * TODO handle margin and padding where 1 value sets all 4
      */
     public void finalizeCSS() {
     	for (Entry<String, String> e : properties.entrySet()) {
@@ -146,7 +150,7 @@ public class CSSStyle {
     		case "color": 				color = new CSSColor(value); break;
     		case "display":				display = displayType.valueOf(value.toUpperCase()); break;
     		case "font-family":			fontFamily = value; break;
-    		case "font-size":			fontSize = Integer.parseInt(value); break;
+    		case "font-size":			fontSize = parseFontSizeValue(value.toLowerCase()); break;
     		case "font-style":			fontStyle = fontStyleType.valueOf(value.toUpperCase()); break;
     		case "font-weight":			fontWeight = fontWeightType.valueOf(value.toUpperCase()); break;
     		case "height":				height = Float.parseFloat(value.endsWith("%") ? value.substring(0, value.length() - 1) : value);
@@ -190,6 +194,7 @@ public class CSSStyle {
     public void apply(Map<String, String> css) {
     	for (Entry<String, String> e : css.entrySet()) {
     		properties.put(e.getKey(), e.getValue());
+    		setProperties.add(e.getKey());
     	}
     }
     

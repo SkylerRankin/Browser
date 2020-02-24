@@ -65,7 +65,7 @@ public class ResourceLoader {
         for (String cssURL : resources.get(resourceType.CSS)) {
             String css = HTTPClient.requestResource(cssURL);
             externalCSS.add(css);
-            System.out.printf("Loaded %d characters of css from %s. What now\n", (css == null ? 0 : css.length()), cssURL);
+            System.out.printf("Loaded %d characters of css from %s.\n", (css == null ? 0 : css.length()), cssURL);
         }
         
     }
