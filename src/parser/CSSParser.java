@@ -14,6 +14,8 @@ import model.CSSNode;
 
 public class CSSParser {
     
+    private final boolean debug = false;
+    
     public enum SelectorType {
         CLASS,
         NESTED_CLASS,
@@ -139,9 +141,9 @@ public class CSSParser {
      * @return
      */
     public Map<Selector, Map<String, String>> parseRules(String css) {
-        final String ruleRegex = "[\\:@\\.#a-zA-Z0-9,\\*\\s+?]+\\{(.|\r\n)*?\\}";
-        final String declarationRegex = ".+:\\s*.+;";
-        final String lastDeclarationRegex = ".+:\\s*.+;?";
+        final String ruleRegex = "[\\_\\-(\\s?>\\s?)\\:@\\.#a-zA-Z0-9,\\*\\s+?]+\\{(.|\r\n)*?\\}";
+        final String declarationRegex = "[^:]+:\\s*[^;]+;";
+        final String lastDeclarationRegex = "[^:]+:\\s*[^;]+;?";
         
         Pattern declarationPattern = Pattern.compile(declarationRegex);
         Pattern lastDeclarationPattern = Pattern.compile(lastDeclarationRegex);
@@ -155,8 +157,13 @@ public class CSSParser {
             String declarationText = match.substring(match.indexOf("{")+1, match.indexOf("}"));
             Matcher declarationMatcher = declarationPattern.matcher(declarationText);
             
-            Selector selector = parseSelector(match.substring(0, match.indexOf("{")).trim());
+            String[] selectorTexts = match.substring(0, match.indexOf("{")).trim().split(",");
+            List<Selector> selectors = new ArrayList<Selector>();
             
+            for (String selectorText : selectorTexts) {
+                selectors.add(parseSelector(selectorText.trim()));
+            }
+                        
             int lastIndex = 0;
             
             // Match each declaration. Requires a semicolon at the end
@@ -179,17 +186,22 @@ public class CSSParser {
                         lastDeclaration.substring(lastDeclaration.indexOf(":") + 1).trim());
             }
             
-            // If the selector was already parsed, then merge the declarations.
-            if (rules.containsKey(selector)) {
-                Map<String, String> prevDeclarations = rules.get(selector);
-                for (Entry<String, String> e : declarations.entrySet()) {
-                    prevDeclarations.put(e.getKey(), e.getValue());
+            for (Selector selector : selectors) {
+                // If the selector was already parsed, then merge the declarations.
+                if (rules.containsKey(selector)) {
+                    Map<String, String> prevDeclarations = rules.get(selector);
+                    for (Entry<String, String> e : declarations.entrySet()) {
+                        prevDeclarations.put(e.getKey(), e.getValue());
+                    }
+                    rules.put(selector, prevDeclarations);
+                } else if (selector != null) {
+                    // Create a fresh set of declarations so future merges for other selectors don't change it
+                    Map<String, String> newDeclarations = new HashMap<String, String>();
+                    newDeclarations.putAll(declarations);
+                    rules.put(selector, newDeclarations);
+                } else if (debug) {
+                    System.out.printf("CSSParser: selector was null. was not parsed correctly. %s\n", declarations);
                 }
-                rules.put(selector, prevDeclarations);
-            } else if (selector != null) {
-                rules.put(selector, declarations);
-            } else {
-                System.out.printf("CSSParser: selector was null. was not parsed correctly. %s\n", declarations);
             }
             
         }

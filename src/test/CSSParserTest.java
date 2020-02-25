@@ -3,6 +3,9 @@ package test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -127,11 +130,13 @@ public class CSSParserTest {
         expected.put(s1, m1);
         
         Selector s2 = parser.new Selector(CSSParser.SelectorType.ELEMENT);
+        Selector s4 = parser.new Selector(CSSParser.SelectorType.ELEMENT);
         s2.values.add("h2");
-        s2.values.add("h3");
+        s4.values.add("h3");
         Map<String, String> m2 = new HashMap<String, String>();
         m2.put("float", "right");
         expected.put(s2, m2);
+        expected.put(s4, m2);
         
         Selector s3 = parser.new Selector(CSSParser.SelectorType.ELEMENT);
         s3.values.add("p");
@@ -166,11 +171,13 @@ public class CSSParserTest {
         expected.put(s1, m1);
         
         Selector s2 = parser.new Selector(CSSParser.SelectorType.ELEMENT);
+        Selector s3 = parser.new Selector(CSSParser.SelectorType.ELEMENT);
         s2.values.add("h2");
-        s2.values.add("h3");
+        s3.values.add("h3");
         Map<String, String> m2 = new HashMap<String, String>();
         m2.put("float", "left");
         expected.put(s2, m2);
+        expected.put(s3, m2);
         
         for (Entry<Selector, Map> e : expected.entrySet()) {
             assertTrue(actual.keySet().contains(e.getKey()));
@@ -186,6 +193,7 @@ public class CSSParserTest {
         
         CSSParser parser = new CSSParser();
         parser.parse(css);
+        parser.printRules();
         Map<Selector, Map<String, String>> actual = parser.getRules();
         Map<Selector, Map> expected = new HashMap<Selector, Map>();
         
@@ -197,11 +205,13 @@ public class CSSParserTest {
         expected.put(s1, m1);
         
         Selector s2 = parser.new Selector(CSSParser.SelectorType.ELEMENT);
+        Selector s3 = parser.new Selector(CSSParser.SelectorType.ELEMENT);
         s2.values.add("h2");
-        s2.values.add("h3");
+        s3.values.add("h3");
         Map<String, String> m2 = new HashMap<String, String>();
         m2.put("float", "right");
         expected.put(s2, m2);
+        expected.put(s3, m2);
         
         for (Entry<Selector, Map> e : expected.entrySet()) {
             assertTrue(actual.keySet().contains(e.getKey()));
@@ -335,6 +345,24 @@ public class CSSParserTest {
         expected.values.add("h1");
         expected.values.add("title");
         assertEquals(expected, actual);
+    }
+    
+    @Test
+    public void testParser_multiple_mixed() {
+        String css = "h2, h3, h4, h5, h6, div.h7, div.h8, div.h9 {\r\n" + 
+                "  font-size: 1.75rem;\r\n" + 
+                "  border: 1px solid #000;}";
+        CSSParser parser = new CSSParser();
+        parser.parse(css);
+        parser.printRules();
+    }
+    
+    @Test
+    public void longParsingTest1() throws IOException {
+        String css = new String(Files.readAllBytes(Paths.get("res/test/cssTest1.css")));
+        CSSParser parser = new CSSParser();
+        parser.parse(css);
+        parser.printRules();
     }
 
 }

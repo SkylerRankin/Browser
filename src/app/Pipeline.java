@@ -55,7 +55,7 @@ public class Pipeline {
 		blc.finalizeDimensions(renderRoot);
 		blc.calculateBoxes(renderRoot);
 		blc.applyJustification(renderRoot);
-//	    blc.printBoxes(renderRoot);
+	    blc.printBoxes(renderRoot);
 //		rtg.splitLongText(renderRoot);
 	}
 	

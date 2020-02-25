@@ -82,7 +82,7 @@ public class CSSLoader {
 	        parser.parse(cssString);
 	        Map<Selector, Map<String, String>> rules = parser.getRules();
 	        
-	        parser.printRules();
+//	        parser.printRules();
 	        resetSetProperties(root);
 	        applyRules(root, rules);
 	    }
@@ -90,7 +90,6 @@ public class CSSLoader {
 	}
 	
 	public void loadStyleTags(RenderNode root) {
-	    System.out.println("loadStyleTags");
 	    for (String cssString : styleTagCSS) {
 	        CSSParser parser = new CSSParser();
 	        parser.parse(cssString);

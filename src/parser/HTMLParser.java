@@ -16,7 +16,7 @@ import network.ResourceLoader;
 public class HTMLParser {
     
     private ResourceLoader loader;
-    private final boolean debug = true;
+    private final boolean debug = false;
     
     public HTMLParser(ResourceLoader loader) {
         this.loader = loader;

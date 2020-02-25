@@ -12,11 +12,15 @@ h1 {
 h2 {
 	font-size: 20;
 	font-weight: bold;
+	margin-bottom: 10;
+	width: 100%;
 }
 
 h3 {
 	font-size: 15;
 	font-weight: bold;
+	margin-bottom: 10;
+	width: 100%;
 }
 
 div {
@@ -57,7 +61,7 @@ pre {
 }
 
 hr {
-	height: 2;
+	height: 1;
 	margin: 5px;
 	width: 100%;
 }

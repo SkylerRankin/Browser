@@ -30,12 +30,15 @@ public class CSSStyle {
     
     public CSSColor backgroundColor = new CSSColor("White");
     
-    public CSSColor borderColor = new CSSColor("White");
-    public int borderWidth = 1;
-    public int borderWidthTop = 1;
-    public int borderWidthRight = 1;
-    public int borderWidthBottom = 1;
-    public int borderWidthLeft = 1;
+    public CSSColor borderColorTop = new CSSColor("Black");
+    public CSSColor borderColorBottom = new CSSColor("Black");
+    public CSSColor borderColorLeft = new CSSColor("Black");
+    public CSSColor borderColorRight = new CSSColor("Black");
+
+    public int borderWidthTop = 0;
+    public int borderWidthRight = 0;
+    public int borderWidthBottom = 0;
+    public int borderWidthLeft = 0;
     
     public CSSColor color = new CSSColor("Black");
     
@@ -67,11 +70,13 @@ public class CSSStyle {
     public dimensionType widthType = dimensionType.PIXEL;
     public Float width = null;
     
+    public Float maxWidth = null;
+    
 //    public textDecorationType textDecoration = textDecorationType.NONE;
     
     public wordWrapType wordWrap = wordWrapType.NORMAL;
     
-    public static String[] inheritedProperties = {"color", "font-family", "font-size", "font-style", "font-weight", "text-align"};
+    public static String[] inheritedProperties = {"color", "font-family", "font-size", "font-style", "font-weight", "text-align", "background-color"};
     
     public static boolean propagateAttribute(String attribute) {
         for (String s : inheritedProperties) {
@@ -136,7 +141,25 @@ public class CSSStyle {
     
     private int parseFontSizeValue(String value) {
         if (value.matches("\\d+")) return Integer.parseInt(value);
-        else return 16;
+        if (value.endsWith("rem")) {
+            String remsString = value.substring(0, value.indexOf("rem"));
+            if (remsString.matches("\\d+(\\.\\d+?)?")) {
+                double rems = Double.parseDouble(remsString);
+                return (int) (rems * 16.0);
+                
+            }
+        }
+        return 16;
+    }
+    
+    private int parseBorderWidth(String value) {
+        String[] values = value.split("\\s");
+        return parseDimension(values[0]);
+    }
+    
+    private CSSColor parseBorderColor(String value) {
+        String[] values = value.split("\\s");
+        return new CSSColor(values[2]);
     }
     
     /**
@@ -147,13 +170,45 @@ public class CSSStyle {
     		String value = e.getValue().trim();
     		switch (e.getKey()) {
     		case "background-color": 	backgroundColor = new CSSColor(value); break;
+    		case "border":              borderWidthTop = parseBorderWidth(value);
+    		                            borderWidthBottom = parseBorderWidth(value);
+    		                            borderWidthLeft = parseBorderWidth(value);
+    		                            borderWidthRight = parseBorderWidth(value);
+    		                            borderColorTop = parseBorderColor(value);
+                                        borderColorBottom = parseBorderColor(value);
+                                        borderColorLeft = parseBorderColor(value);
+                                        borderColorRight = parseBorderColor(value); break;
+    		case "border-color":        borderColorTop = new CSSColor(value);
+    		                            borderColorBottom = new CSSColor(value);
+    		                            borderColorLeft = new CSSColor(value);
+    		                            borderColorRight = new CSSColor(value);break;
+    		case "border-width":        borderWidthTop = Integer.parseInt(value);
+    		                            borderWidthBottom = Integer.parseInt(value);
+    		                            borderWidthLeft = Integer.parseInt(value);
+    		                            borderWidthRight = Integer.parseInt(value); break;
+    		case "border-top":          borderColorTop = parseBorderColor(value);
+    		                            borderWidthTop = parseBorderWidth(value); break;
+            case "border-bottom":       borderColorBottom = parseBorderColor(value);
+                                        borderWidthBottom = parseBorderWidth(value); break;
+            case "border-left":         borderColorLeft = parseBorderColor(value);
+                                        borderWidthLeft = parseBorderWidth(value); break;
+            case "border-right":        borderColorRight = parseBorderColor(value);
+                                        borderWidthRight = parseBorderWidth(value); break;
+            case "border-top-color":    borderColorTop = new CSSColor(value); break;
+            case "border-bottom-color": borderColorBottom = new CSSColor(value); break;
+            case "border-left-color":   borderColorLeft = new CSSColor(value); break;
+            case "border-right-color":  borderColorRight = new CSSColor(value); break;
+            case "border-top-width":    borderWidthTop = parseDimension(value); break;
+            case "border-bottom-width": borderWidthBottom = parseDimension(value); break;
+            case "border-left-width":   borderWidthLeft = parseDimension(value); break;
+            case "border-right-width":  borderWidthRight = parseDimension(value); break;
     		case "color": 				color = new CSSColor(value); break;
     		case "display":				display = displayType.valueOf(value.toUpperCase()); break;
     		case "font-family":			fontFamily = value; break;
     		case "font-size":			fontSize = parseFontSizeValue(value.toLowerCase()); break;
     		case "font-style":			fontStyle = fontStyleType.valueOf(value.toUpperCase()); break;
     		case "font-weight":			fontWeight = fontWeightType.valueOf(value.toUpperCase()); break;
-    		case "height":				height = Float.parseFloat(value.endsWith("%") ? value.substring(0, value.length() - 1) : value);
+    		case "height":				height = (float) parseDimension(value);
 							    		heightType = value.contains("%") ? 
 												dimensionType.PERCENTAGE : 
 												dimensionType.PIXEL; break;
@@ -170,6 +225,7 @@ public class CSSStyle {
     		case "margin-right":		marginRight = parseDimension(value);  break;
     		case "margin-bottom":		marginBottom = parseDimension(value);  break;
     		case "margin-left":			marginLeft = parseDimension(value);  break;
+    		case "max-width":           maxWidth = (float) parseDimension(value); break;
     		case "padding":             paddingTop = parseDimension(value);
     		                            paddingRight = parseDimension(value);
     		                            paddingBottom = parseDimension(value);

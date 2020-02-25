@@ -82,5 +82,9 @@ public class CSSColor {
 	public Color toPaint() {
 		return Color.color(rgb[0] / 255.0, rgb[1] / 255.0, rgb[2] / 255.0, opacity);
 	}
+	
+	public String toString() {
+	    return String.format("#%s", hex);
+	}
 
 }

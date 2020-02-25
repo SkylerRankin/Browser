@@ -14,10 +14,11 @@ import model.Box;
 import model.CSSColor;
 import model.DOMNode;
 import model.RenderNode;
+import parser.HTMLElements;
 
 public class HTMLRenderer {
     
-    private static final boolean drawOutlines = true;
+    private static final boolean drawOutlines = false; //true false
     private static final boolean drawPadding = false;
     private static final boolean drawMargins = false;
     
@@ -33,8 +34,15 @@ public class HTMLRenderer {
     	}
     	
     	// Draw box background
-    	fillRect(gc, root.style.backgroundColor, root.box.x, root.box.y, root.box.width, root.box.height);
+    	if (!root.type.equals(HTMLElements.TEXT)) fillRect(gc, root.style.backgroundColor, root.box.x, root.box.y, root.box.width, root.box.height);
     	
+    	// Draw borders
+    	// TODO: this leaves out the corners
+    	if (root.style.borderWidthTop > 0) fillRect(gc, root.style.borderColorTop, root.box.x, root.box.y - root.style.borderWidthTop, root.box.width, root.style.borderWidthTop);
+        if (root.style.borderWidthBottom > 0) fillRect(gc, root.style.borderColorBottom, root.box.x, root.box.y + root.box.height, root.box.width, root.style.borderWidthTop);
+        if (root.style.borderWidthLeft > 0) fillRect(gc, root.style.borderColorLeft, root.box.x - root.style.borderWidthLeft, root.box.y, root.style.borderWidthLeft, root.box.height);
+        if (root.style.borderWidthRight > 0) fillRect(gc, root.style.borderColorRight, root.box.x + root.box.width, root.box.y, root.style.borderWidthRight, root.box.height);
+
     	
     	if (drawPadding) {
     	    CSSColor paddingColor = new CSSColor("SteelBlue");

@@ -41,11 +41,12 @@ public class BoxLayoutCalculator {
     	RenderNode parent = parentNodeMap.get(root.id);
     	if (parent == null) {
     		root.box.fixedWidth = true;
-    		root.box.width = screenWidth;
+    		root.style.maxWidth = screenWidth;
+            root.box.width = root.style.maxWidth == null ? screenWidth : root.style.maxWidth;
     		root.box.x = 0;
     		root.box.y = 0;
     	} else {
-    		root.maxWidth = parent.maxWidth;
+    		root.maxWidth = root.style.maxWidth == null ? parent.maxWidth : root.style.maxWidth;
     	}
     	
     	/* Cases of elements that have set widths
@@ -53,18 +54,32 @@ public class BoxLayoutCalculator {
     	 * 	- image
     	 */
     	
-    	if (root.text != null) {
-    		Vector2 textSize = TextDimensionCalculator.getTextDimension(root.text, root.style);
-    		root.box.width = textSize.x;
-    		root.box.height = textSize.y;
-    	} else if (root.type.equals("img")) {
-    		root.box.width = root.attributes.containsKey("width") ? Float.parseFloat(root.attributes.get("width")) : 50;
-    		root.box.height = root.attributes.containsKey("height") ? Float.parseFloat(root.attributes.get("height")) : 50;
-    		ImageCache.loadImage(root.attributes.get("src"));
+    	if (parent != null) {
+    	    if (root.text != null) {
+                Vector2 textSize = TextDimensionCalculator.getTextDimension(root.text, root.style);
+                root.box.width = textSize.x;
+                root.box.height = textSize.y;
+            } else if (root.type.equals("img")) {
+                root.box.width = root.attributes.containsKey("width") ? Float.parseFloat(root.attributes.get("width")) : 50;
+                root.box.height = root.attributes.containsKey("height") ? Float.parseFloat(root.attributes.get("height")) : 50;
+                ImageCache.loadImage(root.attributes.get("src"));
+            }
+            
+            if (root.style.height != null) {
+                if (root.style.heightType.equals(CSSStyle.dimensionType.PIXEL)) root.box.height = root.style.height;
+                if (root.style.heightType.equals(CSSStyle.dimensionType.PERCENTAGE) && parent.box.fixedHeight) {
+                    root.box.height = root.style.height / 100.0f * parent.box.height;
+                    // This might be wrong. What if the parent does not have a fixed height, but child has a percentage.
+                    // Is that even possible?
+                }
+            }
+            if (root.style.width != null) {
+                if (root.style.widthType.equals(CSSStyle.dimensionType.PIXEL)) root.box.width = root.style.width;
+                if (root.style.widthType.equals(CSSStyle.dimensionType.PERCENTAGE) && parent.box.fixedWidth) {
+                    root.box.width = root.style.width / 100.0f * parent.box.width;
+                }
+            }
     	}
-    	
-    	if (root.style.height != null) root.box.height = root.style.height;
-        if (root.style.width != null) root.box.width = root.style.width;
     	
     	for (RenderNode child : root.children) {
     		setBoxBounds(child);
@@ -356,11 +371,14 @@ public class BoxLayoutCalculator {
         		applyShift(child, xShift, 0f);
         	}
     		
+    	} else {
+    	    // If we didn't apply a shift, continue searching
+    	    for (RenderNode child : root.children) {
+                applyJustification(child);
+            }
     	}
     	
-    	for (RenderNode child : root.children) {
-    		applyJustification(child);
-    	}
+    	
     }
     
     /**
