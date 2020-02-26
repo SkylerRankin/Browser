@@ -2,6 +2,10 @@
 	font-family: Times New Roman;
 }
 
+body {
+	padding: 10px;
+}
+
 h1 {
 	font-size: 40;
 	font-weight: bold;

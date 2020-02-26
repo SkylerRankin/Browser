@@ -133,6 +133,11 @@ public class CSSStyle {
     
     private int parseDimension(String value) {
     	value = value.trim();
+
+    	if (value.endsWith("em")) {
+    	    return 16 * Integer.parseInt(value.substring(0, value.length() - 2));
+    	}
+    	
     	int offset = 0;
     	if (value.endsWith("px")) offset = 2;
     	if (value.endsWith("%")) offset = 1;

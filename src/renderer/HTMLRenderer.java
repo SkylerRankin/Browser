@@ -21,6 +21,7 @@ public class HTMLRenderer {
     private static final boolean drawOutlines = false; //true false
     private static final boolean drawPadding = false;
     private static final boolean drawMargins = false;
+    private static final float textOffsetScale = 0.75f;
     
     public static void render(GraphicsContext gc, RenderNode root) {
 //    	System.out.printf("rendering: %s %f %f\n", root.type, root.box.x, root.box.y);
@@ -94,7 +95,7 @@ public class HTMLRenderer {
     	if (node.style.fontStyle == fontStyleType.ITALICS) fontPosture = FontPosture.ITALIC;
     	gc.setFill(node.style.color.toPaint());
     	gc.setFont(Font.font(node.style.fontFamily, fontWeight, fontPosture, node.style.fontSize));
-        gc.fillText(node.text, node.box.x, node.box.y + node.box.height);
+        gc.fillText(node.text, node.box.x, node.box.y + node.box.height * textOffsetScale);
     }
     
     public static void fillRect(GraphicsContext gc, CSSColor color, float x, float y, float w, float h) {

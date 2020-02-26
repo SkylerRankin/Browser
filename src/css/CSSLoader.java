@@ -82,7 +82,7 @@ public class CSSLoader {
 	        parser.parse(cssString);
 	        Map<Selector, Map<String, String>> rules = parser.getRules();
 	        
-//	        parser.printRules();
+	        parser.printRules();
 	        resetSetProperties(root);
 	        applyRules(root, rules);
 	    }
@@ -125,21 +125,31 @@ public class CSSLoader {
 		CSSParser.Selector allSelector = (new CSSParser()).new Selector(CSSParser.SelectorType.ALL);
 		CSSParser.Selector elementSelector = (new CSSParser()).new Selector(CSSParser.SelectorType.ELEMENT);
 		elementSelector.values.add(node.type);
-		CSSParser.Selector classSelector = (new CSSParser()).new Selector(CSSParser.SelectorType.CLASS);
-		classSelector.values.add(node.attributes.get("class"));
+		List<CSSParser.Selector> classSelectors = new ArrayList<>();
+		if (node.attributes.get("class") != null) {
+		    for (String classString : node.attributes.get("class").split(" ")) {
+		        CSSParser.Selector classSelector = (new CSSParser()).new Selector(CSSParser.SelectorType.CLASS);
+		        classSelector.values.add(classString);
+		        classSelectors.add(classSelector);
+		    }
+		}
+		
 		CSSParser.Selector idSelector = (new CSSParser()).new Selector(CSSParser.SelectorType.ID);
 		idSelector.values.add(node.attributes.get("id"));
 				
 		Map<String, String> allRule = rules.get(allSelector);
 		Map<String, String> elementRule = rules.get(elementSelector);
-	    Map<String, String> classRule = rules.get(classSelector);
+	    List<Map<String, String>> classRules = new ArrayList<>();
+	    for (CSSParser.Selector classSelector : classSelectors) {
+	        classRules.add(rules.get(classSelector));
+	    }
 	    Map<String, String> idRule = rules.get(idSelector);
-	    
-//	    System.out.printf("%s, class=%s, %s\n", node.type, node.attributes.get("class"), classRule == null ? "none" : classRule.toString());
-		
+	    		
 		if (allRule != null) node.style.apply(allRule);
 		if (elementRule != null) node.style.apply(elementRule);
-	    if (classRule != null) node.style.apply(classRule);
+		for (Map<String, String> classRule : classRules) {
+		    if (classRule != null) node.style.apply(classRule);
+		}
         if (idRule != null) node.style.apply(idRule);
 		
 		for (RenderNode child : node.children) {
