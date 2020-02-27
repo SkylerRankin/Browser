@@ -35,16 +35,16 @@ public class RenderTestCanvas extends Application {
         
         grid.add(scroll, 0, 0);
         
-        Scene scene = new Scene(grid, 1200, 800);
+        Scene scene = new Scene(grid, 1400, 800);
 
         stage.setScene(scene);
         stage.show();
         
-        scroll.setPrefSize(1200, stage.getHeight());
+        scroll.setPrefSize(1400, stage.getHeight());
         canvas.setWidth(stage.getWidth());
         canvas.setHeight(stage.getHeight());
         
-        HTMLRendererTest.render(gc, 1100);
+        HTMLRendererTest.render(gc, 1350);
         
     }
 

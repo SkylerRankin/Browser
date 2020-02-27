@@ -135,7 +135,7 @@ public class CSSStyle {
     	value = value.trim();
 
     	if (value.endsWith("em")) {
-    	    return 16 * Integer.parseInt(value.substring(0, value.length() - 2));
+    	    return (int) (16 * Double.parseDouble(value.substring(0, value.length() - 2)));
     	}
     	
     	int offset = 0;

@@ -18,7 +18,7 @@ import parser.HTMLElements;
 
 public class HTMLRenderer {
     
-    private static final boolean drawOutlines = false; //true false
+    private static final boolean drawOutlines = true; //true false
     private static final boolean drawPadding = false;
     private static final boolean drawMargins = false;
     private static final float textOffsetScale = 0.75f;

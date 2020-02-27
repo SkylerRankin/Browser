@@ -1,5 +1,6 @@
 package layout;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -66,19 +67,31 @@ public class BoxLayoutCalculator {
             }
             
             if (root.style.height != null) {
+                root.box.fixedHeight = true;
                 if (root.style.heightType.equals(CSSStyle.dimensionType.PIXEL)) root.box.height = root.style.height;
                 if (root.style.heightType.equals(CSSStyle.dimensionType.PERCENTAGE) && parent.box.fixedHeight) {
-                    root.box.height = root.style.height / 100.0f * parent.box.height;
+                    float availableHeight = parent.box.height
+                            - parent.style.paddingTop - parent.style.paddingBottom
+                            - root.style.marginTop - root.style.marginBottom;
+                    root.box.height = root.style.height / 100.0f * availableHeight;
+                    root.style.heightType = CSSStyle.dimensionType.PIXEL;
                     // This might be wrong. What if the parent does not have a fixed height, but child has a percentage.
                     // Is that even possible?
                 }
             }
+            
             if (root.style.width != null) {
+                root.box.fixedWidth = true;
                 if (root.style.widthType.equals(CSSStyle.dimensionType.PIXEL)) root.box.width = root.style.width;
                 if (root.style.widthType.equals(CSSStyle.dimensionType.PERCENTAGE) && parent.box.fixedWidth) {
-                    root.box.width = root.style.width / 100.0f * parent.box.width;
+                    float availableWidth = parent.box.width
+                            - parent.style.paddingLeft - parent.style.paddingRight
+                            - root.style.marginLeft - root.style.marginRight;
+                    root.box.width = root.style.width / 100.0f * availableWidth;
+                    root.style.widthType = CSSStyle.dimensionType.PIXEL;
                 }
             }
+            
     	}
     	
     	for (RenderNode child : root.children) {
@@ -150,7 +163,9 @@ public class BoxLayoutCalculator {
     			// Percentage based width depends on parent, only if parent specifies a width
     			if (root.style.widthType.equals(CSSStyle.dimensionType.PERCENTAGE) && parent.maxWidth != null) {
     				float parentAvailableWidth = parent.maxWidth - parent.style.paddingLeft - parent.style.paddingRight - root.style.marginLeft - root.style.marginRight;
+    				System.out.printf("%s: parentAvailableWidth: %f, width = %f\n", root.type, parentAvailableWidth, root.box.width);
     				root.maxWidth = parentAvailableWidth * root.box.width / 100f;
+    				System.out.printf("maxWidth: %f\n", root.maxWidth);
     			} else {
     				root.maxWidth = root.box.width + root.style.marginLeft + root.style.marginRight;
     			}
@@ -322,61 +337,121 @@ public class BoxLayoutCalculator {
     }
     
     /**
+     * When justifying content, the rows of nodes will be shifted by the same value horizontally.
+     * This this value varyings between rows, this function looks at consecutive render nodes
+     * that would be "pushed" if the previous node was moved horizontally, and adds all of those
+     * into a row.
+     * @param root
+     * @return
+     */
+    public List<List<RenderNode>> getChildRows(RenderNode root) {
+        List<List<RenderNode>> rows = new ArrayList<>();
+        List<RenderNode> currentRow = new ArrayList<RenderNode>();
+        RenderNode lastAddedNode = null;
+        
+        for (RenderNode child : root.children) {
+            if (lastAddedNode == null) {
+                currentRow.add(child);
+            } else {
+                // Check if current node overlaps vertically with previous node
+                // TODO should margins be included in these vertical positions?
+                float prevTop = lastAddedNode.box.y;
+                float prevBottom = lastAddedNode.box.y + lastAddedNode.box.height;
+                float currTop = child.box.y;
+                float currBottom = child.box.y + child.box.height;
+                if (prevBottom < currTop || prevTop > currBottom) {
+                    rows.add(currentRow);
+                    currentRow = new ArrayList<RenderNode>();
+                    currentRow.add(child);
+                } else {
+                    currentRow.add(child);
+                }
+            }
+            
+            lastAddedNode = child;
+        }
+        
+        rows.add(currentRow);
+        
+        return rows;
+    }
+    
+    /**
+     * Given a render node root with some text alignment justification and a subset of its 
+     * children, find the amount to shift those children so that they obey the alignment.
+     * This doesn't use root's actual set of children because they may be arranged such that
+     * they all require different shifts. If its a vertical stack with different widths for each
+     * node, each would need to be considered separately if we wanted to center them.
+     * @param root
+     * @param children
+     * @return
+     */
+    public float calculateJustificationOffset(RenderNode root, List<RenderNode> children) {
+        RenderNode leftMost = null;
+        RenderNode rightMost = null;
+        
+        for (RenderNode child : children) {
+            if (leftMost == null || child.box.x < leftMost.box.x) leftMost = child;
+            if (rightMost == null || child.box.x > rightMost.box.x) rightMost = child;
+        }
+        
+        float leftSpace = 0;
+        float rightSpace = 0;
+        
+        float parentWidth = root.box.width;
+        float parentX = root.box.x;
+        int parentPaddingLeft = root.style.paddingLeft;
+        int parentPaddingRight = root.style.paddingRight;
+        
+        if (leftMost != null && rightMost != null) {
+            leftSpace = (leftMost.box.x - leftMost.style.marginLeft) - (parentX + parentPaddingLeft);
+            rightSpace =  (parentX + parentWidth - parentPaddingRight) - (rightMost.box.x + rightMost.box.width + rightMost.style.marginRight);
+        }
+        
+        float xShift = 0;
+        
+        if (root.style.textAlign.equals(CSSStyle.textAlignType.CENTER)) {
+            xShift = (leftSpace + rightSpace) / 2.0f;
+        } else if (root.style.textAlign.equals(CSSStyle.textAlignType.RIGHT)) {
+            xShift = leftSpace + rightSpace;
+        }
+        
+        return xShift;
+    }
+    
+    /**
      * Apply shifts for the text-Align CSS property. Since this property doesn't actually change
      * the sizes of containing elements, it can be applied after the boxes are calculated and
      * work just fine. The logic here is to find the left most and right most elements and check
      * what is the most that they can be moved left and right respectively. We then shift every
      * child element by that amount, in the specified direction.
+     * 
+     * Needs to find the shift required to center each row of nodes, they will all require a different
+     * shift to be centered in the parent.
+     * 
      * TODO this is a costly function, should improve the runtime
-     * TODO this will run multiple times on nodes that are next to each other, only needs to calculate the shifts from one of them
      * @param root
      */
     public void applyJustification(RenderNode root) {
+//        System.out.printf("\napplyJustification on %s %s %d children\n", root.type, root.style.textAlign, root.children.size());
     	CSSStyle.textAlignType alignment = root.style.textAlign;
     	if (!alignment.equals(CSSStyle.textAlignType.LEFT) && root.children.size() > 0) {
-    		RenderNode parent = parentNodeMap.get(root.id);
-    		RenderNode leftMost = null;
-    		RenderNode rightMost = null;
-    		
-    		for (RenderNode child : root.children) {
-    			if (leftMost == null || child.box.x < leftMost.box.x) leftMost = child;
-    			if (rightMost == null || child.box.x > rightMost.box.x) rightMost = child;
-    		}
-    		
-    		float leftSpace = 0;
-    		float rightSpace = 0;
-    		
-            float parentWidth = parent == null ? root.box.width : parent.box.width;
-    		float parentX = parent == null ? 0 : parent.box.x;
-            int parentPaddingLeft = parent == null ? 0 : parent.style.paddingLeft;
-    		int parentPaddingRight = parent == null ? 0 : parent.style.paddingRight;
-    		
-    		if (leftMost != null && rightMost != null) {
-    			leftSpace = (leftMost.box.x - leftMost.style.marginLeft) - (parentX + parentPaddingLeft);
-    			rightSpace =  (parentX + parentWidth - parentPaddingRight) - (rightMost.box.x + rightMost.box.width + rightMost.style.marginRight);
-    		}
-    		
-//    		System.out.printf("leftMost=%s rightMost=%s leftSpace=%f rightSpace=%f\n", leftMost.type, rightMost.type, leftSpace, rightSpace);
-    		// Should left space always be 0? since calculateBoxes does left justification?
-    		
-    		float xShift = 0;
-    		
-    		if (alignment.equals(CSSStyle.textAlignType.CENTER)) {
-    			xShift = (leftSpace + rightSpace) / 2.0f;
-    		} else if (alignment.equals(CSSStyle.textAlignType.RIGHT)) {
-    			xShift = leftSpace + rightSpace;
-    		}
-    		    		
-    		for (RenderNode child : root.children) {
-        		applyShift(child, xShift, 0f);
-        	}
-    		
-    	} else {
-    	    // If we didn't apply a shift, continue searching
-    	    for (RenderNode child : root.children) {
-                applyJustification(child);
-            }
+    	    
+    	    List<List<RenderNode>> rows = getChildRows(root);
+    	    for (List<RenderNode> children : rows) {
+    	        float xShift = calculateJustificationOffset(root, children);
+    	        if (xShift > 0) {
+                    for (RenderNode child : children) {
+                        applyShift(child, xShift, 0f);
+                    }
+                }
+    	    }
+    	    
     	}
+    	
+    	for (RenderNode child : root.children) {
+            applyJustification(child);
+        }
     	
     	
     }

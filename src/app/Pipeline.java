@@ -20,7 +20,7 @@ public class Pipeline {
 	private ResourceLoader resourceLoader;
 	private DOMNode domRoot;
 	private RenderNode renderRoot;
-	
+		
 	public static void init() {
 		DefaultColors.init();
 		ImageCache.loadDefaultImages();
@@ -55,7 +55,7 @@ public class Pipeline {
 		blc.finalizeDimensions(renderRoot);
 		blc.calculateBoxes(renderRoot);
 		blc.applyJustification(renderRoot);
-//	    blc.printBoxes(renderRoot);
+	    blc.printBoxes(renderRoot);
 //		rtg.splitLongText(renderRoot);
 	}
 	
