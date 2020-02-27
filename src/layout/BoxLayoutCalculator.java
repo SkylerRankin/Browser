@@ -283,11 +283,14 @@ public class BoxLayoutCalculator {
         		
         		float x = lastAddedChild.box.x + lastAddedChild.box.width + lastAddedChild.style.marginRight + node.style.marginLeft;
         		float boundary = parent.maxWidth - parent.style.paddingRight - node.style.marginRight;
+        		
+        		// Does the text check below need to check for this? text never has margin auto since its not a real HTML tag
+        		boolean marginAuto = node.style.marginType.equals(CSSStyle.marginSizeType.AUTO) ||
+        		        lastAddedChild.style.marginType.equals(CSSStyle.marginSizeType.AUTO);
 
-        		if (parent != null && (x + node.box.width <= boundary)) {
+        		if (!marginAuto && parent != null && (x + node.box.width <= boundary)) {
         			return new Vector2(x, lastAddedChild.box.y);
-        		}
-        		else if (node.type.equals("text")) {
+        		} else if (!marginAuto && node.type.equals("text")) {
         			float availableWidth = boundary - x;
         			
         			if (textSplitter.canBreak(node, availableWidth)) {
@@ -311,6 +314,7 @@ public class BoxLayoutCalculator {
     
     /**
      * Convert percentage based dimensions into raw pixels.
+     * Converts margin: auto to an actual margin value.
      * @param root
      */
     public void finalizeDimensions(RenderNode root) {
@@ -330,6 +334,14 @@ public class BoxLayoutCalculator {
     		        - root.style.marginTop - root.style.marginBottom
     		        - parent.style.paddingTop - parent.style.paddingBottom;
     	}
+		
+		if (root.style.marginType.equals(CSSStyle.marginSizeType.AUTO) && parent != null) {
+		    float availableWidth = parent.box.width
+		            - root.box.width
+		            - parent.style.paddingLeft - parent.style.paddingRight;
+		    root.style.marginLeft = (int) (availableWidth / 2f);
+	        root.style.marginRight = (int) (availableWidth / 2f);
+		}
     	
     	for (RenderNode child : root.children) {
     		finalizeDimensions(child);
@@ -433,7 +445,6 @@ public class BoxLayoutCalculator {
      * @param root
      */
     public void applyJustification(RenderNode root) {
-//        System.out.printf("\napplyJustification on %s %s %d children\n", root.type, root.style.textAlign, root.children.size());
     	CSSStyle.textAlignType alignment = root.style.textAlign;
     	if (!alignment.equals(CSSStyle.textAlignType.LEFT) && root.children.size() > 0) {
     	    
@@ -452,7 +463,6 @@ public class BoxLayoutCalculator {
     	for (RenderNode child : root.children) {
             applyJustification(child);
         }
-    	
     	
     }
     
