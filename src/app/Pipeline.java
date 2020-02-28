@@ -2,6 +2,7 @@ package app;
 
 import css.CSSLoader;
 import css.DefaultColors;
+import css.FontLoader;
 import javafx.scene.canvas.GraphicsContext;
 import layout.BoxLayoutCalculator;
 import model.DOMNode;
@@ -25,6 +26,7 @@ public class Pipeline {
 		DefaultColors.init();
 		ImageCache.loadDefaultImages();
 		HTMLElements.init();
+		FontLoader.init();
 	}
 	
 	/**
@@ -55,7 +57,7 @@ public class Pipeline {
 		blc.finalizeDimensions(renderRoot);
 		blc.calculateBoxes(renderRoot);
 		blc.applyJustification(renderRoot);
-	    blc.printBoxes(renderRoot);
+//	    blc.printBoxes(renderRoot);
 //		rtg.splitLongText(renderRoot);
 	}
 	

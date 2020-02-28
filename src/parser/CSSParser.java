@@ -141,7 +141,7 @@ public class CSSParser {
      * @return
      */
     public Map<Selector, Map<String, String>> parseRules(String css) {
-        final String ruleRegex = "[\\_\\-(\\s?>\\s?)\\:@\\.#a-zA-Z0-9,\\*\\s+?]+\\{(.|\r\n)*?\\}";
+        final String ruleRegex = "[\\_\\-(\\s?>\\s?)\\:@\\.#a-zA-Z0-9,\\*(\\s+)?]+\\{(.|\r\n)*?\\}";
         final String declarationRegex = "[^:]+:\\s*[^;]+;";
         final String lastDeclarationRegex = "[^:]+:\\s*[^;]+;?";
         

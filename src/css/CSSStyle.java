@@ -1,6 +1,5 @@
 package css;
 
-import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -8,17 +7,14 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import model.CSSColor;
+import model.CSSRulePrecedent;
 
 public class CSSStyle {
 	
 	private Set<String> setProperties = new HashSet<String>();
 	private Map<String, String> properties = new HashMap<String, String>();
-	
-	private static enum overridePrecedent {
-		DEFAULT_ALL, DEFAULT_ELEMENT, DEFAULT_CLASS, DEFAULT_ID,
-		TAG_ALL, TAG_ELEMENT, TAG_CLASS, TAG_ID,
-		INLINE};
-	
+	private Map<String, CSSRulePrecedent> precedents = new HashMap<String, CSSRulePrecedent>();
+		
     public static enum dimensionType {PIXEL, PERCENTAGE};
     public static enum displayType {BLOCK, INLINE, NONE};
     public static enum fontStyleType {NORMAL, ITALICS};
@@ -45,7 +41,7 @@ public class CSSStyle {
     public displayType display = displayType.BLOCK;
     
     public String fontFamily = "Times New Roman";
-    public int fontSize = 15;
+    public int fontSize = 16;
     public fontStyleType fontStyle = fontStyleType.NORMAL;
     public fontWeightType fontWeight = fontWeightType.NORMAL;
     
@@ -108,29 +104,6 @@ public class CSSStyle {
     	setProperties.clear();
     }
     
-    public void setProperty2(String property, String value) {
-    	Class<? extends CSSStyle> c = this.getClass();
-    	try {
-			Field field = c.getDeclaredField(property);
-			System.out.println(field.isEnumConstant());
-			field.setAccessible(true);
-			field.set(this, value);
-			field.setAccessible(false);
-		} catch (NoSuchFieldException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (SecurityException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-    }
-    
     private int parseDimension(String value) {
     	value = value.trim();
 
@@ -153,6 +126,10 @@ public class CSSStyle {
                 return (int) (rems * 16.0);
                 
             }
+        }
+        if (value.endsWith("%") && value.substring(0, value.length()-1).matches("\\d+")) {
+            double percent = Double.parseDouble(value.substring(0, value.length()-1));
+            return (int) (16.0 * 100.0 / percent);
         }
         return 16;
     }
@@ -209,7 +186,7 @@ public class CSSStyle {
             case "border-right-width":  borderWidthRight = parseDimension(value); break;
     		case "color": 				color = new CSSColor(value); break;
     		case "display":				display = displayType.valueOf(value.toUpperCase()); break;
-    		case "font-family":			fontFamily = value; break;
+    		case "font-family":			fontFamily = FontLoader.getValidFont(value.split(",")); break;
     		case "font-size":			fontSize = parseFontSizeValue(value.toLowerCase()); break;
     		case "font-style":			fontStyle = fontStyleType.valueOf(value.toUpperCase()); break;
     		case "font-weight":			fontWeight = fontWeightType.valueOf(value.toUpperCase()); break;
@@ -248,15 +225,35 @@ public class CSSStyle {
     	}
     }
     
+    public CSSRulePrecedent getPropertyPrecedent(String property) {
+        return precedents.get(property);
+    }
+    
+    public void apply(String property, String value, CSSRulePrecedent newPrecedent) {
+        CSSRulePrecedent oldPrecedent = precedents.get(property);
+        if (oldPrecedent == null || newPrecedent.hasPrecedentOver(oldPrecedent)) {
+            properties.put(property, value);
+            // TODO dont need setProperties anymore since we have precedents
+            setProperties.add(property);
+            precedents.put(property, newPrecedent);
+        }
+    }
+    
     /**
-     * Apply some CSS rules
+     * Apply some CSS rules if it has precedence over what is currently there
      * @param css	Map<String, String> of the CSS attribute and value
      */
-    public void apply(Map<String, String> css) {
+    public void apply(Map<String, String> css, CSSRulePrecedent newPrecedent) {
     	for (Entry<String, String> e : css.entrySet()) {
-    		properties.put(e.getKey(), e.getValue());
-    		setProperties.add(e.getKey());
+    	    apply(e.getKey(), e.getValue(), newPrecedent);
     	}
+    }
+    
+    public void print(String padding) {
+        for (Entry<String, String> e : properties.entrySet()) {
+            CSSRulePrecedent p = precedents.get(e.getKey());
+            System.out.printf("%s%s %s: %s\n", padding, p.toString(), e.getKey(), e.getValue());
+        }
     }
     
 }

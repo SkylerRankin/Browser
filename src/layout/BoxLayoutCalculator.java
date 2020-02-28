@@ -280,17 +280,12 @@ public class BoxLayoutCalculator {
         		// TODO put new lines in a horizontal row NO MATTER WHAT, text splitter handles putting them on new lines
         		// Why check if parent is null? there would already have been a null pointer exception
         		// Try in-line, but if it needs more space, continue to block case
-        		
         		float x = lastAddedChild.box.x + lastAddedChild.box.width + lastAddedChild.style.marginRight + node.style.marginLeft;
-        		float boundary = parent.maxWidth - parent.style.paddingRight - node.style.marginRight;
+        		float boundary = parent.box.x + parent.maxWidth - parent.style.paddingRight - node.style.marginRight;
         		
-        		// Does the text check below need to check for this? text never has margin auto since its not a real HTML tag
-        		boolean marginAuto = node.style.marginType.equals(CSSStyle.marginSizeType.AUTO) ||
-        		        lastAddedChild.style.marginType.equals(CSSStyle.marginSizeType.AUTO);
-
-        		if (!marginAuto && parent != null && (x + node.box.width <= boundary)) {
+        		if (parent != null && (x + node.box.width <= boundary)) {
         			return new Vector2(x, lastAddedChild.box.y);
-        		} else if (!marginAuto && node.type.equals("text")) {
+        		} else if (node.type.equals("text")) {
         			float availableWidth = boundary - x;
         			
         			if (textSplitter.canBreak(node, availableWidth)) {

@@ -78,5 +78,17 @@ public class RenderNode {
         }
         System.out.println(pad+type);
     }
+    
+    public void printStyle() {
+        printStyle("");
+    }
+    
+    public void printStyle(String pad) {
+        System.out.printf("%s%s [depth=%d id=%d]\n",pad, type, this.depth, this.id);
+        style.print(pad+" ");
+        for (RenderNode n : children) {
+            n.printStyle(pad+"\t");
+        }
+    }
 
 }

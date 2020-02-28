@@ -4,10 +4,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import model.CSSRulePrecedent;
 import model.DOMNode;
 import model.RenderNode;
 import parser.CSSParser;
@@ -52,10 +54,12 @@ public class CSSLoader {
 	}
 	
 	public void applyAllCSS(RenderNode root) {
+	    resetSetProperties(root);
 		loadDefaults(root);
 		loadExternalCSS(root);
 		loadStyleTags(root);
 		applyInline(root);
+		root.printStyle();
 		propagateCSS(root);
 		finalizeCSS(root);
 	}
@@ -72,7 +76,6 @@ public class CSSLoader {
 		parser.parse(cssString);
 		Map<Selector, Map<String, String>> rules = parser.getRules();
 		
-		resetSetProperties(root);
 		applyRules(root, rules);
 	}
 	
@@ -81,9 +84,6 @@ public class CSSLoader {
 	        CSSParser parser = new CSSParser();
 	        parser.parse(cssString);
 	        Map<Selector, Map<String, String>> rules = parser.getRules();
-	        
-	        parser.printRules();
-	        resetSetProperties(root);
 	        applyRules(root, rules);
 	    }
 	    
@@ -94,7 +94,6 @@ public class CSSLoader {
 	        CSSParser parser = new CSSParser();
 	        parser.parse(cssString);
 	        Map<Selector, Map<String, String>> rules = parser.getRules();
-	        resetSetProperties(root);
 	        applyRules(root, rules);
 	    }
 	}
@@ -109,8 +108,6 @@ public class CSSLoader {
 			CSSParser parser = new CSSParser();
 			String style = root.attributes.get("style");
 			parser.parse(String.format("%s { %s }", root.type, style));
-			
-			resetSetProperties(root);
 			applyRules(root, parser.getRules());
 		}
 		
@@ -145,12 +142,12 @@ public class CSSLoader {
 	    }
 	    Map<String, String> idRule = rules.get(idSelector);
 	    		
-		if (allRule != null) node.style.apply(allRule);
-		if (elementRule != null) node.style.apply(elementRule);
+		if (allRule != null) node.style.apply(allRule, CSSRulePrecedent.All());
+		if (elementRule != null) node.style.apply(elementRule, CSSRulePrecedent.Element());
 		for (Map<String, String> classRule : classRules) {
-		    if (classRule != null) node.style.apply(classRule);
+		    if (classRule != null) node.style.apply(classRule, CSSRulePrecedent.Class());
 		}
-        if (idRule != null) node.style.apply(idRule);
+        if (idRule != null) node.style.apply(idRule, CSSRulePrecedent.ID());
 		
 		for (RenderNode child : node.children) {
 			applyRules(child, rules);
@@ -167,8 +164,11 @@ public class CSSLoader {
 		RenderNode parent = parentRenderNodeMap.get(root.id);
 		if (parent != null) {
 			for (Entry<String, String> e : parent.style.getAllProperties().entrySet()) {
-				if (!root.style.hasPropertySet(e.getKey()) && CSSStyle.propagateAttribute(e.getKey())) {
-					root.style.setProperty(e.getKey(), e.getValue());
+				if (CSSStyle.propagateAttribute(e.getKey())) {
+				    String property = e.getKey();
+				    CSSRulePrecedent parentPrecedent = parent.style.getPropertyPrecedent(property);
+				    parentPrecedent.incrementLevel();
+				    root.style.apply(property, e.getValue(), parentPrecedent);
 				}
 			}
 		}
