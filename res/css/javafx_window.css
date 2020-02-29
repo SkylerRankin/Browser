@@ -10,14 +10,14 @@
 .text-field {
     -fx-text-fill: white;
 	-fx-background-color: rgb(41, 42, 46);
-    -fx-border-radius: 10;
-    -fx-background-radius: 10;
+    -fx-border-radius: 15;
+    -fx-background-radius: 15;
 }
 
 .text-field:focused {
 	-fx-background-color: rgb(41, 42, 46);
-    -fx-border-radius: 10;
-    -fx-background-radius: 10;
+    -fx-border-radius: 15;
+    -fx-background-radius: 15;
 }
 
 .debug {
@@ -40,7 +40,7 @@
 
 .tab {
 	-fx-background-color: rgb(50, 54, 57);
-	-fx-background-radius: 0;
+	-fx-background-radius: 5px 5px 0px 0px;
 	-fx-pref-height: 30px;
 }
 
@@ -108,4 +108,46 @@
 	-fx-background-color: red;
 }
 
+/* Scroll bar styles */
 
+.scroll-bar .thumb {
+	-fx-color: rgb(50, 54, 57);
+	-fx-background-radius: 0;
+	-fx-border: none;
+}
+
+.scroll-bar:horizontal .track,
+.scroll-bar:vertical .track{
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-background-radius: 0.0em;
+    -fx-border-radius: 2.0em;
+    -fx-border: none;
+}
+
+.scroll-bar:horizontal .increment-button ,
+.scroll-bar:horizontal .decrement-button {
+    -fx-background-color: transparent;
+    -fx-background-radius: 0.0em;
+    -fx-padding :0.0 0.0 10.0 0.0;
+}
+
+.scroll-bar:vertical .increment-button ,
+.scroll-bar:vertical .decrement-button {
+    -fx-background-color: transparent;
+    -fx-background-radius: 0.0em;
+    -fx-padding: 0 5 0 5;
+
+}
+
+ .scroll-bar .increment-arrow,
+ .scroll-bar .decrement-arrow{
+    -fx-shape : " ";    
+    -fx-padding :0.15em 0.0;
+}
+
+ .scroll-bar:vertical .increment-arrow,
+ .scroll-bar:vertical .decrement-arrow{
+    -fx-shape : " ";    
+    -fx-padding :0.0 0.15em;
+}

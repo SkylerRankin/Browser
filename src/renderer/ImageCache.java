@@ -2,7 +2,9 @@ package renderer;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import javafx.scene.image.Image;
 import network.HTTPClient;
@@ -10,6 +12,7 @@ import network.HTTPClient;
 public class ImageCache {
 	
 	private static Map<String, Image> images = new HashMap<String, Image>();
+	private static Set<String> brokenImageLinks = new HashSet<String>();
 	
 	public static void loadDefaultImages() {
 		File file = new File("./res//images//defaultImage.png");
@@ -24,6 +27,8 @@ public class ImageCache {
 		Image image = HTTPClient.downloadImage(url);
 		if (image != null) {
 			images.put(url, image);
+		} else {
+		    brokenImageLinks.add(url);
 		}
 	}
 	

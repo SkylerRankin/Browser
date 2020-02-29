@@ -26,7 +26,7 @@ public class TextSplitter {
 	 * @param width		Width to fit to
 	 */
 	public void splitTextNode(RenderNode text, RenderNode parent, float firstWidth, float laterWidth) {
-		System.out.printf("splitTextNode: %.2f %.2f, text=%s\n", firstWidth, laterWidth, text.text);
+//		System.out.printf("splitTextNode: %.2f %.2f, text=%s\n", firstWidth, laterWidth, text.text);
 		List<String> lines = splitToWidth(text.text, text.style, firstWidth, laterWidth);
 		if (lines == null || lines.size() == 0) {
 			System.err.println("TextSplitter.splitTextNode failed");

@@ -298,9 +298,9 @@ public class HTMLRendererTest {
 		Pipeline pipeline = new Pipeline();
 		Pipeline.init();
 //		pipeline.loadWebpage("file://res/html/error_page.html");
-//		pipeline.loadWebpage("http://gallium.inria.fr/~fpottier/menhir/");
+		pipeline.loadWebpage("http://gallium.inria.fr/~fpottier/menhir/");
 //		pipeline.loadWebpage("https://www.kernel.org/doc/man-pages/");
-		pipeline.loadWebpage("https://www.kernel.org/doc/man-pages/download.html");
+//		pipeline.loadWebpage("https://www.kernel.org/doc/man-pages/download.html");
 //		pipeline.loadWebpage("http://man7.org/linux/man-pages/man0/aio.h.0p.html");
 //		pipeline.loadWebpage("https://www.cis.upenn.edu/~cis341/current/");
 //		pipeline.loadWebpage("https://mirrors.edge.kernel.org/pub/linux/docs/man-pages/");

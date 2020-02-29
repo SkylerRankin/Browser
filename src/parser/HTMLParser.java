@@ -98,6 +98,16 @@ public class HTMLParser {
         return bodyCandidate;
     }
     
+    public DOMNode getTitleNode(DOMNode dom) {
+        if (dom.type.equals(HTMLElements.TITLE)) return dom;
+        DOMNode titleCandidate = null;
+        for (DOMNode child : dom.children) {
+            DOMNode d = getTitleNode(child);
+            if (d != null) titleCandidate = d;
+        }
+        return titleCandidate;
+    }
+    
     public void removeUnknownElements(DOMNode dom) {
         List<DOMNode> newChildren = new ArrayList<DOMNode>();
         for (DOMNode child : dom.children) {
@@ -249,6 +259,15 @@ public class HTMLParser {
         }
         
         return html.toString();
+    }
+    
+    public String getTitle(DOMNode dom) {
+        DOMNode title = getTitleNode(dom);
+        if (title != null && title.children.size() == 1) {
+            return title.children.get(0).content;
+        } else {
+            return null;
+        }
     }
 
 }

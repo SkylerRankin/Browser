@@ -59,7 +59,7 @@ public class CSSLoader {
 		loadExternalCSS(root);
 		loadStyleTags(root);
 		applyInline(root);
-		root.printStyle();
+//		root.printStyle();
 		propagateCSS(root);
 		finalizeCSS(root);
 	}

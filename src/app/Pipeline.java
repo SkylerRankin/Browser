@@ -21,6 +21,9 @@ public class Pipeline {
 	private ResourceLoader resourceLoader;
 	private DOMNode domRoot;
 	private RenderNode renderRoot;
+	
+	public String title;
+	public float height;
 		
 	public static void init() {
 		DefaultColors.init();
@@ -28,7 +31,7 @@ public class Pipeline {
 		HTMLElements.init();
 		FontLoader.init();
 	}
-	
+
 	/**
 	 * Step 1 in the pipeline. Downloads and parses the HTML.
 	 * @param url		URL to visit.
@@ -37,6 +40,7 @@ public class Pipeline {
 	    resourceLoader = new ResourceLoader();
 	    resourceLoader.loadWebpage(url);
 		domRoot = resourceLoader.getDOM();
+		title = (new HTMLParser(null)).getTitle(domRoot);
 	}
 	
 	/**
@@ -51,6 +55,7 @@ public class Pipeline {
 		CSSLoader cssLoader = new CSSLoader(domRoot, rtg.getParentRenderNodeMap(), resourceLoader.getExternalCSS());
 		cssLoader.applyAllCSS(renderRoot);
 		BoxLayoutCalculator blc = new BoxLayoutCalculator(rtg.getParentRenderNodeMap(), screenWidth);
+		
 		rtg.transformNode(renderRoot);
 		blc.setBoxBounds(renderRoot);
 		blc.propagateMaxSizes(renderRoot);
@@ -59,6 +64,7 @@ public class Pipeline {
 		blc.applyJustification(renderRoot);
 //	    blc.printBoxes(renderRoot);
 //		rtg.splitLongText(renderRoot);
+		height = renderRoot.box.height;
 	}
 	
 	/**

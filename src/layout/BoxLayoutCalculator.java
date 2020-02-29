@@ -63,7 +63,7 @@ public class BoxLayoutCalculator {
             } else if (root.type.equals("img")) {
                 root.box.width = root.attributes.containsKey("width") ? Float.parseFloat(root.attributes.get("width")) : 50;
                 root.box.height = root.attributes.containsKey("height") ? Float.parseFloat(root.attributes.get("height")) : 50;
-                ImageCache.loadImage(root.attributes.get("src"));
+//                ImageCache.loadImage(root.attributes.get("src"));
             }
             
             if (root.style.height != null) {
