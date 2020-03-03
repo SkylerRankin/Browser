@@ -40,6 +40,7 @@ public class SearchTab extends BrowserTab {
 		super(TabType.SEARCH, stage);
 		setupUI();
 		pipeline = new SearchTabPipeline(this.id, canvas, tab);
+		pipeline.loadWebpage("file://res/html/startup_page.html");
 	}
 	
 	private void setupUI() {
@@ -113,7 +114,6 @@ public class SearchTab extends BrowserTab {
 	
 	private void onSearch() {
 	    String input = urlInput.getText();
-	    System.out.printf("onSearch: %s\n", input);
 	    pipeline.loadWebpage(input);
 	}
 	

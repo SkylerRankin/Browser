@@ -1,5 +1,6 @@
 package tasks;
 
+import app.ErrorPageHandler;
 import app.Pipeline;
 import javafx.concurrent.Task;
 import network.HTTPClient;
@@ -23,8 +24,14 @@ public class LoadWebpageTask extends Task<Pipeline> {
             pipeline.calculateLayout(width);
         } catch (Exception e) {
             e.printStackTrace();
-            pipeline.loadWebpage("file://res/html/error_page.html");
-            pipeline.calculateLayout(width);
+            try {
+                pipeline.loadWebpage(ErrorPageHandler.errorPagePath);
+                pipeline.calculateLayout(width);
+            } catch (Exception e2) {
+                System.out.println("LoadWebpageTask: error running pipeline on error page.");
+                e2.printStackTrace();
+            }
+            
         }
         
         return pipeline;

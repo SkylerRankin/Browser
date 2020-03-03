@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import app.ErrorPageHandler;
 import layout.BoxLayoutCalculator;
 import layout.TextDimensionCalculator;
 import model.DOMNode;
@@ -39,6 +40,7 @@ public class RenderTreeGenerator {
 		DOMNode body = getBodyNode(dom);
         if (body == null) {
             System.out.println("RenderTreeGenerator: no body element found");
+            ErrorPageHandler.browserError = ErrorPageHandler.BrowserErrorType.NO_BODY;
             return null;
         }
         nodeID = 0;

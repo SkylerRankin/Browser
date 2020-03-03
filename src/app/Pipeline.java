@@ -30,6 +30,7 @@ public class Pipeline {
 		ImageCache.loadDefaultImages();
 		HTMLElements.init();
 		FontLoader.init();
+		ErrorPageHandler.init();
 	}
 
 	/**

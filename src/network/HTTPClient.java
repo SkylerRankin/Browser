@@ -13,6 +13,7 @@ import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
 
+import app.ErrorPageHandler;
 import javafx.scene.image.Image;
 
 public class HTTPClient {
@@ -38,6 +39,7 @@ public class HTTPClient {
             conn.setInstanceFollowRedirects(false);
             
             int responseCode = conn.getResponseCode();
+            ErrorPageHandler.responseCode = responseCode;
             System.out.printf("HTTPClient Response Code %d\n", responseCode);
             
             BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));

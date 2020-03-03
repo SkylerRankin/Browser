@@ -17,7 +17,7 @@ public class CSSStyle {
 		
     public static enum dimensionType {PIXEL, PERCENTAGE};
     public static enum displayType {BLOCK, INLINE, NONE};
-    public static enum fontStyleType {NORMAL, ITALICS};
+    public static enum fontStyleType {NORMAL, ITALIC, ITALICS};
     public static enum fontWeightType {NORMAL, BOLD, OTHER};
     public static enum textAlignType {LEFT, CENTER, RIGHT};
 //    public static enum textDecorationType {NONE, OVERLINE, LINETHROUGH, UNDERLINE};
@@ -106,9 +106,11 @@ public class CSSStyle {
     
     private int parseDimension(String value) {
     	value = value.trim();
-
+    	
     	if (value.endsWith("em")) {
     	    return (int) (16 * Double.parseDouble(value.substring(0, value.length() - 2)));
+    	} else if (value.equals("auto")) {
+    	    return 0;
     	}
     	
     	int offset = 0;

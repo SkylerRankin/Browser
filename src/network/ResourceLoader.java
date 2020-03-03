@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import app.ErrorPageHandler;
 import model.DOMNode;
 import parser.HTMLParser;
 import renderer.ImageCache;
@@ -52,6 +53,10 @@ public class ResourceLoader {
             }
         } else {
             html = HTTPClient.requestPage(url);
+        }
+        
+        if (url.equals(ErrorPageHandler.errorPagePath)) {
+            html = ErrorPageHandler.populateHTML(html);
         }
         
         HTMLParser parser = new HTMLParser(this);

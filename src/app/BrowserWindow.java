@@ -125,7 +125,7 @@ public class BrowserWindow extends Application {
         StackPane stack = new StackPane();
         stack.getChildren().addAll(root, new ResizeOverlay(stage));
         
-        scene = new Scene(stack, 1000, 600);
+        scene = new Scene(stack, 1500, 800);
         
         tabPane.setPrefWidth(scene.getWidth());
         tabPane.setPrefHeight(scene.getHeight());
