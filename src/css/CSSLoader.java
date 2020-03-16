@@ -68,7 +68,7 @@ public class CSSLoader {
 		CSSParser parser = new CSSParser();
 		String cssString = "";
 		try {
-			cssString = new String(Files.readAllBytes(Paths.get("./src/css/default.css")));
+			cssString = new String(Files.readAllBytes(Paths.get("./res/css/default.css")));
 		} catch (IOException e) {
 		    System.err.println("CSSLoader: failed to load default.css");
 			e.printStackTrace();

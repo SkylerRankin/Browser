@@ -138,6 +138,9 @@ public class RenderTreeGenerator {
 			root.text = root.text.replaceAll("[\n\r]", " ");
 			root.text = root.text.replaceAll("\\s+", " ");
 		}
+		
+		root.text = SpecialSymbolHandler.insertSymbols(root.text);
+		
 		for (RenderNode child : root.children) {
 			cleanUpText(child, inPre || root.type.equals("pre"));
 		}

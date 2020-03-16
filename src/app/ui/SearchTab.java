@@ -43,7 +43,7 @@ public class SearchTab extends BrowserTab {
 	}
 	
 	public void loadStartupPage() {
-	    pipeline.loadWebpage("file://res/html/test.html");
+	    pipeline.loadWebpage("file://res/html/startup_page.html");
 	}
 	
 	private void setupUI() {

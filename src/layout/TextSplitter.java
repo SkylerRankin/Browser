@@ -26,7 +26,7 @@ public class TextSplitter {
 	 * @param width		Width to fit to
 	 */
 	public void splitTextNode(RenderNode text, RenderNode parent, float firstWidth, float laterWidth) {
-		System.out.printf("splitTextNode: %.2f %.2f, text=%s\n", firstWidth, laterWidth, text.text);
+//		System.out.printf("splitTextNode: %.2f %.2f, text=%s\n", firstWidth, laterWidth, text.text);
 		List<String> lines = splitToWidth(text.text, text.style, firstWidth, laterWidth);
 		if (lines == null || lines.size() == 0) {
 			System.err.println("TextSplitter.splitTextNode failed");
@@ -71,7 +71,7 @@ public class TextSplitter {
 	        return;
 	    }
 	    RenderNode text = node.children.get(0);
-	    System.out.printf("splitContainingTextNode: %.2f %.2f, text=%s\n", firstWidth, laterWidth, text.text);
+//	    System.out.printf("splitContainingTextNode: %.2f %.2f, text=%s\n", firstWidth, laterWidth, text.text);
 	    List<String> lines = splitToWidth(text.text, text.style, firstWidth, laterWidth);
 	    if (lines == null || lines.size() == 0) {
 	        System.err.println("TextSplitter.splitTextNode failed");
@@ -139,7 +139,6 @@ public class TextSplitter {
      * @return
      */
     public List<String> splitToWidth(String s, CSSStyle style, float firstMaxWidth, float laterMaxWidth) {
-        System.out.printf("splitToWidth: s = %s\n", s);
     	List<String> lines = new ArrayList<String>();
     	String[] tokens = s.split("\\s");
     	Float[] tokenWidths = new Float[tokens.length];
@@ -196,116 +195,7 @@ public class TextSplitter {
     	    }
     	}
     	
-    	System.out.printf("lines:\n");
-    	for (String st : lines) {
-    	    System.out.printf("\t%s\n", st);
-    	}
-    	
     	return lines;
-    }
-    
-    /**
-     * Split a string into segments such that each segment's width is as large as possible without
-     * violating the maximum width.
-     * @param s
-     * @param style
-     * @param firstMaxWidth     space available for the first line
-     * @param laterMaxWidth     space available for all other lines
-     * @return
-     */
-    public List<String> splitToWidth_old(String s, CSSStyle style, float firstMaxWidth, float laterMaxWidth) {
-        List<String> lines = new ArrayList<String>();
-        String[] tokens = s.split("\\s");
-        float maxWidth = firstMaxWidth;
-        float totalWidth = getTextDimension(s, style).x;
-        if (totalWidth <= maxWidth) {
-            lines.add(s);
-            return lines;
-        }
-        
-        if (firstMaxWidth <= 0 || laterMaxWidth <= 0 || s.length() == 0 || style == null) {
-            System.out.printf("TextSplitter.splitToWidth called with invalid arguments:\n");
-            System.out.printf("\tfirstMaxWidth = %f, laterMaxWidth = %f, totalWidth = %f\n", firstMaxWidth, laterMaxWidth, totalWidth);
-            System.out.printf("\ttext = %s\n", s);
-        }
-
-        int count = 0;
-        
-        // Search for the largest prefix that fits the width
-        
-        int lineStart = 0;
-        int startIndex = 0;
-        int endIndex = s.length();
-        // Make initial guess based on a mono-spaced font
-        int currentIndex = Math.round(s.length() / totalWidth * maxWidth) - 1;
-        System.out.printf("Length = %f, maxWidth = %f, text = %s\n", totalWidth, maxWidth, s);
-        System.out.printf("Initial guess = %d\n", currentIndex);
-        
-        while (startIndex < s.length()) {
-            // Binary search for largest substring that fits in width and starts at startIndex
-            System.out.printf("\nlineStart=%d, start=%d, curr=%d end=%d\n", lineStart, startIndex, currentIndex, endIndex);
-            
-            while (startIndex < endIndex && ++count < 20) {
-                float currentWidth = getTextDimension(s.substring(lineStart, currentIndex + 1), style).x;
-                System.out.printf("Search iteration: currentWidth = %f\n", currentWidth);
-                float nextWidth = -1;
-                
-                if (currentWidth <= maxWidth && currentIndex == s.length() - 1) {
-                    // Handle case for the last segment
-                    System.out.printf("Found last segment of string\n");
-                    break;
-                }
-                
-                // Check if this index is correct: fits within width, but adding one more letter goes beyond max width for a line
-                if (currentWidth <= maxWidth && currentIndex < s.length()) {
-                    System.out.printf("Current width passed\n");
-                    nextWidth = getTextDimension(s.substring(lineStart, currentIndex + 2), style).x;
-                    if (nextWidth > maxWidth) {
-                        System.out.printf("Next Width fails\nFound correct index\n");
-                        break;
-                    }
-                }
-                
-                System.out.printf("max=%f current=%f next=%f\n", maxWidth, currentWidth, nextWidth);
-                if (currentWidth <= maxWidth && nextWidth <= maxWidth) {
-                    // If both the current string and one more letter fit, then continue searching from the current index
-                    startIndex = currentIndex;
-                    currentIndex = startIndex + (endIndex - startIndex) / 2;
-                    System.out.printf("Both fit more; updating start to %d, current to %d\n", startIndex, currentIndex);
-                } else if (currentWidth > maxWidth) {
-                    // If neither fit, reduce the upper bound. If currentWidth is too large, nextWidth is definitely too large
-                    endIndex = currentIndex;
-                    currentIndex = startIndex + (endIndex - startIndex) / 2;
-                    System.out.printf("Neither fit more; updating end to %d, current to %d\n", endIndex, currentIndex);
-                    System.out.printf("start=%d curr=%d end=%d\n", startIndex, currentIndex, endIndex);
-                }
-            }
-            
-            System.out.printf("lineStart = %d, start = %d, curr = %d, end = %d\n", lineStart, startIndex, currentIndex, endIndex);
-            System.out.printf("Found index %d, adding segment [%s]\n", currentIndex, s.substring(lineStart, currentIndex + 1));
-            lines.add(s.substring(lineStart, currentIndex + 1));
-            startIndex = currentIndex + 1;
-            lineStart = startIndex;
-            currentIndex = Math.min((lines.size() + 1) * lines.get(0).length(), s.length() - 1);
-            endIndex = s.length();
-            if (maxWidth == firstMaxWidth) {
-                maxWidth = laterMaxWidth;
-            }
-            
-            System.out.printf("%d %d\n", lineStart, endIndex);
-            if (lineStart >= endIndex) break;
-            
-        }
-        
-        return lines;
-    }
-    
-    public String joinTokens(String[] tokens, int start, int end) {
-        StringBuilder string = new StringBuilder();
-        for (int i = start; i < end; i++) {
-            string.append(" " + tokens[i]);
-        }
-        return string.toString();
     }
 
 }

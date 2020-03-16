@@ -12,6 +12,7 @@ import network.ResourceLoader;
 import parser.HTMLElements;
 import parser.HTMLParser;
 import parser.RenderTreeGenerator;
+import parser.SpecialSymbolHandler;
 import renderer.HTMLRenderer;
 import renderer.ImageCache;
 
@@ -31,6 +32,7 @@ public class Pipeline {
 		HTMLElements.init();
 		FontLoader.init();
 		ErrorPageHandler.init();
+		SpecialSymbolHandler.init();
 	}
 
 	/**

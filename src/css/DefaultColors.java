@@ -16,7 +16,7 @@ public class DefaultColors {
 	 */
 	public static void init() {
 		try {
-			BufferedReader reader = new BufferedReader(new FileReader("./src/css/defaultColors.txt"));
+			BufferedReader reader = new BufferedReader(new FileReader("./res/data/defaultColors.txt"));
 			String line;
 			while ((line = reader.readLine()) != null) {
 				String name = line.substring(0, line.indexOf(' '));
