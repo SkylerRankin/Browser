@@ -205,6 +205,9 @@ public class BrowserWindow extends Application {
     	currentTab = tabs.size() - 2;
     	tabPane.getTabs().add(tabs.size() - 2, newTab.getActor());
     	tabPane.getSelectionModel().select(currentTab);
+    	if (type.equals(TabType.SEARCH)) {
+    	    ((SearchTab) newTab).loadStartupPage();
+    	}
     }
     
     private void setTabCloseListener(BrowserTab tab) {

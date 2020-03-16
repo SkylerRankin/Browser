@@ -31,6 +31,7 @@ public class SearchTab extends BrowserTab {
     private GridPane grid;
 	private Label statusLabel;
     private TextField urlInput;
+    private BookmarksBar bookmarksBar;
     private ScrollPane scroll;
     private Canvas canvas;
     
@@ -51,6 +52,7 @@ public class SearchTab extends BrowserTab {
 	    urlInput = new TextField();
 	    urlInput.setText("http://gallium.inria.fr/~fpottier/menhir/");
 	    statusLabel = new Label("Loading  ");
+	    bookmarksBar = new BookmarksBar(urlInput);
       
 	    canvas = new Canvas();
 	    gc = canvas.getGraphicsContext2D();
@@ -64,8 +66,8 @@ public class SearchTab extends BrowserTab {
 	    HBox hbox = new HBox();
       
 	    grid.add(urlInput, 0, 0);
-	    grid.add(hbox, 1, 0);
-	    grid.add(scroll, 0, 1, 1, 1);
+	    grid.add(bookmarksBar, 0, 1, 1, 1);
+	    grid.add(scroll, 0, 2, 1, 1);
       
 	    GridPane.setMargin(urlInput, new Insets(5, 10, 5, 10));
       
@@ -90,8 +92,9 @@ public class SearchTab extends BrowserTab {
 	public void onResize(Stage stage) {
 		grid.setPrefWidth(stage.getWidth());
         urlInput.setPrefWidth(stage.getWidth() - statusLabel.getWidth() - 20);
+        bookmarksBar.setPrefWidth(stage.getWidth() - statusLabel.getWidth() - 20);
         if (scene != null) {
-    		scroll.setPrefSize(scene.getWidth(), scene.getHeight() - urlInput.getHeight());
+    		scroll.setPrefSize(scene.getWidth(), scene.getHeight() - urlInput.getHeight() - bookmarksBar.getHeight());
     		
     		for (Node child : scroll.getChildrenUnmodifiable()) {
     			if (child instanceof ScrollBar) {
@@ -101,7 +104,7 @@ public class SearchTab extends BrowserTab {
     		
         	canvas.setWidth(scene.getWidth() - 20);
         	pipeline.updateScreenWidth((float) canvas.getWidth());
-        	canvas.setHeight(scene.getHeight() - urlInput.getHeight() - 50);
+        	canvas.setHeight(scene.getHeight() - urlInput.getHeight() - bookmarksBar.getHeight()- 50);
             gc.setFill(Color.BLUE);
             gc.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
             gc.setFill(Color.WHITE);

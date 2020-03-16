@@ -151,3 +151,18 @@
     -fx-shape : " ";    
     -fx-padding :0.0 0.15em;
 }
+
+/* Bookmark bar styles */
+
+.bookmark_button {
+	-fx-text-fill: gray;
+	-fx-background-insets: 0 5 0 5;
+	-fx-background-color: transparent;
+}
+
+.bookmark_button:hover {
+	-fx-text-fill: white;
+	-fx-cursor: hand;
+
+}
+
