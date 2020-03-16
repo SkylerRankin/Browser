@@ -29,6 +29,7 @@ public class TextDimensionCalculator {
         return new Vector2(width, height);
     }
     
+    // TODO remove this function
     /**
      * Split a string into segments such that each segment's width is as large as possible without
      * violating the maximum width.
@@ -37,7 +38,7 @@ public class TextDimensionCalculator {
      * @param maxWidth
      * @return
      */
-    public static List<String> splitToWidth(String s, CSSStyle style, float maxWidth) {
+    public static List<String> splitToWidth2(String s, CSSStyle style, float maxWidth) {
     	List<String> lines = new ArrayList<String>();
     	float totalWidth = getTextDimension(s, style).x;
     	if (totalWidth <= maxWidth) {

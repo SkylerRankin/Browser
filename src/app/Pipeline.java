@@ -64,7 +64,6 @@ public class Pipeline {
 		blc.calculateBoxes(renderRoot);
 		blc.applyJustification(renderRoot);
 //	    blc.printBoxes(renderRoot);
-//		rtg.splitLongText(renderRoot);
 		height = renderRoot.box.height;
 	}
 	

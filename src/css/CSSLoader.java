@@ -59,9 +59,9 @@ public class CSSLoader {
 		loadExternalCSS(root);
 		loadStyleTags(root);
 		applyInline(root);
-//		root.printStyle();
 		propagateCSS(root);
 		finalizeCSS(root);
+//		root.printStyle();
 	}
 	
 	public void loadDefaults(RenderNode root) {

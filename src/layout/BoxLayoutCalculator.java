@@ -25,6 +25,7 @@ public class BoxLayoutCalculator {
     	this.parentNodeMap = parentNodeMap;
         this.lastAddedChildMap = new HashMap<Integer, RenderNode>();
         textSplitter = new TextSplitter(parentNodeMap);
+        System.out.printf("BoxLayoutCalculator: screen width = %f\n", screenWidth);
     }
     
     public void clearBoxBounds(RenderNode root) {
@@ -52,6 +53,7 @@ public class BoxLayoutCalculator {
     	
     	/* Cases of elements that have set widths
     	 * 	- text
+    	 *  - nodes that have 1 child that is text
     	 * 	- image
     	 */
     	
@@ -60,6 +62,10 @@ public class BoxLayoutCalculator {
                 Vector2 textSize = TextDimensionCalculator.getTextDimension(root.text, root.style);
                 root.box.width = textSize.x;
                 root.box.height = textSize.y;
+                if (parent.children.size() == 1 && parent.style.display.equals(CSSStyle.displayType.INLINE)) {
+                    parent.box.width = textSize.x;
+                    parent.box.height = textSize.y;
+                }
             } else if (root.type.equals("img")) {
                 root.box.width = root.attributes.containsKey("width") ? Float.parseFloat(root.attributes.get("width")) : 50;
                 root.box.height = root.attributes.containsKey("height") ? Float.parseFloat(root.attributes.get("height")) : 50;
@@ -127,7 +133,7 @@ public class BoxLayoutCalculator {
     
     public void calculateBoxes(RenderNode root) {
     	RenderNode parent = parentNodeMap.get(root.id);
-//    	System.out.printf("\ncalculateBoxes: root=%s parent=%s\n", root.type, (parent == null ? null : parent.type));
+//    	System.out.printf("\ncalculateBoxes: root=%s [%d] parent=%s [%d]\n", root.type, root.id, (parent == null ? null : parent.type), (parent == null ? -1 : parent.id));
     	
     	if (parent != null) {
     		Vector2 nextPosition = nextPosition(root, parent);
@@ -282,17 +288,29 @@ public class BoxLayoutCalculator {
         		// Try in-line, but if it needs more space, continue to block case
         		float x = lastAddedChild.box.x + lastAddedChild.box.width + lastAddedChild.style.marginRight + node.style.marginLeft;
         		float boundary = parent.box.x + parent.maxWidth - parent.style.paddingRight - node.style.marginRight;
-        		
+//        		System.out.printf("lastAddedChild.box.x=%.2f lastAddedChild.box.width=%.2f\n", lastAddedChild.box.x, lastAddedChild.box.width);
+//        		System.out.printf("x: %.2f = %.2f + %.2f + %d + %d\n",
+//        		        x, lastAddedChild.box.x, lastAddedChild.box.width, lastAddedChild.style.marginRight, node.style.marginLeft);
+//        		System.out.printf("boundary: %.2f = %.2f + %.2f - %d - %d\n",
+//        		        boundary, parent.box.x, parent.maxWidth, parent.style.paddingRight, node.style.marginRight);
+//        		System.out.printf("%s: x + node.box.width <= boundary = %b\n", node.type, (x + node.box.width <= boundary));
+//        		System.out.printf("x + node.box.width = %.2f, width = %.2f\n", x + node.box.width, node.box.width);
         		if (parent != null && (x + node.box.width <= boundary)) {
         			return new Vector2(x, lastAddedChild.box.y);
         		} else if (node.type.equals("text")) {
         			float availableWidth = boundary - x;
-        			
-        			if (textSplitter.canBreak(node, availableWidth)) {
+        			if (textSplitter.canBreakText(node, availableWidth)) {
         				float fullWidth = parent.maxWidth - (parent.style.paddingLeft + node.style.marginLeft + node.style.marginRight + parent.style.paddingRight);
                     	textSplitter.splitTextNode(node, parent, availableWidth, fullWidth);
             			return new Vector2(x, lastAddedChild.box.y);
         			}
+        		} else {
+        		    float availableWidth = boundary - x;
+                    if (textSplitter.canBreakNode(node, availableWidth)) {
+                        float fullWidth = parent.maxWidth - (parent.style.paddingLeft + node.style.marginLeft + node.style.marginRight + parent.style.paddingRight);
+                        textSplitter.splitContainingTextNode(node, parent, availableWidth, fullWidth);
+                        return new Vector2(x, lastAddedChild.box.y);
+                    }
         		}
         	case BLOCK:
         	default:
@@ -315,8 +333,8 @@ public class BoxLayoutCalculator {
     public void finalizeDimensions(RenderNode root) {
     	
     	RenderNode parent = parentNodeMap.get(root.id);
-    	
     	if (root.style.widthType.equals(CSSStyle.dimensionType.PERCENTAGE) && parent != null) {
+    	    
     		root.box.fixedWidth = true;
     		root.box.width = (parent.box.width * root.style.width / 100.0f)
     		        - root.style.marginLeft - root.style.marginRight

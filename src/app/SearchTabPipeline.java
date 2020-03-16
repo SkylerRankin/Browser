@@ -31,7 +31,7 @@ public class SearchTabPipeline {
     }
         
     public void loadWebpage(String url) {
-        if (debug) System.out.printf("SearchTabPipeline: Tab %d loading webpage %s\n", tabID, url);
+        if (debug) System.out.printf("SearchTabPipeline: Tab %d loading webpage, %s\n", tabID, url);
         LoadWebpageTask lwt = new LoadWebpageTask(url, width, pipeline);
         lwt.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
             @Override

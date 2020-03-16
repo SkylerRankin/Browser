@@ -186,7 +186,8 @@ public class BrowserWindow extends Application {
 //            canvas.setHeight(stage.getHeight() - searchButton.getHeight());
         };
         stage.widthProperty().addListener(stageSizeListener);
-        stage.heightProperty().addListener(stageSizeListener); 
+        stage.heightProperty().addListener(stageSizeListener);
+        startingTab.loadStartupPage();
     }
     
     private void addNewTab(Stage stage, TabType type) {

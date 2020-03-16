@@ -40,7 +40,10 @@ public class SearchTab extends BrowserTab {
 		super(TabType.SEARCH, stage);
 		setupUI();
 		pipeline = new SearchTabPipeline(this.id, canvas, tab);
-		pipeline.loadWebpage("file://res/html/startup_page.html");
+	}
+	
+	public void loadStartupPage() {
+	    pipeline.loadWebpage("file://res/html/test.html");
 	}
 	
 	private void setupUI() {

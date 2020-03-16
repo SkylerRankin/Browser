@@ -71,16 +71,18 @@ public class RenderTreeGenerator {
 //		return renderNode;
 //	}
 	
-	public void splitLongText(RenderNode root, Map<Integer, RenderNode> parentRenderNodeMap) {
+	/*
+	public void splitLongText1(RenderNode root, Map<Integer, RenderNode> parentRenderNodeMap) {
 		this.parentRenderNodeMap = parentRenderNodeMap;
 		splitLongText(root);
-	}
+	}*/
 	
+	// TODO: remove this function
 	/**
 	 * Splits lines that go over their max width. Requires the parent map to be populated.
 	 * @param root
-	 */
-	public void splitLongText(RenderNode root) {
+	 *//*
+	public void splitLongText1(RenderNode root) {
 //		System.out.printf("splitLongText: root = %s\n", root.type);
 		if (root.text != null && root.box.width > root.maxWidth) {
 			System.out.printf("splitLongText: %s is too long\n", root.type);
@@ -122,7 +124,7 @@ public class RenderTreeGenerator {
 		for (RenderNode child : root.children) {
 			splitLongText(child);
 		}
-	}
+	}*/
 	
 	
 	/**

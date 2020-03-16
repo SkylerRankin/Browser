@@ -258,7 +258,7 @@ public class HTMLRendererTest {
 		blc.setBoxBounds(root);
 		blc.propagateMaxSizes(root);
 		blc.printBoxes(root);
-		rtg.splitLongText(root, parentNodeMap);
+//		rtg.splitLongText(root, parentNodeMap);
 //		blc.clearBoxBounds(root);
 //		blc.setBoxBounds(root);
 		blc.printBoxes(root);
@@ -297,8 +297,9 @@ public class HTMLRendererTest {
 		
 		Pipeline pipeline = new Pipeline();
 		Pipeline.init();
+		pipeline.loadWebpage("file://res/html/startup_page.html");
 //		pipeline.loadWebpage("file://res/html/error_page.html");
-		pipeline.loadWebpage("http://gallium.inria.fr/~fpottier/menhir/");
+//		pipeline.loadWebpage("http://gallium.inria.fr/~fpottier/menhir/");
 //		pipeline.loadWebpage("https://www.kernel.org/doc/man-pages/");
 //		pipeline.loadWebpage("https://www.kernel.org/doc/man-pages/download.html");
 //		pipeline.loadWebpage("http://man7.org/linux/man-pages/man0/aio.h.0p.html");

@@ -12,6 +12,7 @@ import org.junit.Test;
 import css.CSSStyle;
 import javafx.embed.swing.JFXPanel;
 import layout.TextDimensionCalculator;
+import layout.TextSplitter;
 import model.Vector2;
 
 public class TextDimensionCalculatorTest {
@@ -41,7 +42,7 @@ public class TextDimensionCalculatorTest {
 		style.fontSize = 12;
 		float letterWidth = TextDimensionCalculator.getTextDimension("a", style).x;
 		System.out.printf("letterWidth: %f\n", letterWidth);
-		List<String> lines = TextDimensionCalculator.splitToWidth(testString, style, maxWidth);
+		List<String> lines = new TextSplitter(null).splitToWidth(testString, style, maxWidth);
 		String total = "";
 		for (String line : lines) {
 			total += line;
