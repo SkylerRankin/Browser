@@ -1,6 +1,6 @@
 0 Unknown
 301 Move Permanently
-307 Temoporary Redirect
+307 Temporary Redirect
 400 Bad Request
 403 Forbidden
 400 Bad Request

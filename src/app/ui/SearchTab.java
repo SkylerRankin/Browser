@@ -104,7 +104,7 @@ public class SearchTab extends BrowserTab {
     		
         	canvas.setWidth(scene.getWidth() - 20);
         	pipeline.updateScreenWidth((float) canvas.getWidth());
-        	canvas.setHeight(scene.getHeight() - urlInput.getHeight() - bookmarksBar.getHeight()- 50);
+        	canvas.setHeight(scene.getHeight() - urlInput.getHeight() - bookmarksBar.getHeight());
             gc.setFill(Color.BLUE);
             gc.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
             gc.setFill(Color.WHITE);

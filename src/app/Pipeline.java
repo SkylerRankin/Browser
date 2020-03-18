@@ -24,7 +24,9 @@ public class Pipeline {
 	private RenderNode renderRoot;
 	
 	public String title;
+	public float width;
 	public float height;
+	
 		
 	public static void init() {
 		DefaultColors.init();
@@ -62,11 +64,13 @@ public class Pipeline {
 		rtg.transformNode(renderRoot);
 		blc.setBoxBounds(renderRoot);
 		blc.propagateMaxSizes(renderRoot);
+//		blc.printBoxes(renderRoot);
 		blc.finalizeDimensions(renderRoot);
 		blc.calculateBoxes(renderRoot);
 		blc.applyJustification(renderRoot);
 //	    blc.printBoxes(renderRoot);
 		height = renderRoot.box.height;
+		width = screenWidth;
 	}
 	
 	/**
@@ -74,6 +78,7 @@ public class Pipeline {
 	 * @param gc		An instance of GraphicsContext to render on.
 	 */
 	public void render(GraphicsContext gc) {
+	    HTMLRenderer.setBackground(gc, renderRoot.style.backgroundColor, width, height);
 		HTMLRenderer.render(gc, renderRoot);
 	}
 

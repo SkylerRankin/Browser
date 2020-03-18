@@ -43,7 +43,7 @@ public class BoxLayoutCalculator {
     	RenderNode parent = parentNodeMap.get(root.id);
     	if (parent == null) {
     		root.box.fixedWidth = true;
-    		root.style.maxWidth = screenWidth;
+    		root.style.maxWidth = root.style.maxWidth == null ? screenWidth : root.style.maxWidth;
             root.box.width = root.style.maxWidth == null ? screenWidth : root.style.maxWidth;
     		root.box.x = 0;
     		root.box.y = 0;
@@ -142,9 +142,13 @@ public class BoxLayoutCalculator {
     		root.positioned = true;
     		propagateSize(root);
     		lastAddedChildMap.put(parent.id, root);
+    	} else {
+    	    // Position the body element
+    	    root.box.x = root.style.marginLeft;
+    	    root.box.y = root.style.marginTop;
     	}
     	
-    	/* When splitting lines, more RenderNodes can be added to a nodes children, meaning
+    	/* When splitting lines, more RenderNodes can be added to a node's children, meaning
     	 * root.childen.size() can change over the course of the loop. Have to use for loop
     	 * over indices to avoid concurrent modification exception.
     	 */
@@ -266,7 +270,6 @@ public class BoxLayoutCalculator {
     	CSSStyle.displayType displayType = node.style.display;
         RenderNode lastAddedChild = lastAddedChildMap.get(parent.id);
         if (lastAddedChild == null) {
-        	
         	float availableWidth = parent.maxWidth - (parent.style.paddingLeft + node.style.marginLeft + node.style.marginRight + parent.style.paddingRight);
         	
         	if (node.type.equals("text") && availableWidth < node.box.width) {
@@ -288,28 +291,27 @@ public class BoxLayoutCalculator {
         		// Try in-line, but if it needs more space, continue to block case
         		float x = lastAddedChild.box.x + lastAddedChild.box.width + lastAddedChild.style.marginRight + node.style.marginLeft;
         		float boundary = parent.box.x + parent.maxWidth - parent.style.paddingRight - node.style.marginRight;
-//        		System.out.printf("lastAddedChild.box.x=%.2f lastAddedChild.box.width=%.2f\n", lastAddedChild.box.x, lastAddedChild.box.width);
-//        		System.out.printf("x: %.2f = %.2f + %.2f + %d + %d\n",
-//        		        x, lastAddedChild.box.x, lastAddedChild.box.width, lastAddedChild.style.marginRight, node.style.marginLeft);
-//        		System.out.printf("boundary: %.2f = %.2f + %.2f - %d - %d\n",
-//        		        boundary, parent.box.x, parent.maxWidth, parent.style.paddingRight, node.style.marginRight);
-//        		System.out.printf("%s: x + node.box.width <= boundary = %b\n", node.type, (x + node.box.width <= boundary));
-//        		System.out.printf("x + node.box.width = %.2f, width = %.2f\n", x + node.box.width, node.box.width);
+//        		System.out.printf("%b: width = %.2f, x = %.2f, boundary = %.2f\n", (x + node.box.width <= boundary), node.box.width, x, boundary);
         		if (parent != null && (x + node.box.width <= boundary)) {
         			return new Vector2(x, lastAddedChild.box.y);
         		} else if (node.type.equals("text")) {
         			float availableWidth = boundary - x;
         			if (textSplitter.canBreakText(node, availableWidth)) {
         				float fullWidth = parent.maxWidth - (parent.style.paddingLeft + node.style.marginLeft + node.style.marginRight + parent.style.paddingRight);
-                    	textSplitter.splitTextNode(node, parent, availableWidth, fullWidth);
-            			return new Vector2(x, lastAddedChild.box.y);
+                    	boolean firstUsed = textSplitter.splitTextNode(node, parent, availableWidth, fullWidth);
+                    	// Place first line of text on current line if possible; fall through to block if not
+                    	if (firstUsed) {
+                    	    return new Vector2(x, lastAddedChild.box.y);
+                    	}
         			}
         		} else {
         		    float availableWidth = boundary - x;
                     if (textSplitter.canBreakNode(node, availableWidth)) {
                         float fullWidth = parent.maxWidth - (parent.style.paddingLeft + node.style.marginLeft + node.style.marginRight + parent.style.paddingRight);
-                        textSplitter.splitContainingTextNode(node, parent, availableWidth, fullWidth);
-                        return new Vector2(x, lastAddedChild.box.y);
+                        boolean firstUsed = textSplitter.splitContainingTextNode(node, parent, availableWidth, fullWidth);
+                        if (firstUsed) {
+                            return new Vector2(x, lastAddedChild.box.y);
+                        }
                     }
         		}
         	case BLOCK:
@@ -354,6 +356,17 @@ public class BoxLayoutCalculator {
 		            - parent.style.paddingLeft - parent.style.paddingRight;
 		    root.style.marginLeft = (int) (availableWidth / 2f);
 	        root.style.marginRight = (int) (availableWidth / 2f);
+		} else if (root.style.marginType.equals(CSSStyle.marginSizeType.AUTO) && root.style.width != null) {
+		    float width = root.style.width;
+		    if (root.style.widthType.equals(CSSStyle.dimensionType.PERCENTAGE)) {
+		        width = (float) (screenWidth * width / 100.0);
+		    }
+		    if (width > root.style.maxWidth) {
+		        width = root.style.maxWidth;
+		    }
+		    float availableWidth = screenWidth - width;
+            root.style.marginLeft = (int) (availableWidth / 2f);
+            root.style.marginRight = (int) (availableWidth / 2f);
 		}
     	
     	for (RenderNode child : root.children) {

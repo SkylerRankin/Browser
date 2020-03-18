@@ -37,7 +37,7 @@ public class SearchTabPipeline {
             @Override
             public void handle(WorkerStateEvent event) {
                 System.out.println("LoadWebpageTask succeeded");
-                canvas.setHeight(pipeline.height);
+                canvas.setHeight(Math.max(pipeline.height, (float) gc.getCanvas().getHeight()));
                 pipeline.render(gc);
                 tab.setText(pipeline.title == null ? url : pipeline.title);
             }

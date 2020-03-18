@@ -18,7 +18,7 @@ import parser.HTMLElements;
 
 public class HTMLRenderer {
     
-    private static final boolean drawOutlines = false; //true false
+    private static final boolean drawOutlines = true; //true false
     private static final boolean drawPadding = false;
     private static final boolean drawMargins = false;
     private static final float textOffsetScale = 0.75f;
@@ -30,7 +30,7 @@ public class HTMLRenderer {
     		renderImage(gc, root);
     		return;
     	case "hr":
-    		fillRect(gc, new CSSColor("black"), root.box.x, root.box.y, root.box.width, root.box.height);
+    		fillRect(gc, root.style.color, root.box.x, root.box.y, root.box.width, root.box.height);
     		return;
     	}
     	
@@ -38,9 +38,8 @@ public class HTMLRenderer {
     	if (!root.type.equals(HTMLElements.TEXT)) fillRect(gc, root.style.backgroundColor, root.box.x, root.box.y, root.box.width, root.box.height);
     	
     	// Draw borders
-    	// TODO: this leaves out the corners
-    	if (root.style.borderWidthTop > 0) fillRect(gc, root.style.borderColorTop, root.box.x, root.box.y - root.style.borderWidthTop, root.box.width, root.style.borderWidthTop);
-        if (root.style.borderWidthBottom > 0) fillRect(gc, root.style.borderColorBottom, root.box.x, root.box.y + root.box.height, root.box.width, root.style.borderWidthTop);
+    	if (root.style.borderWidthTop > 0) fillRect(gc, root.style.borderColorTop, root.box.x - root.style.borderWidthLeft, root.box.y - root.style.borderWidthTop, root.box.width + root.style.borderWidthLeft + root.style.borderWidthRight, root.style.borderWidthTop);
+        if (root.style.borderWidthBottom > 0) fillRect(gc, root.style.borderColorBottom, root.box.x  - root.style.borderWidthLeft, root.box.y + root.box.height, root.box.width + root.style.borderWidthLeft + root.style.borderWidthRight, root.style.borderWidthTop);
         if (root.style.borderWidthLeft > 0) fillRect(gc, root.style.borderColorLeft, root.box.x - root.style.borderWidthLeft, root.box.y, root.style.borderWidthLeft, root.box.height);
         if (root.style.borderWidthRight > 0) fillRect(gc, root.style.borderColorRight, root.box.x + root.box.width, root.box.y, root.style.borderWidthRight, root.box.height);
 
@@ -103,6 +102,10 @@ public class HTMLRenderer {
         if (w <= 0f || h <= 0f) return;
     	gc.setFill(color.toPaint());
     	gc.fillRect(x, y, w, h);
+    }
+    
+    public static void setBackground(GraphicsContext gc, CSSColor color, float w, float h) {
+        fillRect(gc, color, 0, 0, w, Math.max(h, (float) gc.getCanvas().getHeight()));
     }
     
 }

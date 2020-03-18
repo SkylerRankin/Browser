@@ -24,13 +24,14 @@ public class TextSplitter {
 	 * @param text		The node of text to split up
 	 * @param parent	RenderNode parent of text
 	 * @param width		Width to fit to
+	 * @return          true if the first width was used, false if it was too small
 	 */
-	public void splitTextNode(RenderNode text, RenderNode parent, float firstWidth, float laterWidth) {
+	public boolean splitTextNode(RenderNode text, RenderNode parent, float firstWidth, float laterWidth) {
 //		System.out.printf("splitTextNode: %.2f %.2f, text=%s\n", firstWidth, laterWidth, text.text);
 		List<String> lines = splitToWidth(text.text, text.style, firstWidth, laterWidth);
 		if (lines == null || lines.size() == 0) {
 			System.err.println("TextSplitter.splitTextNode failed");
-			return;
+			return false;
 		}
 		int childIndex = parent.children.indexOf(text);
 		
@@ -52,8 +53,10 @@ public class TextSplitter {
 	            parent.children.add(++childIndex, newLine);
 	            parentNodeMap.put(newLine.id, parent);
 			}
-			
 		}
+		
+		textSize = getTextDimension(text.text, text.style);
+		return textSize.x <= firstWidth;
 	}
 	
 
@@ -64,18 +67,18 @@ public class TextSplitter {
 	 * @param parent       The parent of the node.
 	 * @param firstWidth   The width to fit the first line of text to
 	 * @param laterWidth   The width to fit every other line to
+	 * @return             True if the first width was used, false if it was too small for the first token
 	 */
-	public void splitContainingTextNode(RenderNode node, RenderNode parent, float firstWidth, float laterWidth) {
+	public boolean splitContainingTextNode(RenderNode node, RenderNode parent, float firstWidth, float laterWidth) {
 	    if (node.children.size() != 1) {
 	        System.err.printf("splitContainingTextNode: node must have a single child, had %d\n", node.children.size());
-	        return;
+	        return false;
 	    }
 	    RenderNode text = node.children.get(0);
-//	    System.out.printf("splitContainingTextNode: %.2f %.2f, text=%s\n", firstWidth, laterWidth, text.text);
 	    List<String> lines = splitToWidth(text.text, text.style, firstWidth, laterWidth);
 	    if (lines == null || lines.size() == 0) {
 	        System.err.println("TextSplitter.splitTextNode failed");
-	        return;
+	        return false;
 	    }
 	    int childIndex = parent.children.indexOf(node);
 	        
@@ -107,6 +110,10 @@ public class TextSplitter {
 	            parentNodeMap.put(newText.id, newLine);
 	        }  
 	    }
+	    
+	    textSize = getTextDimension(text.text, text.style);
+	    return textSize.x <= firstWidth;
+	    
 	}
 	
 	public boolean canBreakNode(RenderNode node, float availableWidth) {
@@ -127,7 +134,13 @@ public class TextSplitter {
 	    return splitToWidth(s, style, width, width);
 	}
 	
-	
+	public String trimFront(String s) {
+	    return s;
+//	    if (s == null || s.length() == 0) return s;
+//	    int i = 0;
+//	    while (s.charAt(i++) == ' ');
+//	    return s.substring(i);
+	}
 	
     /**
      * Split a string into segments such that each segment's width is as large as possible without
@@ -147,7 +160,7 @@ public class TextSplitter {
     	float totalWidth = getTextDimension(s, style).x;
 //        System.out.printf("space width = %.2f, total width = %.2f, max width = %.2f, %d tokens\n", spaceWidth, totalWidth, maxWidth, tokens.length);
     	if (totalWidth <= maxWidth || tokens.length == 1) {
-    		lines.add(s);
+    		lines.add(trimFront(s));
     		return lines;
     	}
     	
@@ -174,7 +187,7 @@ public class TextSplitter {
     	    if (currentWidth + spaceWidth + tokenWidths[i] >= (first ? firstMaxWidth : laterMaxWidth)) {
     	        lines.add(currentLine.toString());
     	        currentLine = new StringBuilder();
-    	        currentLine.append(tokens[i] + " ");
+    	        currentLine.append(trimFront(tokens[i]) + " ");
     	        currentWidth = tokenWidths[i] + spaceWidth;
     	        first = false;
     	        
@@ -185,7 +198,11 @@ public class TextSplitter {
     	        
     	    } else {
     	        currentWidth = currentWidth + spaceWidth + tokenWidths[i];
-    	        currentLine.append(tokens[i]);
+    	        if (currentLine.length() == 0) {
+    	            currentLine.append(trimFront(tokens[i]));
+    	        } else {
+    	            currentLine.append(tokens[i]);
+    	        }
     	        if (i == tokens.length - 1) {
     	            currentLine.append(" ");
     	            lines.add(currentLine.toString());

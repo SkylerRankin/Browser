@@ -152,6 +152,10 @@
     -fx-padding :0.0 0.15em;
 }
 
+.scroll-pane {
+    -fx-background-color:transparent;
+}
+
 /* Bookmark bar styles */
 
 .bookmark_button {

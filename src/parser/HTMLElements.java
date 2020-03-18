@@ -52,13 +52,16 @@ public class HTMLElements {
     
     private static Set<String> validElements;
     private static Set<String> emptyElements;
+    private static Set<String> blockElements;
     
     public static void init() {
         validElements = new HashSet<String>();
         emptyElements = new HashSet<String>();
+        blockElements = new HashSet<String>();
 
         validElements.addAll(Arrays.asList(VALID_ELEMENTS));
         emptyElements.addAll(Arrays.asList(EMPTY_ELEMENTS));
+        blockElements.addAll(Arrays.asList(BLOCK_LEVEL_ELEMENTS));
     }
     
     public static boolean isValidElement(String element) {
@@ -67,6 +70,10 @@ public class HTMLElements {
     
     public static boolean isEmptyElement(String element) {
         return emptyElements.contains(element);
+    }
+    
+    public static boolean isBlockLevelElement(String element) {
+        return blockElements.contains(element);
     }
     
     public static boolean usedInRenderTree(String element) {

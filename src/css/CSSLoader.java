@@ -76,7 +76,7 @@ public class CSSLoader {
 		parser.parse(cssString);
 		Map<Selector, Map<String, String>> rules = parser.getRules();
 		
-		applyRules(root, rules);
+		applyRules(root, rules, true);
 	}
 	
 	public void loadExternalCSS(RenderNode root) {
@@ -84,7 +84,7 @@ public class CSSLoader {
 	        CSSParser parser = new CSSParser();
 	        parser.parse(cssString);
 	        Map<Selector, Map<String, String>> rules = parser.getRules();
-	        applyRules(root, rules);
+	        applyRules(root, rules, true);
 	    }
 	    
 	}
@@ -94,7 +94,7 @@ public class CSSLoader {
 	        CSSParser parser = new CSSParser();
 	        parser.parse(cssString);
 	        Map<Selector, Map<String, String>> rules = parser.getRules();
-	        applyRules(root, rules);
+	        applyRules(root, rules, true);
 	    }
 	}
 	
@@ -108,7 +108,7 @@ public class CSSLoader {
 			CSSParser parser = new CSSParser();
 			String style = root.attributes.get("style");
 			parser.parse(String.format("%s { %s }", root.type, style));
-			applyRules(root, parser.getRules());
+			applyRules(root, parser.getRules(), false);
 		}
 		
 		for (RenderNode child : root.children) {
@@ -117,7 +117,7 @@ public class CSSLoader {
 	}
 
 	//TODO handle selectors for nested elements; this is just 1 level
-	private static void applyRules(RenderNode node, Map<Selector, Map<String, String>> rules) {
+	private static void applyRules(RenderNode node, Map<Selector, Map<String, String>> rules, boolean globalApplication) {
 		// Create some representative selectors for this node
 		CSSParser.Selector allSelector = (new CSSParser()).new Selector(CSSParser.SelectorType.ALL);
 		CSSParser.Selector elementSelector = (new CSSParser()).new Selector(CSSParser.SelectorType.ELEMENT);
@@ -149,9 +149,12 @@ public class CSSLoader {
 		}
         if (idRule != null) node.style.apply(idRule, CSSRulePrecedent.ID());
 		
-		for (RenderNode child : node.children) {
-			applyRules(child, rules);
-		}
+        if (globalApplication) {
+            for (RenderNode child : node.children) {
+                applyRules(child, rules, globalApplication);
+            }
+        }
+		
 	}
 	
 	/**

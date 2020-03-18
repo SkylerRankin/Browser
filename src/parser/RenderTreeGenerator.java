@@ -59,74 +59,6 @@ public class RenderTreeGenerator {
 		return renderNode;
 	}
 	
-//	private RenderNode copyTree(DOMNode dom, Integer parentID, int depth) {
-//		RenderNode renderNode = new RenderNode(dom, nodeID, depth);
-//		renderNode.attributes = dom.attributes;
-////		if (parentID != null) parentRenderNodeMap.put(parentID, renderNode);
-//		if (parentID != null) parentRenderNodeMap.put(parentID, renderNode);
-//		nodeID++;
-//		for (DOMNode child : dom.children) {
-//			renderNode.children.add(copyTree(child, nodeID - 1, depth + 1));
-//		}
-//		return renderNode;
-//	}
-	
-	/*
-	public void splitLongText1(RenderNode root, Map<Integer, RenderNode> parentRenderNodeMap) {
-		this.parentRenderNodeMap = parentRenderNodeMap;
-		splitLongText(root);
-	}*/
-	
-	// TODO: remove this function
-	/**
-	 * Splits lines that go over their max width. Requires the parent map to be populated.
-	 * @param root
-	 *//*
-	public void splitLongText1(RenderNode root) {
-//		System.out.printf("splitLongText: root = %s\n", root.type);
-		if (root.text != null && root.box.width > root.maxWidth) {
-			System.out.printf("splitLongText: %s is too long\n", root.type);
-
-			List<String> lines = TextDimensionCalculator.splitToWidth(root.text, root.style, root.maxWidth);
-			System.out.printf("Splitting text into %d lines\n", lines.size());
-			// Replace this node with new nodes, each containing one line of the text
-			RenderNode parent = parentRenderNodeMap.get(root.id);
-			List<RenderNode> newChildren = new ArrayList<RenderNode>();
-			
-			if (parent != null) {
-				for (RenderNode child : parent.children) {
-					if (child.id != root.id) {
-						newChildren.add(child);
-					} else {
-						for (String line : lines) {
-							RenderNode newNode = new RenderNode(root.type);
-							newNode.style = root.style;
-							newNode.id = ++nodeID;
-							parentRenderNodeMap.put(newNode.id, parent);
-							newNode.depth = root.depth;
-							newNode.attributes = root.attributes;
-							newNode.text = line;
-							newNode.maxWidth = root.maxWidth;
-							newNode.maxHeight = root.maxHeight;
-							Vector2 size = TextDimensionCalculator.getTextDimension(line, root.style);
-							newNode.box.fixedWidth = true;
-							newNode.box.width = size.x;
-							newNode.box.fixedHeight = true;
-							newNode.box.height = size.y;
-							newChildren.add(newNode);
-						}
-					}
-				}
-				parent.children = newChildren;
-			}
-		}
-		
-		for (RenderNode child : root.children) {
-			splitLongText(child);
-		}
-	}*/
-	
-	
 	/**
 	 * Remove all new lines, carriage returns, and extra spaces from text. The only place
 	 * that these should be left as is is inside a 'pre' tag.
@@ -137,9 +69,12 @@ public class RenderTreeGenerator {
 		if (root.text != null && !inPre) {
 			root.text = root.text.replaceAll("[\n\r]", " ");
 			root.text = root.text.replaceAll("\\s+", " ");
+//			while (root.text.startsWith(" ") && root.text.length() > 1) root.text = root.text.substring(1);
 		}
 		
-		root.text = SpecialSymbolHandler.insertSymbols(root.text);
+		if (root.text != null) {
+		    root.text = SpecialSymbolHandler.insertSymbols(root.text);
+		}
 		
 		for (RenderNode child : root.children) {
 			cleanUpText(child, inPre || root.type.equals("pre"));

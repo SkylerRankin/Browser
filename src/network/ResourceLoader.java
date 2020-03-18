@@ -12,6 +12,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import app.ErrorPageHandler;
+import app.StartupPageHandler;
 import model.DOMNode;
 import parser.HTMLParser;
 import renderer.ImageCache;
@@ -55,9 +56,8 @@ public class ResourceLoader {
             html = HTTPClient.requestPage(url);
         }
         
-        if (url.equals(ErrorPageHandler.errorPagePath)) {
-            html = ErrorPageHandler.populateHTML(html);
-        }
+        if (url.equals(ErrorPageHandler.errorPagePath)) html = ErrorPageHandler.populateHTML(html);
+        if (url.equals(StartupPageHandler.startupPagePath)) html = StartupPageHandler.populateHTML(html);
         
         HTMLParser parser = new HTMLParser(this);
         dom = parser.generateDOMTree(html);

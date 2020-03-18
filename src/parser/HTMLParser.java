@@ -137,6 +137,7 @@ public class HTMLParser {
     public Map<String, String> getAttributes(String content) {
         Map<String, String> attributes = new HashMap<String, String>();
         String[] rawAttributes = splitOnAttributes(removeUselessSpaces(content));
+
         for (String attribute : rawAttributes) {
             if (attribute.contains("=")) {
                 int equalsIndex = attribute.indexOf("=");
@@ -199,7 +200,7 @@ public class HTMLParser {
      */
     public String[] splitOnAttributes(String s) {
         // Pattern Examples: "x", ".. x", ".. x ..", "x="some stuff""
-        Pattern pattern = Pattern.compile("(^[\\w-]+$)|([\\w-]+$)|([\\w-]+?(?=\\s))|([\\w-]+=\"[\\s\\w\\.\\-\\:\\;%]+\")");
+        Pattern pattern = Pattern.compile("(^[\\w-]+$)|([\\w-]+$)|([\\w-]+?(?=\\s))|([\\w-]+=\"[\\s\\w\\.\\-\\:\\;%#]+\")");
         Matcher matcher = pattern.matcher(s);
         List<String> attributes = new ArrayList<String>();
         while (matcher.find()) {

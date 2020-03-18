@@ -358,6 +358,14 @@ public class CSSParserTest {
     }
     
     @Test
+    public void testParser_borders() {
+        String css = "div { border: 5px solid #c22817;} p { border: 5px solid rgb(1, 1, 1);}";
+        CSSParser parser = new CSSParser();
+        parser.parse(css);
+        parser.printRules();
+    }
+    
+    @Test
     public void longParsingTest1() throws IOException {
         String css = new String(Files.readAllBytes(Paths.get("res/test/cssTest1.css")));
         CSSParser parser = new CSSParser();
