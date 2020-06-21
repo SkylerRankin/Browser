@@ -81,5 +81,10 @@ public class Pipeline {
 	    HTMLRenderer.setBackground(gc, renderRoot.style.backgroundColor, width, height);
 		HTMLRenderer.render(gc, renderRoot);
 	}
+	
+	// Expose the render tree for the inspector
+	public RenderNode getRootRenderNode() {
+	    return renderRoot;
+	}
 
 }

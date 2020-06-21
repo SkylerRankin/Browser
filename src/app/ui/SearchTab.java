@@ -23,6 +23,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
+import model.RenderNode;
 
 public class SearchTab extends BrowserTab {
 	
@@ -117,7 +118,7 @@ public class SearchTab extends BrowserTab {
 	public Tab getActor() {
 		return tab;
 	}
-	
+		
 	private void onSearch() {
 	    String input = urlInput.getText();
 	    pipeline.loadWebpage(input);

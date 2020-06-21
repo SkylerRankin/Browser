@@ -13,6 +13,7 @@ import app.ui.ResizeOverlay;
 import app.ui.SearchTab;
 import app.ui.SettingsButton;
 import app.ui.SettingsTab;
+import app.ui.inspector.InspectorHandler;
 import app.ui.BrowserTab.TabType;
 import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
@@ -49,6 +50,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import model.RenderNode;
 import tasks.LoadWebpageTask;
 import tasks.LoadingAnimationTask;
 
@@ -72,6 +74,8 @@ public class BrowserWindow extends Application {
     
     private double offsetX = 0;
     private double offsetY = 0;
+    
+    private InspectorHandler inspectorHandler;
     
     private void setupUI(Stage stage) {
         stage.setTitle("Browser");
@@ -188,6 +192,9 @@ public class BrowserWindow extends Application {
         stage.widthProperty().addListener(stageSizeListener);
         stage.heightProperty().addListener(stageSizeListener);
         startingTab.loadStartupPage();
+        
+        inspectorHandler = new InspectorHandler(stage);
+        
     }
     
     private void addNewTab(Stage stage, TabType type) {
@@ -283,6 +290,7 @@ public class BrowserWindow extends Application {
     	KeyCodeCombination ctrlT = new KeyCodeCombination(KeyCode.T, KeyCodeCombination.CONTROL_DOWN);
     	KeyCodeCombination ctrlR = new KeyCodeCombination(KeyCode.R, KeyCodeCombination.CONTROL_DOWN);
     	KeyCodeCombination ctrlTab = new KeyCodeCombination(KeyCode.TAB, KeyCodeCombination.CONTROL_DOWN);
+        KeyCodeCombination ctrlI = new KeyCodeCombination(KeyCode.I, KeyCodeCombination.CONTROL_DOWN);
     	
     	scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
 
@@ -297,6 +305,8 @@ public class BrowserWindow extends Application {
 				} else if (ctrlTab.match(event)) {
 					System.out.println("ctrl tab");
 					event.consume();
+				} else if (ctrlI.match(event)) {
+				    inspectorHandler.toggle();
 				}
 			}
     		

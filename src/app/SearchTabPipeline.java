@@ -1,10 +1,12 @@
 package app;
 
+import app.ui.inspector.InspectorHandler;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.event.EventHandler;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Tab;
+import model.RenderNode;
 import tasks.LoadWebpageTask;
 
 public class SearchTabPipeline {
@@ -29,7 +31,7 @@ public class SearchTabPipeline {
     public void updateScreenWidth(float width) {
         this.width = width;
     }
-        
+    
     public void loadWebpage(String url) {
         if (debug) System.out.printf("SearchTabPipeline: Tab %d loading webpage, %s\n", tabID, url);
         LoadWebpageTask lwt = new LoadWebpageTask(url, width, pipeline);
@@ -40,6 +42,7 @@ public class SearchTabPipeline {
                 canvas.setHeight(Math.max(pipeline.height, (float) gc.getCanvas().getHeight()));
                 pipeline.render(gc);
                 tab.setText(pipeline.title == null ? url : pipeline.title);
+                InspectorHandler.get().update(pipeline.getRootRenderNode());
             }
         });
         Thread thread = new Thread(lwt);
