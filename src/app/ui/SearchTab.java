@@ -106,12 +106,14 @@ public class SearchTab extends BrowserTab {
         	canvas.setWidth(scene.getWidth() - 20);
         	pipeline.updateScreenWidth((float) canvas.getWidth());
         	canvas.setHeight(scene.getHeight() - urlInput.getHeight() - bookmarksBar.getHeight());
-            gc.setFill(Color.BLUE);
-            gc.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
-            gc.setFill(Color.WHITE);
-            gc.fillRect(10, 10, canvas.getWidth() - 20, canvas.getHeight() - 20);
-            gc.setFill(Color.BLACK);
-            gc.fillText(String.format("Tab %d", this.id), 50, 50);
+        	
+        	if (pipeline.loadedWebpage()) pipeline.redrawWebpage();
+//            gc.setFill(Color.BLUE);
+//            gc.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
+//            gc.setFill(Color.WHITE);
+//            gc.fillRect(10, 10, canvas.getWidth() - 20, canvas.getHeight() - 20);
+//            gc.setFill(Color.BLACK);
+//            gc.fillText(String.format("Tab %d", this.id), 50, 50);
         }
 	}
 	

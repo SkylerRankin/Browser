@@ -79,3 +79,13 @@ strong, em {
 	display: inline;
 	font-weight: bold;
 }
+
+table {
+	padding: 2px;
+}
+
+td {
+	display: inline;
+	margin: 2px;
+	padding: 3px;
+}

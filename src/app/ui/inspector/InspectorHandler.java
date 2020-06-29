@@ -27,7 +27,6 @@ public class InspectorHandler {
     private boolean open;
     private float height = 300f;
     private float width = 500f;
-    private RenderNode renderNode;
     
     public InspectorHandler(Stage browserStage) {
         inspectorHandler = this;
@@ -89,35 +88,7 @@ public class InspectorHandler {
             }
         });
     }
-    
-    private RenderNode testRenderNode() {
-        RenderNode root = new RenderNode("html");
-        RenderNode head = new RenderNode("head");
-        RenderNode body = new RenderNode("body");
-        RenderNode h1 = new RenderNode("h1");
-        RenderNode t1 = new RenderNode("text");
-        t1.text = "Testing the Inspector";
-        RenderNode div = new RenderNode("div");
-        RenderNode p = new RenderNode("p");
-        RenderNode t2 = new RenderNode("text");
-        t2.text = "Deep inside of the";
-        RenderNode b = new RenderNode("b");
-        RenderNode t3 = new RenderNode("text");
-        t3.text = " render tree";
-
-        root.children.add(head);
-        root.children.add(body);
-        body.children.add(h1);
-        h1.children.add(t1);
-        body.children.add(div);
-        div.children.add(p);
-        p.children.add(t2);
-        p.children.add(b);
-        b.children.add(t3);
-        
-        return root;
-    }
-        
+            
     public void update(RenderNode root) {
         treeViewer.update(root);
     }

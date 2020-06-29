@@ -66,6 +66,28 @@ public class RenderNode {
     
     public void render() {}
     
+    public boolean childrenHasElement(String element) {
+        for (RenderNode child : children) {
+            if (child.type.equals(element)) return true;
+        }
+        return false;
+    }
+    
+    public RenderNode getElementInChildren(String element) {
+        for (RenderNode child : children) {
+            if (child.type.equals(element)) return child;
+        }
+        return null;
+    }
+    
+    public List<RenderNode> getElementsInChildren(String element) {
+        List<RenderNode> nodes = new ArrayList<RenderNode>();
+        for (RenderNode child : children) {
+            if (child.type.equals(element)) nodes.add(child);
+        }
+        return nodes;
+    }
+    
     public void print() {
         print("");
     }

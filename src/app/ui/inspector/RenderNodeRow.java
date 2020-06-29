@@ -1,6 +1,8 @@
 package app.ui.inspector;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -23,9 +25,11 @@ public class RenderNodeRow extends Pane {
     private int depth;
     private boolean expanded;
     private Label label;
-    private ImageView triangleImageView;
+    private ImageView iconImageView;
     private Image triangleRightImage;
     private Image triangleDownImage;
+    
+    private static Map<String, Image> icons;
     
     private int margin = 30;
     
@@ -40,24 +44,22 @@ public class RenderNodeRow extends Pane {
         hbox.setSpacing(5);
         hbox.setAlignment(Pos.CENTER_LEFT);
         
-        File rightImageFile = new File("./res/images/triangle_right.png");
-        String rightImagePath = rightImageFile.toURI().toString();
+        if (icons == null) loadIcons();
+        iconImageView = new ImageView();
         
-        File downImageFile = new File("./res/images/triangle_down.png");
-        String downImagePath = downImageFile.toURI().toString();
+        if (renderNode.type.equals(HTMLElements.TEXT)) {
+            label = new Label(renderNode.text);
+            setIcon("text");
+        } else {
+            label = new Label(renderNode.type);
+            iconImageView = new ImageView(triangleRightImage);
+            if (renderNode.children.size() > 0) setIcon("triangle_right");
+            else setIcon("");
+        }
         
-        triangleRightImage = new Image(rightImagePath, 10, 10, true, true);
-        triangleDownImage = new Image(downImagePath, 10, 10, true, true);
-        
-        triangleImageView = new ImageView(triangleRightImage);
-        
-        label = new Label(renderNode.type.equals(HTMLElements.TEXT) ?
-                renderNode.text :
-                renderNode.type
-        );
         label.getStyleClass().add("row_text");
         
-        hbox.getChildren().addAll(triangleImageView, label);
+        hbox.getChildren().addAll(iconImageView, label);
         
         this.getChildren().add(hbox);
         this.getStyleClass().add("render_node_row");
@@ -67,6 +69,23 @@ public class RenderNodeRow extends Pane {
                 onClick();
             }
         });
+    }
+    
+    public static void loadIcons() {
+        icons = new HashMap<String, Image>();
+        String[] fileNames = {"triangle_right", "triangle_down", "text"};
+        for (String fileName : fileNames) {
+            File imageFile = new File(String.format("./res/images/%s.png", fileName));
+            String imageFilePath = imageFile.toURI().toString();
+            Image image = new Image(imageFilePath, 10, 10, true, true);
+            icons.put(fileName, image);
+        }
+    }
+    
+    private void setIcon(String name) {
+        if (icons.containsKey(name)) {
+            iconImageView.setImage(icons.get(name));
+        }
     }
     
     public RenderNode getRenderNode() {
@@ -79,16 +98,16 @@ public class RenderNodeRow extends Pane {
     
     private void onClick() {
         expanded = !expanded;
-        if (expanded && renderNode.children.size() == 0) expanded = false;
+        if (expanded && (renderNode.children.size() == 0 || renderNode.type.equals(HTMLElements.TEXT))) expanded = false;
         if (expanded) {
             this.getStyleClass().add("expanded");
             label.getStyleClass().add("row_text_expanded");
-            triangleImageView.setImage(triangleDownImage);
+            setIcon("triangle_down");
             treeViewer.expandRow(id);
-        } else {
+        } else if (!renderNode.type.equals(HTMLElements.TEXT) && renderNode.children.size() > 0) {
             this.getStyleClass().remove("expanded");
             label.getStyleClass().remove("row_text_expanded");
-            triangleImageView.setImage(triangleRightImage);
+            setIcon("triangle_right");
             treeViewer.collapseRow(id);
         }
     }

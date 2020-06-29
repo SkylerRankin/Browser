@@ -4,14 +4,12 @@ import app.ErrorPageHandler;
 import app.Pipeline;
 import javafx.concurrent.Task;
 
-public class LoadWebpageTask extends Task<Pipeline> {
+public class RedrawWebpageTask extends Task<Pipeline> {
     
-    private String url;
     private Pipeline pipeline;
     private float width;
     
-    public LoadWebpageTask(String url, float width, Pipeline pipeline) {
-        this.url = url;
+    public RedrawWebpageTask(float width, Pipeline pipeline) {
         this.pipeline = pipeline;
         this.width = width;
     }
@@ -19,18 +17,20 @@ public class LoadWebpageTask extends Task<Pipeline> {
     @Override
     protected Pipeline call() throws Exception {
         try {
-            pipeline.loadWebpage(url);
+            if (!pipeline.loadedWebpage()) {
+                System.out.println("RedrawWebpageTask: attempted redraw before first draw");
+                return pipeline;
+            }
             pipeline.calculateLayout(width);
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(e.getLocalizedMessage());
             try {
                 pipeline.loadWebpage(ErrorPageHandler.errorPagePath);
                 pipeline.calculateLayout(width);
             } catch (Exception e2) {
                 System.out.println("LoadWebpageTask: error running pipeline on error page.");
-                e2.printStackTrace();
+                System.out.println(e2.getLocalizedMessage());
             }
-            
         }
         
         return pipeline;

@@ -113,6 +113,12 @@ public class CSSStyle {
     	    return 0;
     	}
     	
+    	String[] values = value.split(" ");
+    	if (values.length > 1) {
+    	    System.out.printf("CSSStyle: ignoring multiple dimension values, %s\n", value);
+    	    value = values[0];
+    	}
+    	
     	int offset = 0;
     	if (value.endsWith("px")) offset = 2;
     	if (value.endsWith("%")) offset = 1;

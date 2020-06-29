@@ -5,7 +5,7 @@ import java.time.LocalDate;
 public class StartupPageHandler {
     
     public final static String startupPagePath = "file://res/html/startup_page.html";
-        
+  
     public static String populateHTML(String html) {
         LocalDate date = LocalDate.now();
         String dayName = date.getDayOfWeek().toString().toLowerCase();

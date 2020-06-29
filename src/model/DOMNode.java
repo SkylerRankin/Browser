@@ -47,6 +47,50 @@ public class DOMNode {
         }
     }
     
+    public boolean equalsIgnoreText(Object obj) {
+        return equalsIgnoreText(obj, false);
+    }
+    
+    public boolean equalsIgnoreText(Object obj, boolean printDifference) {
+        if (!(obj instanceof DOMNode) || obj == null) return false;
+        DOMNode n = (DOMNode) obj;
+        if (!n.type.equals(this.type)) {
+            if (printDifference) System.out.printf("DOMNode: type mismatch: %s != %s\n", n.type, this.type);
+            return false;
+        }
+        
+        for (Entry<String, String> e : attributes.entrySet()) {
+            if (!n.attributes.containsKey(e.getKey())) {
+                if (printDifference) System.out.printf("DOMNode: missing attribute %s\n", e.getKey());
+                return false;
+            }  else if (e.getValue() == null) {
+                if (n.attributes.get(e.getKey()) != null) return false;
+            } else {
+                if (!e.getValue().equals(n.attributes.get(e.getKey()))) return false;
+            }
+        }
+        
+        if (this.children.size() != n.children.size()) {
+            if (printDifference) System.out.printf("DOMNode: children size mismatch: %d != %d\n", n.children.size(), this.children.size());
+            return false;
+        }
+        
+        for (DOMNode c : n.children) {
+            int index = n.children.indexOf(c);
+            if (this.children.size() < index) return false; 
+            
+            boolean foundChild = false;
+            for (DOMNode child : this.children) {
+                if (child.equalsIgnoreText(c)) {
+                    foundChild = true;
+                }
+            }
+            if (!foundChild) return false;
+        }
+        return true;
+        
+    }
+    
     @Override
     public boolean equals(Object obj) {
         if (!(obj instanceof DOMNode) || obj == null) return false;

@@ -76,10 +76,13 @@ public class HTTPClient {
     	// Try to download from url directly
     	try {
 			url = new URL(formatURL(urlString));
+			System.out.printf("URLString = %s\n", url.toString());
 			InputStream in = new BufferedInputStream(url.openStream());
 			image = new Image(in);
 		} catch (IOException e) {
-			System.err.printf("HTTPClient: error downloading image from %s\n", url.toString());
+			System.err.printf("HTTPClient: IO error downloading image from %s\n", url.toString());
+		} catch (Exception e) {
+		    System.err.printf("HTTPClient: general error downloading image from %s\n", url.toString());
 		}
     	
     	// Assume urlString is a relative resource; try downloading with base URL prepended

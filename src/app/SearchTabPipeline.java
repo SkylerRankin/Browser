@@ -1,6 +1,10 @@
 package app;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import app.ui.inspector.InspectorHandler;
+import javafx.concurrent.Task;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.event.EventHandler;
 import javafx.scene.canvas.Canvas;
@@ -8,6 +12,7 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Tab;
 import model.RenderNode;
 import tasks.LoadWebpageTask;
+import tasks.RedrawWebpageTask;
 
 public class SearchTabPipeline {
     
@@ -18,6 +23,7 @@ public class SearchTabPipeline {
     private Canvas canvas;
     private GraphicsContext gc;
     private final boolean debug = true;
+    private List<RedrawWebpageTask> currentRedrawTasks;
     
     public SearchTabPipeline(int id, Canvas canvas, Tab tab) {
         tabID = id;
@@ -26,10 +32,15 @@ public class SearchTabPipeline {
         this.width = (float) canvas.getWidth();
         this.gc = canvas.getGraphicsContext2D();
         this.tab = tab;
+        currentRedrawTasks = new ArrayList<RedrawWebpageTask>();
     }
     
     public void updateScreenWidth(float width) {
         this.width = width;
+    }
+    
+    public boolean loadedWebpage() {
+        return pipeline.loadedWebpage();
     }
     
     public void loadWebpage(String url) {
@@ -50,6 +61,35 @@ public class SearchTabPipeline {
             @Override
             public void uncaughtException(Thread t, Throwable e) {
                 System.err.printf("Uncaught exception: %s\n", e);
+            }
+        });
+        thread.start();
+    }
+    
+    public void redrawWebpage() {
+        if (debug) System.out.printf("SearchTabPipeline: Tab %d redrawing webpage webpage\n", tabID);
+        RedrawWebpageTask crt = new RedrawWebpageTask(width, pipeline);
+        for (RedrawWebpageTask task : currentRedrawTasks) {
+            task.cancel();
+        }
+        currentRedrawTasks.clear();
+        currentRedrawTasks.add(crt);
+        crt.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
+            @Override
+            public void handle(WorkerStateEvent event) {
+                System.out.println("RedrawWebpageTask succeeded");
+                canvas.setHeight(Math.max(pipeline.height, (float) gc.getCanvas().getHeight()));
+                pipeline.render(gc);
+                InspectorHandler.get().update(pipeline.getRootRenderNode());
+                currentRedrawTasks.remove(crt);
+            }
+        });
+        Thread thread = new Thread(crt);
+        thread.setUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+            @Override
+            public void uncaughtException(Thread t, Throwable e) {
+                System.err.printf("Uncaught exception: %s\n", e);
+                currentRedrawTasks.remove(crt);
             }
         });
         thread.start();

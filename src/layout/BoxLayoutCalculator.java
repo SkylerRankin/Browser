@@ -10,6 +10,7 @@ import css.CSSStyle;
 import model.Box;
 import model.RenderNode;
 import model.Vector2;
+import parser.HTMLElements;
 import renderer.ImageCache;
 
 public class BoxLayoutCalculator {
@@ -507,12 +508,48 @@ public class BoxLayoutCalculator {
     }
     
     /**
-     * Once all dimensions and max sizes are set, check if any lines of text are too large for their
-     * containing element. For these, split them into multiple lines by making new render nodes.
+     * Find each table, and enlarge the sizes of each cell so that the columns line up.
      * @param root
      */
-    public void breakLines(RenderNode root) {
-    	
+    public void setTableCellWidths(RenderNode root) {
+        if (root.type.equals(HTMLElements.TABLE)) {
+            // TODO check for thead, tbody, tfoot
+            List<RenderNode> rows = root.getElementsInChildren(HTMLElements.TR);
+            
+            int maxColumns = 0;
+            for (RenderNode row : rows) {
+                int columns = row.getElementsInChildren(HTMLElements.TD).size();
+                if (columns > maxColumns) maxColumns = columns;
+            }
+            
+            Float[] widths = new Float[maxColumns];
+            
+            for (RenderNode row : rows) {
+                List<RenderNode> cols = row.getElementsInChildren(HTMLElements.TD);
+                for (int i = 0; i < maxColumns; i++) {
+                    if (i < cols.size() && (widths[i] == null || widths[i] < cols.get(i).box.width)) {
+                        widths[i] = new Float(cols.get(i).box.width);
+                    }
+                }
+            }
+            
+            for (Float f : widths) System.out.printf("width: %f\n", f);
+            
+            for (RenderNode row : rows) {
+                List<RenderNode> cols = row.getElementsInChildren(HTMLElements.TD);
+                for (int i = 0; i < cols.size(); i++) {
+                    RenderNode cell = cols.get(i);
+                    System.out.printf("CurrentWidth: %f, set width: %s\n", cell.box.width, widths[i]);
+                    cell.box.width = widths[i] + cell.style.marginLeft + cell.style.marginRight;
+                    cell.box.fixedWidth = true;
+                }
+            }
+            
+        } else {
+            for (RenderNode child : root.children) {
+                setTableCellWidths(child);
+            }
+        }
     }
 
 }

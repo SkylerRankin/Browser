@@ -37,11 +37,12 @@ public class HTMLParser {
         
         while (index < html.length()) {
             
-            if (html.substring(index, index+1).equals("<")) {
+            if (atNewTag(html, index)) {
                 // If the current index is the start of an HTML tag.
                 
                 int end = html.indexOf(">", index+1);
                 String fullTag = html.substring(index, end+1);
+                
                 if (fullTag.startsWith("</")) {
                     // If this is an ending tag, then move up to the parent.
                     current = current.parent;
@@ -49,7 +50,6 @@ public class HTMLParser {
                     DOMNode n;
                     // If this is another new tag, set it to be the current tag to explore.
                     String content = html.substring(end-1, end).equals("/") ? html.substring(index+1, end-1) : html.substring(index+1, end);
-                    
                     int spaceIndex = content.indexOf(' ');
                     if (spaceIndex == -1) {
                         n = new DOMNode(content);
@@ -71,11 +71,22 @@ public class HTMLParser {
 //                        current = n;
 //                    }
                 }
-                index+=(end - index+1);
+                index += (end - index + 1);
             } else {
                 // If the current index is the start of the content between two tags.
                 
-                int end = html.indexOf("<", index+1);
+                int end = -1;
+                int currentIndex = index + 1;
+                while (end < 0) {
+                    int next = html.indexOf("<", currentIndex);
+                    if (atNewTag(html, next)) {
+                        end = next;
+                    } else {
+                        currentIndex = next + 1;
+                    }
+                }
+                
+                int closing = html.indexOf(">", end);
                 String content = html.substring(index, end);
                 DOMNode n = new DOMNode(HTMLElements.TEXT);
                 n.content = content;
@@ -86,6 +97,20 @@ public class HTMLParser {
         }
         
         return root;
+    }
+    
+    private boolean atNewTag(String html, int index) {
+        // TODO: better handling for < and > inside scripts
+        if (!html.substring(index, index + 1).equals("<")) return false;
+        int spaceIndex = html.indexOf(" ", index + 1);
+        int closeTagIndex = html.indexOf(">", index + 1);
+        if (spaceIndex == -1 && closeTagIndex == -1) return false;
+        int endIndex =
+                spaceIndex == -1 ? closeTagIndex :
+                closeTagIndex == -1 ? spaceIndex :
+                Math.min(spaceIndex, closeTagIndex);
+        if (!html.substring(index + 1, endIndex).matches("[\\w/]+")) return false;
+        return true;
     }
     
     public DOMNode getBodyNode(DOMNode dom) {
@@ -200,7 +225,12 @@ public class HTMLParser {
      */
     public String[] splitOnAttributes(String s) {
         // Pattern Examples: "x", ".. x", ".. x ..", "x="some stuff""
-        Pattern pattern = Pattern.compile("(^[\\w-]+$)|([\\w-]+$)|([\\w-]+?(?=\\s))|([\\w-]+=\"[\\s\\w\\.\\-\\:\\;%#]+\")");
+        Pattern pattern = Pattern.compile(
+                "(^[\\w-]+$)|" +
+                "([\\w-]+$)|" +
+                "([\\w-]+?(?=\\s))|" +
+                "([\\w-]+=\"[^\"]+\")"      // inside the quotes, match anything that is not a quote
+        );
         Matcher matcher = pattern.matcher(s);
         List<String> attributes = new ArrayList<String>();
         while (matcher.find()) {

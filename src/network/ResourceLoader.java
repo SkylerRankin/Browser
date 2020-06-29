@@ -49,8 +49,8 @@ public class ResourceLoader {
                 String filePath = url.substring(filePrefix.length());
                 html = new String(Files.readAllBytes(Paths.get(filePath)));
             } catch (IOException e) {
-                System.err.printf("ResourceLoader: failed to load %s\n", url);
-                e.printStackTrace();
+                System.err.printf("ResourceLoader: failed to load %s, %s\n", url, e.getLocalizedMessage());
+//                e.printStackTrace();
             }
         } else {
             html = HTTPClient.requestPage(url);

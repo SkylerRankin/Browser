@@ -13,12 +13,14 @@ public class BookmarksBar extends HBox {
     public BookmarksBar(TextField urlInput) {
         this.urlInput = urlInput;
         this.setPrefHeight(50);
+        addBookmark("https://www.google.com");
+        addBookmark("file://res/html/table.html");
         addBookmark("file://res/html/startup_page.html");
-        addBookmark("http://gallium.inria.fr/~fpottier/menhir/");
-        addBookmark("https://caml.inria.fr/pub/docs/manual-ocaml/libref/Option.html");
-        addBookmark("https://caml.inria.fr/pub/docs/manual-ocaml/libref/List.html");
-        addBookmark("https://www.kernel.org/doc/man-pages/");
-        addBookmark("https://www.kernel.org/doc/man-pages/download.html");
+//        addBookmark("http://gallium.inria.fr/~fpottier/menhir/");
+//        addBookmark("https://caml.inria.fr/pub/docs/manual-ocaml/libref/Option.html");
+//        addBookmark("https://caml.inria.fr/pub/docs/manual-ocaml/libref/List.html");
+//        addBookmark("https://www.kernel.org/doc/man-pages/");
+//        addBookmark("https://www.kernel.org/doc/man-pages/download.html");
     }
     
     public void addBookmark(String url) {

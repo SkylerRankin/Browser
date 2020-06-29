@@ -70,8 +70,8 @@ public class CSSLoader {
 		try {
 			cssString = new String(Files.readAllBytes(Paths.get("./res/css/default.css")));
 		} catch (IOException e) {
-		    System.err.println("CSSLoader: failed to load default.css");
-			e.printStackTrace();
+		    System.err.println("CSSLoader: failed to load default.css, " + e.getLocalizedMessage());
+//			e.printStackTrace();
 		}
 		parser.parse(cssString);
 		Map<Selector, Map<String, String>> rules = parser.getRules();

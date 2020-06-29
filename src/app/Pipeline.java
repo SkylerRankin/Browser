@@ -22,6 +22,7 @@ public class Pipeline {
 	private ResourceLoader resourceLoader;
 	private DOMNode domRoot;
 	private RenderNode renderRoot;
+	private boolean loaded;
 	
 	public String title;
 	public float width;
@@ -46,6 +47,7 @@ public class Pipeline {
 	    resourceLoader.loadWebpage(url);
 		domRoot = resourceLoader.getDOM();
 		title = (new HTMLParser(null)).getTitle(domRoot);
+		loaded = true;
 	}
 	
 	/**
@@ -66,6 +68,7 @@ public class Pipeline {
 		blc.propagateMaxSizes(renderRoot);
 //		blc.printBoxes(renderRoot);
 		blc.finalizeDimensions(renderRoot);
+		blc.setTableCellWidths(renderRoot);
 		blc.calculateBoxes(renderRoot);
 		blc.applyJustification(renderRoot);
 //	    blc.printBoxes(renderRoot);
@@ -85,6 +88,10 @@ public class Pipeline {
 	// Expose the render tree for the inspector
 	public RenderNode getRootRenderNode() {
 	    return renderRoot;
+	}
+	
+	public boolean loadedWebpage() {
+	    return loaded;
 	}
 
 }
