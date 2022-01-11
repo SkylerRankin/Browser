@@ -7,7 +7,6 @@ This is a bare bones web browser written in Java that supports enough HTML and C
 - HTML and CSS parsing into DOM and CSSOM.
 - Multi-threaded webpage processing.
 - Multiple tabs.
-- 
 
 ### Notable Omissions
 - No JavaScript interpreter. Many modern web applications don't render anything interesting because of this. 
