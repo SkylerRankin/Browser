@@ -5,31 +5,41 @@
             body {
                 padding: 50px;
                 font-family: Verdana;
-                background-color: #002b36;
+                background-color: #fff;
             }
-            
-            p {color: white;}
-            b {color: #c22817;}
-            
+
+            div {
+                font-size: 12px;
+            }
+
+            .container {
+                max-width: 500px;
+                margin: auto;
+                width: 40%;
+            }
         </style>
     </head>
     <body>
-        <div style="padding: 10px; border: 3px solid #005e1d; max-width: 400px; margin: auto; width: 40%;">
-           <p style="margin-bottom: 0px;"> Today is:</p>
-            <h1 style="color: #005e1d; margin-top: 0px;">
-             $DAY_NAME$ $MONTH_NAME$ $DAY_DATE$
-            </h1>
-            <hr style="color: white; height: 2px; margin-bottom: 15px;"/>
-            <div style="padding: 20px;">
-              <p>
-                This browser implements the bare minimum <b>HTML</b> and <b>CSS</b> to view many simple webpages and most older webpages. The application's main pipeline to convert a URL to a visible site happens in about 3 steps: <b>resource fetching</b>, <b>layout calculation</b>, and <b>rendering</b>. These steps, particularly layout calculation, contain many smaller steps and explore lots of interesting HTML rendering engine problems, such as generating a DOM, resolving complex CSS precedence rules, and intelligent line splitting.
-              </p>
-              <p>
-                In the <b>bookmarks above</b> are some webpages that render pretty closely to what modern browser would provide. Given that this is largely an HTML renderer (no <b>JavaScript</b> engine), lots of modern sites won't render correctly.
-              </p>
-              <p>
-              Read more and see the source code at <b>github.com/SkylerRankin/browser</b>
-              </p>
+        <div class="container">
+            <h1>HTML Web Browser</h1>
+            <hr/>
+            <div>
+                <p>
+                    This browser implements the bare minimum HTML and CSS required to view simple webpages. The rendering pipeline converts a given URL into a visible webpage via three main steps: <b>resource fetching</b>, <b>layout calculation</b>, and <b>rendering</b>. These steps, particularly layout calculation, explore lots of interesting HTML rendering engine problems, such as DOM box calculation, resolving messy CSS precedence rules, and intelligent line splitting.
+                </p>
+                <p>
+                    Read more and see the source code at <a>github.com/SkylerRankin/browser</a>.
+                </p>
+                <hr/>
+                <b>Offline test webpages</b>
+                <div>The following lists of webpages are simple enough that they should render completely correctly in this browser. The source files are saved locally in this repo in case the webpages are taken down in the future.</div>
+                <ul>
+                    <li>Ancient Chinese Geography</li>
+                    <li>Confusing Domestic Ducks (and hybrids)</li>
+                    <li>Linux man-pages</li>
+                    <li>Menhir LR(1) parser</li>
+                    <li>Gradle unit test report</li>
+                </ul>
             </div>
         </div>
     </body>
