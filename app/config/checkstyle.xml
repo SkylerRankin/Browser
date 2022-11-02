@@ -1,0 +1,75 @@
+<?xml version="1.0"?>
+<!DOCTYPE module PUBLIC "-//Checkstyle//DTD Checkstyle Configuration 1.3//EN" "https://checkstyle.org/dtds/configuration_1_3.dtd">
+
+<module name="Checker">
+    <property name="charset" value="UTF-8" />
+
+    <property name="severity" value="error" />
+
+    <property name="fileExtensions" value="java, properties, xml" />
+    <!-- Excludes all 'module-info.java' files              -->
+    <!-- See https://checkstyle.org/config_filefilters.html -->
+    <module name="BeforeExecutionExclusionFileFilter">
+        <property name="fileNamePattern" value="module\-info\.java$" />
+    </module>
+    <!-- https://checkstyle.org/config_filters.html#SuppressionFilter -->
+    <module name="SuppressionFilter">
+        <property name="file" value="${org.checkstyle.google.suppressionfilter.config}" default="suppressions.xml" />
+        <property name="optional" value="true" />
+    </module>
+
+    <!-- Checks for whitespace                               -->
+    <!-- See http://checkstyle.org/config_whitespace.html -->
+    <module name="FileTabCharacter">
+        <property name="eachLine" value="true" />
+    </module>
+
+    <module name="TreeWalker">
+
+        <!-- Alphabetical imports, with spaces between java, javafx, browser, and other imports. -->
+        <module name="ImportOrder">
+            <property name="ordered" value="true"/>
+            <property name="groups" value="/^java\./,/^javafx\./,/^browser\.*/"/>
+            <property name="separated" value="true"/>
+            <property name="option" value="top"/>
+            <property name="sortStaticImportsAlphabetically" value="true"/>
+        </module>
+
+        <!-- Disallow unused imports. -->
+        <module name="UnusedImports"/>
+
+<!--        <module name="Indentation">-->
+<!--            <property name="basicOffset" value="4"/>-->
+<!--        </module>-->
+
+        <module name="MemberName">
+            <property name="format" value="^[a-z][a-zA-Z0-9]*$"/>
+        </module>
+
+        <!-- Local variables are camel case. -->
+        <module name="LocalFinalVariableName"/>
+        <module name="LocalVariableName">
+            <property name="format" value="^[a-z][a-zA-Z0-9]*$"/>
+        </module>
+
+        <!-- Empty line separators between things like imports, classes, methods, etc. -->
+        <module name="EmptyLineSeparator">
+            <property name="allowMultipleEmptyLines" value="false"/>
+            <property name="allowNoEmptyLineBetweenFields" value="true"/>
+            <property name="tokens" value="PACKAGE_DEF,IMPORT,ENUM_DEF"/>
+        </module>
+        <!-- Normal formatting for whitespace around '<' and '>'. -->
+        <module name="GenericWhitespace"/>
+        <!-- Normal whitespace around method definition -->
+        <module name="MethodParamPad"/>
+        <!-- Prevent whitespace at the end of a line. -->
+        <module name="NoWhitespaceAfter"/>
+        <!-- Prevent whitespace at the start of a line. -->
+        <module name="NoWhitespaceBefore"/>
+
+
+    </module>
+
+
+
+</module>

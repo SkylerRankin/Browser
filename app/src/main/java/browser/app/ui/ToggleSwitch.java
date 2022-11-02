@@ -1,4 +1,4 @@
-package browser.parser.app.ui;
+package browser.app.ui;
 
 import javafx.event.Event;
 import javafx.event.EventHandler;
@@ -10,7 +10,7 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 
 public class ToggleSwitch extends StackPane {
-	
+
     private final Rectangle back = new Rectangle(30, 10, Color.RED);
     private final Button button = new Button();
     private String buttonStyleOff = "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 0.2, 0.0, 0.0, 2); -fx-background-color: WHITE;";
@@ -18,8 +18,8 @@ public class ToggleSwitch extends StackPane {
     private boolean state;
 
     private void init() {
-    	this.maxWidth(30);
-    	this.minWidth(30);
+        this.maxWidth(30);
+        this.minWidth(30);
         getChildren().addAll(back, button);
         setMinSize(30, 15);
         back.maxWidth(30);

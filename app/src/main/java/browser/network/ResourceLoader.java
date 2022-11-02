@@ -10,17 +10,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import browser.parser.app.ErrorPageHandler;
-import browser.parser.app.StartupPageHandler;
+import browser.app.ErrorPageHandler;
+import browser.app.StartupPageHandler;
 import browser.model.DOMNode;
 import browser.parser.HTMLParser;
 import browser.renderer.ImageCache;
 
 public class ResourceLoader {
+
+    private enum resourceType {IMG, CSS}
     
     private DOMNode dom;
     private Map<resourceType, Set<String>> resources;
-    private enum resourceType {IMG, CSS};
     private List<String> externalCSS;
     private final String filePrefix = "file://";
     private final boolean debug = true;

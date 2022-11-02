@@ -1,39 +1,34 @@
 package browser.layout;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
-
 import browser.css.CSSStyle;
-//import browser.javafx.embed.swing.JFXPanel;
-import browser.layout.TextDimensionCalculator;
-import browser.layout.TextSplitter;
 import browser.model.Vector2;
+
+import org.junit.Test;
 
 public class TextDimensionCalculatorTest {
 
-//	@Before
-//	public void before() {
-//		JFXPanel jfxPanel = new JFXPanel();
-//	}
+//    @Before
+//    public void before() {
+//        JFXPanel jfxPanel = new JFXPanel();
+//    }
 
     @Test
     public void test() {
-//		JFXPanel jfxPanel = new JFXPanel();
+//        JFXPanel jfxPanel = new JFXPanel();
         CSSStyle style = new CSSStyle();
         style.fontFamily = "Times New Roman";
         style.fontSize = 12;
-//		style.fontWeight = CSSStyle.fontWeightType.BOLD;
+//        style.fontWeight = CSSStyle.fontWeightType.BOLD;
         Vector2 dimensions = TextDimensionCalculator.getTextDimension("<end>", style);
         System.out.printf("%s\n", dimensions.toString());
     }
 
-    //	@Test
+    //    @Test
     public void splitToWidthTest_simple() {
         String testString = "onetwothree";
         float maxWidth = 20f;

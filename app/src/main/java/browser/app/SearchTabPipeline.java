@@ -1,14 +1,15 @@
-package browser.parser.app;
+package browser.app;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import browser.parser.app.ui.inspector.InspectorHandler;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.event.EventHandler;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Tab;
+
+import browser.app.ui.inspector.InspectorHandler;
 import browser.tasks.LoadWebpageTask;
 import browser.tasks.RedrawWebpageTask;
 

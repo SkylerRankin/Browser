@@ -2,14 +2,26 @@ package browser.model;
 
 public class CSSRulePrecedent {
     
-    private static enum RuleType { ALL, ELEMENT, CLASS, ID };
+    private enum RuleType { ALL, ELEMENT, CLASS, ID }
+
     private int levelsInherited;
     private RuleType ruleType;
     
-    public static CSSRulePrecedent All() { return new CSSRulePrecedent(RuleType.ALL); }
-    public static CSSRulePrecedent Element() { return new CSSRulePrecedent(RuleType.ELEMENT); }
-    public static CSSRulePrecedent Class() { return new CSSRulePrecedent(RuleType.CLASS); }
-    public static CSSRulePrecedent ID() { return new CSSRulePrecedent(RuleType.ID); }
+    public static CSSRulePrecedent All() {
+        return new CSSRulePrecedent(RuleType.ALL);
+    }
+
+    public static CSSRulePrecedent Element() {
+        return new CSSRulePrecedent(RuleType.ELEMENT);
+    }
+
+    public static CSSRulePrecedent Class() {
+        return new CSSRulePrecedent(RuleType.CLASS);
+    }
+
+    public static CSSRulePrecedent ID() {
+        return new CSSRulePrecedent(RuleType.ID);
+    }
     
     public CSSRulePrecedent(RuleType ruleType) {
         this.ruleType = ruleType;

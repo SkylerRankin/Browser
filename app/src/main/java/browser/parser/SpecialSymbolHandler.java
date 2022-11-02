@@ -8,11 +8,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 public class SpecialSymbolHandler {
-	
-	private static Map<String, String> symbols = new HashMap<String, String>();
-	
-	public static void init() {
-	    try {
+
+    private static Map<String, String> symbols = new HashMap<String, String>();
+
+    public static void init() {
+        try {
             BufferedReader reader = new BufferedReader(new FileReader("./src/main/resources/data/specialSymbols.txt"));
             String line;
             while ((line = reader.readLine()) != null) {
@@ -30,18 +30,18 @@ public class SpecialSymbolHandler {
             System.err.println("SpecialSymbolHandler: error reading file specialSymbols.txt");
             e.printStackTrace();
         }
-	    
-	}
-	
-	public static String insertSymbols(String s) {
-	    if (s == null) return s;
-	    for (Entry<String, String> e : symbols.entrySet()) {
-	        s = s.replace(e.getKey(), e.getValue());
-	    }
-	    s = s.replace("\\\\t", " ")
-	            .replace("\\\\s", " ")
-	            .replace("\\\\r", " ");
-		return s;
-	}
+
+    }
+
+    public static String insertSymbols(String s) {
+        if (s == null) return s;
+        for (Entry<String, String> e : symbols.entrySet()) {
+            s = s.replace(e.getKey(), e.getValue());
+        }
+        s = s.replace("\\\\t", " ")
+                .replace("\\\\s", " ")
+                .replace("\\\\r", " ");
+        return s;
+    }
 
 }

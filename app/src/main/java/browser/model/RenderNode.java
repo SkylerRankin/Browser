@@ -53,10 +53,10 @@ public class RenderNode {
     }
     
     public RenderNode(RenderNode node) {
-    	type = node.type;
-    	text = node.text;
-    	depth = node.depth;
-    	id = RenderTreeGenerator.getNextID();
+        type = node.type;
+        text = node.text;
+        depth = node.depth;
+        id = RenderTreeGenerator.getNextID();
         children = new ArrayList<RenderNode>();
         box = new Box();
         cssAttribute = node.cssAttribute;

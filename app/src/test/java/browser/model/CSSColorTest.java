@@ -2,11 +2,10 @@ package browser.model;
 
 import static org.junit.Assert.assertEquals;
 
+import browser.css.DefaultColors;
+
 import org.junit.Before;
 import org.junit.Test;
-
-import browser.css.DefaultColors;
-import browser.model.CSSColor;
 
 public class CSSColorTest {
 

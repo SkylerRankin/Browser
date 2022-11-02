@@ -1,4 +1,4 @@
-package browser.parser.app.ui;
+package browser.app.ui;
 
 import javafx.event.EventHandler;
 import javafx.scene.control.Button;

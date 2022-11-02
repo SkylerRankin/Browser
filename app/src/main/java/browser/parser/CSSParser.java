@@ -2,11 +2,9 @@ package browser.parser;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -24,12 +22,12 @@ public class CSSParser {
         ELEMENT,
         NESTED_ELEMENT,
         ELEMENT_CLASS
-    };
+    }
     
     // Map of CSS selectors to a mapping of rules.
     private Map<Selector, Map<String, String>> rules;
     // Root node of the CSS Object Model.
-    private CSSNode CSSOM;
+    private CSSNode cssOM;
     // Map from ID name to rules.
     private Map<String, Map<String, String>> idMap;
     // Map of class name/names to rules. If nested classes, key is space deliminated.
@@ -44,7 +42,7 @@ public class CSSParser {
         css = css.replaceAll("[\r\n]", " ");
         css = removeComments(css);
         rules = parseRules(css);
-        CSSOM = generateCSSOM();
+        cssOM = generateCSSOM();
         idMap = generateIDMap();
     }
     
@@ -125,7 +123,7 @@ public class CSSParser {
         return idMap;
     }
     
-    public CSSNode getCSSOM() { return CSSOM; }
+    public CSSNode getCSSOM() { return cssOM; }
     public Map<Selector, Map<String, String>> getRules() { return rules; }
     public Map<String, Map<String, String>> getIDMap() { return idMap; }
     public Map<String, Map<String, String>> getClassMap() { return classMap; }
@@ -248,15 +246,15 @@ public class CSSParser {
     }
     
     public void printRules() {
-    	System.out.printf("--- CSSParser: %d Rules ---\n", rules.size());
-    	for (Entry<Selector, Map<String, String>> entry : rules.entrySet()) {
-    	    
-    		System.out.printf("%s:\n", entry.getKey().toString());
-    		for (Entry<String, String> rule : entry.getValue().entrySet()) {
-    			System.out.printf("\t%s: %s\n", rule.getKey(), rule.getValue());
-    		}
-    	}
-    	System.out.println("---------------------------\n");
+        System.out.printf("--- CSSParser: %d Rules ---\n", rules.size());
+        for (Entry<Selector, Map<String, String>> entry : rules.entrySet()) {
+
+            System.out.printf("%s:\n", entry.getKey().toString());
+            for (Entry<String, String> rule : entry.getValue().entrySet()) {
+                System.out.printf("\t%s: %s\n", rule.getKey(), rule.getValue());
+            }
+        }
+        System.out.println("---------------------------\n");
     }
     
     public class Selector {

@@ -1,8 +1,9 @@
 package browser.tasks;
 
-import browser.parser.app.ErrorPageHandler;
-import browser.parser.app.Pipeline;
 import javafx.concurrent.Task;
+
+import browser.app.ErrorPageHandler;
+import browser.app.Pipeline;
 
 public class LoadWebpageTask extends Task<Pipeline> {
     

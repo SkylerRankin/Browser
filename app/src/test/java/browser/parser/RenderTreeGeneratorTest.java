@@ -1,11 +1,9 @@
 package browser.parser;
 
-import org.junit.Test;
-
 import browser.model.DOMNode;
 import browser.model.RenderNode;
-import browser.parser.HTMLElements;
-import browser.parser.RenderTreeGenerator;
+
+import org.junit.Test;
 
 public class RenderTreeGeneratorTest {
 

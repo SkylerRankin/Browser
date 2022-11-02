@@ -1,6 +1,5 @@
 package browser.network;
 
-import browser.network.HTTPClient;
 import org.junit.Test;
 
 public class HTTPClientTest {

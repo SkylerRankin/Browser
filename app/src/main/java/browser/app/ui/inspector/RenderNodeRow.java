@@ -1,4 +1,4 @@
-package browser.parser.app.ui.inspector;
+package browser.app.ui.inspector;
 
 import java.io.File;
 import java.util.HashMap;
@@ -13,6 +13,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
+
 import browser.model.RenderNode;
 import browser.parser.HTMLElements;
 

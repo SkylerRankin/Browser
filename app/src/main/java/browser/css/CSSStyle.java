@@ -10,19 +10,26 @@ import browser.model.CSSColor;
 import browser.model.CSSRulePrecedent;
 
 public class CSSStyle {
-	
-	private Set<String> setProperties = new HashSet<String>();
-	private Map<String, String> properties = new HashMap<String, String>();
-	private Map<String, CSSRulePrecedent> precedents = new HashMap<String, CSSRulePrecedent>();
-		
-    public static enum dimensionType {PIXEL, PERCENTAGE};
-    public static enum displayType {BLOCK, INLINE, NONE};
-    public static enum fontStyleType {NORMAL, ITALIC, ITALICS};
-    public static enum fontWeightType {NORMAL, BOLD, OTHER};
-    public static enum textAlignType {LEFT, CENTER, RIGHT};
-//    public static enum textDecorationType {NONE, OVERLINE, LINETHROUGH, UNDERLINE};
-    public static enum wordWrapType {NORMAL, BREAKWORD};
-    public static enum marginSizeType {AUTO, PIXEL};
+
+    private final Set<String> setProperties = new HashSet<>();
+    private final Map<String, String> properties = new HashMap<>();
+    private final Map<String, CSSRulePrecedent> precedents = new HashMap<>();
+
+    public static enum dimensionType {PIXEL, PERCENTAGE}
+
+    public static enum displayType {BLOCK, INLINE, NONE}
+
+    public static enum fontStyleType {NORMAL, ITALIC, ITALICS}
+
+    public static enum fontWeightType {NORMAL, BOLD, OTHER}
+
+    public static enum textAlignType {LEFT, CENTER, RIGHT}
+
+//    public static enum textDecorationType {NONE, OVERLINE, LINETHROUGH, UNDERLINE}
+
+    public static enum wordWrapType {NORMAL, BREAKWORD}
+
+    public static enum marginSizeType {AUTO, PIXEL}
     
     public CSSColor backgroundColor = new CSSColor("White");
     
@@ -87,42 +94,42 @@ public class CSSStyle {
      * @return
      */
     public boolean hasPropertySet(String property) {
-//    	return properties.containsKey(property);
+//        return properties.containsKey(property);
         return setProperties.contains(property);
     }
     
     public void setProperty(String property, String value) {
-    	properties.put(property, value);
-    	setProperties.add(property);
+        properties.put(property, value);
+        setProperties.add(property);
     }
     
     public Map<String, String> getAllProperties() {
-    	return properties;
+        return properties;
     }
     
     public void resetSetProperties() {
-    	setProperties.clear();
+        setProperties.clear();
     }
     
     private int parseDimension(String value) {
-    	value = value.trim();
-    	
-    	if (value.endsWith("em")) {
-    	    return (int) (16 * Double.parseDouble(value.substring(0, value.length() - 2)));
-    	} else if (value.equals("auto")) {
-    	    return 0;
-    	}
-    	
-    	String[] values = value.split(" ");
-    	if (values.length > 1) {
-    	    System.out.printf("CSSStyle: ignoring multiple dimension values, %s\n", value);
-    	    value = values[0];
-    	}
-    	
-    	int offset = 0;
-    	if (value.endsWith("px")) offset = 2;
-    	if (value.endsWith("%")) offset = 1;
-    	return Integer.parseInt(value.substring(0, value.length() - offset));
+        value = value.trim();
+
+        if (value.endsWith("em")) {
+            return (int) (16 * Double.parseDouble(value.substring(0, value.length() - 2)));
+        } else if (value.equals("auto")) {
+            return 0;
+        }
+
+        String[] values = value.split(" ");
+        if (values.length > 1) {
+            System.out.printf("CSSStyle: ignoring multiple dimension values, %s\n", value);
+            value = values[0];
+        }
+
+        int offset = 0;
+        if (value.endsWith("px")) offset = 2;
+        if (value.endsWith("%")) offset = 1;
+        return Integer.parseInt(value.substring(0, value.length() - offset));
     }
     
     private int parseFontSizeValue(String value) {
@@ -156,28 +163,28 @@ public class CSSStyle {
      * Convert the string properties and values to actual properties on this class
      */
     public void finalizeCSS() {
-    	for (Entry<String, String> e : properties.entrySet()) {
-    		String value = e.getValue().trim();
-    		switch (e.getKey()) {
-    		case "background-color": 	backgroundColor = new CSSColor(value); break;
-    		case "border":              borderWidthTop = parseBorderWidth(value);
-    		                            borderWidthBottom = parseBorderWidth(value);
-    		                            borderWidthLeft = parseBorderWidth(value);
-    		                            borderWidthRight = parseBorderWidth(value);
-    		                            borderColorTop = parseBorderColor(value);
+        for (Entry<String, String> e : properties.entrySet()) {
+            String value = e.getValue().trim();
+            switch (e.getKey()) {
+            case "background-color":     backgroundColor = new CSSColor(value); break;
+            case "border":              borderWidthTop = parseBorderWidth(value);
+                                        borderWidthBottom = parseBorderWidth(value);
+                                        borderWidthLeft = parseBorderWidth(value);
+                                        borderWidthRight = parseBorderWidth(value);
+                                        borderColorTop = parseBorderColor(value);
                                         borderColorBottom = parseBorderColor(value);
                                         borderColorLeft = parseBorderColor(value);
                                         borderColorRight = parseBorderColor(value); break;
-    		case "border-color":        borderColorTop = new CSSColor(value);
-    		                            borderColorBottom = new CSSColor(value);
-    		                            borderColorLeft = new CSSColor(value);
-    		                            borderColorRight = new CSSColor(value);break;
-    		case "border-width":        borderWidthTop = Integer.parseInt(value);
-    		                            borderWidthBottom = Integer.parseInt(value);
-    		                            borderWidthLeft = Integer.parseInt(value);
-    		                            borderWidthRight = Integer.parseInt(value); break;
-    		case "border-top":          borderColorTop = parseBorderColor(value);
-    		                            borderWidthTop = parseBorderWidth(value); break;
+            case "border-color":        borderColorTop = new CSSColor(value);
+                                        borderColorBottom = new CSSColor(value);
+                                        borderColorLeft = new CSSColor(value);
+                                        borderColorRight = new CSSColor(value);break;
+            case "border-width":        borderWidthTop = Integer.parseInt(value);
+                                        borderWidthBottom = Integer.parseInt(value);
+                                        borderWidthLeft = Integer.parseInt(value);
+                                        borderWidthRight = Integer.parseInt(value); break;
+            case "border-top":          borderColorTop = parseBorderColor(value);
+                                        borderWidthTop = parseBorderWidth(value); break;
             case "border-bottom":       borderColorBottom = parseBorderColor(value);
                                         borderWidthBottom = parseBorderWidth(value); break;
             case "border-left":         borderColorLeft = parseBorderColor(value);
@@ -192,45 +199,45 @@ public class CSSStyle {
             case "border-bottom-width": borderWidthBottom = parseDimension(value); break;
             case "border-left-width":   borderWidthLeft = parseDimension(value); break;
             case "border-right-width":  borderWidthRight = parseDimension(value); break;
-    		case "color": 				color = new CSSColor(value); break;
-    		case "display":				display = displayType.valueOf(value.toUpperCase()); break;
-    		case "font-family":			fontFamily = FontLoader.getValidFont(value.split(",")); break;
-    		case "font-size":			fontSize = parseFontSizeValue(value.toLowerCase()); break;
-    		case "font-style":			fontStyle = fontStyleType.valueOf(value.toUpperCase()); break;
-    		case "font-weight":			fontWeight = fontWeightType.valueOf(value.toUpperCase()); break;
-    		case "height":				height = (float) parseDimension(value);
-							    		heightType = value.contains("%") ? 
-												dimensionType.PERCENTAGE : 
-												dimensionType.PIXEL; break;
-    		case "margin":              marginType = value.equals("auto") ?
-    		                                    marginSizeType.AUTO :
-    		                                    marginSizeType.PIXEL;
-    		                            if (marginType.equals(marginSizeType.PIXEL)) {
-    		                                marginTop = parseDimension(value);
-    		                                marginRight = parseDimension(value);
-    		                                marginBottom = parseDimension(value);
-    		                                marginLeft = parseDimension(value);
-    		                            } break;
-    		case "margin-top":			marginTop = parseDimension(value);  break;
-    		case "margin-right":		marginRight = parseDimension(value);  break;
-    		case "margin-bottom":		marginBottom = parseDimension(value);  break;
-    		case "margin-left":			marginLeft = parseDimension(value);  break;
-    		case "max-width":           maxWidth = (float) parseDimension(value); break;
-    		case "padding":             paddingTop = parseDimension(value);
-    		                            paddingRight = parseDimension(value);
-    		                            paddingBottom = parseDimension(value);
-    		                            paddingLeft = parseDimension(value); break;
-    		case "padding-top":			paddingTop = parseDimension(value);  break;
-    		case "padding-right":		paddingRight = parseDimension(value);  break;
-    		case "padding-bottom":		paddingBottom = parseDimension(value);  break;
-    		case "padding-left":		paddingLeft = parseDimension(value);  break;
-    		case "text-align":			textAlign = textAlignType.valueOf(value.toUpperCase()); break;
-    		case "width":				width = (float) parseDimension(value);
-    									widthType = value.contains("%") ? 
-    											dimensionType.PERCENTAGE : 
-    											dimensionType.PIXEL; break;
-    		}
-    	}
+            case "color":                 color = new CSSColor(value); break;
+            case "display":                display = displayType.valueOf(value.toUpperCase()); break;
+            case "font-family":            fontFamily = FontLoader.getValidFont(value.split(",")); break;
+            case "font-size":            fontSize = parseFontSizeValue(value.toLowerCase()); break;
+            case "font-style":            fontStyle = fontStyleType.valueOf(value.toUpperCase()); break;
+            case "font-weight":            fontWeight = fontWeightType.valueOf(value.toUpperCase()); break;
+            case "height":                height = (float) parseDimension(value);
+                                        heightType = value.contains("%") ?
+                                                dimensionType.PERCENTAGE :
+                                                dimensionType.PIXEL; break;
+            case "margin":              marginType = value.equals("auto") ?
+                                                marginSizeType.AUTO :
+                                                marginSizeType.PIXEL;
+                                        if (marginType.equals(marginSizeType.PIXEL)) {
+                                            marginTop = parseDimension(value);
+                                            marginRight = parseDimension(value);
+                                            marginBottom = parseDimension(value);
+                                            marginLeft = parseDimension(value);
+                                        } break;
+            case "margin-top":            marginTop = parseDimension(value);  break;
+            case "margin-right":        marginRight = parseDimension(value);  break;
+            case "margin-bottom":        marginBottom = parseDimension(value);  break;
+            case "margin-left":            marginLeft = parseDimension(value);  break;
+            case "max-width":           maxWidth = (float) parseDimension(value); break;
+            case "padding":             paddingTop = parseDimension(value);
+                                        paddingRight = parseDimension(value);
+                                        paddingBottom = parseDimension(value);
+                                        paddingLeft = parseDimension(value); break;
+            case "padding-top":            paddingTop = parseDimension(value);  break;
+            case "padding-right":        paddingRight = parseDimension(value);  break;
+            case "padding-bottom":        paddingBottom = parseDimension(value);  break;
+            case "padding-left":        paddingLeft = parseDimension(value);  break;
+            case "text-align":            textAlign = textAlignType.valueOf(value.toUpperCase()); break;
+            case "width":                width = (float) parseDimension(value);
+                                        widthType = value.contains("%") ?
+                                                dimensionType.PERCENTAGE :
+                                                dimensionType.PIXEL; break;
+            }
+        }
     }
     
     public CSSRulePrecedent getPropertyPrecedent(String property) {
@@ -249,12 +256,12 @@ public class CSSStyle {
     
     /**
      * Apply some CSS rules if it has precedence over what is currently there
-     * @param css	Map<String, String> of the CSS attribute and value
+     * @param css    Map<String, String> of the CSS attribute and value
      */
     public void apply(Map<String, String> css, CSSRulePrecedent newPrecedent) {
-    	for (Entry<String, String> e : css.entrySet()) {
-    	    apply(e.getKey(), e.getValue(), newPrecedent);
-    	}
+        for (Entry<String, String> e : css.entrySet()) {
+            apply(e.getKey(), e.getValue(), newPrecedent);
+        }
     }
     
     public void print(String padding) {

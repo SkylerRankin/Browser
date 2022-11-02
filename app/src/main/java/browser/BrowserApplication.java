@@ -1,7 +1,8 @@
 package browser;
 
-import browser.parser.app.BrowserWindow;
 import javafx.application.Application;
+
+import browser.app.BrowserWindow;
 
 public class BrowserApplication {
     public static void main(String[] args) {

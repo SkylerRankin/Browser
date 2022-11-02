@@ -1,27 +1,22 @@
 package browser.test;
 
 import javafx.application.Application;
-import javafx.beans.value.ChangeListener;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
-import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
 public class RenderTestCanvas extends Application {
 
-	public GraphicsContext gc;
-	
-	@Override
-	public void start(Stage stage) throws Exception {
-		setupUI(stage);
-	}
-	
+    public GraphicsContext gc;
+
+    @Override
+    public void start(Stage stage) throws Exception {
+        setupUI(stage);
+    }
+
     private void setupUI(Stage stage) {
         stage.setTitle("Render Testing Canvas");
         

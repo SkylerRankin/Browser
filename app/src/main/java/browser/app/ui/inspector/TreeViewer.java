@@ -1,4 +1,4 @@
-package browser.parser.app.ui.inspector;
+package browser.app.ui.inspector;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import javafx.scene.layout.VBox;
+
 import browser.model.RenderNode;
 
 public class TreeViewer extends VBox {

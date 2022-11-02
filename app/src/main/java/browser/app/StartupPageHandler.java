@@ -1,4 +1,4 @@
-package browser.parser.app;
+package browser.app;
 
 import java.time.LocalDate;
 

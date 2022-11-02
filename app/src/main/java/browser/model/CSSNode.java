@@ -6,8 +6,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import browser.parser.HTMLElements;
-
 public class CSSNode {
     
     public String type;

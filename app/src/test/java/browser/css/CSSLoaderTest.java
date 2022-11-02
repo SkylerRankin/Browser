@@ -1,19 +1,16 @@
 package browser.css;
 
-import static org.junit.Assert.assertEquals;
+import browser.model.RenderNode;
 
 import org.junit.Test;
-
-import browser.css.CSSLoader;
-import browser.model.RenderNode;
 
 public class CSSLoaderTest {
 
     @Test
     public void test() {
-//		RenderNode root = new RenderNode("h1");
-//		(new CSSLoader(null)).loadDefaults(root);
-//		assertEquals(100, root.style.fontSize);
+//        RenderNode root = new RenderNode("h1");
+//        (new CSSLoader(null)).loadDefaults(root);
+//        assertEquals(100, root.style.fontSize);
     }
 
     @Test

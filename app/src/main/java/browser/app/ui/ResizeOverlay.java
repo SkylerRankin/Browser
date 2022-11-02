@@ -1,4 +1,4 @@
-package browser.parser.app.ui;
+package browser.app.ui;
 
 import javafx.beans.value.ChangeListener;
 import javafx.scene.layout.Pane;

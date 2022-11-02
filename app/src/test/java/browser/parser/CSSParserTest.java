@@ -6,20 +6,14 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
-import java.util.stream.Stream;
-
-import org.junit.Test;
 
 import browser.model.CSSNode;
-import browser.parser.CSSParser;
 import browser.parser.CSSParser.Selector;
-import browser.parser.HTMLElements;
+
+import org.junit.Test;
 
 public class CSSParserTest {
 
@@ -367,7 +361,7 @@ public class CSSParserTest {
 
     @Test
     public void longParsingTest1() throws IOException {
-        String css = new String(Files.readAllBytes(Paths.get("res/test/cssTest1.css")));
+        String css = new String(Files.readAllBytes(Paths.get("src/test/resources/cssTest1.css")));
         CSSParser parser = new CSSParser();
         parser.parse(css);
         parser.printRules();

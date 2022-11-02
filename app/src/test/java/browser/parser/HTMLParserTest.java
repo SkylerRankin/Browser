@@ -8,13 +8,10 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Map;
 
+import browser.model.DOMNode;
+
 import org.junit.Before;
 import org.junit.Test;
-
-import browser.model.DOMNode;
-import browser.model.RenderNode;
-import browser.parser.HTMLParser;
-import browser.parser.HTMLElements;
 
 public class HTMLParserTest {
 
@@ -170,8 +167,6 @@ public class HTMLParserTest {
         DOMNode dom = parser.generateDOMTree(htmlText);
 
         DOMNode expected = new DOMNode("root");
-        DOMNode doctype = new DOMNode(HTMLElements.DOCTYPE);
-        doctype.attributes.put("html", null);
         DOMNode html = new DOMNode(HTMLElements.HTML);
         DOMNode head = new DOMNode(HTMLElements.HEAD);
         DOMNode title = new DOMNode(HTMLElements.TITLE);
@@ -193,7 +188,6 @@ public class HTMLParserTest {
         DOMNode pText = new DOMNode(HTMLElements.TEXT);
         pText.content = "Tonight, a comedian died in New York.";
 
-        expected.addChild(doctype);
         expected.addChild(html);
         html.addChild(head);
         html.addChild(body);
@@ -208,10 +202,6 @@ public class HTMLParserTest {
         div.addChild(p);
         p.addChild(pText);
 
-        expected.print();
-        System.out.println(" --- \n");
-        dom.print();
-
         assertEquals(expected, dom);
     }
 
@@ -222,8 +212,6 @@ public class HTMLParserTest {
         DOMNode dom = parser.generateDOMTree(htmlText);
 
         DOMNode expected = new DOMNode("root");
-        DOMNode doctype = new DOMNode(HTMLElements.DOCTYPE);
-        doctype.attributes.put("html", null);
         DOMNode html = new DOMNode(HTMLElements.HTML);
         DOMNode head = new DOMNode(HTMLElements.HEAD);
         DOMNode title = new DOMNode(HTMLElements.TITLE);
@@ -239,7 +227,6 @@ public class HTMLParserTest {
         DOMNode h1Text = new DOMNode(HTMLElements.TEXT);
         h1Text.content = "Rorschach's Journal";
 
-        expected.addChild(doctype);
         expected.addChild(html);
         html.addChild(head);
         html.addChild(body);
@@ -258,8 +245,6 @@ public class HTMLParserTest {
         DOMNode dom = parser.generateDOMTree(htmlText);
 
         DOMNode expected = new DOMNode("root");
-        DOMNode doctype = new DOMNode(HTMLElements.DOCTYPE);
-        doctype.attributes.put("html", null);
         DOMNode html = new DOMNode(HTMLElements.HTML);
         DOMNode head = new DOMNode(HTMLElements.HEAD);
         DOMNode title = new DOMNode(HTMLElements.TITLE);
@@ -271,7 +256,6 @@ public class HTMLParserTest {
         DOMNode h1Text = new DOMNode(HTMLElements.TEXT);
         h1Text.content = "Rorschach's Journal";
 
-        expected.addChild(doctype);
         expected.addChild(html);
         html.addChild(head);
         html.addChild(body);
@@ -415,20 +399,66 @@ public class HTMLParserTest {
 
     @Test
     public void testRemoveUnknownElements() {
-        String html1 = "<html><head><script>var x = 1</script><title>test</title></head><table><tr><td/><td/></tr></table></html>";
-        String expected1 = "<html><head><title>test</title></head></html>";
+        DOMNode dom = new DOMNode("root");
+        DOMNode html = new DOMNode(HTMLElements.HTML);
+        DOMNode head = new DOMNode(HTMLElements.HEAD);
+        DOMNode script = new DOMNode("script");
+        DOMNode title = new DOMNode(HTMLElements.TITLE);
+        DOMNode table = new DOMNode(HTMLElements.TITLE);
+        DOMNode tr = new DOMNode(HTMLElements.TITLE);
+        DOMNode media = new DOMNode("media");
+        DOMNode td = new DOMNode(HTMLElements.TITLE);
+        td.content = "a table cell";
+
+        dom.addChild(html);
+        html.addChild(head);
+        head.addChild(script);
+        head.addChild(title);
+        html.addChild(table);
+        table.addChild(tr);
+        tr.addChild(media);
+        tr.addChild(td);
+
+        DOMNode expectedDOM = new DOMNode("root");
+        DOMNode expectedHTML = new DOMNode(HTMLElements.HTML);
+        DOMNode expectedHead = new DOMNode(HTMLElements.HEAD);
+        DOMNode expectedScript = new DOMNode("script");
+        DOMNode expectedTitle = new DOMNode(HTMLElements.TITLE);
+        DOMNode expectedTable = new DOMNode(HTMLElements.TITLE);
+        DOMNode expectedTR = new DOMNode(HTMLElements.TITLE);
+        DOMNode expectedMedia = new DOMNode("media");
+        DOMNode expectedTD = new DOMNode(HTMLElements.TITLE);
+        expectedTD.content = "a table cell";
+
+        expectedDOM.addChild(html);
+        expectedHTML.addChild(head);
+        expectedHead.addChild(script);
+        expectedHead.addChild(title);
+        expectedHTML.addChild(table);
+        expectedTable.addChild(tr);
+        expectedTR.addChild(media);
+        expectedTR.addChild(td);
+
         HTMLParser parser = new HTMLParser(null);
-        DOMNode actual = parser.generateDOMTree(html1);
-        parser.removeUnknownElements(actual);
-        DOMNode expected = parser.generateDOMTree(expected1);
-        parser.removeUnknownElements(expected);
-        assertTrue(expected.equals(actual));
+        parser.removeUnknownElements(dom);
+
+        assertEquals(expectedDOM, dom);
     }
 
     @Test
-    public void testRemoveDoctype() {
+    public void testRemoveDoctypeUppercase() {
         HTMLParser parser = new HTMLParser(null);
         String html1 = "<!DOCTYPE html  PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\"><head><style type=\"text/css\">img {border-width: 0}</style><title>Menhir</title>";
+        String expected1 = "<head><style type=\"text/css\">img {border-width: 0}</style><title>Menhir</title>";
+        String actual1 = parser.removeDoctype(html1);
+
+        assertEquals(expected1, actual1);
+    }
+
+    @Test
+    public void testRemoveDoctypeLowercase() {
+        HTMLParser parser = new HTMLParser(null);
+        String html1 = "<!doctype html  PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\"><head><style type=\"text/css\">img {border-width: 0}</style><title>Menhir</title>";
         String expected1 = "<head><style type=\"text/css\">img {border-width: 0}</style><title>Menhir</title>";
         String actual1 = parser.removeDoctype(html1);
 

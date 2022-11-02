@@ -5,23 +5,20 @@ import static org.junit.Assert.*;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
-
 import browser.css.CSSStyle;
-//import javafx.embed.swing.JFXPanel;
-import browser.layout.BoxLayoutCalculator;
 import browser.model.RenderNode;
+
+import org.junit.Test;
 
 public class BoxLayoutCalculatorTest {
 
     private RenderNode root;
     private Map<Integer, RenderNode> parentMap;
 
-//	@Before
-//	public void before() {
-//		JFXPanel jfxPanel = new JFXPanel();
-//	}
+//    @Before
+//    public void before() {
+//        JFXPanel jfxPanel = new JFXPanel();
+//    }
 
     private void createTree2() {
 
@@ -65,12 +62,12 @@ public class BoxLayoutCalculatorTest {
         span5.box.width = 40;
         span5.box.height = 10;
 
-        root.id = 0;	root.depth = 0;
-        span1.id = 1;	span1.depth = 1;
-        span2.id = 2;	span2.depth = 1;
-        span3.id = 3;	span3.depth = 1;
-        span4.id = 4;	span3.depth = 1;
-        span5.id = 5;	span3.depth = 1;
+        root.id = 0;    root.depth = 0;
+        span1.id = 1;    span1.depth = 1;
+        span2.id = 2;    span2.depth = 1;
+        span3.id = 3;    span3.depth = 1;
+        span4.id = 4;    span3.depth = 1;
+        span5.id = 5;    span3.depth = 1;
 
 
         root.children.add(span1);
@@ -90,59 +87,59 @@ public class BoxLayoutCalculatorTest {
         parentMap = new HashMap<Integer, RenderNode>();
 
         root = new RenderNode("body");
-        RenderNode A = new RenderNode("div");
-        RenderNode B = new RenderNode("div");
-        RenderNode C = new RenderNode("div");
-        RenderNode D = new RenderNode("div");
-        RenderNode E = new RenderNode("div");
-        RenderNode F = new RenderNode("div");
+        RenderNode nodeA = new RenderNode("div");
+        RenderNode nodeB = new RenderNode("div");
+        RenderNode nodeC = new RenderNode("div");
+        RenderNode nodeD = new RenderNode("div");
+        RenderNode nodeE = new RenderNode("div");
+        RenderNode nodeF = new RenderNode("div");
 
-        D.style.display = CSSStyle.displayType.INLINE;
-        E.style.display = CSSStyle.displayType.INLINE;
-        F.style.display = CSSStyle.displayType.INLINE;
+        nodeD.style.display = CSSStyle.displayType.INLINE;
+        nodeE.style.display = CSSStyle.displayType.INLINE;
+        nodeF.style.display = CSSStyle.displayType.INLINE;
 
-        A.box.fixedWidth = true;
-        B.box.fixedWidth = true;
-        D.box.fixedWidth = true;
-        E.box.fixedWidth = true;
-        F.box.fixedWidth = true;
+        nodeA.box.fixedWidth = true;
+        nodeB.box.fixedWidth = true;
+        nodeD.box.fixedWidth = true;
+        nodeE.box.fixedWidth = true;
+        nodeF.box.fixedWidth = true;
 
-        A.box.fixedHeight = true;
-        D.box.fixedHeight = true;
-        E.box.fixedHeight = true;
-        F.box.fixedHeight = true;
+        nodeA.box.fixedHeight = true;
+        nodeD.box.fixedHeight = true;
+        nodeE.box.fixedHeight = true;
+        nodeF.box.fixedHeight = true;
 
-        A.box.width = 50;
-        A.box.height = 50;
-        B.box.width = 90;
-        D.box.width = 31;
-        D.box.height = 5;
-        E.box.width = 31;
-        E.box.height = 5;
-        F.box.width = 31;
-        F.box.height = 5;
+        nodeA.box.width = 50;
+        nodeA.box.height = 50;
+        nodeB.box.width = 90;
+        nodeD.box.width = 31;
+        nodeD.box.height = 5;
+        nodeE.box.width = 31;
+        nodeE.box.height = 5;
+        nodeF.box.width = 31;
+        nodeF.box.height = 5;
 
-        root.id = 0;	root.depth = 0;
-        A.id = 1;	A.depth = 1;
-        B.id = 2;	B.depth = 1;
-        C.id = 3;	C.depth = 2;
-        D.id = 4;	D.depth = 3;
-        E.id = 5;	E.depth = 3;
-        F.id = 6;	F.depth = 3;
+        root.id = 0;    root.depth = 0;
+        nodeA.id = 1;    nodeA.depth = 1;
+        nodeB.id = 2;    nodeB.depth = 1;
+        nodeC.id = 3;    nodeC.depth = 2;
+        nodeD.id = 4;    nodeD.depth = 3;
+        nodeE.id = 5;    nodeE.depth = 3;
+        nodeF.id = 6;    nodeF.depth = 3;
 
-        root.children.add(A);
-        root.children.add(B);
-        B.children.add(C);
-        C.children.add(D);
-        C.children.add(E);
-        C.children.add(F);
+        root.children.add(nodeA);
+        root.children.add(nodeB);
+        nodeB.children.add(nodeC);
+        nodeC.children.add(nodeD);
+        nodeC.children.add(nodeE);
+        nodeC.children.add(nodeF);
 
         parentMap.put(1, root);
         parentMap.put(2, root);
-        parentMap.put(3, B);
-        parentMap.put(4, C);
-        parentMap.put(5, C);
-        parentMap.put(6, C);
+        parentMap.put(3, nodeB);
+        parentMap.put(4, nodeC);
+        parentMap.put(5, nodeC);
+        parentMap.put(6, nodeC);
     }
 
     private void createTree4() {
@@ -152,38 +149,38 @@ public class BoxLayoutCalculatorTest {
         parentMap = new HashMap<Integer, RenderNode>();
 
         root = new RenderNode("body");
-        RenderNode A = new RenderNode("div");
-        RenderNode B = new RenderNode("div");
-        RenderNode C = new RenderNode("text");
+        RenderNode nodeA = new RenderNode("div");
+        RenderNode nodeB = new RenderNode("div");
+        RenderNode nodeC = new RenderNode("text");
 
-        A.box.fixedWidth = true;
-        A.box.fixedHeight = true;
+        nodeA.box.fixedWidth = true;
+        nodeA.box.fixedHeight = true;
 
-        A.box.width = 50;
-        A.box.height = 50;
+        nodeA.box.width = 50;
+        nodeA.box.height = 50;
 
-        A.style.paddingTop = 5;
-        A.style.paddingBottom = 5;
-        A.style.paddingLeft = 10;
-        A.style.paddingRight = 10;
+        nodeA.style.paddingTop = 5;
+        nodeA.style.paddingBottom = 5;
+        nodeA.style.paddingLeft = 10;
+        nodeA.style.paddingRight = 10;
 
-        B.style.paddingTop = 2;
-        B.style.paddingBottom = 2;
-        B.style.paddingLeft = 2;
-        B.style.paddingRight = 2;
+        nodeB.style.paddingTop = 2;
+        nodeB.style.paddingBottom = 2;
+        nodeB.style.paddingLeft = 2;
+        nodeB.style.paddingRight = 2;
 
-        root.id = 0;	root.depth = 0;
-        A.id = 1;		A.depth = 1;
-        B.id = 2;		B.depth = 2;
-        C.id = 3;		C.depth = 3;
+        root.id = 0;    root.depth = 0;
+        nodeA.id = 1;        nodeA.depth = 1;
+        nodeB.id = 2;        nodeB.depth = 2;
+        nodeC.id = 3;        nodeC.depth = 3;
 
-        root.children.add(A);
-        A.children.add(B);
-        B.children.add(C);
+        root.children.add(nodeA);
+        nodeA.children.add(nodeB);
+        nodeB.children.add(nodeC);
 
         parentMap.put(1, root);
-        parentMap.put(2, A);
-        parentMap.put(3, B);
+        parentMap.put(2, nodeA);
+        parentMap.put(3, nodeB);
     }
 
     private void createTree5() {
@@ -192,51 +189,51 @@ public class BoxLayoutCalculatorTest {
         parentMap = new HashMap<Integer, RenderNode>();
 
         root = new RenderNode("body");
-        RenderNode A = new RenderNode("div");
-        RenderNode B = new RenderNode("div");
-        RenderNode C = new RenderNode("div");
+        RenderNode nodeA = new RenderNode("div");
+        RenderNode nodeB = new RenderNode("div");
+        RenderNode nodeC = new RenderNode("div");
 
-        A.box.fixedWidth = true;
-        A.box.width = 210;
+        nodeA.box.fixedWidth = true;
+        nodeA.box.width = 210;
 
-        B.box.fixedWidth = true;
-        B.box.fixedHeight = true;
-        B.box.width = 50;
-        B.style.widthType = CSSStyle.dimensionType.PERCENTAGE;
-        B.box.height = 100;
+        nodeB.box.fixedWidth = true;
+        nodeB.box.fixedHeight = true;
+        nodeB.box.width = 50;
+        nodeB.style.widthType = CSSStyle.dimensionType.PERCENTAGE;
+        nodeB.box.height = 100;
 
-        C.box.fixedWidth = true;
-        C.box.width = 20;
-        C.style.widthType = CSSStyle.dimensionType.PERCENTAGE;
-        C.box.fixedHeight = true;
-        C.box.height = 10;
-        C.style.heightType = CSSStyle.dimensionType.PERCENTAGE;
+        nodeC.box.fixedWidth = true;
+        nodeC.box.width = 20;
+        nodeC.style.widthType = CSSStyle.dimensionType.PERCENTAGE;
+        nodeC.box.fixedHeight = true;
+        nodeC.box.height = 10;
+        nodeC.style.heightType = CSSStyle.dimensionType.PERCENTAGE;
 
-        A.style.paddingTop = 5;
-        A.style.paddingBottom = 5;
-        A.style.paddingLeft = 5;
-        A.style.paddingRight = 5;
+        nodeA.style.paddingTop = 5;
+        nodeA.style.paddingBottom = 5;
+        nodeA.style.paddingLeft = 5;
+        nodeA.style.paddingRight = 5;
 
-        B.style.paddingTop = 5;
-        B.style.paddingBottom = 5;
-        B.style.paddingLeft = 10;
-        B.style.paddingRight = 10;
+        nodeB.style.paddingTop = 5;
+        nodeB.style.paddingBottom = 5;
+        nodeB.style.paddingLeft = 10;
+        nodeB.style.paddingRight = 10;
 
-        C.style.marginTop = 5;
-        C.style.marginBottom = 5;
+        nodeC.style.marginTop = 5;
+        nodeC.style.marginBottom = 5;
 
-        root.id = 0;	root.depth = 0;
-        A.id = 1;		A.depth = 1;
-        B.id = 2;		B.depth = 2;
-        C.id = 3;		C.depth = 3;
+        root.id = 0;    root.depth = 0;
+        nodeA.id = 1;        nodeA.depth = 1;
+        nodeB.id = 2;        nodeB.depth = 2;
+        nodeC.id = 3;        nodeC.depth = 3;
 
-        root.children.add(A);
-        A.children.add(B);
-        B.children.add(C);
+        root.children.add(nodeA);
+        nodeA.children.add(nodeB);
+        nodeB.children.add(nodeC);
 
         parentMap.put(1, root);
-        parentMap.put(2, A);
-        parentMap.put(3, B);
+        parentMap.put(2, nodeA);
+        parentMap.put(3, nodeB);
     }
 
     @Test
@@ -275,42 +272,42 @@ public class BoxLayoutCalculatorTest {
         blc.propagateMaxSizes(root);
         blc.calculateBoxes(root);
 
-        RenderNode A = findRenderNode(1, root);
-        RenderNode B = findRenderNode(2, root);
-        RenderNode C = findRenderNode(3, root);
-        RenderNode D = findRenderNode(4, root);
-        RenderNode E = findRenderNode(5, root);
-        RenderNode F = findRenderNode(6, root);
+        RenderNode nodeA = findRenderNode(1, root);
+        RenderNode nodeB = findRenderNode(2, root);
+        RenderNode nodeC = findRenderNode(3, root);
+        RenderNode nodeD = findRenderNode(4, root);
+        RenderNode nodeE = findRenderNode(5, root);
+        RenderNode nodeF = findRenderNode(6, root);
 
-        assertEquals((Float) 0f, (Float) A.box.x);
-        assertEquals((Float) 0f, (Float) A.box.y);
-        assertEquals((Float) 50f, (Float) A.box.width);
-        assertEquals((Float) 50f, (Float) A.box.height);
+        assertEquals((Float) 0f, (Float) nodeA.box.x);
+        assertEquals((Float) 0f, (Float) nodeA.box.y);
+        assertEquals((Float) 50f, (Float) nodeA.box.width);
+        assertEquals((Float) 50f, (Float) nodeA.box.height);
 
-        assertEquals((Float) 0f, (Float) B.box.x);
-        assertEquals((Float) 50f, (Float) B.box.y);
-        assertEquals((Float) 90f, (Float) B.box.width);
-        assertEquals((Float) 10f, (Float) B.box.height);
+        assertEquals((Float) 0f, (Float) nodeB.box.x);
+        assertEquals((Float) 50f, (Float) nodeB.box.y);
+        assertEquals((Float) 90f, (Float) nodeB.box.width);
+        assertEquals((Float) 10f, (Float) nodeB.box.height);
 
-        assertEquals((Float) 0f, (Float) C.box.x);
-        assertEquals((Float) 50f, (Float) C.box.y);
-        assertEquals((Float) 62f, (Float) C.box.width);
-        assertEquals((Float) 10f, (Float) C.box.height);
+        assertEquals((Float) 0f, (Float) nodeC.box.x);
+        assertEquals((Float) 50f, (Float) nodeC.box.y);
+        assertEquals((Float) 62f, (Float) nodeC.box.width);
+        assertEquals((Float) 10f, (Float) nodeC.box.height);
 
-        assertEquals((Float) 0f, (Float) D.box.x);
-        assertEquals((Float) 50f, (Float) D.box.y);
-        assertEquals((Float) 31f, (Float) D.box.width);
-        assertEquals((Float) 5f, (Float) D.box.height);
+        assertEquals((Float) 0f, (Float) nodeD.box.x);
+        assertEquals((Float) 50f, (Float) nodeD.box.y);
+        assertEquals((Float) 31f, (Float) nodeD.box.width);
+        assertEquals((Float) 5f, (Float) nodeD.box.height);
 
-        assertEquals((Float) 31f, (Float) E.box.x);
-        assertEquals((Float) 50f, (Float) E.box.y);
-        assertEquals((Float) 31f, (Float) E.box.width);
-        assertEquals((Float) 5f, (Float) E.box.height);
+        assertEquals((Float) 31f, (Float) nodeE.box.x);
+        assertEquals((Float) 50f, (Float) nodeE.box.y);
+        assertEquals((Float) 31f, (Float) nodeE.box.width);
+        assertEquals((Float) 5f, (Float) nodeE.box.height);
 
-        assertEquals((Float) 0f, (Float) F.box.x);
-        assertEquals((Float) 55f, (Float) F.box.y);
-        assertEquals((Float) 31f, (Float) F.box.width);
-        assertEquals((Float) 5f, (Float) F.box.height);
+        assertEquals((Float) 0f, (Float) nodeF.box.x);
+        assertEquals((Float) 55f, (Float) nodeF.box.y);
+        assertEquals((Float) 31f, (Float) nodeF.box.width);
+        assertEquals((Float) 5f, (Float) nodeF.box.height);
     }
 
     @Test
@@ -321,16 +318,16 @@ public class BoxLayoutCalculatorTest {
         blc.propagateMaxSizes(root);
         blc.calculateBoxes(root);
 
-        RenderNode A = findRenderNode(1, root);
-        RenderNode B = findRenderNode(2, root);
-        RenderNode C = findRenderNode(3, root);
+        RenderNode nodeA = findRenderNode(1, root);
+        RenderNode nodeB = findRenderNode(2, root);
+        RenderNode nodeC = findRenderNode(3, root);
 
-        assertEquals((Float) 0f, (Float) A.box.x);
-        assertEquals((Float) 0f, (Float) A.box.y);
-        assertEquals((Float) 10f, (Float) B.box.x);
-        assertEquals((Float) 5f, (Float) B.box.y);
-        assertEquals((Float) 12f, (Float) C.box.x);
-        assertEquals((Float) 7f, (Float) C.box.y);
+        assertEquals((Float) 0f, (Float) nodeA.box.x);
+        assertEquals((Float) 0f, (Float) nodeA.box.y);
+        assertEquals((Float) 10f, (Float) nodeB.box.x);
+        assertEquals((Float) 5f, (Float) nodeB.box.y);
+        assertEquals((Float) 12f, (Float) nodeC.box.x);
+        assertEquals((Float) 7f, (Float) nodeC.box.y);
 
     }
 
@@ -351,156 +348,156 @@ public class BoxLayoutCalculatorTest {
         createTree3();
         BoxLayoutCalculator blc = new BoxLayoutCalculator(parentMap, 100f);
         blc.propagateMaxSizes(root);
-        RenderNode C = findRenderNode(3, root);
-        assertNull(C.maxHeight);
-        assertEquals((Float) 90f, C.maxWidth);
+        RenderNode nodeC = findRenderNode(3, root);
+        assertNull(nodeC.maxHeight);
+        assertEquals((Float) 90f, nodeC.maxWidth);
 
     }
 
     @Test
-    public void propagateMaxSizesTrestTree5() {
+    public void propagateMaxSizesTestTree5() {
         createTree5();
         BoxLayoutCalculator blc = new BoxLayoutCalculator(parentMap, 300f);
         blc.propagateMaxSizes(root);
-        RenderNode A = findRenderNode(1, root);
-        RenderNode B = findRenderNode(2, root);
-        RenderNode C = findRenderNode(3, root);
-        assertEquals((Float) 210f, A.maxWidth);
-        assertEquals((Float) 100f, B.maxWidth);
-        assertEquals((Float) 100f, B.maxHeight);
-        assertEquals((Float) 16f, C.maxWidth);
-        assertEquals((Float) 16f, C.maxHeight);
+        RenderNode nodeA = findRenderNode(1, root);
+        RenderNode nodeB = findRenderNode(2, root);
+        RenderNode nodeC = findRenderNode(3, root);
+        assertEquals((Float) 210f, nodeA.maxWidth);
+        assertEquals((Float) 100f, nodeB.maxWidth);
+        assertEquals((Float) 100f, nodeB.maxHeight);
+        assertEquals((Float) 16f, nodeC.maxWidth);
+        assertEquals((Float) 16f, nodeC.maxHeight);
 
     }
 
     @Test
     public void propagateMaxSizesTest_small() {
         root = new RenderNode("body");
-        RenderNode A = new RenderNode("div");
-        RenderNode B = new RenderNode("div");
-        RenderNode C = new RenderNode("div");
-        RenderNode D = new RenderNode("div");
+        RenderNode nodeA = new RenderNode("div");
+        RenderNode nodeB = new RenderNode("div");
+        RenderNode nodeC = new RenderNode("div");
+        RenderNode nodeD = new RenderNode("div");
 
         float screenWidth = 100;
 
-        A.box.fixedWidth = true;
-        A.box.fixedHeight = true;
-        A.box.width = 50;
-        A.box.height = 50;
+        nodeA.box.fixedWidth = true;
+        nodeA.box.fixedHeight = true;
+        nodeA.box.width = 50;
+        nodeA.box.height = 50;
 
-        B.box.fixedWidth = true;
-        B.box.fixedHeight = true;
-        B.box.width = 60;
-        B.box.height = 20;
+        nodeB.box.fixedWidth = true;
+        nodeB.box.fixedHeight = true;
+        nodeB.box.width = 60;
+        nodeB.box.height = 20;
 
-        C.box.fixedWidth = true;
-        C.box.width = 30f;
+        nodeC.box.fixedWidth = true;
+        nodeC.box.width = 30f;
 
-        D.box.fixedHeight = true;
-        D.box.height = 40;
+        nodeD.box.fixedHeight = true;
+        nodeD.box.height = 40;
 
-        root.children.add(A);
-        root.children.add(B);
-        A.children.add(D);
-        B.children.add(C);
+        root.children.add(nodeA);
+        root.children.add(nodeB);
+        nodeA.children.add(nodeD);
+        nodeB.children.add(nodeC);
 
-        root.id = 0;		root.depth = 0;
-        A.id = 1;			A.depth = 1;
-        B.id = 2;			B.depth = 1;
-        C.id = 3;			C.depth = 2;
-        D.id = 4;			D.depth = 2;
+        root.id = 0;        root.depth = 0;
+        nodeA.id = 1;            nodeA.depth = 1;
+        nodeB.id = 2;            nodeB.depth = 1;
+        nodeC.id = 3;            nodeC.depth = 2;
+        nodeD.id = 4;            nodeD.depth = 2;
 
         parentMap = new HashMap<Integer, RenderNode>();
         parentMap.put(1, root);
         parentMap.put(2, root);
-        parentMap.put(3, B);
-        parentMap.put(4, A);
+        parentMap.put(3, nodeB);
+        parentMap.put(4, nodeA);
 
         BoxLayoutCalculator blc = new BoxLayoutCalculator(parentMap, screenWidth);
-//		blc.printBoxes(root);
+//        blc.printBoxes(root);
         blc.propagateMaxSizes(root);
-//		blc.printBoxes(root);
+//        blc.printBoxes(root);
 
-        assertEquals((Float) 20f, C.maxHeight);
-        assertEquals((Float) 30f, C.maxWidth);
-        assertEquals((Float) 50f, D.maxWidth);
-        assertEquals((Float) 40f, D.maxHeight);
+        assertEquals((Float) 20f, nodeC.maxHeight);
+        assertEquals((Float) 30f, nodeC.maxWidth);
+        assertEquals((Float) 50f, nodeD.maxWidth);
+        assertEquals((Float) 40f, nodeD.maxHeight);
 
     }
 
     @Test
     public void propagateMaxSizesTest_simple() {
         root = new RenderNode("body");
-        RenderNode A = new RenderNode("div");
-        RenderNode B = new RenderNode("div");
-        RenderNode C = new RenderNode("div");
-        RenderNode D = new RenderNode("div");
-        RenderNode E = new RenderNode("div");
-        RenderNode F = new RenderNode("div");
-        RenderNode G = new RenderNode("div");
+        RenderNode nodeA = new RenderNode("div");
+        RenderNode nodeB = new RenderNode("div");
+        RenderNode nodeC = new RenderNode("div");
+        RenderNode nodeD = new RenderNode("div");
+        RenderNode nodeE = new RenderNode("div");
+        RenderNode nodeF = new RenderNode("div");
+        RenderNode nodeG = new RenderNode("div");
 
         float screenWidth = 100;
 
-        A.box.fixedWidth = true;
-        A.box.width = 80;
+        nodeA.box.fixedWidth = true;
+        nodeA.box.width = 80;
 
-        B.box.fixedWidth = true;
-        B.box.fixedHeight = true;
-        B.box.width = 90;
-        B.box.height = 90;
+        nodeB.box.fixedWidth = true;
+        nodeB.box.fixedHeight = true;
+        nodeB.box.width = 90;
+        nodeB.box.height = 90;
 
-        C.box.fixedWidth = true;
-        C.box.width = 50;
+        nodeC.box.fixedWidth = true;
+        nodeC.box.width = 50;
 
-        F.box.fixedWidth = true;
-        F.box.fixedHeight = true;
-        F.box.width = 50;
-        F.box.height = 10;
+        nodeF.box.fixedWidth = true;
+        nodeF.box.fixedHeight = true;
+        nodeF.box.width = 50;
+        nodeF.box.height = 10;
 
-        root.children.add(A);
-        root.children.add(B);
-        A.children.add(F);
-        B.children.add(C);
-        B.children.add(D);
-        D.children.add(E);
-        F.children.add(G);
+        root.children.add(nodeA);
+        root.children.add(nodeB);
+        nodeA.children.add(nodeF);
+        nodeB.children.add(nodeC);
+        nodeB.children.add(nodeD);
+        nodeD.children.add(nodeE);
+        nodeF.children.add(nodeG);
 
-        root.id = 0;		root.depth = 0;
-        A.id = 1;			A.depth = 1;
-        B.id = 2;			B.depth = 1;
-        C.id = 3;			C.depth = 2;
-        D.id = 4;			D.depth = 2;
-        E.id = 5;			E.depth = 3;
-        F.id = 6;			F.depth = 2;
-        G.id = 7;			G.depth = 3;
+        root.id = 0;        root.depth = 0;
+        nodeA.id = 1;            nodeA.depth = 1;
+        nodeB.id = 2;            nodeB.depth = 1;
+        nodeC.id = 3;            nodeC.depth = 2;
+        nodeD.id = 4;            nodeD.depth = 2;
+        nodeE.id = 5;            nodeE.depth = 3;
+        nodeF.id = 6;            nodeF.depth = 2;
+        nodeG.id = 7;            nodeG.depth = 3;
 
         parentMap = new HashMap<Integer, RenderNode>();
         parentMap.put(1, root);
         parentMap.put(2, root);
-        parentMap.put(3, B);
-        parentMap.put(4, B);
-        parentMap.put(5, D);
-        parentMap.put(6, A);
-        parentMap.put(7, F);
+        parentMap.put(3, nodeB);
+        parentMap.put(4, nodeB);
+        parentMap.put(5, nodeD);
+        parentMap.put(6, nodeA);
+        parentMap.put(7, nodeF);
 
         BoxLayoutCalculator blc = new BoxLayoutCalculator(parentMap, screenWidth);
-//		blc.printBoxes(root);
+//        blc.printBoxes(root);
         blc.propagateMaxSizes(root);
 
-        assertEquals((Float) 80f, A.maxWidth);
-        assertNull(A.maxHeight);
-        assertEquals((Float) 90f, B.maxWidth);
-        assertEquals((Float) 90f, B.maxHeight);
-        assertEquals((Float) 50f, C.maxWidth);
-        assertEquals((Float) 90f, C.maxHeight);
-        assertEquals((Float) 90f, D.maxWidth);
-        assertEquals((Float) 90f, D.maxHeight);
-        assertEquals((Float) 90f, E.maxWidth);
-        assertEquals((Float) 90f, E.maxHeight);
-        assertEquals((Float) 50f, F.maxWidth);
-        assertEquals((Float) 10f, F.maxHeight);
-        assertEquals((Float) 50f, G.maxWidth);
-        assertEquals((Float) 10f, G.maxHeight);
+        assertEquals((Float) 80f, nodeA.maxWidth);
+        assertNull(nodeA.maxHeight);
+        assertEquals((Float) 90f, nodeB.maxWidth);
+        assertEquals((Float) 90f, nodeB.maxHeight);
+        assertEquals((Float) 50f, nodeC.maxWidth);
+        assertEquals((Float) 90f, nodeC.maxHeight);
+        assertEquals((Float) 90f, nodeD.maxWidth);
+        assertEquals((Float) 90f, nodeD.maxHeight);
+        assertEquals((Float) 90f, nodeE.maxWidth);
+        assertEquals((Float) 90f, nodeE.maxHeight);
+        assertEquals((Float) 50f, nodeF.maxWidth);
+        assertEquals((Float) 10f, nodeF.maxHeight);
+        assertEquals((Float) 50f, nodeG.maxWidth);
+        assertEquals((Float) 10f, nodeG.maxHeight);
 
     }
 

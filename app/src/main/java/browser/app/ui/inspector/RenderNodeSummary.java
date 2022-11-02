@@ -1,8 +1,9 @@
-package browser.parser.app.ui.inspector;
+package browser.app.ui.inspector;
 
 import javafx.geometry.Insets;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
+
 import browser.model.RenderNode;
 
 public class RenderNodeSummary extends VBox {

@@ -4,13 +4,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import browser.css.CSSStyle;
 import browser.model.DOMNode;
-import browser.model.RenderNode;
 import browser.network.ResourceLoader;
 
 public class HTMLParser {
@@ -254,7 +251,7 @@ public class HTMLParser {
     }
     
     public String removeDoctype(String s) {
-        return removeTag(s, "<\\!DOCTYPE", ">", false);
+        return removeTag(s, "<(?i)\\!DOCTYPE", ">", false);
     }
     
     /**
@@ -271,8 +268,8 @@ public class HTMLParser {
     public String removeTag(String s, String startPattern, String endPattern, boolean exact) {
         Matcher startMatcher = Pattern.compile(startPattern).matcher(s);
         Matcher endMatcher = Pattern.compile(endPattern).matcher(s);
-        List<Integer> starts = new ArrayList<Integer>();
-        List<Integer> ends = new ArrayList<Integer>();
+        List<Integer> starts = new ArrayList<>();
+        List<Integer> ends = new ArrayList<>();
         while (startMatcher.find()) starts.add(startMatcher.start());
         while (endMatcher.find()) ends.add(endMatcher.end());
         
@@ -281,12 +278,12 @@ public class HTMLParser {
         if ((exact && starts.size() != ends.size()) || starts.size() > ends.size()) {
             System.err.printf("HTMLParser: unmatched comments, %d started, %d ended\n", starts.size(), ends.size());
         } else {
-            int current_start = 0;
+            int currentStart = 0;
             for (int i = 0; i < starts.size(); i++) {
-                html.append(s.substring(current_start, starts.get(i)));
-                current_start = ends.get(i);
+                html.append(s.substring(currentStart, starts.get(i)));
+                currentStart = ends.get(i);
             }
-            html.append(s.substring(current_start));
+            html.append(s.substring(currentStart));
         }
         
         return html.toString();

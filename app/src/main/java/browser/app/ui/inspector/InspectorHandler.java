@@ -1,4 +1,4 @@
-package browser.parser.app.ui.inspector;
+package browser.app.ui.inspector;
 
 import java.io.File;
 
@@ -14,6 +14,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+
 import browser.model.RenderNode;
 
 public class InspectorHandler {

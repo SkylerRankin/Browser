@@ -10,7 +10,7 @@ public class CSSStyleTest {
     public void setPropertyTest() {
         CSSStyle style = new CSSStyle();
         style.setProperty("textAlign", "LEFT");
-        assertEquals("FONT", style.fontFamily);
+        assertEquals(CSSStyle.textAlignType.LEFT, style.textAlign);
     }
 
 }

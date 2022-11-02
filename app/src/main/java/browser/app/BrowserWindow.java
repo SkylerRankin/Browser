@@ -1,18 +1,10 @@
-package browser.parser.app;
+package browser.app;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import browser.parser.app.ui.BrowserTab;
-import browser.parser.app.ui.Footer;
-import browser.parser.app.ui.NewTab;
-import browser.parser.app.ui.ResizeOverlay;
-import browser.parser.app.ui.SearchTab;
-import browser.parser.app.ui.SettingsTab;
-import browser.parser.app.ui.inspector.InspectorHandler;
-import browser.parser.app.ui.BrowserTab.TabType;
 import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -39,10 +31,19 @@ import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
+import browser.app.ui.BrowserTab;
+import browser.app.ui.BrowserTab.TabType;
+import browser.app.ui.Footer;
+import browser.app.ui.NewTab;
+import browser.app.ui.ResizeOverlay;
+import browser.app.ui.SearchTab;
+import browser.app.ui.SettingsTab;
+import browser.app.ui.inspector.InspectorHandler;
+
 public class BrowserWindow extends Application {
         
-	private Scene scene;
-	
+    private Scene scene;
+
     private AnchorPane anchor;
     private TabPane tabPane;
     
@@ -83,12 +84,12 @@ public class BrowserWindow extends Application {
         tabPane.getTabs().add(tabs.get(1).getActor());
 
         tabPane.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Tab>() {
-			@Override
-			public void changed(ObservableValue<? extends Tab> observable, Tab oldValue, Tab newValue) {
-				if (newValue.getId() != null && newValue.getId().equals(TabType.NEW.toString())) {
-					addNewTab(stage, TabType.SEARCH);
-				}
-			}
+            @Override
+            public void changed(ObservableValue<? extends Tab> observable, Tab oldValue, Tab newValue) {
+                if (newValue.getId() != null && newValue.getId().equals(TabType.NEW.toString())) {
+                    addNewTab(stage, TabType.SEARCH);
+                }
+            }
         });
         
 //        SettingsButton settingsButton = new SettingsButton();
@@ -122,11 +123,11 @@ public class BrowserWindow extends Application {
         
         // Prevent swiping from making new tabs
         tabPane.addEventFilter(SwipeEvent.ANY, new EventHandler<SwipeEvent>() {
-			@Override
-			public void handle(SwipeEvent event) {
-				System.out.println("swipe");
-				event.consume();
-			}
+            @Override
+            public void handle(SwipeEvent event) {
+                System.out.println("swipe");
+                event.consume();
+            }
         });
         
         tabPane.setOnMousePressed(new EventHandler<MouseEvent>() {
@@ -153,22 +154,21 @@ public class BrowserWindow extends Application {
 
         stage.setScene(scene);
         stage.show();
-        
-        
+
         for (BrowserTab tab : tabs) {
-        	tab.scene = scene;
-        	tab.onResize(stage);
+            tab.scene = scene;
+            tab.onResize(stage);
         }
         
         ChangeListener<Number> stageSizeListener = (obs, oldValue, newValue) -> {
-        	tabPane.setPrefWidth(scene.getWidth());
-        	tabPane.setPrefHeight(scene.getHeight());
-//        	footer.setPrefWidth(scene.getWidth());
-        	AnchorPane.setTopAnchor(hbox, 3.0);
+            tabPane.setPrefWidth(scene.getWidth());
+            tabPane.setPrefHeight(scene.getHeight());
+//            footer.setPrefWidth(scene.getWidth());
+            AnchorPane.setTopAnchor(hbox, 3.0);
             AnchorPane.setRightAnchor(hbox, 3.0);
-        	for (BrowserTab tab : tabs) {
-        		tab.onResize(stage);
-        	}
+            for (BrowserTab tab : tabs) {
+                tab.onResize(stage);
+            }
 //            statusLabel.setText(String.valueOf(stage.getWidth()));
 //            urlInput.setPrefWidth(stage.getWidth() - searchButton.getWidth() - statusLabel.getWidth() - 20);
 //            canvas.setWidth(stage.getWidth());
@@ -179,39 +179,38 @@ public class BrowserWindow extends Application {
         startingTab.loadStartupPage();
         
         inspectorHandler = new InspectorHandler(stage);
-        
     }
     
     private void addNewTab(Stage stage, TabType type) {
-    	BrowserTab newTab;
-    	if (type.equals(TabType.SETTINGS)) {
-    		newTab = new SettingsTab(stage);
-    	} else {
-    		newTab = new SearchTab(stage);
-    	}
-    	System.out.printf("New tab %d\n", newTab.id());
-    	newTab.scene = scene;
-    	newTab.onResize(stage);
-    	setTabCloseListener(newTab);
-    	tabs.add(tabs.size() - 1, newTab);
-    	currentTab = tabs.size() - 2;
-    	tabPane.getTabs().add(tabs.size() - 2, newTab.getActor());
-    	tabPane.getSelectionModel().select(currentTab);
-    	if (type.equals(TabType.SEARCH)) {
-    	    ((SearchTab) newTab).loadStartupPage();
-    	}
+        BrowserTab newTab;
+        if (type.equals(TabType.SETTINGS)) {
+            newTab = new SettingsTab(stage);
+        } else {
+            newTab = new SearchTab(stage);
+        }
+        System.out.printf("New tab %d\n", newTab.id());
+        newTab.scene = scene;
+        newTab.onResize(stage);
+        setTabCloseListener(newTab);
+        tabs.add(tabs.size() - 1, newTab);
+        currentTab = tabs.size() - 2;
+        tabPane.getTabs().add(tabs.size() - 2, newTab.getActor());
+        tabPane.getSelectionModel().select(currentTab);
+        if (type.equals(TabType.SEARCH)) {
+            ((SearchTab) newTab).loadStartupPage();
+        }
     }
     
     private void setTabCloseListener(BrowserTab tab) {
-    	tab.getActor().setOnClosed(new EventHandler<Event>() {
-			@Override
-			public void handle(Event event) {
-				tabs.remove(tabs.indexOf(tab));
-				if (tab.getType().equals(TabType.SETTINGS)) {
-					settingsTabOpen = false;
-				}
-			}
-    	});
+        tab.getActor().setOnClosed(new EventHandler<Event>() {
+            @Override
+            public void handle(Event event) {
+                tabs.remove(tabs.indexOf(tab));
+                if (tab.getType().equals(TabType.SETTINGS)) {
+                    settingsTabOpen = false;
+                }
+            }
+        });
     }
     
     private void addWindowButtons(HBox hbox, Stage stage) {
@@ -251,51 +250,51 @@ public class BrowserWindow extends Application {
     }
 
     private void setSettingsButtonListener(Button button, Stage stage) {
-    	button.setOnAction(new EventHandler<ActionEvent>() {
-			@Override
-			public void handle(ActionEvent arg0) {
-				if (!settingsTabOpen) {
-					addNewTab(stage, TabType.SETTINGS);
-					settingsTabOpen = true;
-				} else {
-					for (int i = 0; i < tabs.size(); i++) {
-						if (tabs.get(i).getType().equals(TabType.SETTINGS)) {
-							tabPane.getSelectionModel().select(i);
-							break;
-						}
-					}
-				}
-			}
-    		
-    	});
+        button.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent arg0) {
+                if (!settingsTabOpen) {
+                    addNewTab(stage, TabType.SETTINGS);
+                    settingsTabOpen = true;
+                } else {
+                    for (int i = 0; i < tabs.size(); i++) {
+                        if (tabs.get(i).getType().equals(TabType.SETTINGS)) {
+                            tabPane.getSelectionModel().select(i);
+                            break;
+                        }
+                    }
+                }
+            }
+
+        });
     }
     
     private void setKeyListener(Scene scene, Stage stage) {
-    	KeyCodeCombination ctrlW = new KeyCodeCombination(KeyCode.W, KeyCodeCombination.CONTROL_DOWN);
-    	KeyCodeCombination ctrlT = new KeyCodeCombination(KeyCode.T, KeyCodeCombination.CONTROL_DOWN);
-    	KeyCodeCombination ctrlR = new KeyCodeCombination(KeyCode.R, KeyCodeCombination.CONTROL_DOWN);
-    	KeyCodeCombination ctrlTab = new KeyCodeCombination(KeyCode.TAB, KeyCodeCombination.CONTROL_DOWN);
+        KeyCodeCombination ctrlW = new KeyCodeCombination(KeyCode.W, KeyCodeCombination.CONTROL_DOWN);
+        KeyCodeCombination ctrlT = new KeyCodeCombination(KeyCode.T, KeyCodeCombination.CONTROL_DOWN);
+        KeyCodeCombination ctrlR = new KeyCodeCombination(KeyCode.R, KeyCodeCombination.CONTROL_DOWN);
+        KeyCodeCombination ctrlTab = new KeyCodeCombination(KeyCode.TAB, KeyCodeCombination.CONTROL_DOWN);
         KeyCodeCombination ctrlI = new KeyCodeCombination(KeyCode.I, KeyCodeCombination.CONTROL_DOWN);
-    	
-    	scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
 
-			@Override
-			public void handle(KeyEvent event) {
-				if (ctrlW.match(event)) {
-					System.out.println("ctrl w");
-				} else if (ctrlT.match(event)) {
-//					addNewTab(stage, TabType.SEARCH);
-				} else if (ctrlR.match(event)) {
-					System.out.println("ctrl r");
-				} else if (ctrlTab.match(event)) {
-					System.out.println("ctrl tab");
-					event.consume();
-				} else if (ctrlI.match(event)) {
-				    inspectorHandler.toggle();
-				}
-			}
-    		
-    	});
+        scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
+
+            @Override
+            public void handle(KeyEvent event) {
+                if (ctrlW.match(event)) {
+                    System.out.println("ctrl w");
+                } else if (ctrlT.match(event)) {
+//                    addNewTab(stage, TabType.SEARCH);
+                } else if (ctrlR.match(event)) {
+                    System.out.println("ctrl r");
+                } else if (ctrlTab.match(event)) {
+                    System.out.println("ctrl tab");
+                    event.consume();
+                } else if (ctrlI.match(event)) {
+                    inspectorHandler.toggle();
+                }
+            }
+
+        });
     }
 
     
