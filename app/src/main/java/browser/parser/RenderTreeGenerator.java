@@ -1,9 +1,12 @@
 package browser.parser;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import browser.app.ErrorPageHandler;
+import browser.css.CSSStyle;
 import browser.model.DOMNode;
 import browser.model.RenderNode;
 
@@ -45,6 +48,7 @@ public class RenderTreeGenerator {
     private RenderNode copyTree(DOMNode dom, RenderNode parent, int depth) {
         RenderNode renderNode = new RenderNode(dom, nodeID, depth);
         renderNode.attributes = dom.attributes;
+        renderNode.parent = parent;
 //        if (parentID != null) parentRenderNodeMap.put(parentID, renderNode);
         if (parent != null) parentRenderNodeMap.put(nodeID, parent);
         nodeID++;
@@ -83,14 +87,14 @@ public class RenderTreeGenerator {
      * @param root
      */
     public void transformNode(RenderNode root) {
-
-        switch (root.type) {
-        case "ol":
-            transformOL(root);
-            break;
-        case "ul":
-            transformUL(root);
-            break;
+        for (int i = 0; i < root.children.size(); i++) {
+            RenderNode child = root.children.get(i);
+            switch (child.type) {
+                case HTMLElements.OL:
+                case HTMLElements.UL:
+                    transformList(child);
+                    break;
+            }
         }
 
         for (RenderNode child : root.children) {
@@ -98,29 +102,50 @@ public class RenderTreeGenerator {
         }
     }
 
-    // Methods for transforming specific elements
-
-    private void transformUL(RenderNode root) {
-        for (RenderNode item : root.children) {
-            if (item.type.equals("li")) {
-                RenderNode text = item.children.get(0);
-                text.text = String.format("\t� %s", text.text);
-            }
-
-        }
-    }
-
-    private void transformOL(RenderNode root) {
+    /**
+     * HTML lists require the addition of pseudo-elements to represent the
+     * bullet points or numbers. Each <li></li> will have a corresponding
+     * pseudo-element added before it, and the <li></li> style will be set
+     * to display = inline.
+     * @param root The <ul> or <ol> RenderNode to transform.
+     */
+    private void transformList(RenderNode root) {
+        List<RenderNode> newChildren = new ArrayList<>();
         for (int i = 0; i < root.children.size(); i++) {
-            RenderNode item = root.children.get(i);
-            item.text = String.format("\t%d. %s", i + 1, item.text);
+            RenderNode child = root.children.get(i);
+            if (child.type.equals(HTMLElements.LI)) {
+                // Create pseudo element for the list marker.
+                RenderNode marker = new RenderNode(HTMLElements.PSEUDO_MARKER);
+                String listItemTypeKey = "LIST_MARKER_TYPE";
+                String listItemIndexKey = "LIST_MARKER_INDEX";
+                marker.depth = child.depth;
+                marker.id = getNextID();
+                marker.parent = child.parent;
+                marker.attributes.put(listItemTypeKey, root.type);
+                marker.attributes.put(listItemIndexKey, String.valueOf(i));
+                marker.style.display = CSSStyle.displayType.BLOCK;
+                marker.style.width = 30f;
+                marker.style.height = 20f;
+
+                // Update the root node to be inline.
+                child.style.display = CSSStyle.displayType.INLINE;
+
+                // Save the parent reference for the new render node.
+                parentRenderNodeMap.put(marker.id, marker.parent);
+
+                newChildren.add(marker);
+                newChildren.add(child);
+            } else {
+                newChildren.add(child);
+            }
         }
+
+        root.children.clear();
+        root.children.addAll(newChildren);
     }
 
     public Map<Integer, RenderNode> getParentRenderNodeMap() {
         return this.parentRenderNodeMap;
     }
-
-
 
 }

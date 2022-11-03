@@ -73,7 +73,7 @@ public class InspectorHandler {
         stage.setX(browserStage.getX() + browserStage.getWidth() / 2.0);
         stage.setY(browserStage.getY() + browserStage.getHeight() / 2.0);
         
-        File cssFile = new File("./res/css/inspector.css");
+        File cssFile = new File("src/main/resources/css/inspector.css");
         String path = cssFile.toURI().toString();
         scene.getStylesheets().add(path);
     }

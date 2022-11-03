@@ -1,0 +1,177 @@
+
+/*
+General colour scheme:
+#333 Grey for copy text
+
+Links: #336699;
+Links visited state: #4488bb;
+Other Link states: #07488A;
+
+#666 text grey
+#ddd grey
+#BBCCD9 blue grey
+#4488bb lighter blue
+#336699 dk blue
+*/
+
+/*
+that space that you wanted to get rid of is actually space further up here;
+    html, body {
+        margin: 0;
+        padding: 0;
+    }
+*/
+
+/* General Styles */
+html, body {    
+    background-color: #fcfcfc;
+    font-family: arial, sans-serif;
+    font-size: 100%;
+    color: #333;
+}
+
+h1, h2, h3, h4, h5, h5 {
+/*
+    color: #005689;
+    font-family: georgia, serif;
+*/
+    color: #2d7c0b;
+    font-family: arial, sans-serif;
+    margin-top: 25px;
+}
+
+h1 {
+/*
+    font-size: 18px;
+*/
+}
+
+h2 {
+/*
+    font-size: 16px;
+*/
+}
+
+p {
+    margin-bottom: 0.5em;
+}
+
+a {
+    color: #336699;
+    text-decoration: none;
+}
+
+a:visited {
+    color: #4488bb;
+}
+
+a:hover, a:focus, a:active {
+    color: #07488A;
+    text-decoration: none;
+}
+
+/* Preamble */
+
+
+/* End of Interfaces */
+
+a.func {
+    color: red;
+    text-decoration: none;
+}
+a.file {
+    color: red;
+    text-decoration: none;
+}
+
+pre.code {
+    background-color: #f4f0f4;
+//    font-family: monospace, courier;
+    font-size: 110%;
+    margin-left: 0px;
+    margin-right: 60px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 8px;
+    padding-right: 8px;
+    border: 1px solid #AADDAA;
+}
+
+
+.cmd {
+    font-family: monospace;
+    color: darkgreen;
+}
+
+.shell {
+    	font-family: monospace, courier ;
+	color: #004000;
+	margin-left: 40px;
+}
+.shell strong {
+   	color: #007000;
+	font-weight: bold;
+}
+.shell em {
+	color: #000080
+}
+
+.code {
+    font-family: monospace;
+    color: darkgreen;
+}
+
+.const {
+    font-family: monospace;
+    color: #330000;
+}
+
+.email {
+    font-family: monospace;
+    color: #0000a0;
+}
+
+.envvar {
+    font-family: monospace;
+    color: #330000;
+}
+
+.func {
+    font-family: serif;
+    font-style: italic;
+    color: #330000;
+}
+
+.man-page {
+    font-family: serif;
+    font-style: italic;
+    color: darkblue;
+}
+
+.pathname {
+    font-family: monospace;
+    color: darkgreen;
+}
+
+.url {
+    font-family: serif;
+    font-style: italic;
+    color: #440064;
+}
+
+.var {
+    font-family: serif;
+    font-style: italic;
+    color: #330000;
+}
+
+.t-del {
+    text-decoration: line-through;
+    border-bottom: 3px double #ff0000;
+    background-color: #ffcccc;
+}
+
+.t-add {
+    border-bottom: 3px double #00ff00;
+    background-color: #ccffcc;
+}

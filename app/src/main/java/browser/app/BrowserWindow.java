@@ -7,14 +7,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TabPane.TabClosingPolicy;
 import javafx.scene.image.Image;
@@ -31,28 +29,24 @@ import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
-import browser.app.ui.BrowserTab;
+import browser.app.ui.*;
 import browser.app.ui.BrowserTab.TabType;
-import browser.app.ui.Footer;
-import browser.app.ui.NewTab;
-import browser.app.ui.ResizeOverlay;
-import browser.app.ui.SearchTab;
-import browser.app.ui.SettingsTab;
 import browser.app.ui.inspector.InspectorHandler;
+import browser.interaction.InteractionCallback;
 
 public class BrowserWindow extends Application {
         
     private Scene scene;
-
+    private Stage stage;
     private AnchorPane anchor;
     private TabPane tabPane;
     
     private Footer footer;
     
-    private List<BrowserTab> tabs;
-    private int currentTab;
+    private List<BrowserTab> tabs = new ArrayList<>();
+    private int currentTabIndex = 0;
     
-    private boolean settingsTabOpen;
+    private boolean settingsTabOpen = false;
     private AtomicBoolean loading;
     
     private long currentTime;
@@ -64,39 +58,21 @@ public class BrowserWindow extends Application {
     private InspectorHandler inspectorHandler;
     
     private void setupUI(Stage stage) {
+        this.stage = stage;
         stage.setTitle("Browser");
         stage.initStyle(StageStyle.UNDECORATED);
-        tabs = new ArrayList<BrowserTab>();
-        currentTab = 0;
-        settingsTabOpen = false;
-        
-        SearchTab startingTab = new SearchTab(stage);
-        NewTab newTab = new NewTab();
-        
-        setTabCloseListener(startingTab);
-        setTabCloseListener(newTab);
-        
-        tabs.add(startingTab);
-        tabs.add(newTab);
-        
         tabPane = new TabPane();
-        tabPane.getTabs().add(tabs.get(currentTab).getActor());
-        tabPane.getTabs().add(tabs.get(1).getActor());
 
-        tabPane.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Tab>() {
-            @Override
-            public void changed(ObservableValue<? extends Tab> observable, Tab oldValue, Tab newValue) {
-                if (newValue.getId() != null && newValue.getId().equals(TabType.NEW.toString())) {
-                    addNewTab(stage, TabType.SEARCH);
-                }
+        addNewTab(stage, TabType.NEW);
+        addNewTab(stage, TabType.SEARCH);
+
+        tabPane.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue.getId() != null && newValue.getId().equals(TabType.NEW.toString())) {
+                addNewTab(stage, TabType.SEARCH);
             }
         });
         
-//        SettingsButton settingsButton = new SettingsButton();
-//        setSettingsButtonListener(settingsButton, stage);
-        
         HBox hbox = new HBox();
-//        hbox.getChildren().addAll(settingsButton);
         addWindowButtons(hbox, stage);
         
         anchor = new AnchorPane();
@@ -176,28 +152,40 @@ public class BrowserWindow extends Application {
         };
         stage.widthProperty().addListener(stageSizeListener);
         stage.heightProperty().addListener(stageSizeListener);
-        startingTab.loadStartupPage();
+//        startingTab.loadStartupPage();
         
         inspectorHandler = new InspectorHandler(stage);
     }
-    
+
     private void addNewTab(Stage stage, TabType type) {
+        String startupPageURL = "file://src/main/resources/html/startup_page.html";
+        addNewTab(stage, type, startupPageURL);
+    }
+    
+    private void addNewTab(Stage stage, TabType type, String urlToLoad) {
         BrowserTab newTab;
         if (type.equals(TabType.SETTINGS)) {
             newTab = new SettingsTab(stage);
+        } else if (type.equals(TabType.SEARCH)) {
+            newTab = new SearchTab(stage, getInteractionCallback());
         } else {
-            newTab = new SearchTab(stage);
+            newTab = new NewTab();
         }
-        System.out.printf("New tab %d\n", newTab.id());
+
         newTab.scene = scene;
         newTab.onResize(stage);
         setTabCloseListener(newTab);
-        tabs.add(tabs.size() - 1, newTab);
-        currentTab = tabs.size() - 2;
-        tabPane.getTabs().add(tabs.size() - 2, newTab.getActor());
-        tabPane.getSelectionModel().select(currentTab);
-        if (type.equals(TabType.SEARCH)) {
-            ((SearchTab) newTab).loadStartupPage();
+
+        if (type == TabType.NEW) {
+            tabs.add(newTab);
+            tabPane.getTabs().add(newTab.getActor());
+        } else if (type == TabType.SEARCH) {
+            int newTabIndex = tabs.size() == 0 ? 0 : tabs.size() - 1;
+            tabs.add(newTabIndex, newTab);
+            currentTabIndex = newTabIndex;
+            tabPane.getTabs().add(newTabIndex, newTab.getActor());
+            tabPane.getSelectionModel().select(currentTabIndex);
+            ((SearchTab) newTab).loadURL(urlToLoad);
         }
     }
     
@@ -297,6 +285,18 @@ public class BrowserWindow extends Application {
         });
     }
 
+    private InteractionCallback getInteractionCallback() {
+        return (url, newTab) -> {
+            if (newTab) {
+                System.out.println("interaction callback url: " + url);
+                addNewTab(stage, TabType.SEARCH, url);
+            } else {
+                if (tabs.get(currentTabIndex).getType() == TabType.SEARCH) {
+                    ((SearchTab) tabs.get(currentTabIndex)).loadURL(url);
+                }
+            }
+        };
+    }
     
     private void recordTimeDuration() {
         long now = System.nanoTime();

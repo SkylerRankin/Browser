@@ -148,7 +148,7 @@ public class BoxLayoutCalculator {
         }
 
         /* When splitting lines, more RenderNodes can be added to a node's children, meaning
-         * root.childen.size() can change over the course of the loop. Have to use for loop
+         * root.children.size() can change over the course of the loop. Have to use for loop
          * over indices to avoid concurrent modification exception.
          */
         for (int i = 0; i < root.children.size(); i++) {
@@ -286,12 +286,11 @@ public class BoxLayoutCalculator {
             case INLINE:
                 // TODO handle stacking padding
                 // TODO put new lines in a horizontal row NO MATTER WHAT, text splitter handles putting them on new lines
-                // Why check if parent is null? there would already have been a null pointer exception
                 // Try in-line, but if it needs more space, continue to block case
                 float x = lastAddedChild.box.x + lastAddedChild.box.width + lastAddedChild.style.marginRight + node.style.marginLeft;
                 float boundary = parent.box.x + parent.maxWidth - parent.style.paddingRight - node.style.marginRight;
 //                System.out.printf("%b: width = %.2f, x = %.2f, boundary = %.2f\n", (x + node.box.width <= boundary), node.box.width, x, boundary);
-                if (parent != null && (x + node.box.width <= boundary)) {
+                if (x + node.box.width <= boundary) {
                     return new Vector2(x, lastAddedChild.box.y);
                 } else if (node.type.equals("text")) {
                     float availableWidth = boundary - x;
@@ -304,6 +303,10 @@ public class BoxLayoutCalculator {
                         }
                     }
                 } else {
+                    // Determine if this inline element can be split in order to fit the available width. This is possible
+                    // if the element contains text that can itself be split.
+                    // TODO: textSplitter.canBreakNode needs to be made more flexible. It expects a single text child node
+                    // and does not support nested spans.
                     float availableWidth = boundary - x;
                     if (textSplitter.canBreakNode(node, availableWidth)) {
                         float fullWidth = parent.maxWidth - (parent.style.paddingLeft + node.style.marginLeft + node.style.marginRight + parent.style.paddingRight);

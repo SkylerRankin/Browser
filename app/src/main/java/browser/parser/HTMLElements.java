@@ -45,6 +45,8 @@ public class HTMLElements {
     public static final String STRONG = "strong";
     public static final String CENTER = "center";
     public static final String NOBR = "nobr";
+
+    public static final String PSEUDO_MARKER = "marker";
     
     private static final String[] VALID_ELEMENTS = {TEXT, HTML, HEAD, STYLE, TITLE, BODY, H1, H2, H3, H4, H5, H6, DIV, SPAN, P, UL, OL, LI, HR, B, IMG, A, PRE, TT, CODE, EM, STRONG, CENTER, TABLE, TR, TD};
     private static final String[] EMPTY_ELEMENTS = {DOCTYPE, IMG, BR, LINK, BR, INPUT, META, HR};
@@ -55,15 +57,18 @@ public class HTMLElements {
     private static Set<String> emptyElements;
     private static Set<String> blockElements;
     private static Set<String> renderElements;
+    private static Set<String> pseudoElements;
     
     public static void init() {
         validElements = new HashSet<String>();
         emptyElements = new HashSet<String>();
         blockElements = new HashSet<String>();
         renderElements = new HashSet<String>();
+        pseudoElements = new HashSet<>();
 
         validElements.addAll(Arrays.asList(VALID_ELEMENTS));
         emptyElements.addAll(Arrays.asList(EMPTY_ELEMENTS));
+        pseudoElements.add(PSEUDO_MARKER);
         blockElements.addAll(Arrays.asList(BLOCK_LEVEL_ELEMENTS));
         renderElements.addAll(Arrays.asList(VALID_ELEMENTS));
         renderElements.removeAll(Arrays.asList(NOT_IN_RENDER_TREE_ELEMENTS));
@@ -83,6 +88,10 @@ public class HTMLElements {
     
     public static boolean usedInRenderTree(String element) {
         return renderElements.contains(element);
+    }
+
+    public static boolean isPseudoElement(String element) {
+        return pseudoElements.contains(element);
     }
 
 }

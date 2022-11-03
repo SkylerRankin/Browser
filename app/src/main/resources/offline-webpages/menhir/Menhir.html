@@ -1,0 +1,65 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!-- saved from url=(0041)http://gallium.inria.fr/~fpottier/menhir/ -->
+<html xml:lang="en" lang="en" data-arp-injected="true"><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252"><style type="text/css">img {border-width: 0}</style><title>Menhir</title></head><body><p style="text-align: center;"><img width="180" alt="Photo by Lionel Pottier" src="./Menhir_files/petit-menhir.jpg" height="240"></p><h1>What is Menhir?</h1><p>Menhir is a LR(1) parser generator for the
+         <a href="http://caml.inria.fr/index.en.html">OCaml</a> programming language. That is,
+         Menhir compiles LR(1) grammar specifications down to OCaml code.
+	 Menhir was designed and implemented by François Pottier and
+	 <a href="http://www.pps.jussieu.fr/~yrg/">Yann Régis-Gianas</a>.
+      </p><p>Menhir is 90% compatible with <a href="http://caml.inria.fr/pub/docs/manual-ocaml/lexyacc.html#sec278">ocamlyacc</a>. Legacy ocamlyacc grammar
+         specifications are accepted and compiled by Menhir. The resulting
+         parsers run and produce correct parse trees. However, parsers that
+         explicitly invoke functions in module <tt>Parsing</tt> behave
+         slightly incorrectly. For instance, the functions that provide access
+         to positions return a dummy position when invoked by a Menhir
+         parser. Porting a grammar specification from ocamlyacc to Menhir
+         requires replacing all calls to module <tt>Parsing</tt> with new
+         Menhir-specific keywords.
+      </p><p>Why prefer Menhir to ocamlyacc?</p><ul><li>
+	  Menhir allows the definition of a nonterminal symbol to be <b>parameterized</b> by other
+	  (terminal or nonterminal) symbols. Furthermore, it offers a <b>library</b> of
+          standard parameterized definitions, including options, sequences, and lists. It
+	  offers some support for EBNF syntax, via the <tt>?</tt>, <tt>+</tt>,
+	  and <tt>*</tt> modifiers.
+        </li><li>
+	  ocamlyacc only accepts LALR(1) grammars. Menhir accepts <b>LR(1)</b> grammars,
+          thus avoiding certain artificial conflicts.
+	</li><li>
+	  Menhir's <b><tt>%inline</tt></b> keyword helps avoid or resolve some LR(1)
+          conflicts without artificial modification of the grammar.
+	</li><li>
+	  Menhir <b>explains conflicts</b> in terms of the grammar, not just in terms of
+	  the automaton. Menhir's explanations are believed to be understandable
+	  by mere humans.
+	</li><li>Menhir supports <b>incremental parsing</b> (in <tt>--table</tt> mode only). This
+          means that the state of the parser can be saved at any point (at no cost) and that parsing
+          can later be resumed from a saved state.</li><li>
+	  Menhir offers an <b>interpreter</b> that helps debug grammars interactively.
+	</li><li>
+	  Menhir allows grammar specifications to be <b>split</b> over multiple files.
+          It also allows several grammars to share a single set of tokens.
+	</li><li>
+	  Menhir produces <b>reentrant</b> parsers.
+	</li><li>
+	  Menhir is able to produce parsers that are <b>parameterized</b> by OCaml modules.
+	</li><li>
+	  ocamlyacc requires semantic values to be referred to via keywords: <tt>$1</tt>,
+          <tt>$2</tt>, and so on. Menhir allows semantic values to be explicitly <b>named</b>.
+	</li></ul><p>There are other differences, documented in Menhir's reference manual.</p><h1>Documentation</h1><p>The <a href="http://gallium.inria.fr/~fpottier/menhir/manual.html">reference manual</a>
+         is available in
+         <a href="http://gallium.inria.fr/~fpottier/menhir/manual.html">HTML</a> and
+         <a href="http://gallium.inria.fr/~fpottier/menhir/manual.pdf">PDF</a> formats.</p><p>The <a href="https://gitlab.inria.fr/fpottier/menhir/blob/master/lib/Convert.mli">MenhirLib.Convert</a> API offers facilities for converting
+	 back and forth between the traditional parser API (which assumes that the lexical analyzer
+	 is produced using ocamllex) and a revised API (which makes no such assumption).</p><p>The module <a href="https://gitlab.inria.fr/fpottier/menhir/blob/master/lib/LexerUtil.mli">MenhirLib.LexerUtil</a> offers facilities
+         for extracting the position of a syntax error out of the lexing buffer and
+         displaying it in a readable way.</p><p>The module <a href="https://gitlab.inria.fr/fpottier/menhir/blob/master/lib/ErrorReports.mli">MenhirLib.ErrorReports</a> offers facilities
+         for constructing syntax error messages.</p><p>The incremental API is defined by <a href="https://gitlab.inria.fr/fpottier/menhir/blob/master/lib/IncrementalEngine.ml">MenhirLib.IncrementalEngine</a>
+        (and is also explained in the reference manual).</p><h1>Downloading</h1><p>Here are the <a href="https://gitlab.inria.fr/fpottier/menhir/tags">source code releases</a> of Menhir.
+          Compiling and installing requires GNU make and <a href="http://caml.inria.fr/index.en.html">OCaml</a>
+          (version 4.02 or later). Bug
+	  reports and suggestions are welcome. Here is a list of recent <a href="https://gitlab.inria.fr/fpottier/menhir/blob/master/CHANGES.md">changes</a>.</p><p>Menhir is also available through <a href="http://opam.ocaml.org/doc/Install.html">opam</a>.
+          Once you have installed opam, just type <tt>opam install menhir</tt>.</p><h1>Mailing list</h1><p>There is a <a href="https://sympa.inria.fr/sympa/info/menhir">mailing list</a> for announcements
+          of new releases and for discussion of problems, bugs, feature requests,
+          and so on. Only subscribers can post.</p><div><hr><table cellpadding="5%"><tbody><tr><td><a href="http://gallium.inria.fr/~fpottier/menhir/menhir.html.fr"><img width="55" alt="Français" src="./Menhir_files/france.gif" height="31"></a></td><td><a href="http://gallium.inria.fr/~fpottier/index.html.en">Home</a></td><td><a href="mailto:%46%72%61%6E%63%6F%69%73%2E%50%6F%74%74%69%65%72%40%69%6E%72%69%61%2E%66%72">
+	      Email
+	    </a></td><td>Last modified: August 10, 2021
+</td></tr></tbody></table></div></body></html>

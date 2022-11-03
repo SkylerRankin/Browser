@@ -16,24 +16,28 @@ import browser.parser.HTMLElements;
 
 public class HTMLRenderer {
     
-    private static final boolean drawOutlines = false; //true false
+    private static final boolean drawOutlines = true; //true false
     private static final boolean drawPadding = false;
     private static final boolean drawMargins = false;
     private static final float textOffsetScale = 0.75f;
     
     public static void render(GraphicsContext gc, RenderNode root) {
-//        System.out.printf("rendering: %s %f %f\n", root.type, root.box.x, root.box.y);
-        switch (root.type) {
-        case "img":
-            renderImage(gc, root);
-            return;
-        case "hr":
-            fillRect(gc, root.style.color, root.box.x, root.box.y, root.box.width, root.box.height);
-            return;
+        // Draw box background
+        if (!root.type.equals(HTMLElements.TEXT) && root.style.backgroundColor != null) {
+            fillRect(gc, root.style.backgroundColor, root.box.x, root.box.y, root.box.width, root.box.height);
         }
 
-        // Draw box background
-        if (!root.type.equals(HTMLElements.TEXT)) fillRect(gc, root.style.backgroundColor, root.box.x, root.box.y, root.box.width, root.box.height);
+        switch (root.type) {
+            case HTMLElements.IMG:
+                renderImage(gc, root);
+                break;
+            case HTMLElements.HR:
+                fillRect(gc, root.style.color, root.box.x, root.box.y, root.box.width, root.box.height);
+                break;
+            case HTMLElements.PSEUDO_MARKER:
+                renderPseudoMarker(gc, root);
+                break;
+        }
 
         // Draw borders
         if (root.style.borderWidthTop > 0) fillRect(gc, root.style.borderColorTop, root.box.x - root.style.borderWidthLeft, root.box.y - root.style.borderWidthTop, root.box.width + root.style.borderWidthLeft + root.style.borderWidthRight, root.style.borderWidthTop);
@@ -73,12 +77,10 @@ public class HTMLRenderer {
         Image image = ImageCache.getImage(root.attributes.get("src"));
         gc.drawImage(image, root.box.x, root.box.y, root.box.width, root.box.height);
     }
-    
-    public static void renderList(GraphicsContext gc, RenderNode root) {
-        for (RenderNode child : root.children) {
-            child.text = String.format("\t� %s", child.text);
-            drawText(gc, child);
-        }
+
+    public static void renderPseudoMarker(GraphicsContext gc, RenderNode node) {
+        gc.setFill(node.style.color.toPaint());
+        gc.fillText("\u2022", node.box.x, node.box.y + node.box.height * textOffsetScale);
     }
     
     public static void drawBoxOutline(GraphicsContext gc, Box box) {

@@ -10,6 +10,7 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Tab;
 
 import browser.app.ui.inspector.InspectorHandler;
+import browser.interaction.InteractionHandler;
 import browser.tasks.LoadWebpageTask;
 import browser.tasks.RedrawWebpageTask;
 
@@ -18,19 +19,21 @@ public class SearchTabPipeline {
     private int tabID;
     private Pipeline pipeline;
     private Tab tab;
+    private InteractionHandler interactionHandler;
     private float width;
     private Canvas canvas;
     private GraphicsContext gc;
     private final boolean debug = true;
     private List<RedrawWebpageTask> currentRedrawTasks;
     
-    public SearchTabPipeline(int id, Canvas canvas, Tab tab) {
+    public SearchTabPipeline(int id, Canvas canvas, Tab tab, InteractionHandler interactionHandler) {
         tabID = id;
         pipeline = new Pipeline();
         this.canvas = canvas;
         this.width = (float) canvas.getWidth();
         this.gc = canvas.getGraphicsContext2D();
         this.tab = tab;
+        this.interactionHandler = interactionHandler;
         currentRedrawTasks = new ArrayList<RedrawWebpageTask>();
     }
     
@@ -53,6 +56,7 @@ public class SearchTabPipeline {
                 pipeline.render(gc);
                 tab.setText(pipeline.title == null ? url : pipeline.title);
                 InspectorHandler.get().update(pipeline.getRootRenderNode());
+                interactionHandler.setRootRenderNode(pipeline.getRootRenderNode());
             }
         });
         Thread thread = new Thread(lwt);

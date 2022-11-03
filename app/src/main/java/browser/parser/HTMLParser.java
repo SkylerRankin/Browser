@@ -86,7 +86,7 @@ public class HTMLParser {
                 int closing = html.indexOf(">", end);
                 String content = html.substring(index, end);
                 DOMNode n = new DOMNode(HTMLElements.TEXT);
-                n.content = content;
+                n.content = content.trim();
                 n.parent = current;
                 current.children.add(n);
                 index+=(end - index);

@@ -32,4 +32,12 @@ public class Box {
         return corners;
     }
 
+    public boolean overlapsPoint(Vector2 point) {
+        return x <= point.x && x + width >= point.x && y <= point.y && y + height >= point.y;
+    }
+
+    public String toString() {
+        return String.format("Position: (%.2f, %.2f), Size: (%.2f, %.2f)", x, y, width, height);
+    }
+
 }

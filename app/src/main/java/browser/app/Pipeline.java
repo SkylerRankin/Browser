@@ -57,13 +57,16 @@ public class Pipeline {
     public void calculateLayout(float screenWidth) {
         RenderTreeGenerator rtg = new RenderTreeGenerator();
         renderRoot = rtg.generateRenderTree(domRoot, screenWidth);
-//        renderRoot.print();
         rtg.cleanUpText(renderRoot, false);
         CSSLoader cssLoader = new CSSLoader(domRoot, rtg.getParentRenderNodeMap(), resourceLoader.getExternalCSS());
         cssLoader.applyAllCSS(renderRoot);
         BoxLayoutCalculator blc = new BoxLayoutCalculator(rtg.getParentRenderNodeMap(), screenWidth);
 
         rtg.transformNode(renderRoot);
+
+//        System.out.println("Pipeline.calculateLayout: printing render root.");
+//        renderRoot.print();
+
         blc.setBoxBounds(renderRoot);
         blc.propagateMaxSizes(renderRoot);
 //        blc.printBoxes(renderRoot);
@@ -71,6 +74,7 @@ public class Pipeline {
         blc.setTableCellWidths(renderRoot);
         blc.calculateBoxes(renderRoot);
         blc.applyJustification(renderRoot);
+//        System.out.println("Pipeline.calculateLayout: printing render root after box calculation.");
 //        blc.printBoxes(renderRoot);
         height = renderRoot.box.height;
         width = screenWidth;

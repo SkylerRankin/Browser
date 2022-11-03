@@ -331,6 +331,27 @@ public class HTMLParserTest {
     }
 
     @Test
+    public void testGenerateDOMTree_trimWhitespace() {
+        String htmlText = "<html>\n\t<div>\n\t\t<p>\n\t\t\tSome text\n\t\t</p>\n\t</div>\n</html>";
+        HTMLParser parser = new HTMLParser(null);
+        DOMNode dom = parser.generateDOMTree(htmlText);
+
+        DOMNode root = new DOMNode("root");
+        DOMNode html = new DOMNode(HTMLElements.HTML);
+        DOMNode div = new DOMNode(HTMLElements.DIV);
+        DOMNode p = new DOMNode(HTMLElements.P);
+        DOMNode text = new DOMNode(HTMLElements.TEXT);
+        text.content = "Some text";
+
+        root.addChild(html);
+        html.addChild(div);
+        div.addChild(p);
+        p.addChild(text);
+
+        assertEquals(root, dom);
+    }
+
+    @Test
     public void testGetBodyNode() {
         DOMNode dom = new DOMNode("root");
         DOMNode html = new DOMNode(HTMLElements.HTML);

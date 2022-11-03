@@ -98,7 +98,7 @@ public class RenderNode {
         for (RenderNode n : children) {
             n.print(pad+"\t");
         }
-        System.out.println(pad+type);
+        System.out.println(pad + "/" + type);
     }
     
     public void printStyle() {

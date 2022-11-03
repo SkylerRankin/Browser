@@ -4,7 +4,6 @@ import javafx.beans.value.ChangeListener;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollBar;
 import javafx.scene.control.ScrollPane;
@@ -13,15 +12,16 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 
 import browser.app.SearchTabPipeline;
+import browser.interaction.InteractionCallback;
+import browser.interaction.InteractionHandler;
+import browser.model.Vector2;
 
 public class SearchTab extends BrowserTab {
 
     private Tab tab;
-    private GraphicsContext gc;
     private GridPane grid;
     private Label statusLabel;
     private TextField urlInput;
@@ -29,36 +29,35 @@ public class SearchTab extends BrowserTab {
     private ScrollPane scroll;
     private Canvas canvas;
     
-    private SearchTabPipeline pipeline;
+    private final SearchTabPipeline pipeline;
+    private final InteractionHandler interactionHandler;
 
-    public SearchTab(Stage stage) {
+    public SearchTab(Stage stage, InteractionCallback interactionCallback) {
         super(TabType.SEARCH, stage);
         setupUI();
-        pipeline = new SearchTabPipeline(this.id, canvas, tab);
+        interactionHandler = new InteractionHandler(interactionCallback);
+        pipeline = new SearchTabPipeline(this.id, canvas, tab, interactionHandler);
     }
 
-    public void loadStartupPage() {
-        pipeline.loadWebpage("file://src/main/resources/html/startup_page.html");
+    public void loadURL(String url) {
+        pipeline.loadWebpage(url);
+        urlInput.setText(url);
     }
 
     private void setupUI() {
         grid = new GridPane();
         urlInput = new TextField();
-        urlInput.setText("http://gallium.inria.fr/~fpottier/menhir/");
+        urlInput.setText("");
         statusLabel = new Label("Loading  ");
         bookmarksBar = new BookmarksBar(urlInput);
       
         canvas = new Canvas();
-        gc = canvas.getGraphicsContext2D();
-      
         scroll = new ScrollPane();
         scroll.setVbarPolicy(ScrollBarPolicy.ALWAYS);
         scroll.setHbarPolicy(ScrollBarPolicy.NEVER);
         scroll.setContent(canvas);
         scroll.setFitToWidth(true);
-      
-        HBox hbox = new HBox();
-      
+
         grid.add(urlInput, 0, 0);
         grid.add(bookmarksBar, 0, 1, 1, 1);
         grid.add(scroll, 0, 2, 1, 1);
@@ -68,10 +67,15 @@ public class SearchTab extends BrowserTab {
         tab = new Tab("New Tab", grid);
         tab.setId(TabType.SEARCH.toString());
         tab.getStyleClass().add("search_tab");
-      
+
         ChangeListener<Number> stageSizeListener = (obs, oldValue, newValue) -> {
 //        onResize(stage);
         };
+
+        canvas.setOnMouseClicked(event -> {
+            Vector2 position = new Vector2((float) event.getX(), (float) event.getY());
+            interactionHandler.handleClickEvent(position);
+        });
       
         stage.widthProperty().addListener(stageSizeListener);
 

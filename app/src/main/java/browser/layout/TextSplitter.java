@@ -9,6 +9,7 @@ import java.util.Map;
 import browser.css.CSSStyle;
 import browser.model.RenderNode;
 import browser.model.Vector2;
+import browser.parser.HTMLElements;
 
 public class TextSplitter {
 
@@ -117,6 +118,7 @@ public class TextSplitter {
 
     public boolean canBreakNode(RenderNode node, float availableWidth) {
         if (node.children.size() != 1) return false;
+        if (!node.children.get(0).type.equals(HTMLElements.TEXT)) return false;
         RenderNode child = node.children.get(0);
         return canBreakText(child, availableWidth);
     }

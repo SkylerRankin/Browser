@@ -33,9 +33,9 @@ public class DOMNode {
     
     public void print(String pad) {
         if (this.type.equals((HTMLElements.TEXT))) {
-            System.out.printf("%sTEXT: %s\n", pad, content);
+            System.out.printf("%sTEXT: [%s]\n", pad, content);
         } else {
-            System.out.print(pad+type);
+            System.out.print(pad + type);
             for (Entry<String, String> entry : this.attributes.entrySet()) {
                 System.out.print(String.format(" %s=%s", entry.getKey(), entry.getValue()));
             }
@@ -43,7 +43,7 @@ public class DOMNode {
             for (DOMNode n : children) {
                 n.print(pad+"    ");
             }
-            System.out.println(pad+type);
+            System.out.println(pad + "/" + type);
         }
     }
     
