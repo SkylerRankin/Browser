@@ -9,6 +9,11 @@ import java.util.Set;
 import browser.model.CSSColor;
 import browser.model.CSSRulePrecedent;
 
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
+
+@EqualsAndHashCode
+@ToString
 public class CSSStyle {
 
     private final Set<String> setProperties = new HashSet<>();
@@ -17,7 +22,7 @@ public class CSSStyle {
 
     public static enum dimensionType {PIXEL, PERCENTAGE}
 
-    public static enum displayType {BLOCK, INLINE, NONE}
+    public static enum displayType {BLOCK, INLINE, INLINE_BLOCK}
 
     public static enum fontStyleType {NORMAL, ITALIC, ITALICS}
 
@@ -48,7 +53,7 @@ public class CSSStyle {
     public displayType display = displayType.BLOCK;
     
     public String fontFamily = "Times New Roman";
-    public int fontSize = 16;
+    public int fontSize = 12;
     public fontStyleType fontStyle = fontStyleType.NORMAL;
     public fontWeightType fontWeight = fontWeightType.NORMAL;
     

@@ -7,6 +7,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
 
+import browser.constants.PseudoElementConstants;
 import browser.css.CSSStyle.fontStyleType;
 import browser.css.CSSStyle.fontWeightType;
 import browser.model.Box;
@@ -16,7 +17,7 @@ import browser.parser.HTMLElements;
 
 public class HTMLRenderer {
     
-    private static final boolean drawOutlines = true; //true false
+    private static final boolean drawOutlines = false; //true false
     private static final boolean drawPadding = false;
     private static final boolean drawMargins = false;
     private static final float textOffsetScale = 0.75f;
@@ -80,7 +81,10 @@ public class HTMLRenderer {
 
     public static void renderPseudoMarker(GraphicsContext gc, RenderNode node) {
         gc.setFill(node.style.color.toPaint());
-        gc.fillText("\u2022", node.box.x, node.box.y + node.box.height * textOffsetScale);
+        String markerType = node.attributes.get(PseudoElementConstants.MARKER_TYPE_KEY);
+        String markerIndex = node.attributes.get(PseudoElementConstants.MARKER_INDEX_KEY);
+        String text = markerType.equals(HTMLElements.UL) ? "\u2022" : String.format("%d.", Integer.parseInt(markerIndex) + 1);
+        gc.fillText(text, node.box.x, node.box.y + node.box.height * textOffsetScale);
     }
     
     public static void drawBoxOutline(GraphicsContext gc, Box box) {

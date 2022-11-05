@@ -1,5 +1,8 @@
 package browser.model;
 
+import lombok.EqualsAndHashCode;
+
+@EqualsAndHashCode
 public class CSSRulePrecedent {
     
     private enum RuleType { ALL, ELEMENT, CLASS, ID }

@@ -87,6 +87,85 @@ public class RenderNode {
         }
         return nodes;
     }
+
+    public void addChild(RenderNode n) {
+        children.add(n);
+        n.parent = this;
+    }
+
+    public void addChildren(RenderNode... nodes) {
+        for (RenderNode node : nodes) {
+            addChild(node);
+        }
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (!(object instanceof RenderNode node)) {
+            return false;
+        }
+
+        if (this.id != node.id ||
+                this.depth != node.depth ||
+                !this.type.equals(node.type) ||
+                !this.style.equals(node.style) ||
+                !this.box.equals(node.box) || (maxWidth == null ? node.maxWidth != null : maxWidth.compareTo(node.maxWidth) != 0) ||
+                (maxHeight == null ? node.maxHeight != null : maxHeight.compareTo(node.maxHeight) != 0)) {
+            return false;
+        }
+
+        if (this.parent == null) {
+            if (node.parent != null) {
+                return false;
+            }
+        } else {
+            if (parent.id != node.parent.id) {
+                return false;
+            }
+        }
+
+        if (cssAttribute == null) {
+            if (node.cssAttribute != null) {
+                return false;
+            }
+        } else if (!cssAttribute.equals(node.cssAttribute)) {
+            return false;
+        }
+
+        for (Map.Entry<String, String> e : attributes.entrySet()) {
+            if (!node.attributes.containsKey(e.getKey())) {
+                return false;
+            }  else if (e.getValue() == null) {
+                if (node.attributes.get(e.getKey()) != null) {
+                    return false;
+                }
+            } else {
+                if (!e.getValue().equals(node.attributes.get(e.getKey()))) {
+                    return false;
+                }
+            }
+        }
+
+        if (node.attributes.size() != attributes.size()) {
+            return false;
+        }
+
+        if (node.children.size() != children.size()) {
+            return false;
+        }
+
+        for (int i = 0; i < children.size(); i++) {
+            if (!children.get(i).equals(node.children.get(i))) {
+                return false;
+            }
+        }
+
+        if (text == null && node.text != null || (text != null && !text.equals(node.text))) {
+            return false;
+        }
+
+        return true;
+    }
     
     public void print() {
         print("");
@@ -94,7 +173,7 @@ public class RenderNode {
     
     public void print(String pad) {
         System.out.printf("%s%s [depth=%d id=%d]\n",pad, type, this.depth, this.id);
-        if (text != null) System.out.println(pad+"\t"+text);
+        if (text != null) System.out.printf("%s\t[%s]\n", pad, text);
         for (RenderNode n : children) {
             n.print(pad+"\t");
         }

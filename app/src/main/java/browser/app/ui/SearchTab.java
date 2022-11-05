@@ -59,7 +59,7 @@ public class SearchTab extends BrowserTab {
         scroll.setFitToWidth(true);
 
         grid.add(urlInput, 0, 0);
-        grid.add(bookmarksBar, 0, 1, 1, 1);
+//        grid.add(bookmarksBar, 0, 1, 1, 1);
         grid.add(scroll, 0, 2, 1, 1);
       
         GridPane.setMargin(urlInput, new Insets(5, 10, 5, 10));

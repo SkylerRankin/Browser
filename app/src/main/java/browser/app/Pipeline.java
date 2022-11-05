@@ -18,8 +18,9 @@ import browser.renderer.ImageCache;
 
 public class Pipeline {
 
-    private String url;
-    private ResourceLoader resourceLoader;
+    private static boolean initialized = false;
+
+    private final ResourceLoader resourceLoader;
     private DOMNode domRoot;
     private RenderNode renderRoot;
     private boolean loaded;
@@ -30,6 +31,11 @@ public class Pipeline {
 
 
     public static void init() {
+        if (initialized) {
+            return;
+        }
+
+        initialized = true;
         DefaultColors.init();
         ImageCache.loadDefaultImages();
         HTMLElements.init();
@@ -38,12 +44,15 @@ public class Pipeline {
         SpecialSymbolHandler.init();
     }
 
+    public Pipeline() {
+        resourceLoader = new ResourceLoader();
+    }
+
     /**
      * Step 1 in the pipeline. Downloads and parses the HTML.
      * @param url        URL to visit.
      */
     public void loadWebpage(String url) {
-        resourceLoader = new ResourceLoader();
         resourceLoader.loadWebpage(url);
         domRoot = resourceLoader.getDOM();
         title = (new HTMLParser(null)).getTitle(domRoot);
@@ -51,31 +60,28 @@ public class Pipeline {
     }
 
     /**
-     * Step 2 in the pipeline. Calculates sizes and positions all render nodes.
+     * Step 2 in the pipeline. Calculates the size and position of each render nodes.
      * @param screenWidth        Width in pixels of the screen.
      */
     public void calculateLayout(float screenWidth) {
         RenderTreeGenerator rtg = new RenderTreeGenerator();
         renderRoot = rtg.generateRenderTree(domRoot, screenWidth);
-        rtg.cleanUpText(renderRoot, false);
         CSSLoader cssLoader = new CSSLoader(domRoot, rtg.getParentRenderNodeMap(), resourceLoader.getExternalCSS());
         cssLoader.applyAllCSS(renderRoot);
+
+        // Run text cleanup after CSS properties have been set.
+        rtg.cleanupRenderNodeText(renderRoot);
+
         BoxLayoutCalculator blc = new BoxLayoutCalculator(rtg.getParentRenderNodeMap(), screenWidth);
 
         rtg.transformNode(renderRoot);
 
-//        System.out.println("Pipeline.calculateLayout: printing render root.");
-//        renderRoot.print();
-
         blc.setBoxBounds(renderRoot);
         blc.propagateMaxSizes(renderRoot);
-//        blc.printBoxes(renderRoot);
         blc.finalizeDimensions(renderRoot);
         blc.setTableCellWidths(renderRoot);
         blc.calculateBoxes(renderRoot);
         blc.applyJustification(renderRoot);
-//        System.out.println("Pipeline.calculateLayout: printing render root after box calculation.");
-//        blc.printBoxes(renderRoot);
         height = renderRoot.box.height;
         width = screenWidth;
     }
@@ -92,6 +98,11 @@ public class Pipeline {
     // Expose the render tree for the inspector
     public RenderNode getRootRenderNode() {
         return renderRoot;
+    }
+
+    // Expose the DOM root for testing.
+    public void setDomRoot(DOMNode domRoot) {
+        this.domRoot = domRoot;
     }
 
     public boolean loadedWebpage() {

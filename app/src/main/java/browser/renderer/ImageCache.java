@@ -20,8 +20,12 @@ public class ImageCache {
         if (!file.exists()) {
             System.err.println("ImageCache: defaultImage.png doesn't exist");
         }
-        Image defaultImage = new Image(file.toURI().toString());
-        images.put("default", defaultImage);
+        try {
+            Image defaultImage = new Image(file.toURI().toString());
+            images.put("default", defaultImage);
+        } catch (RuntimeException e) {
+            System.err.println("ImageCache.loadDefaultImages: failed to load default image, internal graphics not initialized yet.");
+        }
     }
 
     public static void loadImage(String url) {

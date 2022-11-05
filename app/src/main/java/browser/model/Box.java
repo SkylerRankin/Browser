@@ -3,6 +3,9 @@ package browser.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import lombok.EqualsAndHashCode;
+
+@EqualsAndHashCode
 public class Box {
     
     public float x;

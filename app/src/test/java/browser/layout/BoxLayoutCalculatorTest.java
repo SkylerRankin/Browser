@@ -1,13 +1,17 @@
 package browser.layout;
 
+import static browser.constants.MathConstants.DELTA;
 import static org.junit.Assert.*;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import browser.app.Pipeline;
 import browser.css.CSSStyle;
 import browser.model.RenderNode;
+import browser.parser.HTMLElements;
 
+import org.junit.Before;
 import org.junit.Test;
 
 public class BoxLayoutCalculatorTest {
@@ -15,10 +19,128 @@ public class BoxLayoutCalculatorTest {
     private RenderNode root;
     private Map<Integer, RenderNode> parentMap;
 
-//    @Before
-//    public void before() {
-//        JFXPanel jfxPanel = new JFXPanel();
-//    }
+    @Before
+    public void setup() {
+        parentMap = new HashMap<>();
+        Pipeline.init();
+    }
+
+    @Test
+    public void setBoxBoundsTest_SimpleFixedSizeDiv() {
+        float screenWidth = 100;
+        BoxLayoutCalculator calculator = new BoxLayoutCalculator(parentMap, screenWidth);
+
+        RenderNode body = new RenderNode(HTMLElements.BODY);
+        body.id = 0;
+        RenderNode div = new RenderNode(HTMLElements.DIV);
+        div.id = 1;
+        div.style.width = 50f;
+        div.style.height = 60f;
+
+        body.addChild(div);
+        parentMap.put(div.id, body);
+
+        calculator.setBoxBounds(body);
+
+        assertTrue(body.box.fixedWidth);
+        assertFalse(body.box.fixedHeight);
+        assertEquals(screenWidth, body.box.width, DELTA);
+        assertEquals(screenWidth, body.maxWidth, DELTA);
+        assertNull(body.maxHeight);
+
+        assertTrue(div.box.fixedWidth);
+        assertTrue(div.box.fixedHeight);
+        assertEquals(50f, div.box.width, DELTA);
+        assertEquals(screenWidth, div.maxWidth, DELTA);
+        assertEquals(60f, div.box.height, DELTA);
+        assertNull(div.maxHeight);
+    }
+
+    @Test
+    public void setBoxBoundsTest_InlineFixedSizeDiv() {
+        float screenWidth = 100;
+        BoxLayoutCalculator calculator = new BoxLayoutCalculator(parentMap, screenWidth);
+
+        RenderNode body = new RenderNode(HTMLElements.BODY);
+        body.id = 0;
+        RenderNode div = new RenderNode(HTMLElements.DIV);
+        div.id = 1;
+        div.style.width = 50f;
+        div.style.height = 60f;
+        div.style.display = CSSStyle.displayType.INLINE;
+
+        body.addChild(div);
+        parentMap.put(div.id, body);
+
+        calculator.setBoxBounds(body);
+
+        assertTrue(body.box.fixedWidth);
+        assertFalse(body.box.fixedHeight);
+        assertEquals(screenWidth, body.box.width, DELTA);
+        assertEquals(screenWidth, body.maxWidth, DELTA);
+        assertNull(body.maxHeight);
+
+        assertFalse(div.box.fixedWidth);
+        assertFalse(div.box.fixedHeight);
+        assertEquals(0, div.box.width, DELTA);
+        assertEquals(screenWidth, div.maxWidth, DELTA);
+        assertEquals(0, div.box.height, DELTA);
+        assertNull(div.maxHeight);
+    }
+
+    @Test
+    public void calculateBoxesTest_ExpandDivs() {
+        final float screenWidth = 100;
+        final float div1Width = 50;
+        BoxLayoutCalculator calculator = new BoxLayoutCalculator(parentMap, screenWidth);
+
+        RenderNode body = new RenderNode(HTMLElements.BODY);
+        body.id = 0;
+        body.box.fixedWidth = true;
+        body.box.width = screenWidth;
+        body.maxWidth = screenWidth;
+        RenderNode div1 = new RenderNode(HTMLElements.DIV);
+        div1.id = 1;
+        div1.box.fixedWidth = true;
+        div1.box.width = div1Width;
+        div1.maxWidth = div1Width;
+        RenderNode div2 = new RenderNode(HTMLElements.DIV);
+        div2.id = 2;
+        div2.maxWidth = div1Width;
+        RenderNode div3 = new RenderNode(HTMLElements.DIV);
+        div3.id = 3;
+        div3.maxWidth = div1Width;
+
+        body.addChild(div1);
+        div1.addChild(div2);
+        div2.addChild(div3);
+
+        parentMap.put(div1.id, body);
+        parentMap.put(div2.id, div1);
+        parentMap.put(div3.id, div2);
+
+        calculator.calculateBoxes(body);
+
+        assertEquals(0, body.box.x, DELTA);
+        assertEquals(0, body.box.y, DELTA);
+        assertEquals(screenWidth, body.box.width, DELTA);
+        assertEquals(0, body.box.height, DELTA);
+
+        assertEquals(0, div1.box.x, DELTA);
+        assertEquals(0, div1.box.y, DELTA);
+        assertEquals(div1Width, div1.box.width, DELTA);
+        assertEquals(0, div1.box.height, DELTA);
+
+        assertEquals(0, div2.box.x, DELTA);
+        assertEquals(0, div2.box.y, DELTA);
+        assertEquals(div1Width, div2.box.width, DELTA);
+        assertEquals(0, div2.box.height, DELTA);
+
+        assertEquals(0, div3.box.x, DELTA);
+        assertEquals(0, div3.box.y, DELTA);
+        assertEquals(div1Width, div3.box.width, DELTA);
+        assertEquals(0, div3.box.height, DELTA);
+    }
 
     private void createTree2() {
 

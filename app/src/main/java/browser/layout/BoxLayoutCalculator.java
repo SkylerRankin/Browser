@@ -13,18 +13,17 @@ import browser.parser.HTMLElements;
 
 public class BoxLayoutCalculator {
 
-    private float screenWidth;
+    private final float screenWidth;
     
-    private Map<Integer, RenderNode> lastAddedChildMap;
-    private Map<Integer, RenderNode> parentNodeMap;
-    private TextSplitter textSplitter;
+    private final Map<Integer, RenderNode> lastAddedChildMap;
+    private final Map<Integer, RenderNode> parentNodeMap;
+    private final TextSplitter textSplitter;
         
     public BoxLayoutCalculator(Map<Integer, RenderNode> parentNodeMap, float screenWidth) {
         this.screenWidth = screenWidth;
         this.parentNodeMap = parentNodeMap;
-        this.lastAddedChildMap = new HashMap<Integer, RenderNode>();
+        this.lastAddedChildMap = new HashMap<>();
         textSplitter = new TextSplitter(parentNodeMap);
-        System.out.printf("BoxLayoutCalculator: screen width = %f\n", screenWidth);
     }
     
     public void clearBoxBounds(RenderNode root) {
@@ -35,26 +34,25 @@ public class BoxLayoutCalculator {
     }
     
     /**
-     * Traverse the render tree and fill in all the boxes that have fixed sizes
-     * @param root
+     * Traverse the render tree and fill in all the boxes that have fixed sizes. The elements that have fixed sizes are:
+     *  - text
+     *  - images
+     *  - any block or inline-block element with width or height CSS properties
+     * @param root The render node to start on.
      */
     public void setBoxBounds(RenderNode root) {
         RenderNode parent = parentNodeMap.get(root.id);
         if (parent == null) {
+            // If the parent is null, this is the root element, so it should fill the screen width and be positioned at
+            // the absolute top left.
             root.box.fixedWidth = true;
-            root.style.maxWidth = root.style.maxWidth == null ? screenWidth : root.style.maxWidth;
-            root.box.width = root.style.maxWidth == null ? screenWidth : root.style.maxWidth;
+            root.maxWidth = root.style.maxWidth == null ? screenWidth : root.style.maxWidth;
+            root.box.width = root.maxWidth;
             root.box.x = 0;
             root.box.y = 0;
         } else {
             root.maxWidth = root.style.maxWidth == null ? parent.maxWidth : root.style.maxWidth;
         }
-
-        /* Cases of elements that have set widths
-         *     - text
-         *  - nodes that have 1 child that is text
-         *     - image
-         */
 
         if (parent != null) {
             if (root.text != null) {
@@ -68,10 +66,9 @@ public class BoxLayoutCalculator {
             } else if (root.type.equals("img")) {
                 root.box.width = root.attributes.containsKey("width") ? Float.parseFloat(root.attributes.get("width")) : 50;
                 root.box.height = root.attributes.containsKey("height") ? Float.parseFloat(root.attributes.get("height")) : 50;
-//                ImageCache.loadImage(root.attributes.get("src"));
             }
             
-            if (root.style.height != null) {
+            if (root.style.height != null && root.style.display != CSSStyle.displayType.INLINE) {
                 root.box.fixedHeight = true;
                 if (root.style.heightType.equals(CSSStyle.dimensionType.PIXEL)) root.box.height = root.style.height;
                 if (root.style.heightType.equals(CSSStyle.dimensionType.PERCENTAGE) && parent.box.fixedHeight) {
@@ -85,7 +82,7 @@ public class BoxLayoutCalculator {
                 }
             }
             
-            if (root.style.width != null) {
+            if (root.style.width != null && root.style.display != CSSStyle.displayType.INLINE) {
                 root.box.fixedWidth = true;
                 if (root.style.widthType.equals(CSSStyle.dimensionType.PIXEL)) root.box.width = root.style.width;
                 if (root.style.widthType.equals(CSSStyle.dimensionType.PERCENTAGE) && parent.box.fixedWidth) {
@@ -106,12 +103,12 @@ public class BoxLayoutCalculator {
     }
     
     public void printBoxes(RenderNode root) {
-        System.out.printf("BoxLayoutCalculator: printing boxes\n\n");
+        System.out.print("BoxLayoutCalculator: printing boxes\n\n");
         System.out.printf("[%d:%s] (%.2f, %.2f), (%.2f, %.2f)\n", root.id, root.type, root.box.x, root.box.y, root.box.width, root.box.height);
         for (RenderNode child : root.children) {
             printBoxes(child, "\t");
         }
-        System.out.printf("\n");
+        System.out.print("\n");
     }
     
     private void printBoxes(RenderNode root, String pad) {
@@ -132,7 +129,6 @@ public class BoxLayoutCalculator {
     
     public void calculateBoxes(RenderNode root) {
         RenderNode parent = parentNodeMap.get(root.id);
-//        System.out.printf("\ncalculateBoxes: root=%s [%d] parent=%s [%d]\n", root.type, root.id, (parent == null ? null : parent.type), (parent == null ? -1 : parent.id));
 
         if (parent != null) {
             Vector2 nextPosition = nextPosition(root, parent);
@@ -140,6 +136,7 @@ public class BoxLayoutCalculator {
             root.box.y = nextPosition.y;
             root.positioned = true;
             propagateSize(root);
+            expandIfBlockElement(root);
             lastAddedChildMap.put(parent.id, root);
         } else {
             // Position the body element
@@ -158,8 +155,8 @@ public class BoxLayoutCalculator {
     
     /**
      * Set the maximum dimensions of each node based on the maximum size of their parent, and so on.
-     * Use this after using setBoxBounds, since it depends on boxes having their widths set.
-     * @param root
+     * Use this after using setBoxBounds, since it depends on fixed-size boxes having their width/height set.
+     * @param root The render node to start on.
      */
     public void propagateMaxSizes(RenderNode root) {
         RenderNode parent = parentNodeMap.get(root.id);
@@ -167,14 +164,11 @@ public class BoxLayoutCalculator {
             root.maxWidth = this.screenWidth;
             root.maxHeight = null;
         } else {
-
             if (root.box.fixedWidth) {
                 // Percentage based width depends on parent, only if parent specifies a width
                 if (root.style.widthType.equals(CSSStyle.dimensionType.PERCENTAGE) && parent.maxWidth != null) {
                     float parentAvailableWidth = parent.maxWidth - parent.style.paddingLeft - parent.style.paddingRight - root.style.marginLeft - root.style.marginRight;
-                    System.out.printf("%s: parentAvailableWidth: %f, width = %f\n", root.type, parentAvailableWidth, root.box.width);
                     root.maxWidth = parentAvailableWidth * root.box.width / 100f;
-                    System.out.printf("maxWidth: %f\n", root.maxWidth);
                 } else {
                     root.maxWidth = root.box.width + root.style.marginLeft + root.style.marginRight;
                 }
@@ -185,7 +179,7 @@ public class BoxLayoutCalculator {
             if (root.box.fixedHeight) {
                 // Percentage based height depends on parent, only if parent specifies a height
                 if (root.style.heightType.equals(CSSStyle.dimensionType.PERCENTAGE) && parent.maxHeight != null) {
-                    float parentAvailableHeight = parent.maxWidth - parent.style.paddingTop - parent.style.paddingBottom - root.style.marginTop - root.style.marginBottom;
+                    float parentAvailableHeight = parent.maxHeight - parent.style.paddingTop - parent.style.paddingBottom - root.style.marginTop - root.style.marginBottom;
                     root.maxHeight = parentAvailableHeight * root.box.width / 100f;
                 } else {
                     root.maxHeight = root.box.height + root.style.marginTop + root.style.marginBottom;
@@ -193,7 +187,6 @@ public class BoxLayoutCalculator {
             } else if (parent.maxHeight != null) {
                 root.maxHeight = parent.maxHeight - parent.style.paddingTop - parent.style.paddingBottom - root.style.marginTop - root.style.marginBottom;
             }
-
         }
 
         for (RenderNode child : root.children) {
@@ -203,10 +196,10 @@ public class BoxLayoutCalculator {
     }
     
     /**
-     * When a render node's dimensions are updated, this information must be send upwards through
+     * When a render node's dimensions are updated, this information must be sent upwards through
      * the tree, such that the higher nodes expand to accommodate the now larger child node. For
      * nodes with percentage based sizes, if the parent gets larger, these nodes must also get 
-     * larger to make sure the occupy the correct percentage. These changes only apply to nodes
+     * larger to make sure they occupy the correct percentage. These changes only apply to nodes
      * that do not already have their width fixed.
      * @param node      The node with a newly updated dimension.
      */
@@ -214,7 +207,7 @@ public class BoxLayoutCalculator {
         RenderNode parent = parentNodeMap.get(node.id);
         if (parent == null) return;
 
-        // Find width and height by finding difference between farthest elements, vertically and horizontally
+        // Find width and height by finding difference between the farthest elements, vertically and horizontally.
 
         RenderNode leftMost = null;
         RenderNode rightMost = null;
@@ -244,13 +237,11 @@ public class BoxLayoutCalculator {
                     topMost.style.marginTop + bottomMost.style.marginBottom;
         }
 
-//        System.out.printf("propagateSize: node=%s, parent=%s, (%.2f, %.2f)\n", node.type, (parent == null ? null : parent.type), newWidth, newHeight);
-
-        if (!parent.box.fixedWidth) {
+        if (!parent.box.fixedWidth && newWidth > parent.box.width) {
             parent.box.width = newWidth;
         }
 
-        if (!parent.box.fixedHeight) {
+        if (!parent.box.fixedHeight && newHeight > parent.box.height) {
             parent.box.height = newHeight;
         }
 
@@ -283,62 +274,73 @@ public class BoxLayoutCalculator {
 
         } else {
             switch (displayType) {
-            case INLINE:
-                // TODO handle stacking padding
-                // TODO put new lines in a horizontal row NO MATTER WHAT, text splitter handles putting them on new lines
-                // Try in-line, but if it needs more space, continue to block case
-                float x = lastAddedChild.box.x + lastAddedChild.box.width + lastAddedChild.style.marginRight + node.style.marginLeft;
-                float boundary = parent.box.x + parent.maxWidth - parent.style.paddingRight - node.style.marginRight;
-//                System.out.printf("%b: width = %.2f, x = %.2f, boundary = %.2f\n", (x + node.box.width <= boundary), node.box.width, x, boundary);
-                if (x + node.box.width <= boundary) {
-                    return new Vector2(x, lastAddedChild.box.y);
-                } else if (node.type.equals("text")) {
-                    float availableWidth = boundary - x;
-                    if (textSplitter.canBreakText(node, availableWidth)) {
-                        float fullWidth = parent.maxWidth - (parent.style.paddingLeft + node.style.marginLeft + node.style.marginRight + parent.style.paddingRight);
-                        boolean firstUsed = textSplitter.splitTextNode(node, parent, availableWidth, fullWidth);
-                        // Place first line of text on current line if possible; fall through to block if not
-                        if (firstUsed) {
-                            return new Vector2(x, lastAddedChild.box.y);
+                case INLINE:
+                case INLINE_BLOCK:
+                    // TODO handle stacking padding
+                    // TODO put new lines in a horizontal row NO MATTER WHAT, text splitter handles putting them on new lines
+                    // Try in-line, but if it needs more space, continue to block case
+                    float x = lastAddedChild.box.x + lastAddedChild.box.width + lastAddedChild.style.marginRight + node.style.marginLeft;
+                    float boundary = parent.box.x + parent.maxWidth - parent.style.paddingRight - node.style.marginRight;
+                    if (x + node.box.width <= boundary) {
+                        return new Vector2(x, lastAddedChild.box.y);
+                    } else if (node.type.equals("text")) {
+                        float availableWidth = boundary - x;
+                        if (textSplitter.canBreakText(node, availableWidth)) {
+                            float fullWidth = parent.maxWidth - (parent.style.paddingLeft + node.style.marginLeft + node.style.marginRight + parent.style.paddingRight);
+                            boolean firstUsed = textSplitter.splitTextNode(node, parent, availableWidth, fullWidth);
+                            // Place first line of text on current line if possible; fall through to block if not
+                            if (firstUsed) {
+                                return new Vector2(x, lastAddedChild.box.y);
+                            }
+                        }
+                    } else {
+                        // Determine if this inline element can be split in order to fit the available width. This is possible
+                        // if the element contains text that can itself be split.
+                        // TODO: textSplitter.canBreakNode needs to be made more flexible. It expects a single text child node
+                        // and does not support nested spans.
+                        float availableWidth = boundary - x;
+                        if (textSplitter.canBreakNode(node, availableWidth)) {
+                            float fullWidth = parent.maxWidth - (parent.style.paddingLeft + node.style.marginLeft + node.style.marginRight + parent.style.paddingRight);
+                            boolean firstUsed = textSplitter.splitContainingTextNode(node, parent, availableWidth, fullWidth);
+                            if (firstUsed) {
+                                return new Vector2(x, lastAddedChild.box.y);
+                            }
                         }
                     }
-                } else {
-                    // Determine if this inline element can be split in order to fit the available width. This is possible
-                    // if the element contains text that can itself be split.
-                    // TODO: textSplitter.canBreakNode needs to be made more flexible. It expects a single text child node
-                    // and does not support nested spans.
-                    float availableWidth = boundary - x;
-                    if (textSplitter.canBreakNode(node, availableWidth)) {
-                        float fullWidth = parent.maxWidth - (parent.style.paddingLeft + node.style.marginLeft + node.style.marginRight + parent.style.paddingRight);
-                        boolean firstUsed = textSplitter.splitContainingTextNode(node, parent, availableWidth, fullWidth);
-                        if (firstUsed) {
-                            return new Vector2(x, lastAddedChild.box.y);
-                        }
-                    }
-                }
-            case BLOCK:
-            default:
-                // Default block elements get put to the left, and right below all the other elements. The height gets updated later.
-                // Bottom padding no longer impacts the last added child, so have to subtract that when finding the new values
-                // TODO probably other sides' padding have a stacking effect that needs to be managed
-                float bottomPaddingCorrection = parent.style.paddingBottom;
-                return new Vector2(
-                        parent.box.x + parent.style.paddingLeft + node.style.marginLeft,
-                        parent.box.y + parent.box.height + node.style.marginTop - bottomPaddingCorrection);
+                case BLOCK:
+                default:
+                    // Default block elements get put to the left, and right below all the other elements. The height gets updated later.
+                    // Bottom padding no longer impacts the last added child, so have to subtract that when finding the new values
+                    // TODO probably other sides' padding have a stacking effect that needs to be managed
+                    float bottomPaddingCorrection = parent.style.paddingBottom;
+                    return new Vector2(
+                            parent.box.x + parent.style.paddingLeft + node.style.marginLeft,
+                            parent.box.y + parent.box.height + node.style.marginTop - bottomPaddingCorrection);
             }
         }
     }
-    
+
+    /**
+     * Elements with display = block should expand to fill all available width. This means the new box width should
+     * simply be set to the box's max width.
+     * @param node  The node to expand
+     */
+    public void expandIfBlockElement(RenderNode node) {
+        if (node.style.display != CSSStyle.displayType.BLOCK) {
+            return;
+        }
+
+        node.box.width = node.maxWidth;
+    }
+
     /**
      * Convert percentage based dimensions into raw pixels.
      * Converts margin: auto to an actual margin value.
-     * @param root
+     * @param root The render node to start on.
      */
     public void finalizeDimensions(RenderNode root) {
-
         RenderNode parent = parentNodeMap.get(root.id);
         if (root.style.widthType.equals(CSSStyle.dimensionType.PERCENTAGE) && parent != null) {
-
             root.box.fixedWidth = true;
             root.box.width = (parent.box.width * root.style.width / 100.0f)
                     - root.style.marginLeft - root.style.marginRight
@@ -533,14 +535,11 @@ public class BoxLayoutCalculator {
                     }
                 }
             }
-            
-            for (Float f : widths) System.out.printf("width: %f\n", f);
-            
+
             for (RenderNode row : rows) {
                 List<RenderNode> cols = row.getElementsInChildren(HTMLElements.TD);
                 for (int i = 0; i < cols.size(); i++) {
                     RenderNode cell = cols.get(i);
-                    System.out.printf("CurrentWidth: %f, set width: %s\n", cell.box.width, widths[i]);
                     cell.box.width = widths[i] + cell.style.marginLeft + cell.style.marginRight;
                     cell.box.fixedWidth = true;
                 }

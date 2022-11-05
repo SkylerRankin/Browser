@@ -34,7 +34,7 @@ public class SpecialSymbolHandler {
     }
 
     public static String insertSymbols(String s) {
-        if (s == null) return s;
+        if (s == null) return null;
         for (Entry<String, String> e : symbols.entrySet()) {
             s = s.replace(e.getKey(), e.getValue());
         }

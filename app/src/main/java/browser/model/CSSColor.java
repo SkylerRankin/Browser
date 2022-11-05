@@ -89,4 +89,13 @@ public class CSSColor {
         return String.format("#%s", hex);
     }
 
+    @Override
+    public boolean equals(Object object) {
+        if (!(object instanceof CSSColor color)) {
+            return false;
+        }
+
+        return hex.equals(color.hex);
+    }
+
 }

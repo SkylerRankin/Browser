@@ -26,6 +26,12 @@ public class DOMNode {
         children.add(n);
         n.parent = this;
     }
+
+    public void addChildren(DOMNode... nodes) {
+        for (DOMNode node : nodes) {
+            addChild(node);
+        }
+    }
     
     public void print() {
         print("");

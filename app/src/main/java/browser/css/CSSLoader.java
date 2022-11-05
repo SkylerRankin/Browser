@@ -187,6 +187,9 @@ public class CSSLoader {
      * @param root
      */
     public void resetSetProperties(RenderNode root) {
+        if (root.style == null) {
+            root.style = new CSSStyle();
+        }
         root.style.resetSetProperties();
         for (RenderNode child : root.children) {
             resetSetProperties(child);

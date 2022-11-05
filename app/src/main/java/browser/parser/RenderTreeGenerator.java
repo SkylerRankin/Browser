@@ -6,22 +6,25 @@ import java.util.List;
 import java.util.Map;
 
 import browser.app.ErrorPageHandler;
+import browser.constants.PseudoElementConstants;
 import browser.css.CSSStyle;
 import browser.model.DOMNode;
 import browser.model.RenderNode;
 
 public class RenderTreeGenerator {
-    // has to be changed for testing, making it private later?
-    public static int nodeID = 0;
-    private Map<Integer, RenderNode> parentRenderNodeMap = new HashMap<Integer, RenderNode>();
+    private static int nodeID = 0;
+    private final Map<Integer, RenderNode> parentRenderNodeMap = new HashMap<Integer, RenderNode>();
 
     public RenderNode generateRenderTree(DOMNode dom, Float screenWidth) {
-        RenderNode renderTree = domTreeToRenderTree(dom);
-        return renderTree;
+        return domTreeToRenderTree(dom);
     }
 
     public static int getNextID() {
         return nodeID++;
+    }
+
+    public static void setNextID(int id) {
+        nodeID = id;
     }
 
     public DOMNode getBodyNode(DOMNode dom) {
@@ -58,18 +61,22 @@ public class RenderTreeGenerator {
         return renderNode;
     }
 
+    public void cleanupRenderNodeText(RenderNode renderNode) {
+        removeDuplicateWhitespace(renderNode, false);
+        trimTextWhitespace(renderNode);
+    }
+
     /**
      * Remove all new lines, carriage returns, and extra spaces from text. The only place
-     * that these should be left as is is inside a 'pre' tag.
-     * @param root
-     * @param inPre
+     * that these should be left as-is is inside a 'pre' tag.
+     * @param root  The render node to start on.
+     * @param inPre True if the node is within a pre-formatted block.
      */
-    public void cleanUpText(RenderNode root, boolean inPre) {
+    public void removeDuplicateWhitespace(RenderNode root, boolean inPre) {
         if (root == null) return;
         if (root.text != null && !inPre) {
             root.text = root.text.replaceAll("[\n\r]", " ");
             root.text = root.text.replaceAll("\\s+", " ");
-//            while (root.text.startsWith(" ") && root.text.length() > 1) root.text = root.text.substring(1);
         }
 
         if (root.text != null) {
@@ -77,7 +84,83 @@ public class RenderTreeGenerator {
         }
 
         for (RenderNode child : root.children) {
-            cleanUpText(child, inPre || root.type.equals("pre"));
+            removeDuplicateWhitespace(child, inPre || root.type.equals("pre"));
+        }
+    }
+
+    /**
+     * Whitespace around text should be removed, but whitespace within text or around tags that are themselves within
+     * text (such as "some <b>bold</b> text") should be retained. The following steps decide if whitespace should
+     * be trimmed or not.
+     *
+     * Should trim start of text?
+     *      - If this the first child of the parent? If so, trim.
+     *      - Does the previous child have text that ends with a space? If so, trim.
+     *      - Otherwise, do not trim.
+     *
+     * Should trim end of text?
+     *      - If this the last child of the parent? If so, trim.
+     *      - Does the next child not have text? If so, trim.
+     *      - Otherwise, do not trim.
+     *
+     * @param node  The node to start on.
+     */
+    public void trimTextWhitespace(RenderNode node) {
+        if (node == null ) return;
+
+        if (node.parent != null && node.text != null) {
+            int indexInParent = node.parent.children.indexOf(node);
+
+            // Trim the start of the text.
+            boolean isFirstChild = indexInParent == 0;
+            RenderNode previousTextNode = getPreviousInlineTextNode(node);
+            if (isFirstChild || (previousTextNode != null && previousTextNode.text.endsWith(" "))) {
+                node.text = node.text.stripLeading();
+            }
+
+            // Trim the end of the text.
+            boolean isLastChild = indexInParent == node.parent.children.size() - 1;
+            RenderNode nextTextNode = getNextInlineTextNode(node);
+            if (isLastChild || (nextTextNode == null || nextTextNode.text == null)) {
+                node.text = node.text.stripTrailing();
+            }
+        }
+
+        for (RenderNode child : node.children) {
+            trimTextWhitespace(child);
+        }
+    }
+
+    public RenderNode getNextInlineTextNode(RenderNode node) {
+        return getRelativeInlineTextNode(node, 1);
+    }
+
+    public RenderNode getPreviousInlineTextNode(RenderNode node) {
+        return getRelativeInlineTextNode(node, -1);
+    }
+
+    private RenderNode getRelativeInlineTextNode(RenderNode node, int direction) {
+        int indexInParent = node.parent.children.indexOf(node);
+
+        // If node is the last child of the parent, there can be no next node.
+        if (direction == 1 && indexInParent == node.parent.children.size() - 1) {
+            return null;
+        } else if (direction == -1 && indexInParent == 0) {
+            return null;
+        }
+
+        RenderNode current = node.parent.children.get(indexInParent + direction);
+        while (!current.type.equals(HTMLElements.TEXT)) {
+            if (current.children.isEmpty()  || current.style.display == CSSStyle.displayType.BLOCK) {
+                break;
+            }
+            current = current.children.get(0);
+        }
+
+        if (current.type.equals(HTMLElements.TEXT)) {
+            return current;
+        } else {
+            return null;
         }
     }
 
@@ -116,19 +199,18 @@ public class RenderTreeGenerator {
             if (child.type.equals(HTMLElements.LI)) {
                 // Create pseudo element for the list marker.
                 RenderNode marker = new RenderNode(HTMLElements.PSEUDO_MARKER);
-                String listItemTypeKey = "LIST_MARKER_TYPE";
-                String listItemIndexKey = "LIST_MARKER_INDEX";
                 marker.depth = child.depth;
                 marker.id = getNextID();
                 marker.parent = child.parent;
-                marker.attributes.put(listItemTypeKey, root.type);
-                marker.attributes.put(listItemIndexKey, String.valueOf(i));
-                marker.style.display = CSSStyle.displayType.BLOCK;
-                marker.style.width = 30f;
-                marker.style.height = 20f;
+                marker.attributes.put(PseudoElementConstants.MARKER_TYPE_KEY, root.type);
+                marker.attributes.put(PseudoElementConstants.MARKER_INDEX_KEY, String.valueOf(i));
+                marker.style.display = PseudoElementConstants.MARKER_DISPLAY_TYPE;
+                marker.style.width = PseudoElementConstants.MARKER_WIDTH;
+                marker.style.height = PseudoElementConstants.MARKER_HEIGHT;
 
-                // Update the root node to be inline.
-                child.style.display = CSSStyle.displayType.INLINE;
+                // Update the root node to be inline-block. In needs to be inline with the marker element, but should
+                // otherwise be a block element.
+                child.style.display = CSSStyle.displayType.INLINE_BLOCK;
 
                 // Save the parent reference for the new render node.
                 parentRenderNodeMap.put(marker.id, marker.parent);
@@ -146,6 +228,11 @@ public class RenderTreeGenerator {
 
     public Map<Integer, RenderNode> getParentRenderNodeMap() {
         return this.parentRenderNodeMap;
+    }
+
+    public void reset() {
+        nodeID = 0;
+        parentRenderNodeMap.clear();
     }
 
 }

@@ -13,6 +13,9 @@ plugins {
     id 'org.openjfx.javafxplugin' version '0.0.10'
 
     id 'checkstyle'
+
+    // Plugin to automatic Lombok configuration.
+    id "io.freefair.lombok" version "6.5.1"
 }
 
 repositories {
