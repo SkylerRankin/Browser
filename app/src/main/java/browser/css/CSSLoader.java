@@ -20,7 +20,6 @@ public class CSSLoader {
     private Map<Integer, RenderNode> parentRenderNodeMap;
     private List<String> externalCSS;
     private List<String> styleTagCSS;
-    private final boolean debug = true;
 
     public CSSLoader(DOMNode dom, Map<Integer, RenderNode> parentRenderNodeMap, List<String> externalCSS) {
         this.parentRenderNodeMap = parentRenderNodeMap;
@@ -41,7 +40,6 @@ public class CSSLoader {
             DOMNode text = root.children.get(0);
             if (text != null) {
                 styleTagCSS.add(text.content);
-                if (debug) System.out.printf("Found style tag\n");
             } else {
                 System.err.println("CSSLoader: findStyleTagCSS: style node had no child text");
             }

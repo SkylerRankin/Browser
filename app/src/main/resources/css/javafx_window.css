@@ -3,10 +3,6 @@
 	-fx-faint-focus-color: transparent;
 }
 
-.footer {
-    -fx-background-color: lightgray;
-}
-
 .text-field {
     -fx-text-fill: white;
 	-fx-background-color: rgb(41, 42, 46);
@@ -63,6 +59,14 @@
 	-fx-font-weight: bold;
 }
 
+.split_pane {
+    -fx-border: none;
+}
+
+.split-pane:horizontal > .split-pane-divider {
+   -fx-background-color: #202124;
+}
+
 /* CSS for the various buttons */
 
 .close-button {
@@ -110,19 +114,28 @@
 
 /* Scroll bar styles */
 
-.scroll-bar .thumb {
-	-fx-color: rgb(50, 54, 57);
+.scroll-bar:horizontal .thumb,
+.scroll-bar:vertical .thumb {
+	-fx-background-color: #a5a5a5;
 	-fx-background-radius: 0;
-	-fx-border: none;
+	-fx-border-color: transparent;
+}
+
+.inspector_container .scroll-bar:horizontal .thumb,
+.inspector_container .scroll-bar:vertical .thumb {
+    -fx-background-color: #797979;
 }
 
 .scroll-bar:horizontal .track,
-.scroll-bar:vertical .track{
-    -fx-background-color: transparent;
+.scroll-bar:vertical .track {
+    -fx-background-color: #ededed;
     -fx-border-color: transparent;
-    -fx-background-radius: 0.0em;
-    -fx-border-radius: 2.0em;
-    -fx-border: none;
+    -fx-background-radius: 0em;
+}
+
+.inspector_container .scroll-bar:horizontal .track,
+.inspector_container .scroll-bar:vertical .track {
+    -fx-background-color: #414141;
 }
 
 .scroll-bar:horizontal .increment-button ,
@@ -152,21 +165,6 @@
     -fx-padding :0.0 0.15em;
 }
 
-.scroll-pane {
+.scroll-pane, .scroll-pane .corner {
     -fx-background-color:transparent;
 }
-
-/* Bookmark bar styles */
-
-.bookmark_button {
-	-fx-text-fill: gray;
-	-fx-background-insets: 0 5 0 5;
-	-fx-background-color: transparent;
-}
-
-.bookmark_button:hover {
-	-fx-text-fill: white;
-	-fx-cursor: hand;
-
-}
-

@@ -26,8 +26,6 @@ public class InspectorHandler {
     private ScrollPane leftScroll;
     private ScrollPane rightScroll;
     private Label subtitle;
-    private TreeViewer treeViewer;
-    private RenderNodeSummary renderNodeSummary;
     private boolean open;
     private float height = 300f;
     private float width = 700f;
@@ -49,22 +47,18 @@ public class InspectorHandler {
         subtitle.setPadding(new Insets(0, 0, 0, 5));
         subtitle.getStyleClass().add("title");
 
-        renderNodeSummary = new RenderNodeSummary();
-        treeViewer = new TreeViewer(renderNodeSummary);
-
         HBox hbox = new HBox();
 
         leftScroll = new ScrollPane();
         leftScroll.setVbarPolicy(ScrollBarPolicy.AS_NEEDED);
         leftScroll.setHbarPolicy(ScrollBarPolicy.NEVER);
-        leftScroll.setContent(treeViewer);
 //        leftScroll.setFitToWidth(true);
         leftScroll.setPrefHeight(height - subtitle.getHeight());
         
         VBox vbox = new VBox();
         vbox.getChildren().addAll(subtitle, leftScroll);
 
-        scene = new Scene(hbox, width, height);
+        scene = new Scene(vbox, width, height);
 
         stage = new Stage();
         stage.setTitle("Inspector");
@@ -95,11 +89,7 @@ public class InspectorHandler {
             }
         });
     }
-            
-    public void update(RenderNode root) {
-        treeViewer.update(root);
-    }
-    
+
     public void toggle() {
         open = !open;
         if (open) stage.show();

@@ -9,8 +9,8 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Tab;
 
-import browser.app.ui.inspector.InspectorHandler;
 import browser.interaction.InteractionHandler;
+import browser.tasks.LoadWebpageCallback;
 import browser.tasks.LoadWebpageTask;
 import browser.tasks.RedrawWebpageTask;
 
@@ -23,7 +23,6 @@ public class SearchTabPipeline {
     private float width;
     private Canvas canvas;
     private GraphicsContext gc;
-    private final boolean debug = true;
     private List<RedrawWebpageTask> currentRedrawTasks;
     
     public SearchTabPipeline(int id, Canvas canvas, Tab tab, InteractionHandler interactionHandler) {
@@ -45,17 +44,15 @@ public class SearchTabPipeline {
         return pipeline.loadedWebpage();
     }
     
-    public void loadWebpage(String url) {
-        if (debug) System.out.printf("SearchTabPipeline: Tab %d loading webpage, %s\n", tabID, url);
+    public void loadWebpage(String url, LoadWebpageCallback callback) {
         LoadWebpageTask lwt = new LoadWebpageTask(url, width, pipeline);
         lwt.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
             @Override
             public void handle(WorkerStateEvent event) {
-                System.out.println("LoadWebpageTask succeeded");
                 canvas.setHeight(Math.max(pipeline.height, (float) gc.getCanvas().getHeight()));
-                pipeline.render(gc);
                 tab.setText(pipeline.title == null ? url : pipeline.title);
-                InspectorHandler.get().update(pipeline.getRootRenderNode());
+                pipeline.render(gc);
+                callback.onWebpageLoaded(pipeline.getRootRenderNode());
                 interactionHandler.setRootRenderNode(pipeline.getRootRenderNode());
             }
         });
@@ -70,7 +67,6 @@ public class SearchTabPipeline {
     }
     
     public void redrawWebpage() {
-        if (debug) System.out.printf("SearchTabPipeline: Tab %d redrawing webpage webpage\n", tabID);
         RedrawWebpageTask crt = new RedrawWebpageTask(width, pipeline);
         for (RedrawWebpageTask task : currentRedrawTasks) {
             task.cancel();
@@ -80,10 +76,8 @@ public class SearchTabPipeline {
         crt.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
             @Override
             public void handle(WorkerStateEvent event) {
-                System.out.println("RedrawWebpageTask succeeded");
                 canvas.setHeight(Math.max(pipeline.height, (float) gc.getCanvas().getHeight()));
                 pipeline.render(gc);
-                InspectorHandler.get().update(pipeline.getRootRenderNode());
                 currentRedrawTasks.remove(crt);
             }
         });

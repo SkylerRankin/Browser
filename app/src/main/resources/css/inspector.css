@@ -1,24 +1,82 @@
-* {
-	-fx-focus-color: transparent;
-	-fx-faint-focus-color: transparent;
+.inspector_container {
+    -fx-background-color: #202124;
 }
 
-.title {
-	-fx-font-size: 18;
-	-fx-text-alignment: center;
+.inspector_tab {
+    -fx-background-color: #2e3033;
+    -fx-padding: 0 10 0 10;
+    -fx-background-radius: 0;
 }
 
-.row_text {
-	-fx-font-size: 15;
-	-fx-text-fill: #828282;
+.inspector_tab .tab-label {
+	-fx-font-size: 100%;
 }
 
-.row_text_expanded {
-	-fx-text-fill: #3a67ab;
-	-fx-font-weight: bold;
+.inspector_tab_selected {
+    -fx-background-color: #202124;
 }
 
-.render_node_row {
-	-fx-cursor: hand;
-	-fx-border-color: white white #b0b0b0 white;
+/* CSS for the render tree panel */
+
+.render_tree {
+    -fx-background: #202124;
+    -fx-font-family: Consolas;
+}
+
+.render_tree_row {
+    -fx-background-color: #202124;
+}
+
+.render_tree_row_hovered {
+    -fx-background-color: #232a36;
+}
+
+.render_tree_row_html {
+    -fx-fill: #52b5e3;
+    /*-fx-fill: #5297a9;*/
+}
+
+.render_tree_row_ellipses {
+    -fx-fill: white;
+}
+
+.render_tree_row_attribute_name {
+    -fx-fill: #9bbbdc;
+}
+
+.render_tree_row_attribute_value {
+    -fx-fill: #f29766;
+}
+
+/* CSS for the settings panel */
+
+.settings_panel {
+    -fx-background: transparent;
+    -fx-font-family: Consolas;
+}
+
+.settings_panel .settings_toggle {
+    -fx-padding: 0 10 0 10;
+    -fx-background-color: transparent;
+}
+
+.settings_toggle_label {
+    -fx-text-fill: #61afef;
+    -fx-pref-width: 150px;
+    -fx-pref-height: 40px;
+}
+
+.settings_toggle_value {
+    -fx-text-fill: #98c379;
+    -fx-font-weight: bold;
+    -fx-pref-height: 40px;
+}
+
+.settings_toggle_value:hover {
+    -fx-cursor: hand;
+}
+
+.settings_toggle_value_off {
+    -fx-text-fill: #8f95a1;
+    -fx-font-weight: bold;
 }

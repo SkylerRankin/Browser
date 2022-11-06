@@ -16,10 +16,7 @@ import browser.model.RenderNode;
 import browser.parser.HTMLElements;
 
 public class HTMLRenderer {
-    
-    private static final boolean drawOutlines = false; //true false
-    private static final boolean drawPadding = false;
-    private static final boolean drawMargins = false;
+
     private static final float textOffsetScale = 0.75f;
     
     public static void render(GraphicsContext gc, RenderNode root) {
@@ -47,7 +44,7 @@ public class HTMLRenderer {
         if (root.style.borderWidthRight > 0) fillRect(gc, root.style.borderColorRight, root.box.x + root.box.width, root.box.y, root.style.borderWidthRight, root.box.height);
 
 
-        if (drawPadding) {
+        if (RenderSettings.renderPadding) {
             CSSColor paddingColor = new CSSColor("SteelBlue");
             fillRect(gc, paddingColor, root.box.x, root.box.y, root.box.width, root.style.paddingTop);
             fillRect(gc, paddingColor, root.box.x, root.box.y + root.box.height - root.style.paddingBottom, root.box.width, root.style.paddingBottom);
@@ -55,7 +52,7 @@ public class HTMLRenderer {
             fillRect(gc, paddingColor, root.box.x + root.box.width - root.style.paddingRight, root.box.y, root.style.paddingRight, root.box.height);
         }
 
-        if (drawMargins) {
+        if (RenderSettings.renderMargins) {
             CSSColor marginColor = new CSSColor("Gold");
             fillRect(gc, marginColor, root.box.x, root.box.y - root.style.marginTop, root.box.width, root.style.marginTop);
             fillRect(gc, marginColor, root.box.x, root.box.y + root.box.height, root.box.width, root.style.marginBottom);
@@ -63,7 +60,7 @@ public class HTMLRenderer {
             fillRect(gc, marginColor, root.box.x + root.box.width, root.box.y, root.style.marginRight, root.box.height);
         }
 
-        if (drawOutlines) {
+        if (RenderSettings.renderOutlines) {
             drawBoxOutline(gc, root.box);
         }
 

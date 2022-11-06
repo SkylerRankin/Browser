@@ -40,9 +40,7 @@ public class BrowserWindow extends Application {
     private Stage stage;
     private AnchorPane anchor;
     private TabPane tabPane;
-    
-    private Footer footer;
-    
+
     private List<BrowserTab> tabs = new ArrayList<>();
     private int currentTabIndex = 0;
     
@@ -84,10 +82,6 @@ public class BrowserWindow extends Application {
         BorderPane root = new BorderPane();
         root.setCenter(anchor);
         
-        footer = new Footer();
-        
-//        root.setBottom(footer);
-        
         StackPane stack = new StackPane();
         stack.getChildren().addAll(root, new ResizeOverlay(stage));
         
@@ -122,9 +116,9 @@ public class BrowserWindow extends Application {
             }
         });
         
-        File cssFile = new File("./src/main/resources/css/javafx_window.css");
-        String path = cssFile.toURI().toString();
-        scene.getStylesheets().add(path);
+        File windowCSSFile = new File("./src/main/resources/css/javafx_window.css");
+        File inspectorCSSFile = new File("./src/main/resources/css/inspector.css");
+        scene.getStylesheets().addAll(windowCSSFile.toURI().toString(), inspectorCSSFile.toURI().toString());
         
         setKeyListener(scene, stage);
 
@@ -278,7 +272,11 @@ public class BrowserWindow extends Application {
                     System.out.println("ctrl tab");
                     event.consume();
                 } else if (ctrlI.match(event)) {
-                    inspectorHandler.toggle();
+                    for (BrowserTab tab : tabs) {
+                        if (tab instanceof SearchTab searchTab) {
+                            searchTab.toggleInspector();
+                        }
+                    }
                 }
             }
 
@@ -288,7 +286,6 @@ public class BrowserWindow extends Application {
     private InteractionCallback getInteractionCallback() {
         return (url, newTab) -> {
             if (newTab) {
-                System.out.println("interaction callback url: " + url);
                 addNewTab(stage, TabType.SEARCH, url);
             } else {
                 if (tabs.get(currentTabIndex).getType() == TabType.SEARCH) {

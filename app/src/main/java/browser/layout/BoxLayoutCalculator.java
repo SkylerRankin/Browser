@@ -326,7 +326,7 @@ public class BoxLayoutCalculator {
      * @param node  The node to expand
      */
     public void expandIfBlockElement(RenderNode node) {
-        if (node.style.display != CSSStyle.displayType.BLOCK) {
+        if (node.style.display != CSSStyle.displayType.BLOCK || node.box.fixedWidth) {
             return;
         }
 
