@@ -5,7 +5,7 @@ import javafx.scene.control.TabPane;
 import javafx.scene.text.Text;
 
 import browser.app.SearchTabPipeline;
-import browser.app.ui.inspector.rendertree.RenderTree;
+import browser.app.ui.inspector.elements.RenderTree;
 import browser.app.ui.inspector.settings.SettingsPanel;
 import browser.model.RenderNode;
 
@@ -13,8 +13,6 @@ public class InspectorPanel extends TabPane {
 
     private final RenderTree renderTree;
     private final SettingsPanel settingsPanel;
-
-    private SearchTabPipeline pipeline;
 
     public InspectorPanel() {
         setMinWidth(200);
@@ -55,7 +53,7 @@ public class InspectorPanel extends TabPane {
     }
 
     public void setPipeline(SearchTabPipeline pipeline) {
-        this.pipeline = pipeline;
         settingsPanel.setPipeline(pipeline);
+        renderTree.setPipeline(pipeline);
     }
 }

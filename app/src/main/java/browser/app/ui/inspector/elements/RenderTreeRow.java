@@ -1,10 +1,11 @@
-package browser.app.ui.inspector.rendertree;
+package browser.app.ui.inspector.elements;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import browser.parser.HTMLElements;
 import javafx.geometry.Insets;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -15,7 +16,7 @@ import browser.model.RenderNode;
 
 public class RenderTreeRow extends FlowPane {
 
-    public enum RowMode { Start, End, Collapsed }
+    public enum RowMode { Text, Start, End, Collapsed }
 
     private final int baseIndentationSize = 10;
     private final int indentationSize = 20;
@@ -38,6 +39,7 @@ public class RenderTreeRow extends FlowPane {
         rightArrowImage = new Image(rightArrowImageFile.toURI().toString(), true);
 
         switch (mode) {
+            case Text -> addRowPlainText();
             case Start -> addRowStartText();
             case End -> {
                 addRowEndText();
@@ -88,7 +90,7 @@ public class RenderTreeRow extends FlowPane {
         tagStart.getStyleClass().add("render_tree_row_html");
         Text tagStartEnd = new Text(">");
         tagStartEnd.getStyleClass().add("render_tree_row_html");
-        Text ellipses = new Text("...");
+        Text ellipses = new Text(node.text == null ? "..." : node.text);
         ellipses.getStyleClass().add("render_tree_row_ellipses");
         Text tagEnd = new Text(String.format("</%s>", node.type));
         tagEnd.getStyleClass().add("render_tree_row_html");
@@ -125,6 +127,21 @@ public class RenderTreeRow extends FlowPane {
         }
 
         return list;
+    }
+
+    private void addRowPlainText() {
+        Text tagStart = new Text(String.format(" <%s>", node.type));
+        tagStart.getStyleClass().add("render_tree_row_html");
+        Text text = new Text(node.text);
+        text.getStyleClass().add("render_tree_row_ellipses");
+        Text tagEnd = new Text(String.format("</%s>", node.type));
+        tagEnd.getStyleClass().add("render_tree_row_html");
+
+        getChildren().addAll(tagStart);
+        if (node.text != null) {
+            getChildren().addAll(text);
+        }
+        getChildren().addAll(tagEnd);
     }
 
 }

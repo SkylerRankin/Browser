@@ -13,6 +13,7 @@ import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TabPane.TabClosingPolicy;
 import javafx.scene.image.Image;
@@ -272,8 +273,9 @@ public class BrowserWindow extends Application {
                     System.out.println("ctrl tab");
                     event.consume();
                 } else if (ctrlI.match(event)) {
+                    Tab currentTab = tabPane.getSelectionModel().selectedItemProperty().getValue();
                     for (BrowserTab tab : tabs) {
-                        if (tab instanceof SearchTab searchTab) {
+                        if (tab instanceof SearchTab searchTab && searchTab.getActor().equals(currentTab)) {
                             searchTab.toggleInspector();
                         }
                     }

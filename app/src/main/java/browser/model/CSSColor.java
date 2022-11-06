@@ -13,8 +13,8 @@ public class CSSColor {
     private int[] rgb = new int[0];
     private String hex;
 
-    private static Pattern rgbRegex = Pattern.compile("(rgb\\()(\\d+)(,\\s*)(\\d+)(,\\s*)(\\d+)(\\))");
-    private static Pattern rgbaRegex = Pattern.compile("(rgb\\()(\\d+)(,\\s*)(\\d+)(,\\s*)(\\d+)(,\\s*)(\\d+)(\\))");
+    private static final Pattern rgbRegex = Pattern.compile("(rgb\\()(\\d+)(,\\s*)(\\d+)(,\\s*)(\\d+)(\\))");
+    private static final Pattern rgbaRegex = Pattern.compile("(rgba?\\()(\\d+)(,\\s*)(\\d+)(,\\s*)(\\d+)(,\\s*)(\\d+)(\\))");
 
     public CSSColor(String color) {
         color = color.toLowerCase();
@@ -33,13 +33,14 @@ public class CSSColor {
                 };
                 setHex(rgb);
             }
-        } else if (color.matches("rgba(\\d+,\\s?,\\d+,\\s?\\d+,\\s?\\d+)")) {
+        } else if (color.matches("rgba\\(\\d+,\\s?\\d+,\\s?\\d+,\\s?\\d+\\)")) {
             Matcher match = rgbaRegex.matcher(color);
             if (match.find()) {
                 rgb = new int[] {
                     Integer.parseInt(match.group(2)),
                     Integer.parseInt(match.group(4)),
                     Integer.parseInt(match.group(6)),
+                    Integer.parseInt(match.group(8))
                 };
                 opacity = Integer.parseInt(match.group(8)) / 255.0;
                 setHex(rgb);

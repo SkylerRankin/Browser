@@ -63,7 +63,9 @@ public class BoxLayoutCalculator {
                     parent.box.width = textSize.x;
                     parent.box.height = textSize.y;
                 }
-            } else if (root.type.equals("img")) {
+            } else if (root.type.equals(HTMLElements.IMG)) {
+                root.box.fixedWidth = true;
+                root.box.fixedHeight = true;
                 root.box.width = root.attributes.containsKey("width") ? Float.parseFloat(root.attributes.get("width")) : 50;
                 root.box.height = root.attributes.containsKey("height") ? Float.parseFloat(root.attributes.get("height")) : 50;
             }

@@ -69,6 +69,7 @@ hr {
 
 code {
 	display: inline;
+	font-family: Consolas;
 }
 
 strong, em {

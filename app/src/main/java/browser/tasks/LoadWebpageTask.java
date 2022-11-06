@@ -7,9 +7,9 @@ import browser.app.Pipeline;
 
 public class LoadWebpageTask extends Task<Pipeline> {
     
-    private String url;
-    private Pipeline pipeline;
-    private float width;
+    private final String url;
+    private final Pipeline pipeline;
+    private final float width;
     
     public LoadWebpageTask(String url, float width, Pipeline pipeline) {
         this.url = url;
@@ -18,10 +18,12 @@ public class LoadWebpageTask extends Task<Pipeline> {
     }
 
     @Override
-    protected Pipeline call() throws Exception {
+    protected Pipeline call() {
         try {
-            pipeline.loadWebpage(url);
-            pipeline.calculateLayout(width);
+            synchronized (pipeline) {
+                pipeline.loadWebpage(url);
+                pipeline.calculateLayout(width);
+            }
         } catch (Exception e) {
             e.printStackTrace();
             try {

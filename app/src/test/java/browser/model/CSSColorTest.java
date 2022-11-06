@@ -1,6 +1,7 @@
 package browser.model;
 
-import static org.junit.Assert.assertEquals;
+import static browser.constants.MathConstants.DELTA;
+import static org.junit.Assert.*;
 
 import browser.css.DefaultColors;
 
@@ -35,6 +36,14 @@ public class CSSColorTest {
         assertEquals("DC143C", color.getHex());
         color = new CSSColor("rgb(34, 139, 34)");
         assertEquals("228B22", color.getHex());
+    }
+
+    @Test
+    public void constructorRGBATest() {
+        CSSColor color = new CSSColor("rgba(220, 20, 60, 100)");
+        assertEquals("DC143C", color.getHex());
+        assertArrayEquals(new int[]{220, 20, 60, 100}, color.getRGB());
+        assertEquals(0.39215686274, color.toPaint().getOpacity(), DELTA);
     }
 
     @Test

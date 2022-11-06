@@ -1,6 +1,7 @@
 package browser.renderer;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -9,6 +10,8 @@ import java.util.Set;
 import javafx.scene.image.Image;
 
 import browser.network.HTTPClient;
+
+import static browser.constants.ResourceConstants.FILE_PREFIX;
 
 public class ImageCache {
 
@@ -25,6 +28,33 @@ public class ImageCache {
             images.put("default", defaultImage);
         } catch (RuntimeException e) {
             System.err.println("ImageCache.loadDefaultImages: failed to load default image, internal graphics not initialized yet.");
+        }
+    }
+
+    public static void loadLocalImage(String imagePath, String url) {
+        String originalImagePath = imagePath;
+        url = url.startsWith(FILE_PREFIX) ? url.substring(FILE_PREFIX.length()) : url;
+        imagePath = imagePath.startsWith("./") ? imagePath.substring(2) : imagePath;
+
+        String urlPreviousLevel = url.substring(0, url.lastIndexOf("/") + 1);
+
+        if (!url.endsWith("/")) {
+            url = url + "/";
+        }
+
+        String[] filePaths = {
+                url + imagePath,
+                urlPreviousLevel + imagePath,
+                imagePath
+        };
+
+        for (String filePath : filePaths) {
+            File imageFile = new File(filePath);
+            if (imageFile.exists()) {
+                Image image = new Image(imageFile.toURI().toString());
+                images.put(originalImagePath, image);
+                break;
+            }
         }
     }
 

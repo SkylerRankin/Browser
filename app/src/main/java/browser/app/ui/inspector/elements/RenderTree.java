@@ -1,19 +1,21 @@
-package browser.app.ui.inspector.rendertree;
+package browser.app.ui.inspector.elements;
 
 import java.util.*;
 
+import browser.app.SearchTabPipeline;
+import browser.renderer.RenderSettings;
 import javafx.geometry.Insets;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 
 import browser.model.RenderNode;
+import browser.parser.HTMLElements;
 
 public class RenderTree extends ScrollPane {
 
     // Render nodes within this depth are expanded to start with.
     private final int maxStartingDepth = 2;
-    private final String renderTreeClass = "render_tree";
     private final String rowHoveredClass = "render_tree_row_hovered";
 
     private final VBox vbox;
@@ -21,6 +23,7 @@ public class RenderTree extends ScrollPane {
     private final Map<Integer, RenderTreeRow> rowStartIdToRowEnd = new HashMap<>();
     private final Map<Integer, RenderTreeRow> rowEndIdToRowStart = new HashMap<>();
     private RenderNode lastRenderNode;
+    private SearchTabPipeline pipeline;
 
     public RenderTree() {
         setFitToWidth(true);
@@ -30,7 +33,7 @@ public class RenderTree extends ScrollPane {
         setPadding(new Insets(10, 0, 0, 0));
         vbox = new VBox();
         setContent(vbox);
-        getStyleClass().add(renderTreeClass);
+        getStyleClass().add("render_tree");
     }
 
     public void update(RenderNode root) {
@@ -65,7 +68,11 @@ public class RenderTree extends ScrollPane {
     }
 
     private void addNodeAndChildren(RenderNode node) {
-        if (expandedNodes.contains(node.id)) {
+        if (node.type.equals(HTMLElements.TEXT)) {
+            RenderTreeRow row = new RenderTreeRow(node, RenderTreeRow.RowMode.Text);
+            addRowEventHandlers(row);
+            vbox.getChildren().add(row);
+        } else if (expandedNodes.contains(node.id)) {
             RenderTreeRow rowStart = new RenderTreeRow(node, RenderTreeRow.RowMode.Start);
             addRowEventHandlers(rowStart);
             vbox.getChildren().add(rowStart);
@@ -89,7 +96,7 @@ public class RenderTree extends ScrollPane {
 
     private void addRowEventHandlers(RenderTreeRow row) {
         RenderTreeRow.RowMode mode = row.getMode();
-        if (mode != RenderTreeRow.RowMode.End) {
+        if (mode != RenderTreeRow.RowMode.End && !row.getRenderNode().type.equals(HTMLElements.TEXT)) {
             row.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
                 int id = row.getRenderNode().id;
                 if (expandedNodes.contains(id)) {
@@ -120,6 +127,11 @@ public class RenderTree extends ScrollPane {
                 RenderTreeRow startRow = rowEndIdToRowStart.get(row.getRenderNode().id);
                 startRow.getStyleClass().add(rowHoveredClass);
             }
+
+            if (RenderSettings.hoveredElementID != row.getRenderNode().id) {
+                RenderSettings.hoveredElementID = row.getRenderNode().id;
+                pipeline.redrawWebpage();
+            }
         });
 
         row.addEventHandler(MouseEvent.MOUSE_EXITED, event -> {
@@ -131,7 +143,16 @@ public class RenderTree extends ScrollPane {
                 RenderTreeRow startRow = rowEndIdToRowStart.get(row.getRenderNode().id);
                 startRow.getStyleClass().remove(rowHoveredClass);
             }
+
+            if (RenderSettings.hoveredElementID == row.getRenderNode().id) {
+                RenderSettings.hoveredElementID = -1;
+                pipeline.redrawWebpage();
+            }
         });
+    }
+
+    public void setPipeline(SearchTabPipeline pipeline) {
+        this.pipeline = pipeline;
     }
 
 }

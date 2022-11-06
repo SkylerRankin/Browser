@@ -16,6 +16,8 @@ import browser.parser.SpecialSymbolHandler;
 import browser.renderer.HTMLRenderer;
 import browser.renderer.ImageCache;
 
+import java.util.Map;
+
 public class Pipeline {
 
     private static boolean initialized = false;
@@ -101,6 +103,9 @@ public class Pipeline {
     }
 
     // Expose the DOM root for testing.
+    public DOMNode getDomRoot() {
+        return domRoot;
+    }
     public void setDomRoot(DOMNode domRoot) {
         this.domRoot = domRoot;
     }

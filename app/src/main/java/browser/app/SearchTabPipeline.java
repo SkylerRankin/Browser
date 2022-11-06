@@ -1,8 +1,5 @@
 package browser.app;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import javafx.concurrent.WorkerStateEvent;
 import javafx.event.EventHandler;
 import javafx.scene.canvas.Canvas;
@@ -17,14 +14,14 @@ import browser.tasks.RedrawWebpageTask;
 public class SearchTabPipeline {
     
     private int tabID;
-    private Pipeline pipeline;
-    private Tab tab;
-    private InteractionHandler interactionHandler;
+    private final Pipeline pipeline;
+    private final Tab tab;
+    private final InteractionHandler interactionHandler;
     private float width;
-    private Canvas canvas;
-    private GraphicsContext gc;
-    private List<RedrawWebpageTask> currentRedrawTasks;
-    
+    private final Canvas canvas;
+    private final GraphicsContext gc;
+    private RedrawWebpageTask currentRedrawTask;
+
     public SearchTabPipeline(int id, Canvas canvas, Tab tab, InteractionHandler interactionHandler) {
         tabID = id;
         pipeline = new Pipeline();
@@ -33,7 +30,6 @@ public class SearchTabPipeline {
         this.gc = canvas.getGraphicsContext2D();
         this.tab = tab;
         this.interactionHandler = interactionHandler;
-        currentRedrawTasks = new ArrayList<RedrawWebpageTask>();
     }
     
     public void updateScreenWidth(float width) {
@@ -68,25 +64,25 @@ public class SearchTabPipeline {
     
     public void redrawWebpage() {
         RedrawWebpageTask crt = new RedrawWebpageTask(width, pipeline);
-        for (RedrawWebpageTask task : currentRedrawTasks) {
-            task.cancel();
+        if (currentRedrawTask != null) {
+            currentRedrawTask.cancel(true);
         }
-        currentRedrawTasks.clear();
-        currentRedrawTasks.add(crt);
+        currentRedrawTask = crt;
         crt.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
             @Override
             public void handle(WorkerStateEvent event) {
                 canvas.setHeight(Math.max(pipeline.height, (float) gc.getCanvas().getHeight()));
                 pipeline.render(gc);
-                currentRedrawTasks.remove(crt);
+                currentRedrawTask = null;
             }
         });
         Thread thread = new Thread(crt);
         thread.setUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
             @Override
             public void uncaughtException(Thread t, Throwable e) {
-                System.err.printf("Uncaught exception: %s\n", e);
-                currentRedrawTasks.remove(crt);
+                System.err.println("SearchTabPipeline:redrawWebpage() thread uncaught exception handler");
+                e.printStackTrace();
+                currentRedrawTask = null;
             }
         });
         thread.start();

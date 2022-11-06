@@ -64,7 +64,7 @@ public class SearchTab extends BrowserTab {
 
         splitPane = new SplitPane();
         splitPane.getStyleClass().add("split_pane");
-        splitPane.getItems().addAll(scroll, inspectorPanel);
+        splitPane.getItems().addAll(scroll);
         splitPane.setDividerPosition(0, splitPaneDividerPosition);
 
         grid.add(urlInput, 0, 0);

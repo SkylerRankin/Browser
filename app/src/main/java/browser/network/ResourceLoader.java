@@ -1,5 +1,7 @@
 package browser.network;
 
+import static browser.constants.ResourceConstants.FILE_PREFIX;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -23,9 +25,7 @@ public class ResourceLoader {
     private DOMNode dom;
     private Map<resourceType, Set<String>> resources;
     private List<String> externalCSS;
-    private final String filePrefix = "file://";
-    private final boolean debug = true;
-    
+
     public ResourceLoader() {
         dom = null;
         resources = new HashMap<resourceType, Set<String>>();
@@ -44,9 +44,9 @@ public class ResourceLoader {
     public void loadWebpage(String url) {
         
         String html = null;
-        if (url.startsWith(filePrefix)) {
+        if (url.startsWith(FILE_PREFIX)) {
             try {
-                String filePath = url.substring(filePrefix.length());
+                String filePath = url.substring(FILE_PREFIX.length());
                 html = new String(Files.readAllBytes(Paths.get(filePath)));
             } catch (IOException e) {
                 System.err.printf("ResourceLoader: failed to load %s, %s\n", url, e.getLocalizedMessage());
@@ -64,7 +64,11 @@ public class ResourceLoader {
         parser.removeUnknownElements(dom);
         
         for (String imgURL : resources.get(resourceType.IMG)) {
-            ImageCache.loadImage(imgURL);
+            if (url.startsWith(FILE_PREFIX)) {
+                ImageCache.loadLocalImage(imgURL, url);
+            } else {
+                ImageCache.loadImage(imgURL);
+            }
         }
         
         for (String cssURL : resources.get(resourceType.CSS)) {
@@ -87,17 +91,11 @@ public class ResourceLoader {
             String src = attributes.get("src");
             if (src != null) {
                 resources.get(resourceType.IMG).add(src);
-                if (debug) {
-                    System.out.printf("ResourceLoader: found img src [%s]\n", src);
-                }
             }
         } else if (tag.equals("link")) {
             String href = attributes.get("href");
             if (href != null && href.endsWith("css")) {
                 resources.get(resourceType.CSS).add(href);
-                if (debug) {
-                    System.out.printf("ResourceLoader: found link href [%s]\n", href);
-                }
             }
         }
         

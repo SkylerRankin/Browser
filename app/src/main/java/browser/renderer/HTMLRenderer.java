@@ -1,5 +1,6 @@
 package browser.renderer;
 
+import browser.layout.BoxUtils;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
@@ -37,23 +38,21 @@ public class HTMLRenderer {
                 break;
         }
 
-        // Draw borders
         if (root.style.borderWidthTop > 0) fillRect(gc, root.style.borderColorTop, root.box.x - root.style.borderWidthLeft, root.box.y - root.style.borderWidthTop, root.box.width + root.style.borderWidthLeft + root.style.borderWidthRight, root.style.borderWidthTop);
         if (root.style.borderWidthBottom > 0) fillRect(gc, root.style.borderColorBottom, root.box.x  - root.style.borderWidthLeft, root.box.y + root.box.height, root.box.width + root.style.borderWidthLeft + root.style.borderWidthRight, root.style.borderWidthTop);
         if (root.style.borderWidthLeft > 0) fillRect(gc, root.style.borderColorLeft, root.box.x - root.style.borderWidthLeft, root.box.y, root.style.borderWidthLeft, root.box.height);
         if (root.style.borderWidthRight > 0) fillRect(gc, root.style.borderColorRight, root.box.x + root.box.width, root.box.y, root.style.borderWidthRight, root.box.height);
 
-
-        if (RenderSettings.renderPadding) {
-            CSSColor paddingColor = new CSSColor("SteelBlue");
+        if (RenderSettings.renderPadding || root.id == RenderSettings.hoveredElementID) {
+            CSSColor paddingColor = new CSSColor("rgba(183, 196, 127, 100)");
             fillRect(gc, paddingColor, root.box.x, root.box.y, root.box.width, root.style.paddingTop);
             fillRect(gc, paddingColor, root.box.x, root.box.y + root.box.height - root.style.paddingBottom, root.box.width, root.style.paddingBottom);
             fillRect(gc, paddingColor, root.box.x, root.box.y, root.style.paddingLeft, root.box.height);
             fillRect(gc, paddingColor, root.box.x + root.box.width - root.style.paddingRight, root.box.y, root.style.paddingRight, root.box.height);
         }
 
-        if (RenderSettings.renderMargins) {
-            CSSColor marginColor = new CSSColor("Gold");
+        if (RenderSettings.renderMargins || root.id == RenderSettings.hoveredElementID) {
+            CSSColor marginColor = new CSSColor("rgba(227, 151, 73, 100)");
             fillRect(gc, marginColor, root.box.x, root.box.y - root.style.marginTop, root.box.width, root.style.marginTop);
             fillRect(gc, marginColor, root.box.x, root.box.y + root.box.height, root.box.width, root.style.marginBottom);
             fillRect(gc, marginColor, root.box.x - root.style.marginLeft, root.box.y, root.style.marginLeft, root.box.height);
@@ -68,6 +67,13 @@ public class HTMLRenderer {
 
         for (RenderNode child : root.children) {
             render(gc, child);
+        }
+
+        // Render the highlight after the children, so it appears on top.
+        if (root.id == RenderSettings.hoveredElementID) {
+            CSSColor highlightColor = new CSSColor("rgba(3, 152, 252, 100)");
+            Box contentBox = BoxUtils.getBoxWithoutPadding(root);
+            fillRect(gc, highlightColor, contentBox.x, contentBox.y, contentBox.width, contentBox.height);
         }
     }
     
