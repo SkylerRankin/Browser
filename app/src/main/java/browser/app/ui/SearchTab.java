@@ -29,7 +29,7 @@ public class SearchTab extends BrowserTab {
     private ScrollPane scroll;
     private Canvas canvas;
     private InspectorPanel inspectorPanel;
-    private double splitPaneDividerPosition = 0;
+    private double splitPaneDividerPosition = -1;
 
     public SearchTab(Stage stage, InteractionCallback interactionCallback) {
         super(TabType.SEARCH, stage);
@@ -65,7 +65,6 @@ public class SearchTab extends BrowserTab {
         splitPane = new SplitPane();
         splitPane.getStyleClass().add("split_pane");
         splitPane.getItems().addAll(scroll);
-        splitPane.setDividerPosition(0, splitPaneDividerPosition);
 
         grid.add(urlInput, 0, 0);
         grid.add(splitPane, 0, 1, 1, 1);
@@ -107,27 +106,46 @@ public class SearchTab extends BrowserTab {
                 }
             }
 
-            canvas.setWidth(scene.getWidth() - 20);
+            canvas.setWidth(scene.getWidth());
             pipeline.updateScreenWidth((float) canvas.getWidth());
             canvas.setHeight(scene.getHeight() - urlInput.getHeight());
 
             if (pipeline.loadedWebpage()) pipeline.redrawWebpage();
-//            gc.setFill(Color.BLUE);
-//            gc.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
-//            gc.setFill(Color.WHITE);
-//            gc.fillRect(10, 10, canvas.getWidth() - 20, canvas.getHeight() - 20);
-//            gc.setFill(Color.BLACK);
-//            gc.fillText(String.format("Tab %d", this.id), 50, 50);
         }
     }
 
     public void toggleInspector() {
+        double totalWidth = scene.getWidth();
+        double newCanvasWidth;
         if (splitPane.getItems().size() == 1) {
             splitPane.getItems().add(inspectorPanel);
+
+            if (splitPaneDividerPosition == -1) {
+                splitPaneDividerPosition = getInitialSplitPanePosition();
+            }
             splitPane.setDividerPosition(0, splitPaneDividerPosition);
+
+            splitPane.getDividers().get(0).positionProperty().addListener((obs, oldVal, newVal) -> {
+                splitPaneDividerPosition = clampSplitPanePosition(newVal.doubleValue());
+                double canvasWidth = getCanvasWidth();
+                canvas.setWidth(canvasWidth);
+                pipeline.updateScreenWidth((float) canvasWidth);
+                if (pipeline.loadedWebpage()) {
+                    pipeline.redrawWebpage();
+                }
+            });
+
+            newCanvasWidth = getCanvasWidth();
         } else {
             splitPaneDividerPosition = splitPane.getDividerPositions()[0];
             splitPane.getItems().remove(1);
+            newCanvasWidth = totalWidth;
+        }
+
+        canvas.setWidth(newCanvasWidth);
+        pipeline.updateScreenWidth((float) newCanvasWidth);
+        if (pipeline.loadedWebpage()) {
+            pipeline.redrawWebpage();
         }
     }
 
@@ -140,6 +158,29 @@ public class SearchTab extends BrowserTab {
         pipeline.loadWebpage(input, root -> {
             inspectorPanel.updateRenderTree(root);
         });
+    }
+
+    private double getCanvasWidth() {
+        boolean inspectorOpen = splitPane.getItems().size() == 2;
+        if (inspectorOpen) {
+            double totalWidth = scene.getWidth();
+            double inspectorWidth = (1 - splitPaneDividerPosition) * totalWidth;
+            return totalWidth - inspectorWidth;
+        } else {
+            return scene.getWidth();
+        }
+    }
+
+    private double getInitialSplitPanePosition() {
+        double totalWidth = scene.getWidth();
+        double inspectorMinWidth = inspectorPanel.getMinWidth();
+        return 1 - (inspectorMinWidth / totalWidth);
+    }
+
+    private double clampSplitPanePosition(double position) {
+        double min = 1 - (inspectorPanel.getMaxWidth() / scene.getWidth());
+        double max = 1 - (inspectorPanel.getMinWidth() / scene.getWidth());
+        return Math.min(Math.max(position, min), max);
     }
 
 }
