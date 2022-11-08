@@ -1,6 +1,5 @@
 package browser.renderer;
 
-import browser.layout.BoxUtils;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
@@ -11,6 +10,7 @@ import javafx.scene.text.FontWeight;
 import browser.constants.PseudoElementConstants;
 import browser.css.CSSStyle.fontStyleType;
 import browser.css.CSSStyle.fontWeightType;
+import browser.layout.BoxUtils;
 import browser.model.Box;
 import browser.model.CSSColor;
 import browser.model.RenderNode;

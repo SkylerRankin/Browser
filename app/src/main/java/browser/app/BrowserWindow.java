@@ -68,6 +68,15 @@ public class BrowserWindow extends Application {
         tabPane.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue.getId() != null && newValue.getId().equals(TabType.NEW.toString())) {
                 addNewTab(stage, TabType.SEARCH);
+            } else {
+                for (BrowserTab tab : tabs) {
+                    if (tab.getActor().equals(newValue)) {
+                        if (tab instanceof SearchTab searchTab) {
+                            searchTab.onRefresh();
+                        }
+                        break;
+                    }
+                }
             }
         });
         
@@ -134,21 +143,19 @@ public class BrowserWindow extends Application {
         ChangeListener<Number> stageSizeListener = (obs, oldValue, newValue) -> {
             tabPane.setPrefWidth(scene.getWidth());
             tabPane.setPrefHeight(scene.getHeight());
-//            footer.setPrefWidth(scene.getWidth());
             AnchorPane.setTopAnchor(hbox, 3.0);
             AnchorPane.setRightAnchor(hbox, 3.0);
+            Tab currentTab = tabPane.getSelectionModel().selectedItemProperty().getValue();
             for (BrowserTab tab : tabs) {
-                tab.onResize(stage);
+                if (tab.getActor().equals(currentTab)) {
+                    tab.onResize(stage);
+                    break;
+                }
             }
-//            statusLabel.setText(String.valueOf(stage.getWidth()));
-//            urlInput.setPrefWidth(stage.getWidth() - searchButton.getWidth() - statusLabel.getWidth() - 20);
-//            canvas.setWidth(stage.getWidth());
-//            canvas.setHeight(stage.getHeight() - searchButton.getHeight());
         };
         stage.widthProperty().addListener(stageSizeListener);
         stage.heightProperty().addListener(stageSizeListener);
-//        startingTab.loadStartupPage();
-        
+
         inspectorHandler = new InspectorHandler(stage);
     }
 
@@ -260,7 +267,6 @@ public class BrowserWindow extends Application {
         KeyCodeCombination ctrlI = new KeyCodeCombination(KeyCode.I, KeyCodeCombination.CONTROL_DOWN);
 
         scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
-
             @Override
             public void handle(KeyEvent event) {
                 if (ctrlW.match(event)) {
@@ -268,7 +274,13 @@ public class BrowserWindow extends Application {
                 } else if (ctrlT.match(event)) {
 //                    addNewTab(stage, TabType.SEARCH);
                 } else if (ctrlR.match(event)) {
-                    System.out.println("ctrl r");
+                    Tab currentTab = tabPane.getSelectionModel().selectedItemProperty().getValue();
+                    for (BrowserTab tab : tabs) {
+                        if (tab instanceof SearchTab searchTab && searchTab.getActor().equals(currentTab)) {
+                            searchTab.onRefresh();
+                            break;
+                        }
+                    }
                 } else if (ctrlTab.match(event)) {
                     System.out.println("ctrl tab");
                     event.consume();
@@ -277,6 +289,7 @@ public class BrowserWindow extends Application {
                     for (BrowserTab tab : tabs) {
                         if (tab instanceof SearchTab searchTab && searchTab.getActor().equals(currentTab)) {
                             searchTab.toggleInspector();
+                            break;
                         }
                     }
                 }
@@ -295,12 +308,6 @@ public class BrowserWindow extends Application {
                 }
             }
         };
-    }
-    
-    private void recordTimeDuration() {
-        long now = System.nanoTime();
-        taskDurations.add(now - currentTime);
-        currentTime = now;
     }
     
     @Override

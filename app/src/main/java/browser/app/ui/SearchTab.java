@@ -1,8 +1,6 @@
 package browser.app.ui;
 
-import javafx.beans.value.ChangeListener;
 import javafx.geometry.Insets;
-import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.*;
 import javafx.scene.control.ScrollPane.ScrollBarPolicy;
@@ -15,6 +13,7 @@ import browser.app.ui.inspector.InspectorPanel;
 import browser.interaction.InteractionCallback;
 import browser.interaction.InteractionHandler;
 import browser.model.Vector2;
+import browser.tasks.RenderCompleteCallback;
 
 public class SearchTab extends BrowserTab {
 
@@ -35,14 +34,12 @@ public class SearchTab extends BrowserTab {
         super(TabType.SEARCH, stage);
         setupUI();
         interactionHandler = new InteractionHandler(interactionCallback);
-        pipeline = new SearchTabPipeline(this.id, canvas, tab, interactionHandler);
+        pipeline = new SearchTabPipeline(this.id, canvas, tab, interactionHandler, getRenderCompleteCallback());
         inspectorPanel.setPipeline(pipeline);
     }
 
     public void loadURL(String url) {
-        pipeline.loadWebpage(url, root -> {
-            inspectorPanel.updateRenderTree(root);
-        });
+        pipeline.loadWebpage(url);
         urlInput.setText(url);
     }
 
@@ -75,16 +72,10 @@ public class SearchTab extends BrowserTab {
         tab.setId(TabType.SEARCH.toString());
         tab.getStyleClass().add("search_tab");
 
-        ChangeListener<Number> stageSizeListener = (obs, oldValue, newValue) -> {
-//        onResize(stage);
-        };
-
         canvas.setOnMouseClicked(event -> {
             Vector2 position = new Vector2((float) event.getX(), (float) event.getY());
             interactionHandler.handleClickEvent(position);
         });
-      
-        stage.widthProperty().addListener(stageSizeListener);
 
         urlInput.setOnKeyPressed(event -> {
             if (event.getCode().equals(KeyCode.ENTER)) {
@@ -99,13 +90,6 @@ public class SearchTab extends BrowserTab {
         urlInput.setPrefWidth(stage.getWidth() - statusLabel.getWidth() - 20);
         if (scene != null) {
             scroll.setPrefSize(scene.getWidth(), scene.getHeight() - urlInput.getHeight());
-
-            for (Node child : scroll.getChildrenUnmodifiable()) {
-                if (child instanceof ScrollBar) {
-                    ScrollBar bar = (ScrollBar) child;
-                }
-            }
-
             canvas.setWidth(scene.getWidth());
             pipeline.updateScreenWidth((float) canvas.getWidth());
             canvas.setHeight(scene.getHeight() - urlInput.getHeight());
@@ -114,11 +98,16 @@ public class SearchTab extends BrowserTab {
         }
     }
 
+    public void onRefresh() {
+        if (pipeline.loadedWebpage()) pipeline.redrawWebpage();
+    }
+
     public void toggleInspector() {
         double totalWidth = scene.getWidth();
         double newCanvasWidth;
         if (splitPane.getItems().size() == 1) {
             splitPane.getItems().add(inspectorPanel);
+            inspectorPanel.updateRenderTree(pipeline.getRootRenderNode());
 
             if (splitPaneDividerPosition == -1) {
                 splitPaneDividerPosition = getInitialSplitPanePosition();
@@ -155,9 +144,7 @@ public class SearchTab extends BrowserTab {
 
     private void onSearch() {
         String input = urlInput.getText();
-        pipeline.loadWebpage(input, root -> {
-            inspectorPanel.updateRenderTree(root);
-        });
+        pipeline.loadWebpage(input);
     }
 
     private double getCanvasWidth() {
@@ -181,6 +168,14 @@ public class SearchTab extends BrowserTab {
         double min = 1 - (inspectorPanel.getMaxWidth() / scene.getWidth());
         double max = 1 - (inspectorPanel.getMinWidth() / scene.getWidth());
         return Math.min(Math.max(position, min), max);
+    }
+
+    private RenderCompleteCallback getRenderCompleteCallback() {
+        return (root, renderType) -> {
+            if (renderType == RenderCompleteCallback.RenderType.NewLayout && splitPane.getItems().size() == 2) {
+                inspectorPanel.updateRenderTree(root);
+            }
+        };
     }
 
 }

@@ -13,6 +13,7 @@ import browser.parser.HTMLElements;
 
 public class TextSplitter {
 
+    private final boolean debugLogs = false;
     Map<Integer, RenderNode> parentNodeMap;
 
     public TextSplitter(Map<Integer, RenderNode> parentNodeMap) {
@@ -165,7 +166,7 @@ public class TextSplitter {
             return lines;
         }
 
-        if (firstMaxWidth <= 0 || laterMaxWidth <= 0 || s.length() == 0 || style == null) {
+        if ((firstMaxWidth <= 0 || laterMaxWidth <= 0 || s.length() == 0 || style == null) && debugLogs) {
             System.out.printf("TextSplitter.splitToWidth called with invalid arguments:\n");
             System.out.printf("\tfirstMaxWidth = %f, laterMaxWidth = %f, totalWidth = %f\n", firstMaxWidth, laterMaxWidth, totalWidth);
             System.out.printf("\ttext = %s\n", s);

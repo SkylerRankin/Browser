@@ -2,15 +2,16 @@ package browser.app.ui.inspector.elements;
 
 import java.util.*;
 
-import browser.app.SearchTabPipeline;
-import browser.renderer.RenderSettings;
 import javafx.geometry.Insets;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 
+import browser.app.SearchTabPipeline;
 import browser.model.RenderNode;
 import browser.parser.HTMLElements;
+import browser.renderer.RenderSettings;
+import browser.tasks.RenderCompleteCallback;
 
 public class RenderTree extends ScrollPane {
 
@@ -44,6 +45,7 @@ public class RenderTree extends ScrollPane {
         expandedNodes.clear();
         addStartingExpandedIDs(root);
         addNodeAndChildren(root);
+        requestLayout();
     }
 
     private void refresh() {
@@ -130,7 +132,7 @@ public class RenderTree extends ScrollPane {
 
             if (RenderSettings.hoveredElementID != row.getRenderNode().id) {
                 RenderSettings.hoveredElementID = row.getRenderNode().id;
-                pipeline.redrawWebpage();
+                pipeline.redrawWebpage(RenderCompleteCallback.RenderType.InspectorUpdate);
             }
         });
 
@@ -146,7 +148,7 @@ public class RenderTree extends ScrollPane {
 
             if (RenderSettings.hoveredElementID == row.getRenderNode().id) {
                 RenderSettings.hoveredElementID = -1;
-                pipeline.redrawWebpage();
+                pipeline.redrawWebpage(RenderCompleteCallback.RenderType.InspectorUpdate);
             }
         });
     }

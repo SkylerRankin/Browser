@@ -16,8 +16,6 @@ import browser.parser.SpecialSymbolHandler;
 import browser.renderer.HTMLRenderer;
 import browser.renderer.ImageCache;
 
-import java.util.Map;
-
 public class Pipeline {
 
     private static boolean initialized = false;

@@ -1,5 +1,6 @@
 package browser.app;
 
+import browser.model.RenderNode;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.event.EventHandler;
 import javafx.scene.canvas.Canvas;
@@ -7,9 +8,9 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Tab;
 
 import browser.interaction.InteractionHandler;
-import browser.tasks.LoadWebpageCallback;
 import browser.tasks.LoadWebpageTask;
 import browser.tasks.RedrawWebpageTask;
+import browser.tasks.RenderCompleteCallback;
 
 public class SearchTabPipeline {
     
@@ -17,12 +18,13 @@ public class SearchTabPipeline {
     private final Pipeline pipeline;
     private final Tab tab;
     private final InteractionHandler interactionHandler;
+    private final RenderCompleteCallback renderCompleteCallback;
     private float width;
     private final Canvas canvas;
     private final GraphicsContext gc;
     private RedrawWebpageTask currentRedrawTask;
 
-    public SearchTabPipeline(int id, Canvas canvas, Tab tab, InteractionHandler interactionHandler) {
+    public SearchTabPipeline(int id, Canvas canvas, Tab tab, InteractionHandler interactionHandler, RenderCompleteCallback renderCompleteCallback) {
         tabID = id;
         pipeline = new Pipeline();
         this.canvas = canvas;
@@ -30,6 +32,7 @@ public class SearchTabPipeline {
         this.gc = canvas.getGraphicsContext2D();
         this.tab = tab;
         this.interactionHandler = interactionHandler;
+        this.renderCompleteCallback = renderCompleteCallback;
     }
     
     public void updateScreenWidth(float width) {
@@ -40,15 +43,17 @@ public class SearchTabPipeline {
         return pipeline.loadedWebpage();
     }
     
-    public void loadWebpage(String url, LoadWebpageCallback callback) {
+    public void loadWebpage(String url) {
         LoadWebpageTask lwt = new LoadWebpageTask(url, width, pipeline);
         lwt.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
             @Override
             public void handle(WorkerStateEvent event) {
                 canvas.setHeight(Math.max(pipeline.height, (float) gc.getCanvas().getHeight()));
                 tab.setText(pipeline.title == null ? url : pipeline.title);
-                pipeline.render(gc);
-                callback.onWebpageLoaded(pipeline.getRootRenderNode());
+                synchronized (pipeline) {
+                    pipeline.render(gc);
+                }
+                renderCompleteCallback.onRenderCompleted(pipeline.getRootRenderNode(), RenderCompleteCallback.RenderType.NewLayout);
                 interactionHandler.setRootRenderNode(pipeline.getRootRenderNode());
             }
         });
@@ -61,8 +66,12 @@ public class SearchTabPipeline {
         });
         thread.start();
     }
-    
+
     public void redrawWebpage() {
+        redrawWebpage(RenderCompleteCallback.RenderType.NewLayout);
+    }
+    
+    public void redrawWebpage(RenderCompleteCallback.RenderType renderType) {
         RedrawWebpageTask crt = new RedrawWebpageTask(width, pipeline);
         if (currentRedrawTask != null) {
             currentRedrawTask.cancel(true);
@@ -72,7 +81,11 @@ public class SearchTabPipeline {
             @Override
             public void handle(WorkerStateEvent event) {
                 canvas.setHeight(Math.max(pipeline.height, (float) gc.getCanvas().getHeight()));
-                pipeline.render(gc);
+                synchronized (pipeline) {
+                    pipeline.render(gc);
+                }
+                renderCompleteCallback.onRenderCompleted(pipeline.getRootRenderNode(), renderType);
+                interactionHandler.setRootRenderNode(pipeline.getRootRenderNode());
                 currentRedrawTask = null;
             }
         });
@@ -86,6 +99,10 @@ public class SearchTabPipeline {
             }
         });
         thread.start();
+    }
+
+    public RenderNode getRootRenderNode() {
+        return pipeline.getRootRenderNode();
     }
 
 }

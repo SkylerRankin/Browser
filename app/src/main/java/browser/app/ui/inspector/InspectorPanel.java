@@ -50,6 +50,7 @@ public class InspectorPanel extends TabPane {
 
     public void updateRenderTree(RenderNode root) {
         renderTree.update(root);
+        requestLayout();
     }
 
     public void setPipeline(SearchTabPipeline pipeline) {
