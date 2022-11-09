@@ -72,7 +72,6 @@ public class HTTPClient {
         // Try to download from url directly
         try {
             url = new URL(formatURL(urlString));
-            System.out.printf("URLString = %s\n", url.toString());
             InputStream in = new BufferedInputStream(url.openStream());
             image = new Image(in);
         } catch (IOException e) {

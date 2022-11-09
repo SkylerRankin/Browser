@@ -126,6 +126,7 @@ public class SearchTab extends BrowserTab {
 
             newCanvasWidth = getCanvasWidth();
         } else {
+            inspectorPanel.preClose();
             splitPaneDividerPosition = splitPane.getDividerPositions()[0];
             splitPane.getItems().remove(1);
             newCanvasWidth = totalWidth;

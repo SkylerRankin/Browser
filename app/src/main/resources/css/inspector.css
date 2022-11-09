@@ -16,6 +16,10 @@
     -fx-background-color: #202124;
 }
 
+.inspector_elements_split_pane {
+    -fx-background-color: #202124;
+}
+
 /* CSS for the render tree panel */
 
 .render_tree {
@@ -27,13 +31,24 @@
     -fx-background-color: #202124;
 }
 
+.render_tree_row_selected {
+    -fx-background-color: #073d69;
+}
+
 .render_tree_row_hovered {
     -fx-background-color: #232a36;
 }
 
+.render_tree_row_arrow_container {
+    -fx-cursor: hand;
+}
+
+.render_tree_row_content_pane {
+    -fx-cursor: hand;
+}
+
 .render_tree_row_html {
     -fx-fill: #52b5e3;
-    /*-fx-fill: #5297a9;*/
 }
 
 .render_tree_row_ellipses {
@@ -46,6 +61,12 @@
 
 .render_tree_row_attribute_value {
     -fx-fill: #f29766;
+}
+
+/* CSS for the render node details panel */
+
+.inspector_render_node_details {
+    -fx-background-color: white;
 }
 
 /* CSS for the settings panel */

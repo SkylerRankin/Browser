@@ -5,16 +5,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import browser.parser.HTMLElements;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
 
 import browser.model.RenderNode;
 
-public class RenderTreeRow extends FlowPane {
+public class RenderTreeRow extends HBox {
 
     public enum RowMode { Text, Start, End, Collapsed }
 
@@ -27,24 +28,36 @@ public class RenderTreeRow extends FlowPane {
     private final Image downArrowImage;
     private final Image rightArrowImage;
 
-    public RenderTreeRow(RenderNode node, RowMode mode) {
+    private HBox expandButton;
+    private HBox collapseButton;
+    private FlowPane rowSelectorPane;
+
+    public RenderTreeRow(RenderNode node, RowMode mode, boolean isSelected) {
         this.node = node;
         this.mode = mode;
         getStyleClass().add("render_tree_row");
+        if (isSelected) {
+            getStyleClass().add("render_tree_row_selected");
+        }
         setPadding(new Insets(0, 0, 0, baseIndentationSize + indentationSize * node.depth));
 
         File downArrowImageFile = new File("./src/main/resources/images/downArrow.png");
-        downArrowImage = new Image(downArrowImageFile.toURI().toString(), true);
+        downArrowImage = new Image(downArrowImageFile.toURI().toString(), false);
         File rightArrowImageFile = new File("./src/main/resources/images/rightArrow.png");
-        rightArrowImage = new Image(rightArrowImageFile.toURI().toString(), true);
+        rightArrowImage = new Image(rightArrowImageFile.toURI().toString(), false);
+        // Add extra padding for text and end rows since they do not have the arrow image.
+        int leftPadding = 20 + baseIndentationSize + indentationSize * node.depth;
+        Insets padding = new Insets(0, 0, 0, leftPadding);
 
         switch (mode) {
-            case Text -> addRowPlainText();
+            case Text -> {
+                addRowPlainText();
+                setPadding(padding);
+            }
             case Start -> addRowStartText();
             case End -> {
                 addRowEndText();
-                // Add extra padding since end tags do not have the arrow image.
-                setPadding(new Insets(0, 0, 0, arrowImageSize + baseIndentationSize + indentationSize * node.depth));
+                setPadding(padding);
             }
             case Collapsed -> addRowCollapsedText();
         }
@@ -53,40 +66,68 @@ public class RenderTreeRow extends FlowPane {
     public RenderNode getRenderNode() {
         return node;
     }
-
     public RowMode getMode() {
         return mode;
     }
+    public HBox getExpandButton() {
+        return expandButton;
+    }
+    public HBox getCollapseButton() {
+        return collapseButton;
+    }
+    public FlowPane getRowSelector() { return rowSelectorPane; }
 
     private void addRowStartText() {
+        collapseButton = new HBox();
+        collapseButton.setPrefWidth(20);
+        collapseButton.setMinWidth(20);
+        collapseButton.getStyleClass().add("render_tree_row_arrow_container");
+        collapseButton.setAlignment(Pos.CENTER);
         ImageView arrow = new ImageView(downArrowImage);
         arrow.setFitWidth(arrowImageSize);
         arrow.setFitHeight(arrowImageSize);
-        Text tagStart = new Text(String.format(" <%s", node.type));
+        collapseButton.getChildren().add(arrow);
+
+        rowSelectorPane = new FlowPane();
+        rowSelectorPane.getStyleClass().add("render_tree_row_content_pane");
+
+        Text tagStart = new Text(String.format("<%s", node.type));
         tagStart.getStyleClass().add("render_tree_row_html");
         Text tagEnd = new Text(">");
         tagEnd.getStyleClass().add("render_tree_row_html");
 
         List<Text> attributesText = getAttributesTextList();
 
-        getChildren().addAll(arrow, tagStart);
+        rowSelectorPane.getChildren().addAll(tagStart);
         if (attributesText.size() > 0) {
-            getChildren().addAll(attributesText);
+            rowSelectorPane.getChildren().addAll(attributesText);
         }
-        getChildren().add(tagEnd);
+        rowSelectorPane.getChildren().add(tagEnd);
+
+        getChildren().addAll(collapseButton, rowSelectorPane);
     }
 
     private void addRowEndText() {
-        Text tagEnd = new Text(String.format(" </%s>", node.type));
+        Text tagEnd = new Text(String.format("</%s>", node.type));
         tagEnd.getStyleClass().add("render_tree_row_html");
         getChildren().addAll(tagEnd);
     }
 
     private void addRowCollapsedText() {
+        expandButton = new HBox();
+        expandButton.setPrefWidth(20);
+        expandButton.setMinWidth(20);
+        expandButton.getStyleClass().add("render_tree_row_arrow_container");
+        expandButton.setAlignment(Pos.CENTER);
         ImageView arrow = new ImageView(rightArrowImage);
         arrow.setFitWidth(arrowImageSize);
         arrow.setFitHeight(arrowImageSize);
-        Text tagStart = new Text(String.format(" <%s", node.type));
+        expandButton.getChildren().add(arrow);
+
+        rowSelectorPane = new FlowPane();
+        rowSelectorPane.getStyleClass().add("render_tree_row_content_pane");
+
+        Text tagStart = new Text(String.format("<%s", node.type));
         tagStart.getStyleClass().add("render_tree_row_html");
         Text tagStartEnd = new Text(">");
         tagStartEnd.getStyleClass().add("render_tree_row_html");
@@ -96,11 +137,13 @@ public class RenderTreeRow extends FlowPane {
         tagEnd.getStyleClass().add("render_tree_row_html");
         List<Text> attributesText = getAttributesTextList();
 
-        getChildren().addAll(arrow, tagStart);
+        rowSelectorPane.getChildren().addAll(tagStart);
         if (attributesText.size() > 0) {
-            getChildren().addAll(attributesText);
+            rowSelectorPane.getChildren().addAll(attributesText);
         }
-        getChildren().addAll(tagStartEnd, ellipses, tagEnd);
+        rowSelectorPane.getChildren().addAll(tagStartEnd, ellipses, tagEnd);
+
+        getChildren().addAll(expandButton, rowSelectorPane);
     }
 
     private List<Text> getAttributesTextList() {
@@ -130,7 +173,7 @@ public class RenderTreeRow extends FlowPane {
     }
 
     private void addRowPlainText() {
-        Text tagStart = new Text(String.format(" <%s>", node.type));
+        Text tagStart = new Text(String.format("<%s>", node.type));
         tagStart.getStyleClass().add("render_tree_row_html");
         Text text = new Text(node.text);
         text.getStyleClass().add("render_tree_row_ellipses");
