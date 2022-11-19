@@ -23,7 +23,7 @@ public class CSSStyle {
     // Reference for all display type combinations: https://developer.mozilla.org/en-US/docs/Web/CSS/display.
     public enum DisplayType {
         // display-outside values
-        BLOCK, INLINE,
+        BLOCK, INLINE, RUN_IN,
         // display-inside values
         FLOW, FLOW_ROOT, TABLE, FLEX, GRID, RUBY,
         // display-list-item values

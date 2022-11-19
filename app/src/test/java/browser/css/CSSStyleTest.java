@@ -36,7 +36,8 @@ public class CSSStyleTest {
                 List.of("display", "flex"),
                 List.of("display", "inline flow"),
                 List.of("display", "block table"),
-                List.of("display", "block flex")
+                List.of("display", "block flex"),
+                List.of("display", "run-in")
         );
 
         List<List<DisplayType>> displayTypes = List.of(
@@ -49,7 +50,8 @@ public class CSSStyleTest {
                 List.of(DisplayType.BLOCK, DisplayType.FLEX),
                 List.of(DisplayType.INLINE, DisplayType.FLOW),
                 List.of(DisplayType.BLOCK, DisplayType.TABLE),
-                List.of(DisplayType.BLOCK, DisplayType.FLEX)
+                List.of(DisplayType.BLOCK, DisplayType.FLEX),
+                List.of(DisplayType.RUN_IN, DisplayType.FLOW)
         );
 
         for (int i = 0; i < properties.size(); i++) {

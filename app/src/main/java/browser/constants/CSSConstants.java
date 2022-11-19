@@ -9,13 +9,15 @@ public class CSSConstants {
 
     public final static List<CSSStyle.DisplayType> outerDisplayTypes = List.of(
             CSSStyle.DisplayType.BLOCK,
-            CSSStyle.DisplayType.INLINE
+            CSSStyle.DisplayType.INLINE,
+            CSSStyle.DisplayType.RUN_IN
     );
 
     // Mappings from the CSS display type string to the corresponding display enum.
     private final static Map<String, CSSStyle.DisplayType> displayTypeStringToType = Map.ofEntries(
             Map.entry("block", CSSStyle.DisplayType.BLOCK),
             Map.entry("inline", CSSStyle.DisplayType.INLINE),
+            Map.entry("run-in", CSSStyle.DisplayType.RUN_IN),
             Map.entry("flow", CSSStyle.DisplayType.FLOW),
             Map.entry("flow-root", CSSStyle.DisplayType.FLOW_ROOT),
             Map.entry("table", CSSStyle.DisplayType.TABLE),
