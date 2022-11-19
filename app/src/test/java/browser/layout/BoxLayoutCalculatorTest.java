@@ -67,7 +67,7 @@ public class BoxLayoutCalculatorTest {
         div.id = 1;
         div.style.width = 50f;
         div.style.height = 60f;
-        div.style.display = CSSStyle.displayType.INLINE;
+        div.style.display = CSSStyle.DisplayType.INLINE;
 
         body.addChild(div);
         parentMap.put(div.id, body);
@@ -155,11 +155,11 @@ public class BoxLayoutCalculatorTest {
         RenderNode span4 = new RenderNode("span");
         RenderNode span5 = new RenderNode("span");
 
-        span1.style.display = CSSStyle.displayType.INLINE;
-        span2.style.display = CSSStyle.displayType.INLINE;
-        span3.style.display = CSSStyle.displayType.INLINE;
-        span4.style.display = CSSStyle.displayType.INLINE;
-        span5.style.display = CSSStyle.displayType.INLINE;
+        span1.style.display = CSSStyle.DisplayType.INLINE;
+        span2.style.display = CSSStyle.DisplayType.INLINE;
+        span3.style.display = CSSStyle.DisplayType.INLINE;
+        span4.style.display = CSSStyle.DisplayType.INLINE;
+        span5.style.display = CSSStyle.DisplayType.INLINE;
 
         span1.box.fixedWidth = true;
         span2.box.fixedWidth = true;
@@ -216,9 +216,9 @@ public class BoxLayoutCalculatorTest {
         RenderNode nodeE = new RenderNode("div");
         RenderNode nodeF = new RenderNode("div");
 
-        nodeD.style.display = CSSStyle.displayType.INLINE;
-        nodeE.style.display = CSSStyle.displayType.INLINE;
-        nodeF.style.display = CSSStyle.displayType.INLINE;
+        nodeD.style.display = CSSStyle.DisplayType.INLINE;
+        nodeE.style.display = CSSStyle.DisplayType.INLINE;
+        nodeF.style.display = CSSStyle.DisplayType.INLINE;
 
         nodeA.box.fixedWidth = true;
         nodeB.box.fixedWidth = true;

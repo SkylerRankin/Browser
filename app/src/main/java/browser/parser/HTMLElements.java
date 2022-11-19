@@ -47,6 +47,7 @@ public class HTMLElements {
     public static final String NOBR = "nobr";
 
     public static final String PSEUDO_MARKER = "marker";
+    public static final String ANONYMOUS = "anonymous";
     
     private static final String[] VALID_ELEMENTS = {TEXT, HTML, HEAD, STYLE, TITLE, BODY, H1, H2, H3, H4, H5, H6, DIV, SPAN, P, UL, OL, LI, HR, B, IMG, A, PRE, TT, CODE, EM, STRONG, CENTER, TABLE, TR, TD};
     private static final String[] EMPTY_ELEMENTS = {DOCTYPE, IMG, BR, LINK, BR, INPUT, META, HR};
@@ -92,6 +93,10 @@ public class HTMLElements {
 
     public static boolean isPseudoElement(String element) {
         return pseudoElements.contains(element);
+    }
+
+    public static boolean isAnonymousElement(String element) {
+        return element.equals(ANONYMOUS);
     }
 
 }

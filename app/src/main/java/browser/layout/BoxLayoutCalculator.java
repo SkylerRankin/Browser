@@ -59,7 +59,7 @@ public class BoxLayoutCalculator {
                 Vector2 textSize = TextDimensionCalculator.getTextDimension(root.text, root.style);
                 root.box.width = textSize.x;
                 root.box.height = textSize.y;
-                if (parent.children.size() == 1 && parent.style.display.equals(CSSStyle.displayType.INLINE)) {
+                if (parent.children.size() == 1 && parent.style.display.equals(CSSStyle.DisplayType.INLINE)) {
                     parent.box.width = textSize.x;
                     parent.box.height = textSize.y;
                 }
@@ -70,7 +70,7 @@ public class BoxLayoutCalculator {
                 root.box.height = root.attributes.containsKey("height") ? Float.parseFloat(root.attributes.get("height")) : 50;
             }
             
-            if (root.style.height != null && root.style.display != CSSStyle.displayType.INLINE) {
+            if (root.style.height != null && root.style.display != CSSStyle.DisplayType.INLINE) {
                 root.box.fixedHeight = true;
                 if (root.style.heightType.equals(CSSStyle.dimensionType.PIXEL)) root.box.height = root.style.height;
                 if (root.style.heightType.equals(CSSStyle.dimensionType.PERCENTAGE) && parent.box.fixedHeight) {
@@ -84,7 +84,7 @@ public class BoxLayoutCalculator {
                 }
             }
             
-            if (root.style.width != null && root.style.display != CSSStyle.displayType.INLINE) {
+            if (root.style.width != null && root.style.display != CSSStyle.DisplayType.INLINE) {
                 root.box.fixedWidth = true;
                 if (root.style.widthType.equals(CSSStyle.dimensionType.PIXEL)) root.box.width = root.style.width;
                 if (root.style.widthType.equals(CSSStyle.dimensionType.PERCENTAGE) && parent.box.fixedWidth) {
@@ -153,6 +153,17 @@ public class BoxLayoutCalculator {
         for (int i = 0; i < root.children.size(); i++) {
             calculateBoxes(root.children.get(i));
         }
+    }
+
+    public void setBoxTypes(RenderNode node) {
+        CSSStyle.DisplayType displayType = node.style.display;
+        switch (displayType) {
+            case BLOCK -> {}
+        }
+    }
+
+    public void addAnonymousRenderNodes(RenderNode node) {
+        // todo
     }
     
     /**
@@ -259,7 +270,7 @@ public class BoxLayoutCalculator {
      * @return
      */
     public Vector2 nextPosition(RenderNode node, RenderNode parent) {
-        CSSStyle.displayType displayType = node.style.display;
+        CSSStyle.DisplayType displayType = node.style.display;
         RenderNode lastAddedChild = lastAddedChildMap.get(parent.id);
         if (lastAddedChild == null) {
             float availableWidth = parent.maxWidth - (parent.style.paddingLeft + node.style.marginLeft + node.style.marginRight + parent.style.paddingRight);
@@ -328,7 +339,7 @@ public class BoxLayoutCalculator {
      * @param node  The node to expand
      */
     public void expandIfBlockElement(RenderNode node) {
-        if (node.style.display != CSSStyle.displayType.BLOCK || node.box.fixedWidth) {
+        if (node.style.display != CSSStyle.DisplayType.BLOCK || node.box.fixedWidth) {
             return;
         }
 

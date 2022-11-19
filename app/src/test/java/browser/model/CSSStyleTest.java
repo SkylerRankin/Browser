@@ -22,12 +22,12 @@ public class CSSStyleTest {
 
         assertEquals(style1, style2);
 
-        style1.display = CSSStyle.displayType.INLINE;
-        style2.display = CSSStyle.displayType.BLOCK;
+        style1.display = CSSStyle.DisplayType.INLINE;
+        style2.display = CSSStyle.DisplayType.BLOCK;
 
         assertNotEquals(style1, style2);
 
-        style2.display = CSSStyle.displayType.INLINE;
+        style2.display = CSSStyle.DisplayType.INLINE;
         style2.setProperty("property", "value2");
         style1.setProperty("property", "value1");
 

@@ -151,7 +151,7 @@ public class RenderTreeGenerator {
 
         RenderNode current = node.parent.children.get(indexInParent + direction);
         while (!current.type.equals(HTMLElements.TEXT)) {
-            if (current.children.isEmpty()  || current.style.display == CSSStyle.displayType.BLOCK) {
+            if (current.children.isEmpty()  || current.style.display == CSSStyle.DisplayType.BLOCK) {
                 break;
             }
             current = current.children.get(0);
@@ -210,7 +210,7 @@ public class RenderTreeGenerator {
 
                 // Update the root node to be inline-block. In needs to be inline with the marker element, but should
                 // otherwise be a block element.
-                child.style.display = CSSStyle.displayType.INLINE_BLOCK;
+                child.style.display = CSSStyle.DisplayType.INLINE_BLOCK;
 
                 // Save the parent reference for the new render node.
                 parentRenderNodeMap.put(marker.id, marker.parent);

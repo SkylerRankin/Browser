@@ -1,11 +1,9 @@
 package browser.css;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 
+import browser.constants.CSSConstants;
 import browser.model.CSSColor;
 import browser.model.CSSRulePrecedent;
 
@@ -22,7 +20,24 @@ public class CSSStyle {
 
     public static enum dimensionType {PIXEL, PERCENTAGE}
 
-    public static enum displayType {BLOCK, INLINE, INLINE_BLOCK}
+    // Reference for all display type combinations: https://developer.mozilla.org/en-US/docs/Web/CSS/display.
+    public enum DisplayType {
+        // display-outside values
+        BLOCK, INLINE,
+        // display-inside values
+        FLOW, FLOW_ROOT, TABLE, FLEX, GRID, RUBY,
+        // display-list-item values
+        LIST_ITEM,
+        // display-internal values
+        TABLE_ROW_GROUP, TABLE_HEADER_GROUP, TABLE_FOOTER_GROUP,
+        TABLE_ROW, TABLE_CELL, TABLE_COLUMN_GROUP, TABLE_COLUMN,
+        TABLE_CAPTION, RUBY_BASE, RUBY_TEXT, RUBY_BASE_CONTAINER,
+        RUBY_TEXT_CONTAINER,
+        // display-box values
+        CONTENTS, NONE,
+        // display-legacy values
+        INLINE_BLOCK, INLINE_TABLE, INLINE_FLEX, INLINE_GRID;
+    }
 
     public static enum fontStyleType {NORMAL, ITALIC, ITALICS}
 
@@ -50,7 +65,12 @@ public class CSSStyle {
     
     public CSSColor color = new CSSColor("Black");
     
-    public displayType display = displayType.BLOCK;
+    public DisplayType display = DisplayType.BLOCK;
+    public DisplayType innerDisplay;
+    public DisplayType outerDisplay = DisplayType.BLOCK;
+    // Some display types, such as list-item, set a third value in addition to the inner and outer display types. This
+    // auxiliary display type captures that information.
+    public DisplayType auxiliaryDisplay;
     
     public String fontFamily = "Times New Roman";
     public int fontSize = 12;
@@ -163,6 +183,50 @@ public class CSSStyle {
         String[] values = value.split("\\s");
         return new CSSColor(values[2]);
     }
+
+    /**
+     * Populates the inner and outer display types based on a display CSS string. There are a few configurations
+     * for this property.
+     *   - Single value: This can be an inner or outer value. Depending on which it is, the remaining display type is
+     *     set to a default value (block for outer, and flow for inner).
+     *   - Hyphenated values: The first is the inner, second is the outer.
+     *   - Spaced values: The first is the inner, second is the outer.
+     * @param text      The CSS display property text to parse.
+     */
+    private void parseDisplayType(String text) {
+        if (CSSConstants.getDisplayType(text) != null) {
+            DisplayType singleType = CSSConstants.getDisplayType(text);
+            if (CSSConstants.getDisplayTypeOverride(singleType) != null) {
+                // Some display types have mappings to inner/outer display types that are not evident from their names.
+                // For example, inline-block maps to inline flow-root.
+                List<DisplayType> types = CSSConstants.getDisplayTypeOverride(singleType);
+                outerDisplay = types.get(0);
+                innerDisplay = types.get(1);
+                if (types.size() == 3) {
+                    auxiliaryDisplay = types.get(2);
+                }
+            } else if (CSSConstants.outerDisplayTypes.contains(singleType)) {
+                outerDisplay = singleType;
+                innerDisplay = DisplayType.FLOW;
+            } else {
+                outerDisplay = DisplayType.BLOCK;
+                innerDisplay = singleType;
+            }
+        } else if (text.contains("-")) {
+            outerDisplay = CSSConstants.getDisplayType(text.substring(0, text.indexOf("-")));
+            innerDisplay = CSSConstants.getDisplayType(text.substring(text.indexOf("-") + 1));
+        } else if (text.contains(" ")) {
+            outerDisplay = CSSConstants.getDisplayType(text.substring(0, text.indexOf(" ")));
+            innerDisplay = CSSConstants.getDisplayType(text.substring(text.indexOf(" ") + 1));
+        } else {
+            outerDisplay = DisplayType.BLOCK;
+            innerDisplay = DisplayType.FLOW;
+            System.out.printf("CSSStyle.parseDisplayType: unknown display type %s, reverting to block.\n", text);
+        }
+
+        // TODO should the basic display even be used anymore?
+        // TODO hwo to set the default inner. not sure if "flow" is the correct choice here.
+    }
     
     /**
      * Convert the string properties and values to actual properties on this class
@@ -204,13 +268,13 @@ public class CSSStyle {
             case "border-bottom-width": borderWidthBottom = parseDimension(value); break;
             case "border-left-width":   borderWidthLeft = parseDimension(value); break;
             case "border-right-width":  borderWidthRight = parseDimension(value); break;
-            case "color":                 color = new CSSColor(value); break;
-            case "display":                display = displayType.valueOf(value.toUpperCase()); break;
-            case "font-family":            fontFamily = FontLoader.getValidFont(value.split(",")); break;
-            case "font-size":            fontSize = parseFontSizeValue(value.toLowerCase()); break;
-            case "font-style":            fontStyle = fontStyleType.valueOf(value.toUpperCase()); break;
-            case "font-weight":            fontWeight = fontWeightType.valueOf(value.toUpperCase()); break;
-            case "height":                height = (float) parseDimension(value);
+            case "color":               color = new CSSColor(value); break;
+            case "display":             parseDisplayType(value); break;
+            case "font-family":         fontFamily = FontLoader.getValidFont(value.split(",")); break;
+            case "font-size":           fontSize = parseFontSizeValue(value.toLowerCase()); break;
+            case "font-style":          fontStyle = fontStyleType.valueOf(value.toUpperCase()); break;
+            case "font-weight":         fontWeight = fontWeightType.valueOf(value.toUpperCase()); break;
+            case "height":              height = (float) parseDimension(value);
                                         heightType = value.contains("%") ?
                                                 dimensionType.PERCENTAGE :
                                                 dimensionType.PIXEL; break;
@@ -223,21 +287,21 @@ public class CSSStyle {
                                             marginBottom = parseDimension(value);
                                             marginLeft = parseDimension(value);
                                         } break;
-            case "margin-top":            marginTop = parseDimension(value);  break;
+            case "margin-top":          marginTop = parseDimension(value);  break;
             case "margin-right":        marginRight = parseDimension(value);  break;
-            case "margin-bottom":        marginBottom = parseDimension(value);  break;
-            case "margin-left":            marginLeft = parseDimension(value);  break;
+            case "margin-bottom":       marginBottom = parseDimension(value);  break;
+            case "margin-left":         marginLeft = parseDimension(value);  break;
             case "max-width":           maxWidth = (float) parseDimension(value); break;
             case "padding":             paddingTop = parseDimension(value);
                                         paddingRight = parseDimension(value);
                                         paddingBottom = parseDimension(value);
                                         paddingLeft = parseDimension(value); break;
-            case "padding-top":            paddingTop = parseDimension(value);  break;
-            case "padding-right":        paddingRight = parseDimension(value);  break;
-            case "padding-bottom":        paddingBottom = parseDimension(value);  break;
+            case "padding-top":         paddingTop = parseDimension(value);  break;
+            case "padding-right":       paddingRight = parseDimension(value);  break;
+            case "padding-bottom":      paddingBottom = parseDimension(value);  break;
             case "padding-left":        paddingLeft = parseDimension(value);  break;
-            case "text-align":            textAlign = textAlignType.valueOf(value.toUpperCase()); break;
-            case "width":                width = (float) parseDimension(value);
+            case "text-align":          textAlign = textAlignType.valueOf(value.toUpperCase()); break;
+            case "width":               width = (float) parseDimension(value);
                                         widthType = value.contains("%") ?
                                                 dimensionType.PERCENTAGE :
                                                 dimensionType.PIXEL; break;

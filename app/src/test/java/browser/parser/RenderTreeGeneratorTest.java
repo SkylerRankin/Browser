@@ -136,7 +136,7 @@ public class RenderTreeGeneratorTest {
         RenderNode renderLI1 = new RenderNode(HTMLElements.LI);
         renderLI1.id = id++;
         renderLI1.depth = 3;
-        renderLI1.style.display = CSSStyle.displayType.INLINE;
+        renderLI1.style.display = CSSStyle.DisplayType.INLINE;
         RenderNode renderText1 = new RenderNode(HTMLElements.TEXT);
         renderText1.id = id++;
         renderText1.depth = 4;
@@ -152,7 +152,7 @@ public class RenderTreeGeneratorTest {
         RenderNode renderLI2 = new RenderNode(HTMLElements.LI);
         renderLI2.id = id++;
         renderLI2.depth = 3;
-        renderLI2.style.display = CSSStyle.displayType.INLINE;
+        renderLI2.style.display = CSSStyle.DisplayType.INLINE;
         RenderNode renderText2 = new RenderNode(HTMLElements.TEXT);
         renderText2.id = id++;
         renderText2.depth = 4;
@@ -168,7 +168,7 @@ public class RenderTreeGeneratorTest {
         RenderNode renderLI3 = new RenderNode(HTMLElements.LI);
         renderLI3.id = id++;
         renderLI3.depth = 3;
-        renderLI3.style.display = CSSStyle.displayType.INLINE;
+        renderLI3.style.display = CSSStyle.DisplayType.INLINE;
         RenderNode renderText3 = new RenderNode(HTMLElements.TEXT);
         renderText3.id = id++;
         renderText3.depth = 4;
@@ -254,7 +254,7 @@ public class RenderTreeGeneratorTest {
         RenderNode renderLI1 = new RenderNode(HTMLElements.LI);
         renderLI1.id = id++;
         renderLI1.depth = 3;
-        renderLI1.style.display = CSSStyle.displayType.INLINE;
+        renderLI1.style.display = CSSStyle.DisplayType.INLINE;
 
         RenderNode renderUL = new RenderNode(HTMLElements.UL);
         renderUL.id = id++;
@@ -270,7 +270,7 @@ public class RenderTreeGeneratorTest {
         RenderNode renderLI2 = new RenderNode(HTMLElements.LI);
         renderLI2.id = id++;
         renderLI2.depth = 5;
-        renderLI2.style.display = CSSStyle.displayType.INLINE;
+        renderLI2.style.display = CSSStyle.DisplayType.INLINE;
         RenderNode renderText1 = new RenderNode(HTMLElements.TEXT);
         renderText1.id = id++;
         renderText1.depth = 6;
@@ -286,7 +286,7 @@ public class RenderTreeGeneratorTest {
         RenderNode renderLI3 = new RenderNode(HTMLElements.LI);
         renderLI3.id = id++;
         renderLI3.depth = 5;
-        renderLI3.style.display = CSSStyle.displayType.INLINE;
+        renderLI3.style.display = CSSStyle.DisplayType.INLINE;
         RenderNode renderText2 = new RenderNode(HTMLElements.TEXT);
         renderText2.id = id++;
         renderText2.depth = 6;
@@ -331,15 +331,15 @@ public class RenderTreeGeneratorTest {
         // "  This text is <b>bold</b> for testing. "
         RenderNode div = new RenderNode(HTMLElements.DIV);
         RenderNode text1 = new RenderNode(HTMLElements.TEXT);
-        text1.style.display = CSSStyle.displayType.INLINE;
+        text1.style.display = CSSStyle.DisplayType.INLINE;
         text1.text = "  This text is ";
         RenderNode b = new RenderNode(HTMLElements.B);
-        b.style.display = CSSStyle.displayType.INLINE;
+        b.style.display = CSSStyle.DisplayType.INLINE;
         RenderNode text2 = new RenderNode(HTMLElements.TEXT);
-        text2.style.display = CSSStyle.displayType.INLINE;
+        text2.style.display = CSSStyle.DisplayType.INLINE;
         text2.text = "bold";
         RenderNode text3 = new RenderNode(HTMLElements.TEXT);
-        text3.style.display = CSSStyle.displayType.INLINE;
+        text3.style.display = CSSStyle.DisplayType.INLINE;
         text3.text = " text for testing. ";
 
         div.addChildren(text1, b, text3);
@@ -357,28 +357,28 @@ public class RenderTreeGeneratorTest {
         // "  Start <b>b1</b>, <b>b2</b>, and <b>b3</b>"
         RenderNode div = new RenderNode(HTMLElements.DIV);
         RenderNode text1 = new RenderNode(HTMLElements.TEXT);
-        text1.style.display = CSSStyle.displayType.INLINE;
+        text1.style.display = CSSStyle.DisplayType.INLINE;
         text1.text = "  Start ";
         RenderNode b1 = new RenderNode(HTMLElements.B);
-        b1.style.display = CSSStyle.displayType.INLINE;
+        b1.style.display = CSSStyle.DisplayType.INLINE;
         RenderNode text2 = new RenderNode(HTMLElements.TEXT);
-        text2.style.display = CSSStyle.displayType.INLINE;
+        text2.style.display = CSSStyle.DisplayType.INLINE;
         text2.text = "b1";
         RenderNode text3 = new RenderNode(HTMLElements.TEXT);
-        text3.style.display = CSSStyle.displayType.INLINE;
+        text3.style.display = CSSStyle.DisplayType.INLINE;
         text3.text = ", ";
         RenderNode b2 = new RenderNode(HTMLElements.B);
-        b2.style.display = CSSStyle.displayType.INLINE;
+        b2.style.display = CSSStyle.DisplayType.INLINE;
         RenderNode text4 = new RenderNode(HTMLElements.TEXT);
-        text4.style.display = CSSStyle.displayType.INLINE;
+        text4.style.display = CSSStyle.DisplayType.INLINE;
         text4.text = "b2";
         RenderNode text5 = new RenderNode(HTMLElements.TEXT);
-        text5.style.display = CSSStyle.displayType.INLINE;
+        text5.style.display = CSSStyle.DisplayType.INLINE;
         text5.text = ", and ";
         RenderNode b3 = new RenderNode(HTMLElements.B);
-        b3.style.display = CSSStyle.displayType.INLINE;
+        b3.style.display = CSSStyle.DisplayType.INLINE;
         RenderNode text6 = new RenderNode(HTMLElements.TEXT);
-        text6.style.display = CSSStyle.displayType.INLINE;
+        text6.style.display = CSSStyle.DisplayType.INLINE;
         text6.text = "b3";
 
         div.addChildren(text1, b1, text3, b2, text5, b3);
@@ -402,11 +402,11 @@ public class RenderTreeGeneratorTest {
         RenderNode body = new RenderNode(HTMLElements.BODY);
         RenderNode div = new RenderNode(HTMLElements.DIV);
         RenderNode text1 = new RenderNode(HTMLElements.TEXT);
-        text1.style.display = CSSStyle.displayType.INLINE;
+        text1.style.display = CSSStyle.DisplayType.INLINE;
         RenderNode span1 = new RenderNode(HTMLElements.SPAN);
-        span1.style.display = CSSStyle.displayType.INLINE;
+        span1.style.display = CSSStyle.DisplayType.INLINE;
         RenderNode text2 = new RenderNode(HTMLElements.TEXT);
-        text2.style.display = CSSStyle.displayType.INLINE;
+        text2.style.display = CSSStyle.DisplayType.INLINE;
 
         body.addChildren(div, text1, span1);
         span1.addChild(text2);
