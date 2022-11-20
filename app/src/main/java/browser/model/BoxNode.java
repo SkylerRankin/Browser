@@ -5,16 +5,25 @@ import static browser.css.CSSStyle.DisplayType;
 import java.util.ArrayList;
 import java.util.List;
 
+import browser.css.CSSStyle;
+
 public class BoxNode {
 
     public int id;
     public List<BoxNode> children = new ArrayList<>();
     public BoxNode parent = null;
     public int renderNodeId = -1;
+    public CSSStyle correspondingStyle = new CSSStyle();
     public DisplayType outerDisplayType;
     public DisplayType innerDisplayType;
     public boolean isAnonymous = false;
     public boolean isTextNode = false;
+    public float x;
+    public float y;
+    public float width;
+    public float height;
+    public Float maxWidth = null;
+    public Float maxHeight = null;
 
     @Override
     public boolean equals(Object o) {
@@ -53,6 +62,18 @@ public class BoxNode {
             string.append(child.toRecursiveString(padding + "  "));
         }
         return string.toString();
+    }
+
+    public boolean isDescendantOf(int id) {
+        if (parent == null) {
+            return false;
+        }
+
+        if (parent.id == id) {
+            return true;
+        }
+
+        return parent.isDescendantOf(id);
     }
 
 }

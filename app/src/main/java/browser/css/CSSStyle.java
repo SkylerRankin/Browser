@@ -39,6 +39,8 @@ public class CSSStyle {
         INLINE_BLOCK, INLINE_TABLE, INLINE_FLEX, INLINE_GRID;
     }
 
+    public enum PositionType { STATIC, RELATIVE, ABSOLUTE, FIXED, STICKY }
+
     public static enum fontStyleType {NORMAL, ITALIC, ITALICS}
 
     public static enum fontWeightType {NORMAL, BOLD, OTHER}
@@ -71,6 +73,8 @@ public class CSSStyle {
     // Some display types, such as list-item, set a third value in addition to the inner and outer display types. This
     // auxiliary display type captures that information.
     public DisplayType auxiliaryDisplay;
+
+    public PositionType position = PositionType.STATIC;
     
     public String fontFamily = "Times New Roman";
     public int fontSize = 12;
@@ -99,6 +103,7 @@ public class CSSStyle {
     public Float width = null;
     
     public Float maxWidth = null;
+    public Float maxHeight = null;
     
 //    public textDecorationType textDecoration = textDecorationType.NONE;
     
@@ -292,6 +297,7 @@ public class CSSStyle {
             case "margin-bottom":       marginBottom = parseDimension(value);  break;
             case "margin-left":         marginLeft = parseDimension(value);  break;
             case "max-width":           maxWidth = (float) parseDimension(value); break;
+            case "max-height":          maxHeight = (float) parseDimension(value); break;
             case "padding":             paddingTop = parseDimension(value);
                                         paddingRight = parseDimension(value);
                                         paddingBottom = parseDimension(value);
@@ -300,6 +306,7 @@ public class CSSStyle {
             case "padding-right":       paddingRight = parseDimension(value);  break;
             case "padding-bottom":      paddingBottom = parseDimension(value);  break;
             case "padding-left":        paddingLeft = parseDimension(value);  break;
+            case "position":            position = PositionType.valueOf(value.toLowerCase()); break;
             case "text-align":          textAlign = textAlignType.valueOf(value.toUpperCase()); break;
             case "width":               width = (float) parseDimension(value);
                                         widthType = value.contains("%") ?

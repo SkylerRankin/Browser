@@ -2,10 +2,7 @@ package browser.layout;
 
 import static browser.css.CSSStyle.DisplayType;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import browser.model.BoxNode;
 import browser.model.RenderNode;
@@ -60,6 +57,7 @@ public class BoxTreeGenerator {
         BoxNode boxNode = new BoxNode();
         boxNode.id = nextBoxNodeId++;
         boxNode.renderNodeId = renderNode.id;
+        boxNode.correspondingStyle = renderNode.style;
         boxNode.parent = parentBoxNode;
         if (parentBoxNode != null) {
             parentBoxNode.children.add(boxNode);
@@ -75,68 +73,40 @@ public class BoxTreeGenerator {
         return boxNode;
     }
 
-    private void addAnonymousBoxes(BoxNode boxNode) {
-        if (boxNode.children.size() == 0) {
+    private void addAnonymousBoxes(BoxNode rootBoxNode) {
+        if (rootBoxNode.children.size() == 0) {
             return;
         }
 
-        List<BoxNode> blockChildren = boxNode.children.stream().filter(node -> !node.isTextNode).filter(node -> node.outerDisplayType.equals(DisplayType.BLOCK)).toList();
-        List<BoxNode> inlineChildren = boxNode.children.stream().filter(node -> !node.isTextNode).filter(node -> node.outerDisplayType.equals(DisplayType.INLINE)).toList();
-        List<BoxNode> textChildren = boxNode.children.stream().filter(node -> node.isTextNode).toList();
+        List<BoxNode> queue = new ArrayList<>();
+        queue.add(rootBoxNode);
 
-        if (boxNode.outerDisplayType.equals(DisplayType.BLOCK)) {
-            if (blockChildren.size() > 0 && (inlineChildren.size() > 0 || textChildren.size() > 0)) {
-                // The block level element contains both inline (or text) and block elements.
+        while (!queue.isEmpty()) {
+            BoxNode boxNode = queue.remove(0);
+            boolean validDisplayConfiguration = boxHasValidDisplayConfiguration(boxNode);
+            if (!validDisplayConfiguration) {
                 addAnonymousBlockBoxes(boxNode);
-            }
-        } else if (boxNode.outerDisplayType.equals(DisplayType.INLINE)) {
-            if (blockChildren.size() > 0) {
-                // The inline level element contains block level elements.
-                addAnonymousBlockBoxes(boxNode);
-            }
-        }
 
-        for (BoxNode childBoxNode : boxNode.children) {
-            addAnonymousBoxes(childBoxNode);
+                // Adding anonymous boxes may have invalidated the box consistency in the parent box. Reset the queue
+                // so that the parent is reprocessed.
+                if (boxNode.parent != null) {
+                    List<BoxNode> newQueueContent = queue.stream()
+                            .filter(b -> b.isDescendantOf(boxNode.parent.id)).toList();
+                    queue.clear();
+                    queue.add(0, boxNode.parent);
+                    queue.addAll(newQueueContent);
+                }
+            }
+            queue.addAll(boxNode.children);
         }
     }
 
     private void addAnonymousBlockBoxes(BoxNode boxNode) {
-        System.out.printf("\naddAnonymousBlockBoxes, box node %d\n", boxNode.id);
         BoxNode baseBoxNode = boxNode;
 
         // If the root box is inline, it needs to be wrapped in an anonymous block box.
         if (boxNode.outerDisplayType.equals(DisplayType.INLINE)) {
-            BoxNode containingAnonymousBox;
-
-            containingAnonymousBox = new BoxNode();
-            containingAnonymousBox.id = nextBoxNodeId++;
-            containingAnonymousBox.outerDisplayType = DisplayType.BLOCK;
-            containingAnonymousBox.innerDisplayType = DisplayType.FLOW;
-            containingAnonymousBox.parent = boxNode.parent;
-            containingAnonymousBox.isAnonymous = true;
-            System.out.printf("Adding anon box since root is inline. id=%d\n", containingAnonymousBox.id);
-
-            // Add the anonymous containing box to the parent's children, and remove the inline box.
-            BoxNode parent = boxNode.parent;
-            if (parent == null) {
-                // If the parent is null, then the base box node is the root box node. Since the parent of this node
-                // is being changed, the root itself is updated to the containing anonymous box, since this now
-                // contains the previous root box node.
-                rootBoxNode = containingAnonymousBox;
-            } else {
-                int indexInParent = parent.children.indexOf(boxNode);
-                parent.children.add(indexInParent, containingAnonymousBox);
-                parent.children.remove(boxNode);
-            }
-
-            // Add the inline box's children to the new containing box, cutting the inline box out of the box tree.
-            containingAnonymousBox.children.addAll(boxNode.children);
-            for (BoxNode child : boxNode.children) {
-                child.parent = containingAnonymousBox;
-            }
-
-            baseBoxNode = containingAnonymousBox;
+            baseBoxNode = wrapInlineElementWithAnonymousBlockBox(boxNode);
         }
 
         List<BoxNode> currentInlineBoxes = new ArrayList<>();
@@ -157,7 +127,6 @@ public class BoxTreeGenerator {
                     anonymousBox.outerDisplayType = DisplayType.BLOCK;
                     anonymousBox.innerDisplayType = DisplayType.FLOW;
                     anonymousBox.isAnonymous = true;
-                    System.out.printf("Adding anon box to hold inline boxes. id=%d\n", anonymousBox.id);
 
                     for (BoxNode inlineBox : currentInlineBoxes) {
                         inlineBox.parent = anonymousBox;
@@ -173,7 +142,7 @@ public class BoxTreeGenerator {
             } else if (childNode.outerDisplayType.equals(DisplayType.INLINE)) {
                 currentInlineBoxes.add(childNode);
             } else {
-                // TODO what if its neither inline no block?
+                // TODO what if its neither inline nor block?
                 newChildren.add(childNode);
             }
         }
@@ -182,6 +151,56 @@ public class BoxTreeGenerator {
             child.parent = baseBoxNode;
         }
         baseBoxNode.children = newChildren;
+    }
+
+    private BoxNode wrapInlineElementWithAnonymousBlockBox(BoxNode inlineBox) {
+        BoxNode containingAnonymousBox = new BoxNode();
+        containingAnonymousBox.id = nextBoxNodeId++;
+        containingAnonymousBox.outerDisplayType = DisplayType.BLOCK;
+        containingAnonymousBox.innerDisplayType = DisplayType.FLOW;
+        containingAnonymousBox.parent = inlineBox.parent;
+        containingAnonymousBox.isAnonymous = true;
+
+        // Add the anonymous containing box to the parent's children, and remove the inline box.
+        BoxNode parent = inlineBox.parent;
+        if (parent == null) {
+            // If the parent is null, then the base box node is the root box node. Since the parent of this node
+            // is being changed, the root itself is updated to the containing anonymous box, since this now
+            // contains the previous root box node.
+            rootBoxNode = containingAnonymousBox;
+        } else {
+            int indexInParent = parent.children.indexOf(inlineBox);
+            parent.children.add(indexInParent, containingAnonymousBox);
+            parent.children.remove(inlineBox);
+        }
+
+        // Add the inline box's children to the new containing box, cutting the inline box out of the box tree.
+        containingAnonymousBox.children.addAll(inlineBox.children);
+        for (BoxNode child : inlineBox.children) {
+            child.parent = containingAnonymousBox;
+        }
+
+        return containingAnonymousBox;
+    }
+
+    private boolean boxHasValidDisplayConfiguration(BoxNode boxNode) {
+        List<BoxNode> blockChildren = boxNode.children.stream().filter(node -> !node.isTextNode).filter(node -> node.outerDisplayType.equals(DisplayType.BLOCK)).toList();
+        List<BoxNode> inlineChildren = boxNode.children.stream().filter(node -> !node.isTextNode).filter(node -> node.outerDisplayType.equals(DisplayType.INLINE)).toList();
+        List<BoxNode> textChildren = boxNode.children.stream().filter(node -> node.isTextNode).toList();
+
+        if (boxNode.outerDisplayType.equals(DisplayType.BLOCK)) {
+            if (blockChildren.size() > 0 && (inlineChildren.size() > 0 || textChildren.size() > 0)) {
+                // The block level element contains both inline (or text) and block elements.
+                return false;
+            }
+        } else if (boxNode.outerDisplayType.equals(DisplayType.INLINE)) {
+            if (blockChildren.size() > 0) {
+                // The inline level element contains block level elements.
+                return false;
+            }
+        }
+
+        return true;
     }
 
 }

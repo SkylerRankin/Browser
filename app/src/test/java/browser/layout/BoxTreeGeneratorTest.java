@@ -360,17 +360,17 @@ public class BoxTreeGeneratorTest {
      *
      * <div1>
      *     <anonymous1>
-     *         <anonymous2>
+     *         <anonymous3>
      *             <div2></div2>
-     *             <anonymous3>
+     *             <anonymous4>
      *                 <span2></span2>
-     *             </anonymous3>
-     *         </anonymous2>
+     *             </anonymous4>
+     *         </anonymous3>
      *     </anonymous1>
      *     <div3>
-     *         <anonymous4>
+     *         <anonymous2>
      *             <span3></span3>
-     *         </anonymous4>
+     *         </anonymous2>
      *         <div4></div4>
      *     </div3>
      * </div1>
@@ -477,35 +477,170 @@ public class BoxTreeGeneratorTest {
         anonymousBox2.outerDisplayType = DisplayType.BLOCK;
         anonymousBox2.innerDisplayType = DisplayType.FLOW;
         anonymousBox2.isAnonymous = true;
-        anonymousBox2.parent = anonymousBox1;
+        anonymousBox2.parent = div3Box;
 
         BoxNode anonymousBox3 = new BoxNode();
         anonymousBox3.id = 9;
         anonymousBox3.outerDisplayType = DisplayType.BLOCK;
         anonymousBox3.innerDisplayType = DisplayType.FLOW;
         anonymousBox3.isAnonymous = true;
-        anonymousBox3.parent = anonymousBox2;
+        anonymousBox3.parent = anonymousBox1;
 
         BoxNode anonymousBox4 = new BoxNode();
         anonymousBox4.id = 10;
         anonymousBox4.outerDisplayType = DisplayType.BLOCK;
         anonymousBox4.innerDisplayType = DisplayType.FLOW;
         anonymousBox4.isAnonymous = true;
-        anonymousBox4.parent = div3Box;
+        anonymousBox4.parent = anonymousBox3;
 
-        div2Box.parent = anonymousBox2;
-        span2Box.parent = anonymousBox3;
-        span3Box.parent = anonymousBox4;
+        div2Box.parent = anonymousBox3;
+        span2Box.parent = anonymousBox4;
+        span3Box.parent = anonymousBox2;
 
         div1Box.children.addAll(List.of(anonymousBox1, div3Box));
-        anonymousBox1.children.add(anonymousBox2);
-        anonymousBox2.children.addAll(List.of(div2Box, anonymousBox3));
-        anonymousBox3.children.add(span2Box);
-        div3Box.children.addAll(List.of(anonymousBox4, div4Box));
-        anonymousBox4.children.add(span3Box);
+        anonymousBox1.children.add(anonymousBox3);
+        anonymousBox3.children.addAll(List.of(div2Box, anonymousBox4));
+        anonymousBox4.children.add(span2Box);
+        div3Box.children.addAll(List.of(anonymousBox2, div4Box));
+        anonymousBox2.children.add(span3Box);
 
         assertEquals(div1Box, rootBoxNode);
+    }
 
+    /**
+     * This test covers the situation of an inline box containing a block box, but the inline is itself contained
+     * in several inline boxes.
+     *
+     * <div1>
+     *     <span1>
+     *         <span2>
+     *             some text
+     *             <span3>
+     *                 <div2></div>
+     *             </span3>
+     *         </span2>
+     *     </span1>
+     * </div1>
+     *
+     * -->
+     *
+     * <div1>
+     *     <anon4>
+     *         <anon3>
+     *             <anon2>
+     *                 some text
+     *             </anon2>
+     *             <anon1>
+     *                 <div2></div2>
+     *             </anon1>
+     *         </anon3>
+     *     </anon4>
+     * </div1>
+     *
+     */
+    @Test
+    public void generatedNestedInlinesContainingBlock() {
+        RenderNode div1 = new RenderNode(HTMLElements.DIV);
+        div1.id = 0;
+        div1.style.outerDisplay = DisplayType.BLOCK;
+        div1.style.innerDisplay = DisplayType.FLOW;
+
+        RenderNode span1 = new RenderNode(HTMLElements.SPAN);
+        span1.id = 1;
+        span1.style.outerDisplay = DisplayType.INLINE;
+        span1.style.innerDisplay = DisplayType.FLOW;
+        span1.parent = div1;
+
+        RenderNode span2 = new RenderNode(HTMLElements.SPAN);
+        span2.id = 2;
+        span2.style.outerDisplay = DisplayType.INLINE;
+        span2.style.innerDisplay = DisplayType.FLOW;
+        span2.parent = span1;
+
+        RenderNode text = new RenderNode(HTMLElements.TEXT);
+        text.id = 3;
+        text.style.outerDisplay = DisplayType.INLINE;
+        text.style.innerDisplay = DisplayType.FLOW;
+        text.parent = span2;
+
+        RenderNode span3 = new RenderNode(HTMLElements.SPAN);
+        span3.id = 4;
+        span3.style.outerDisplay = DisplayType.INLINE;
+        span3.style.innerDisplay = DisplayType.FLOW;
+        span3.parent = span2;
+
+        RenderNode div2 = new RenderNode(HTMLElements.DIV);
+        div2.id = 5;
+        div2.style.outerDisplay = DisplayType.BLOCK;
+        div2.style.innerDisplay = DisplayType.FLOW;
+        div2.parent = span3;
+
+        div1.children.add(span1);
+        span1.children.add(span2);
+        span2.children.addAll(List.of(text, span3));
+        span3.children.add(div2);
+
+        BoxTreeGenerator boxTreeGenerator = new BoxTreeGenerator();
+        BoxNode rootBoxNode = boxTreeGenerator.generate(div1);
+
+        BoxNode div1Box = new BoxNode();
+        div1Box.id = 0;
+        div1Box.renderNodeId = div1.id;
+        div1Box.outerDisplayType = DisplayType.BLOCK;
+        div1Box.innerDisplayType = DisplayType.FLOW;
+
+        BoxNode textBox = new BoxNode();
+        textBox.id = text.id;
+        textBox.renderNodeId = text.id;
+        textBox.outerDisplayType = DisplayType.INLINE;
+        textBox.innerDisplayType = DisplayType.FLOW;
+        textBox.isAnonymous = true;
+        textBox.isTextNode = true;
+
+        BoxNode div2Box = new BoxNode();
+        div2Box.id = div2.id;
+        div2Box.renderNodeId = div2.id;
+        div2Box.outerDisplayType = DisplayType.BLOCK;
+        div2Box.innerDisplayType = DisplayType.FLOW;
+
+        BoxNode anonymousBox1 = new BoxNode();
+        anonymousBox1.id = 6;
+        anonymousBox1.outerDisplayType = DisplayType.BLOCK;
+        anonymousBox1.innerDisplayType = DisplayType.FLOW;
+        anonymousBox1.isAnonymous = true;
+
+        BoxNode anonymousBox3 = new BoxNode();
+        anonymousBox3.id = 7;
+        anonymousBox3.outerDisplayType = DisplayType.BLOCK;
+        anonymousBox3.innerDisplayType = DisplayType.FLOW;
+        anonymousBox3.isAnonymous = true;
+
+        BoxNode anonymousBox2 = new BoxNode();
+        anonymousBox2.id = 8;
+        anonymousBox2.outerDisplayType = DisplayType.BLOCK;
+        anonymousBox2.innerDisplayType = DisplayType.FLOW;
+        anonymousBox2.isAnonymous = true;
+
+        BoxNode anonymousBox4 = new BoxNode();
+        anonymousBox4.id = 9;
+        anonymousBox4.outerDisplayType = DisplayType.BLOCK;
+        anonymousBox4.innerDisplayType = DisplayType.FLOW;
+        anonymousBox4.isAnonymous = true;
+
+        div2Box.parent = anonymousBox1;
+        textBox.parent = anonymousBox2;
+        anonymousBox1.parent = anonymousBox3;
+        anonymousBox2.parent = anonymousBox3;
+        anonymousBox3.parent = anonymousBox4;
+        anonymousBox4.parent = div1Box;
+
+        anonymousBox1.children.add(div2Box);
+        anonymousBox2.children.add(textBox);
+        anonymousBox3.children.addAll(List.of(anonymousBox2, anonymousBox1));
+        anonymousBox4.children.add(anonymousBox3);
+        div1Box.children.add(anonymousBox4);
+
+        assertEquals(div1Box, rootBoxNode);
     }
 
 }
