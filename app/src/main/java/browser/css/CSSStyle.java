@@ -18,7 +18,7 @@ public class CSSStyle {
     private final Map<String, String> properties = new HashMap<>();
     private final Map<String, CSSRulePrecedent> precedents = new HashMap<>();
 
-    public static enum dimensionType {PIXEL, PERCENTAGE}
+    public enum DimensionType { PIXEL, PERCENTAGE }
 
     // Reference for all display type combinations: https://developer.mozilla.org/en-US/docs/Web/CSS/display.
     public enum DisplayType {
@@ -81,7 +81,7 @@ public class CSSStyle {
     public fontStyleType fontStyle = fontStyleType.NORMAL;
     public fontWeightType fontWeight = fontWeightType.NORMAL;
     
-    public dimensionType heightType = dimensionType.PIXEL;
+    public DimensionType heightType = DimensionType.PIXEL;
     public Float height = null;
     
     public marginSizeType marginType = marginSizeType.PIXEL;
@@ -99,11 +99,13 @@ public class CSSStyle {
     
     public textAlignType textAlign = textAlignType.LEFT;
     
-    public dimensionType widthType = dimensionType.PIXEL;
+    public DimensionType widthType = DimensionType.PIXEL;
     public Float width = null;
     
     public Float maxWidth = null;
+    public DimensionType maxWidthType = DimensionType.PIXEL;
     public Float maxHeight = null;
+    public DimensionType maxHeightType = DimensionType.PIXEL;
     
 //    public textDecorationType textDecoration = textDecorationType.NONE;
     
@@ -281,8 +283,8 @@ public class CSSStyle {
             case "font-weight":         fontWeight = fontWeightType.valueOf(value.toUpperCase()); break;
             case "height":              height = (float) parseDimension(value);
                                         heightType = value.contains("%") ?
-                                                dimensionType.PERCENTAGE :
-                                                dimensionType.PIXEL; break;
+                                                DimensionType.PERCENTAGE :
+                                                DimensionType.PIXEL; break;
             case "margin":              marginType = value.equals("auto") ?
                                                 marginSizeType.AUTO :
                                                 marginSizeType.PIXEL;
@@ -296,8 +298,14 @@ public class CSSStyle {
             case "margin-right":        marginRight = parseDimension(value);  break;
             case "margin-bottom":       marginBottom = parseDimension(value);  break;
             case "margin-left":         marginLeft = parseDimension(value);  break;
-            case "max-width":           maxWidth = (float) parseDimension(value); break;
-            case "max-height":          maxHeight = (float) parseDimension(value); break;
+            case "max-width":           maxWidth = (float) parseDimension(value);
+                                        maxWidthType = value.contains("%") ?
+                                            DimensionType.PERCENTAGE :
+                                            DimensionType.PIXEL; break;
+            case "max-height":          maxHeight = (float) parseDimension(value);
+                                        maxHeightType = value.contains("%") ?
+                                            DimensionType.PERCENTAGE :
+                                            DimensionType.PIXEL; break;
             case "padding":             paddingTop = parseDimension(value);
                                         paddingRight = parseDimension(value);
                                         paddingBottom = parseDimension(value);
@@ -310,8 +318,8 @@ public class CSSStyle {
             case "text-align":          textAlign = textAlignType.valueOf(value.toUpperCase()); break;
             case "width":               width = (float) parseDimension(value);
                                         widthType = value.contains("%") ?
-                                                dimensionType.PERCENTAGE :
-                                                dimensionType.PIXEL; break;
+                                                DimensionType.PERCENTAGE :
+                                                DimensionType.PIXEL; break;
             }
         }
     }

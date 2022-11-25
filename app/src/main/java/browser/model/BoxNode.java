@@ -5,25 +5,52 @@ import static browser.css.CSSStyle.DisplayType;
 import java.util.ArrayList;
 import java.util.List;
 
-import browser.css.CSSStyle;
-
 public class BoxNode {
+
+    public static int nextId = 0;
 
     public int id;
     public List<BoxNode> children = new ArrayList<>();
     public BoxNode parent = null;
     public int renderNodeId = -1;
-    public CSSStyle correspondingStyle = new CSSStyle();
+    public int inlineFormattingContextId = -1;
+    public int blockFormattingContextId = -1;
+    public RenderNode correspondingRenderNode = null;
     public DisplayType outerDisplayType;
     public DisplayType innerDisplayType;
     public boolean isAnonymous = false;
     public boolean isTextNode = false;
-    public float x;
-    public float y;
-    public float width;
-    public float height;
+    public Float x = null;
+    public Float y = null;
+    public Float width = null;
+    public Float height = null;
     public Float maxWidth = null;
     public Float maxHeight = null;
+    public int textStartIndex;
+    public int textEndIndex;
+
+    public BoxNode() {}
+
+    public BoxNode(BoxNode other) {
+        this.id = nextId++;
+        this.parent = other.parent;
+        this.renderNodeId = other.renderNodeId;
+        this.inlineFormattingContextId = other.inlineFormattingContextId;
+        this.blockFormattingContextId = other.blockFormattingContextId;
+        this.correspondingRenderNode = other.correspondingRenderNode;
+        this.outerDisplayType = other.outerDisplayType;
+        this.innerDisplayType = other.innerDisplayType;
+        this.isAnonymous = other.isAnonymous;
+        this.isTextNode = other.isTextNode;
+        this.x = other.x;
+        this.y = other.y;
+        this.width = other.width;
+        this.height = other.height;
+        this.maxWidth = other.maxWidth;
+        this.maxHeight = other.maxHeight;
+        this.textStartIndex = other.textStartIndex;
+        this.textEndIndex = other.textEndIndex;
+    }
 
     @Override
     public boolean equals(Object o) {

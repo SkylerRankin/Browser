@@ -13,7 +13,6 @@ public class BoxTreeGenerator {
     private final Map<Integer, BoxNode> renderNodeIdToBoxNode = new HashMap<>();
     private final Map<Integer, Integer> boxNodeIdToRenderNodeId = new HashMap<>();
     private BoxNode rootBoxNode;
-    private int nextBoxNodeId = 0;
 
     // Public methods
 
@@ -55,9 +54,9 @@ public class BoxTreeGenerator {
 
     private BoxNode createBoxNode(RenderNode renderNode, BoxNode parentBoxNode) {
         BoxNode boxNode = new BoxNode();
-        boxNode.id = nextBoxNodeId++;
+        boxNode.id = BoxNode.nextId++;
         boxNode.renderNodeId = renderNode.id;
-        boxNode.correspondingStyle = renderNode.style;
+        boxNode.correspondingRenderNode = renderNode;
         boxNode.parent = parentBoxNode;
         if (parentBoxNode != null) {
             parentBoxNode.children.add(boxNode);
@@ -123,7 +122,7 @@ public class BoxTreeGenerator {
 
                 if (currentInlineBoxes.size() > 0) {
                     BoxNode anonymousBox = new BoxNode();
-                    anonymousBox.id = nextBoxNodeId++;
+                    anonymousBox.id = BoxNode.nextId++;
                     anonymousBox.outerDisplayType = DisplayType.BLOCK;
                     anonymousBox.innerDisplayType = DisplayType.FLOW;
                     anonymousBox.isAnonymous = true;
@@ -155,7 +154,7 @@ public class BoxTreeGenerator {
 
     private BoxNode wrapInlineElementWithAnonymousBlockBox(BoxNode inlineBox) {
         BoxNode containingAnonymousBox = new BoxNode();
-        containingAnonymousBox.id = nextBoxNodeId++;
+        containingAnonymousBox.id = BoxNode.nextId++;
         containingAnonymousBox.outerDisplayType = DisplayType.BLOCK;
         containingAnonymousBox.innerDisplayType = DisplayType.FLOW;
         containingAnonymousBox.parent = inlineBox.parent;

@@ -17,13 +17,12 @@ public class BoxLayoutCalculator {
     
     private final Map<Integer, RenderNode> lastAddedChildMap;
     private final Map<Integer, RenderNode> parentNodeMap;
-    private final TextSplitter textSplitter;
-        
+
     public BoxLayoutCalculator(Map<Integer, RenderNode> parentNodeMap, float screenWidth) {
         this.screenWidth = screenWidth;
         this.parentNodeMap = parentNodeMap;
         this.lastAddedChildMap = new HashMap<>();
-        textSplitter = new TextSplitter(parentNodeMap);
+//        textSplitter = new TextSplitter(parentNodeMap);
     }
     
     public void clearBoxBounds(RenderNode root) {
@@ -56,13 +55,13 @@ public class BoxLayoutCalculator {
 
         if (parent != null) {
             if (root.text != null) {
-                Vector2 textSize = TextDimensionCalculator.getTextDimension(root.text, root.style);
-                root.box.width = textSize.x;
-                root.box.height = textSize.y;
-                if (parent.children.size() == 1 && parent.style.display.equals(CSSStyle.DisplayType.INLINE)) {
-                    parent.box.width = textSize.x;
-                    parent.box.height = textSize.y;
-                }
+//                Vector2 textSize = TextDimensionCalculator.getTextDimension(root.text, root.style);
+//                root.box.width = textSize.x;
+//                root.box.height = textSize.y;
+//                if (parent.children.size() == 1 && parent.style.display.equals(CSSStyle.DisplayType.INLINE)) {
+//                    parent.box.width = textSize.x;
+//                    parent.box.height = textSize.y;
+//                }
             } else if (root.type.equals(HTMLElements.IMG)) {
                 root.box.fixedWidth = true;
                 root.box.fixedHeight = true;
@@ -72,13 +71,13 @@ public class BoxLayoutCalculator {
             
             if (root.style.height != null && root.style.display != CSSStyle.DisplayType.INLINE) {
                 root.box.fixedHeight = true;
-                if (root.style.heightType.equals(CSSStyle.dimensionType.PIXEL)) root.box.height = root.style.height;
-                if (root.style.heightType.equals(CSSStyle.dimensionType.PERCENTAGE) && parent.box.fixedHeight) {
+                if (root.style.heightType.equals(CSSStyle.DimensionType.PIXEL)) root.box.height = root.style.height;
+                if (root.style.heightType.equals(CSSStyle.DimensionType.PERCENTAGE) && parent.box.fixedHeight) {
                     float availableHeight = parent.box.height
                             - parent.style.paddingTop - parent.style.paddingBottom
                             - root.style.marginTop - root.style.marginBottom;
                     root.box.height = root.style.height / 100.0f * availableHeight;
-                    root.style.heightType = CSSStyle.dimensionType.PIXEL;
+                    root.style.heightType = CSSStyle.DimensionType.PIXEL;
                     // This might be wrong. What if the parent does not have a fixed height, but child has a percentage.
                     // Is that even possible?
                 }
@@ -86,21 +85,21 @@ public class BoxLayoutCalculator {
             
             if (root.style.width != null && root.style.display != CSSStyle.DisplayType.INLINE) {
                 root.box.fixedWidth = true;
-                if (root.style.widthType.equals(CSSStyle.dimensionType.PIXEL)) root.box.width = root.style.width;
-                if (root.style.widthType.equals(CSSStyle.dimensionType.PERCENTAGE) && parent.box.fixedWidth) {
+                if (root.style.widthType.equals(CSSStyle.DimensionType.PIXEL)) root.box.width = root.style.width;
+                if (root.style.widthType.equals(CSSStyle.DimensionType.PERCENTAGE) && parent.box.fixedWidth) {
                     float availableWidth = parent.box.width
                             - parent.style.paddingLeft - parent.style.paddingRight
                             - root.style.marginLeft - root.style.marginRight;
                     root.box.width = root.style.width / 100.0f * availableWidth;
-                    root.style.widthType = CSSStyle.dimensionType.PIXEL;
+                    root.style.widthType = CSSStyle.DimensionType.PIXEL;
                 }
             }
             
         }
 
-        for (RenderNode child : root.children) {
-            setBoxBounds(child);
-        }
+//        for (RenderNode child : root.children) {
+//            setBoxBounds(child);
+//        }
 
     }
     
@@ -179,7 +178,7 @@ public class BoxLayoutCalculator {
         } else {
             if (root.box.fixedWidth) {
                 // Percentage based width depends on parent, only if parent specifies a width
-                if (root.style.widthType.equals(CSSStyle.dimensionType.PERCENTAGE) && parent.maxWidth != null) {
+                if (root.style.widthType.equals(CSSStyle.DimensionType.PERCENTAGE) && parent.maxWidth != null) {
                     float parentAvailableWidth = parent.maxWidth - parent.style.paddingLeft - parent.style.paddingRight - root.style.marginLeft - root.style.marginRight;
                     root.maxWidth = parentAvailableWidth * root.box.width / 100f;
                 } else {
@@ -191,7 +190,7 @@ public class BoxLayoutCalculator {
 
             if (root.box.fixedHeight) {
                 // Percentage based height depends on parent, only if parent specifies a height
-                if (root.style.heightType.equals(CSSStyle.dimensionType.PERCENTAGE) && parent.maxHeight != null) {
+                if (root.style.heightType.equals(CSSStyle.DimensionType.PERCENTAGE) && parent.maxHeight != null) {
                     float parentAvailableHeight = parent.maxHeight - parent.style.paddingTop - parent.style.paddingBottom - root.style.marginTop - root.style.marginBottom;
                     root.maxHeight = parentAvailableHeight * root.box.width / 100f;
                 } else {
@@ -276,7 +275,7 @@ public class BoxLayoutCalculator {
             float availableWidth = parent.maxWidth - (parent.style.paddingLeft + node.style.marginLeft + node.style.marginRight + parent.style.paddingRight);
 
             if (node.type.equals("text") && availableWidth < node.box.width) {
-                textSplitter.splitTextNode(node, parent, availableWidth, availableWidth);
+//                textSplitter.splitTextNode(node, parent, availableWidth, availableWidth);
             }
 
             // If this is the first child, then it gets added in the top right of parent
@@ -298,27 +297,27 @@ public class BoxLayoutCalculator {
                         return new Vector2(x, lastAddedChild.box.y);
                     } else if (node.type.equals("text")) {
                         float availableWidth = boundary - x;
-                        if (textSplitter.canBreakText(node, availableWidth)) {
-                            float fullWidth = parent.maxWidth - (parent.style.paddingLeft + node.style.marginLeft + node.style.marginRight + parent.style.paddingRight);
-                            boolean firstUsed = textSplitter.splitTextNode(node, parent, availableWidth, fullWidth);
-                            // Place first line of text on current line if possible; fall through to block if not
-                            if (firstUsed) {
-                                return new Vector2(x, lastAddedChild.box.y);
-                            }
-                        }
+//                        if (textSplitter.canBreakText(node, availableWidth)) {
+//                            float fullWidth = parent.maxWidth - (parent.style.paddingLeft + node.style.marginLeft + node.style.marginRight + parent.style.paddingRight);
+//                            boolean firstUsed = textSplitter.splitTextNode(node, parent, availableWidth, fullWidth);
+//                            // Place first line of text on current line if possible; fall through to block if not
+//                            if (firstUsed) {
+//                                return new Vector2(x, lastAddedChild.box.y);
+//                            }
+//                        }
                     } else {
                         // Determine if this inline element can be split in order to fit the available width. This is possible
                         // if the element contains text that can itself be split.
                         // TODO: textSplitter.canBreakNode needs to be made more flexible. It expects a single text child node
                         // and does not support nested spans.
                         float availableWidth = boundary - x;
-                        if (textSplitter.canBreakNode(node, availableWidth)) {
-                            float fullWidth = parent.maxWidth - (parent.style.paddingLeft + node.style.marginLeft + node.style.marginRight + parent.style.paddingRight);
-                            boolean firstUsed = textSplitter.splitContainingTextNode(node, parent, availableWidth, fullWidth);
-                            if (firstUsed) {
-                                return new Vector2(x, lastAddedChild.box.y);
-                            }
-                        }
+//                        if (textSplitter.canBreakNode(node, availableWidth)) {
+//                            float fullWidth = parent.maxWidth - (parent.style.paddingLeft + node.style.marginLeft + node.style.marginRight + parent.style.paddingRight);
+//                            boolean firstUsed = textSplitter.splitContainingTextNode(node, parent, availableWidth, fullWidth);
+//                            if (firstUsed) {
+//                                return new Vector2(x, lastAddedChild.box.y);
+//                            }
+//                        }
                     }
                 case BLOCK:
                 default:
@@ -353,14 +352,14 @@ public class BoxLayoutCalculator {
      */
     public void finalizeDimensions(RenderNode root) {
         RenderNode parent = parentNodeMap.get(root.id);
-        if (root.style.widthType.equals(CSSStyle.dimensionType.PERCENTAGE) && parent != null) {
+        if (root.style.widthType.equals(CSSStyle.DimensionType.PERCENTAGE) && parent != null) {
             root.box.fixedWidth = true;
             root.box.width = (parent.box.width * root.style.width / 100.0f)
                     - root.style.marginLeft - root.style.marginRight
                     - parent.style.paddingLeft - parent.style.paddingRight;
         }
 
-        if (root.style.heightType.equals(CSSStyle.dimensionType.PERCENTAGE)) {
+        if (root.style.heightType.equals(CSSStyle.DimensionType.PERCENTAGE)) {
             root.box.fixedHeight = true;
             root.box.height = (parent.box.height * root.style.height / 100.0f)
                     - root.style.marginTop - root.style.marginBottom
@@ -375,7 +374,7 @@ public class BoxLayoutCalculator {
             root.style.marginRight = (int) (availableWidth / 2f);
         } else if (root.style.marginType.equals(CSSStyle.marginSizeType.AUTO) && root.style.width != null) {
             float width = root.style.width;
-            if (root.style.widthType.equals(CSSStyle.dimensionType.PERCENTAGE)) {
+            if (root.style.widthType.equals(CSSStyle.DimensionType.PERCENTAGE)) {
                 width = (float) (screenWidth * width / 100.0);
             }
             if (width > root.style.maxWidth) {

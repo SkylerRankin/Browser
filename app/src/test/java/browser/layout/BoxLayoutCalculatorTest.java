@@ -321,15 +321,15 @@ public class BoxLayoutCalculatorTest {
         nodeB.box.fixedWidth = true;
         nodeB.box.fixedHeight = true;
         nodeB.box.width = 50;
-        nodeB.style.widthType = CSSStyle.dimensionType.PERCENTAGE;
+        nodeB.style.widthType = CSSStyle.DimensionType.PERCENTAGE;
         nodeB.box.height = 100;
 
         nodeC.box.fixedWidth = true;
         nodeC.box.width = 20;
-        nodeC.style.widthType = CSSStyle.dimensionType.PERCENTAGE;
+        nodeC.style.widthType = CSSStyle.DimensionType.PERCENTAGE;
         nodeC.box.fixedHeight = true;
         nodeC.box.height = 10;
-        nodeC.style.heightType = CSSStyle.dimensionType.PERCENTAGE;
+        nodeC.style.heightType = CSSStyle.DimensionType.PERCENTAGE;
 
         nodeA.style.paddingTop = 5;
         nodeA.style.paddingBottom = 5;
