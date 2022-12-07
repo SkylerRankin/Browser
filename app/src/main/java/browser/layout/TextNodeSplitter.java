@@ -5,6 +5,7 @@ import java.util.List;
 
 import browser.css.CSSStyle;
 import browser.model.BoxNode;
+import browser.model.Vector2;
 
 public class TextNodeSplitter {
 
@@ -70,6 +71,82 @@ public class TextNodeSplitter {
         }
 
         return createBoxesForLines(boxNode, lineRanges);
+    }
+
+    /**
+     * Updates a text node's textStartIndex and textEndIndex properties such that the text in that range fits within
+     * the provided width. If there is remaining text that does not fit, a new box node is returned that has its
+     * textStartIndex and textEndIndex set to contain the remaining text. If the text does fit, or the box node has
+     * no text, null is returned and the original box node is not modified.
+     * @param boxNode       The text node to fit to the provided width.
+     * @param availableWidth        The width that the text should fit.
+     * @return      A box node with text index ranges containing the remaining text, or null if no split is required.
+     */
+    public BoxNode fitNodeToWidth(BoxNode boxNode, float availableWidth) {
+        if (!boxNode.isTextNode) {
+            return null;
+        }
+
+        CSSStyle style = boxNode.correspondingRenderNode.style;
+        String text = boxNode.correspondingRenderNode.text.substring(boxNode.textStartIndex, boxNode.textEndIndex);
+        Vector2 textDimension = textDimensionCalculator.getDimension(text, style);
+        if (textDimension.x <= availableWidth) {
+            // The text fits in the available space. No extra node is needed.
+            return null;
+        }
+
+        if (!text.contains("\s")) {
+            // The text cannot be split to fit the space.
+            return null;
+        }
+
+        float spaceWidth = textDimensionCalculator.getDimension(" ", style).x;
+        final int startIndex = boxNode.textStartIndex;
+        int currentEndIndex = boxNode.textStartIndex;
+        float currentWidth = 0;
+        String[] words = text.split("\s");
+        for (String word : words) {
+            float wordWidth = textDimensionCalculator.getDimension(word, style).x;
+            float newCurrentWidth = currentWidth + (currentEndIndex == startIndex ? 0 : spaceWidth) + wordWidth;
+            if (newCurrentWidth <= availableWidth) {
+                currentWidth = newCurrentWidth;
+                currentEndIndex += word.length() + (currentEndIndex == startIndex ? 0 : 1);
+            } else {
+                break;
+            }
+        }
+
+        BoxNode newBoxNode = new BoxNode(boxNode);
+        newBoxNode.textStartIndex = currentEndIndex + 1;
+        newBoxNode.textEndIndex = boxNode.textEndIndex;
+
+        boxNode.textEndIndex = currentEndIndex;
+
+        return newBoxNode;
+    }
+
+    /**
+     * Checks if a text node can be split to fit a given width. This only checks if the first split will work, meaning
+     * the text will be broken at the space character closest to but not exceeding the given width. The text remaining
+     * after the split may or may not be able to fit as well.
+     * @param boxNode       The text box to check.
+     * @param availableWidth        The available width for the text.
+     * @return      True if the box's text can be split to fit into the width.
+     */
+    public boolean canSplitNodeToFitWidth(BoxNode boxNode, float availableWidth) {
+        if (!boxNode.isTextNode) {
+            return false;
+        } else {
+            String text = boxNode.correspondingRenderNode.text.substring(boxNode.textStartIndex, boxNode.textEndIndex);
+            int spaceIndex = text.indexOf(" ");
+            if (spaceIndex == -1) {
+                return false;
+            }
+
+            String firstWord = text.substring(0, spaceIndex);
+            float firstWordWidth = textDimensionCalculator.getDimension(firstWord, boxNode.correspondingRenderNode.style).x;
+            return firstWordWidth <= availableWidth;
+        }
     }
 
     private List<BoxNode> createBoxesForLines(BoxNode root, List<Range> lineRanges) {

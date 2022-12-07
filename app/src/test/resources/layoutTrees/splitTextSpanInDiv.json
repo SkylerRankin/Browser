@@ -1,0 +1,204 @@
+{
+  "config": {
+    "screenWidth": 50,
+    "letterWidth": 1,
+    "letterHeight": 10
+  },
+  "renderTree": {
+    "root": {
+      "refName": "div",
+      "template": "div",
+      "children": [
+        {
+          "refName": "span1",
+          "template": "span",
+          "children": [
+            {
+              "refName": "text1",
+              "template": "text",
+              "text": "A block formatting context (BFC) is a part of a visual CSS rendering of a web page. It's the region in which the layout of block boxes occurs and in which floats interact with other elements."
+            }
+          ]
+        },
+        {
+          "refName": "span2",
+          "template": "span",
+          "children": [
+            {
+              "refName": "text2",
+              "template": "text",
+              "text": "Formatting contexts affect layout, but typically, we create a new block formatting context for the positioning and clearing floats rather than changing the layout, because an element that establishes a new block formatting context will:"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "boxTree": {
+    "root": {
+      "template": "block",
+      "correspondingRenderNode": "div",
+      "children": [
+        {
+          "template": "inline",
+          "correspondingRenderNode": "span1",
+          "children": [
+            {
+              "correspondingRenderNode": "text1",
+              "template": "text",
+              "textStartIndex": 0,
+              "textEndIndex": 191
+            }
+          ]
+        },
+        {
+          "template": "inline",
+          "correspondingRenderNode": "span2",
+          "children": [
+            {
+              "correspondingRenderNode": "text2",
+              "template": "text",
+              "textStartIndex": 0,
+              "textEndIndex": 236
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "boxTreeAfterLayout": {
+    "root": {
+      "template": "block",
+      "correspondingRenderNode": "div",
+      "x": 0, "y": 0, "width": 50, "height": 90,
+      "children": [
+        {
+          "template": "inline",
+          "correspondingRenderNode": "span1",
+          "x": 0, "y": 0, "width": 47, "height": 10,
+          "children": [
+            {
+              "correspondingRenderNode": "text1",
+              "x": 0, "y": 0, "width": 47, "height": 10,
+              "template": "text",
+              "textStartIndex": 0,
+              "textEndIndex": 47
+            }
+          ]
+        },
+        {
+          "template": "inline",
+          "correspondingRenderNode": "span1",
+          "x": 0, "y": 10, "width": 44, "height": 10,
+          "children": [
+            {
+              "correspondingRenderNode": "text1",
+              "x": 0, "y": 10, "width": 44, "height": 10,
+              "template": "text",
+              "textStartIndex": 48,
+              "textEndIndex": 92
+            }
+          ]
+        },
+        {
+          "template": "inline",
+          "correspondingRenderNode": "span1",
+          "x": 0, "y": 20, "width": 48, "height": 10,
+          "children": [
+            {
+              "correspondingRenderNode": "text1",
+              "x": 0, "y": 20, "width": 48, "height": 10,
+              "template": "text",
+              "textStartIndex": 93,
+              "textEndIndex": 141
+            }
+          ]
+        },
+        {
+          "template": "inline",
+          "correspondingRenderNode": "span1",
+          "x": 0, "y": 30, "width": 49, "height": 10,
+          "children": [
+            {
+              "correspondingRenderNode": "text1",
+              "x": 0, "y": 30, "width": 49, "height": 10,
+              "template": "text",
+              "textStartIndex": 142,
+              "textEndIndex": 191
+            }
+          ]
+        },
+        {
+          "template": "inline",
+          "correspondingRenderNode": "span2",
+          "x": 0, "y": 40, "width": 49, "height": 10,
+          "children": [
+            {
+              "correspondingRenderNode": "text2",
+              "x": 0, "y": 40, "width": 49, "height": 10,
+              "template": "text",
+              "textStartIndex": 0,
+              "textEndIndex": 49
+            }
+          ]
+        },
+        {
+          "template": "inline",
+          "correspondingRenderNode": "span2",
+          "x": 0, "y": 50, "width": 48, "height": 10,
+          "children": [
+            {
+              "correspondingRenderNode": "text2",
+              "x": 0, "y": 50, "width": 48, "height": 10,
+              "template": "text",
+              "textStartIndex": 50,
+              "textEndIndex": 98
+            }
+          ]
+        },
+        {
+          "template": "inline",
+          "correspondingRenderNode": "span2",
+          "x": 0, "y": 60, "width": 43, "height": 10,
+          "children": [
+            {
+              "correspondingRenderNode": "text2",
+              "x": 0, "y": 60, "width": 43, "height": 10,
+              "template": "text",
+              "textStartIndex": 99,
+              "textEndIndex": 142
+            }
+          ]
+        },
+        {
+          "template": "inline",
+          "correspondingRenderNode": "span2",
+          "x": 0, "y": 70, "width": 44, "height": 10,
+          "children": [
+            {
+              "correspondingRenderNode": "text2",
+              "x": 0, "y": 70, "width": 44, "height": 10,
+              "template": "text",
+              "textStartIndex": 143,
+              "textEndIndex": 187
+            }
+          ]
+        },
+        {
+          "template": "inline",
+          "correspondingRenderNode": "span2",
+          "x": 0, "y": 80, "width": 48, "height": 10,
+          "children": [
+            {
+              "correspondingRenderNode": "text2",
+              "x": 0, "y": 80, "width": 48, "height": 10,
+              "template": "text",
+              "textStartIndex": 188,
+              "textEndIndex": 236
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

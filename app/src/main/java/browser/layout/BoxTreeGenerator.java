@@ -67,6 +67,8 @@ public class BoxTreeGenerator {
 
         if (boxNode.isTextNode) {
             boxNode.isAnonymous = true;
+            boxNode.textStartIndex = 0;
+            boxNode.textEndIndex = boxNode.correspondingRenderNode.text.length();
         }
 
         return boxNode;

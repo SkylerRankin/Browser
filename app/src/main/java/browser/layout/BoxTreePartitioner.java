@@ -30,7 +30,14 @@ public class BoxTreePartitioner {
                 int parentIndex = currentBox.parent.parent.children.indexOf(currentBox.parent);
                 BoxNode newBoxNode = new BoxNode(currentBox.parent);
                 newBoxNode.children = partitions.get(1);
+                for (BoxNode childBoxNode : newBoxNode.children) {
+                    childBoxNode.parent = newBoxNode;
+                }
                 newBoxNode.parent = currentBox.parent.parent;
+                newBoxNode.x = null;
+                newBoxNode.y = null;
+                newBoxNode.width = null;
+                newBoxNode.height = null;
                 currentBox.parent.parent.children.add(parentIndex + 1, newBoxNode);
 
                 currentBox = newBoxNode;

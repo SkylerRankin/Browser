@@ -1,0 +1,107 @@
+{
+  "config": {
+    "screenWidth": 100,
+    "letterWidth": 1,
+    "letterHeight": 10
+  },
+  "renderTree": {
+    "root": {
+      "refName": "div",
+      "template": "div",
+      "style": { "width": 8, "widthType": "PERCENTAGE" },
+      "children": [
+        {
+          "refName": "p1",
+          "template": "div",
+          "children": [
+            {
+              "refName": "text1",
+              "template": "text",
+              "text": "first-text"
+            }
+          ]
+        },
+        {
+          "refName": "p2",
+          "template": "div",
+          "children": [
+            {
+              "refName": "text2",
+              "template": "text",
+              "text": "second-text"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "boxTree": {
+    "root": {
+      "template": "block",
+      "correspondingRenderNode": "div",
+      "children": [
+        {
+          "template": "block",
+          "correspondingRenderNode": "p1",
+          "children": [
+            {
+              "correspondingRenderNode": "text1",
+              "template": "text",
+              "textStartIndex": 0,
+              "textEndIndex": 10
+            }
+          ]
+        },
+        {
+          "template": "block",
+          "correspondingRenderNode": "p2",
+          "children": [
+            {
+              "correspondingRenderNode": "text2",
+              "template": "text",
+              "textStartIndex": 0,
+              "textEndIndex": 11
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "boxTreeAfterLayout": {
+    "root": {
+      "template": "block",
+      "correspondingRenderNode": "div",
+      "x": 0, "y": 0, "width": 8, "height": 20,
+      "children": [
+        {
+          "template": "block",
+          "correspondingRenderNode": "p1",
+          "x": 0, "y": 0, "width": 8, "height": 10,
+          "children": [
+            {
+              "correspondingRenderNode": "text1",
+              "x": 0, "y": 0, "width": 10, "height": 10,
+              "template": "text",
+              "textStartIndex": 0,
+              "textEndIndex": 10
+            }
+          ]
+        },
+        {
+          "template": "block",
+          "correspondingRenderNode": "p2",
+          "x": 0, "y": 10, "width": 8, "height": 10,
+          "children": [
+            {
+              "correspondingRenderNode": "text2",
+              "x": 0, "y": 10, "width": 11, "height": 10,
+              "template": "text",
+              "textStartIndex": 0,
+              "textEndIndex": 11
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

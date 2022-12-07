@@ -1,12 +1,13 @@
 package browser.layout;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Objects;
 
 import browser.app.Pipeline;
 import browser.model.BoxNode;
@@ -95,6 +96,111 @@ public class TextNodeSplitterTest {
         assertEquals("second", renderNode.text.substring(results.get(2).textStartIndex, results.get(2).textEndIndex));
         assertEquals("word third", renderNode.text.substring(results.get(3).textStartIndex, results.get(3).textEndIndex));
         assertEquals("word", renderNode.text.substring(results.get(4).textStartIndex, results.get(4).textEndIndex));
+    }
+
+    @Test
+    public void fitNodeToWidth_notATextNode() {
+        BoxNode boxNode = new BoxNode();
+        boxNode.isTextNode = false;
+        boxNode.textStartIndex = 0;
+        boxNode.textEndIndex = 123;
+        BoxNode result = textNodeSplitter.fitNodeToWidth(boxNode, 10);
+
+        assertNull(result);
+        assertEquals(0, boxNode.textStartIndex);
+        assertEquals(123, boxNode.textEndIndex);
+    }
+
+    @Test
+    public void fitNodeToWidth_textFits() {
+        RenderNode renderNode = new RenderNode(HTMLElements.TEXT);
+        renderNode.text = "some text";
+        BoxNode boxNode = new BoxNode();
+        boxNode.isTextNode = true;
+        boxNode.correspondingRenderNode = renderNode;
+        boxNode.textStartIndex = 0;
+        boxNode.textEndIndex = 9;
+        float width = 10;
+        BoxNode result = textNodeSplitter.fitNodeToWidth(boxNode, width);
+
+        assertNull(result);
+        assertEquals(0, boxNode.textStartIndex);
+        assertEquals(9, boxNode.textEndIndex);
+    }
+
+    @Test
+    public void fitNodeToWidth_textTooLarge() {
+        RenderNode renderNode = new RenderNode(HTMLElements.TEXT);
+        renderNode.text = "some text that does not fit";
+        BoxNode boxNode = new BoxNode();
+        boxNode.isTextNode = true;
+        boxNode.correspondingRenderNode = renderNode;
+        boxNode.textStartIndex = 0;
+        boxNode.textEndIndex = 27;
+        float width = 10;
+        BoxNode result = textNodeSplitter.fitNodeToWidth(boxNode, width);
+
+        assertEquals(0, boxNode.textStartIndex);
+        assertEquals(9, boxNode.textEndIndex);
+
+        assertNotNull(result);
+        assertEquals(10, result.textStartIndex);
+        assertEquals(27, result.textEndIndex);
+    }
+
+    @Test
+    public void fitNodeToWidth_largeWordAtBreak() {
+        RenderNode renderNode = new RenderNode(HTMLElements.TEXT);
+        renderNode.text = "this is-a-large-word-that-cant-be broken.";
+        BoxNode boxNode = new BoxNode();
+        boxNode.isTextNode = true;
+        boxNode.correspondingRenderNode = renderNode;
+        boxNode.textStartIndex = 0;
+        boxNode.textEndIndex = 41;
+        float width = 10;
+        BoxNode result = textNodeSplitter.fitNodeToWidth(boxNode, width);
+
+        assertEquals(0, boxNode.textStartIndex);
+        assertEquals(4, boxNode.textEndIndex);
+
+        assertNotNull(result);
+        assertEquals(5, result.textStartIndex);
+        assertEquals(41, result.textEndIndex);
+    }
+
+    @Test
+    public void fitNodeToWidth_noSplitAndDoesNotFit() {
+        RenderNode renderNode = new RenderNode(HTMLElements.TEXT);
+        renderNode.text = "this-is-a-large-word-that-cant-be-broken.";
+        BoxNode boxNode = new BoxNode();
+        boxNode.isTextNode = true;
+        boxNode.correspondingRenderNode = renderNode;
+        boxNode.textStartIndex = 0;
+        boxNode.textEndIndex = 41;
+        float width = 10;
+        BoxNode result = textNodeSplitter.fitNodeToWidth(boxNode, width);
+
+        assertEquals(0, boxNode.textStartIndex);
+        assertEquals(41, boxNode.textEndIndex);
+        assertNull(result);
+    }
+
+    @Test
+    public void canSplitNodeToFitWidth() {
+        RenderNode renderNode = new RenderNode(HTMLElements.TEXT);
+        renderNode.text = "this is some text";
+        BoxNode boxNode = new BoxNode();
+        boxNode.isTextNode = true;
+        boxNode.correspondingRenderNode = renderNode;
+        boxNode.textStartIndex = 0;
+        boxNode.textEndIndex = 17;
+
+        assertTrue(textNodeSplitter.canSplitNodeToFitWidth(boxNode, 4));
+        assertTrue(textNodeSplitter.canSplitNodeToFitWidth(boxNode, 10));
+        assertTrue(textNodeSplitter.canSplitNodeToFitWidth(boxNode, 100));
+
+        assertFalse(textNodeSplitter.canSplitNodeToFitWidth(boxNode, 1));
+        assertFalse(textNodeSplitter.canSplitNodeToFitWidth(boxNode, 3));
     }
 
 }

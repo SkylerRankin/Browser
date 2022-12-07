@@ -9,6 +9,8 @@ import browser.css.CSSStyle;
 import browser.parser.RenderTreeGenerator;
 
 public class RenderNode {
+
+    public static int nextId = 0;
     
     public int id;
     // Depth of 0 is the root body element.
@@ -56,7 +58,7 @@ public class RenderNode {
         type = node.type;
         text = node.text;
         depth = node.depth;
-        id = RenderTreeGenerator.getNextID();
+        id = nextId++;
         children = new ArrayList<RenderNode>();
         box = new Box();
         cssAttribute = node.cssAttribute;

@@ -1,0 +1,106 @@
+{
+  "config": {
+    "screenWidth": 20,
+    "letterWidth": 1,
+    "letterHeight": 10
+  },
+  "renderTree": {
+    "root": {
+      "refName": "div",
+      "template": "div",
+      "children": [
+        {
+          "refName": "span1",
+          "template": "span",
+          "children": [
+            {
+              "refName": "text1",
+              "template": "text",
+              "text": "some text to filled"
+            }
+          ]
+        },
+        {
+          "refName": "span2",
+          "template": "span",
+          "children": [
+            {
+              "refName": "text2",
+              "template": "text",
+              "text": "new line text"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "boxTree": {
+    "root": {
+      "template": "block",
+      "correspondingRenderNode": "div",
+      "children": [
+        {
+          "template": "inline",
+          "correspondingRenderNode": "span1",
+          "children": [
+            {
+              "correspondingRenderNode": "text1",
+              "template": "text",
+              "textStartIndex": 0,
+              "textEndIndex": 19
+            }
+          ]
+        },
+        {
+          "template": "inline",
+          "correspondingRenderNode": "span2",
+          "children": [
+            {
+              "correspondingRenderNode": "text2",
+              "template": "text",
+              "textStartIndex": 0,
+              "textEndIndex": 13
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "boxTreeAfterLayout": {
+    "root": {
+      "template": "block",
+      "correspondingRenderNode": "div",
+      "x": 0, "y": 0, "width": 20, "height": 20,
+      "children": [
+        {
+          "template": "inline",
+          "correspondingRenderNode": "span1",
+          "x": 0, "y": 0, "width": 19, "height": 10,
+          "children": [
+            {
+              "correspondingRenderNode": "text1",
+              "x": 0, "y": 0, "width": 19, "height": 10,
+              "textStartIndex": 0,
+              "textEndIndex": 19,
+              "template": "text"
+            }
+          ]
+        },
+        {
+          "template": "inline",
+          "correspondingRenderNode": "span2",
+          "x": 0, "y": 10, "width": 13, "height": 10,
+          "children": [
+            {
+              "correspondingRenderNode": "text2",
+              "x": 0, "y": 10, "width": 13, "height": 10,
+              "textStartIndex": 0,
+              "textEndIndex": 13,
+              "template": "text"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

@@ -16,8 +16,11 @@ public class BoxLayoutGenerator {
     private float screenWidth;
     private final Map<Integer, InlineFormattingContext> inlineFormattingContexts = new HashMap<>();
     private final Map<Integer, BlockFormattingContext> blockFormattingContexts = new HashMap<>();
-    private final TextDimensionCalculator textDimensionCalculator = new TextDimensionCalculator();
-    private final InlineLayoutFormatter inlineLayoutFormatter = new InlineLayoutFormatter(textDimensionCalculator);
+    private final InlineLayoutFormatter inlineLayoutFormatter;
+
+    public BoxLayoutGenerator(final TextDimensionCalculator textDimensionCalculator) {
+        inlineLayoutFormatter = new InlineLayoutFormatter(textDimensionCalculator);
+    }
 
     // Public methods
 
@@ -35,10 +38,9 @@ public class BoxLayoutGenerator {
         setInlineFormattingContexts(rootBoxNode);
         setBlockFormattingContexts(rootBoxNode);
 
-        // Set the position and width of the root node.
+        // Set the position of the root node.
         rootBoxNode.x = 0f;
         rootBoxNode.y = 0f;
-        rootBoxNode.width = screenWidth;
 
         // Layout all box nodes within the root.
         setBoxLayout(rootBoxNode);
@@ -56,8 +58,9 @@ public class BoxLayoutGenerator {
      * @param boxNode       The box to set the fixed size of.
      */
     private void setFixedSizes(BoxNode boxNode) {
-        // Only allow fixed sizes on block boxes.
-        boolean fixedSizeAllowed = boxNode.outerDisplayType.equals(CSSStyle.DisplayType.BLOCK);
+        // Only allow fixed sizes on block boxes or boxes that establish new block context.
+        boolean fixedSizeAllowed = boxNode.outerDisplayType.equals(CSSStyle.DisplayType.BLOCK) ||
+                boxNode.innerDisplayType.equals(DisplayType.FLOW_ROOT);
 
         if (fixedSizeAllowed) {
             CSSStyle style = boxNode.correspondingRenderNode.style;
@@ -173,16 +176,21 @@ public class BoxLayoutGenerator {
                 .filter(b -> b.correspondingRenderNode.style.position == PositionType.STATIC ||
                         b.correspondingRenderNode.style.position == PositionType.RELATIVE)
                 .toList();
-        DisplayType childrenDisplayType = childrenInNormalFlow.get(0).outerDisplayType;
-        if (childrenDisplayType.equals(DisplayType.INLINE)) {
-            int id;
-            if (boxNode.parent != null && boxNode.parent.outerDisplayType.equals(DisplayType.INLINE)) {
-                id = boxNode.parent.inlineFormattingContextId;
-            } else {
-                id = inlineFormattingContexts.size();
-                inlineFormattingContexts.put(id, new InlineFormattingContext(boxNode.maxWidth, boxNode.id));
+
+        if (childrenInNormalFlow.size() == 0) {
+            boxNode.inlineFormattingContextId = boxNode.parent == null ? -1 : boxNode.parent.inlineFormattingContextId;
+        } else {
+            DisplayType childrenDisplayType = childrenInNormalFlow.get(0).outerDisplayType;
+            if (childrenDisplayType.equals(DisplayType.INLINE)) {
+                int id;
+                if (boxNode.parent != null && boxNode.parent.inlineFormattingContextId != -1) {
+                    id = boxNode.parent.inlineFormattingContextId;
+                } else {
+                    id = inlineFormattingContexts.size();
+                    inlineFormattingContexts.put(id, new InlineFormattingContext(id, boxNode.width, boxNode.id));
+                }
+                boxNode.inlineFormattingContextId = id;
             }
-            boxNode.inlineFormattingContextId = id;
         }
 
         for (BoxNode child : boxNode.children) {
@@ -201,7 +209,7 @@ public class BoxLayoutGenerator {
         int id;
         // TODO add in all other cases of new BFCs.
         if (boxNode.innerDisplayType.equals(DisplayType.FLOW_ROOT) || boxNode.parent == null) {
-            id = inlineFormattingContexts.size();
+            id = blockFormattingContexts.size();
             blockFormattingContexts.put(id, new BlockFormattingContext());
         } else {
             id = boxNode.parent.blockFormattingContextId;
@@ -240,6 +248,7 @@ public class BoxLayoutGenerator {
      * @param boxNode       The box node to layout.
      */
     private void setBoxLayout(BoxNode boxNode) {
+        System.out.printf("\n\nSet Box Layout for %s:\n", boxNode);
         if (boxNode.children.size() == 0) {
             return;
         }
@@ -280,27 +289,43 @@ public class BoxLayoutGenerator {
             context.setLastPlacedBoxForId(parentBox.id, childBox);
         }
 
-        float maxY = 0;
-        for (BoxNode childBox : parentBox.children) {
-            maxY = Math.max(maxY, childBox.y);
-        }
-        // TODO include padding, margins
-        parentBox.height = maxY - parentBox.y;
+        parentBox.height = getHeightFromChildren(parentBox);
     }
 
     private void layoutInlineBoxes(BoxNode parentBox) {
-        InlineFormattingContext context = inlineFormattingContexts.get(parentBox.id);
+        InlineFormattingContext context = inlineFormattingContexts.get(parentBox.inlineFormattingContextId);
         if (parentBox.id == context.contextRootId) {
+            // TODO maybe can initialize this before
             context.initialize(parentBox);
         }
 
-        for (BoxNode childBox : parentBox.children) {
+        for (int i = 0; i < parentBox.children.size(); i++) {
+            BoxNode childBox = parentBox.children.get(i);
+            System.out.printf("calling layout on child %d, index %d\n", childBox.id, i);
             inlineLayoutFormatter.placeBox(childBox, context);
-            setBoxLayout(childBox);
+            System.out.printf("after formatting, children of %d are %s\n", parentBox.id, parentBox.children.stream().map(boxNode -> boxNode.id).toList());
+            setBoxLayout(parentBox.children.get(i));
         }
 
-        // At this point, all the children should be placed, so can determine the size of the box?
-        // TODO set the height based on the line boxes
+        // If this is an inline element without a predefined width, its width is the necessary size to contain its
+        // children.
+        if (parentBox.outerDisplayType.equals(DisplayType.INLINE) && !parentBox.innerDisplayType.equals(DisplayType.FLOW_ROOT)) {
+            parentBox.width = inlineLayoutFormatter.getWidth(parentBox);
+        }
+        parentBox.height = getHeightFromChildren(parentBox);
+    }
+
+    private float getHeightFromChildren(BoxNode boxNode) {
+        if (boxNode.children.size() == 0) {
+            return 0;
+        }
+
+        float maxY = 0;
+        for (BoxNode childBox : boxNode.children) {
+            maxY = Math.max(maxY, childBox.y + childBox.height);
+        }
+
+        return maxY - boxNode.y;
     }
 
 }

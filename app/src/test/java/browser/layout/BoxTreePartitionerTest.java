@@ -1,6 +1,7 @@
 package browser.layout;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import java.util.List;
 
@@ -30,14 +31,34 @@ public class BoxTreePartitionerTest {
         node1.parent = root;
         node2.parent = root;
 
-        InlineFormattingContext context = new InlineFormattingContext(0, 0);
+        InlineFormattingContext context = new InlineFormattingContext(0, 0, 0);
         boxTreePartitioner.partition(node2, context);
 
         assertEquals(2, root.children.size());
         assertEquals(1, root.children.get(0).id);
         assertEquals(2, root.children.get(1).id);
+
+        assertEquals(0, root.children.get(0).parent.id);
+        assertEquals(0, root.children.get(1).parent.id);
     }
 
+    /**
+     * root (0)
+     *      node11 (1)
+     *          node21 (2)
+     *          node22 (3)
+     *      node12 (4)
+     *          node23 (5)
+     * -->
+     * root (0)
+     *      node11 (1)
+     *          node21 (2)
+     *      new node (6)
+     *          node22 (3)
+     *      node12 (4)
+     *          node23 (5)
+     *
+     */
     @Test
     public void singleSplitTest() {
         BoxNode root = new BoxNode();
@@ -65,25 +86,60 @@ public class BoxTreePartitionerTest {
         node22.parent = node11;
         node23.parent = node12;
 
-        InlineFormattingContext context = new InlineFormattingContext(0, 0);
+        InlineFormattingContext context = new InlineFormattingContext(0, 0, 0);
         boxTreePartitioner.partition(node22, context);
 
-        assertEquals(3, root.children.size());
+        assertNull(root.parent);
 
+        assertEquals(3, root.children.size());
         assertEquals(1, root.children.get(0).id);
         assertEquals(6, root.children.get(1).id);
         assertEquals(2, root.children.get(2).id);
+        assertEquals(0, root.children.get(0).parent.id);
+        assertEquals(0, root.children.get(1).parent.id);
+        assertEquals(0, root.children.get(2).parent.id);
 
         assertEquals(1, root.children.get(0).children.size());
         assertEquals(3, root.children.get(0).children.get(0).id);
+        assertEquals(1, root.children.get(0).children.get(0).parent.id);
 
         assertEquals(1, root.children.get(1).children.size());
         assertEquals(4, root.children.get(1).children.get(0).id);
+        assertEquals(6, root.children.get(1).children.get(0).parent.id);
 
         assertEquals(1, root.children.get(2).children.size());
         assertEquals(5, root.children.get(2).children.get(0).id);
+        assertEquals(2, root.children.get(2).children.get(0).parent.id);
     }
 
+    /**
+     * root (0)
+     *      node11 (1)
+     *          node21 (4)
+     *              node31 (5)
+     *                  node41 (7)
+     *                  node42 (8)
+     *                  node43 (9)
+     *                      node51 (10)
+     *              node32 (6)
+     *      node12 (2)
+     *      node13 (3)
+     * -->
+     * root (0)
+     *      node11 (1)
+     *      node12 (2)
+     *          node21 (4)
+     *              node31 (5)
+     *                  node41 (7)
+     *                  node42 (8)
+     *      new node (13)
+     *          new node (12)
+     *              new node (11)
+     *                  node43 (9)
+     *                      node51 (10)
+     *              node32 (6)
+     *      node13 (3)
+     */
     @Test
     public void multipleSplitTest() {
         BoxNode root = new BoxNode();
@@ -133,24 +189,33 @@ public class BoxTreePartitionerTest {
         node43.parent = node31;
         node51.parent = node43;
 
-        InlineFormattingContext context = new InlineFormattingContext(0, 0);
+        InlineFormattingContext context = new InlineFormattingContext(0, 0, 0);
         boxTreePartitioner.partition(node51, context);
 
         // Depth 0
+        assertNull(root.parent);
         assertEquals(4, root.children.size());
         assertEquals(1, root.children.get(0).id);
         assertEquals(2, root.children.get(1).id);
         assertEquals(13, root.children.get(2).id);
         assertEquals(3, root.children.get(3).id);
 
+        assertEquals(0, root.children.get(0).parent.id);
+        assertEquals(0, root.children.get(1).parent.id);
+        assertEquals(0, root.children.get(2).parent.id);
+        assertEquals(0, root.children.get(3).parent.id);
+
+
         // Depth 1
         assertEquals(0, root.children.get(0).children.size());
 
         assertEquals(1, root.children.get(1).children.size());
         assertEquals(4, root.children.get(1).children.get(0).id);
+        assertEquals(2, root.children.get(1).children.get(0).parent.id);
 
         assertEquals(1, root.children.get(2).children.size());
         assertEquals(12, root.children.get(2).children.get(0).id);
+        assertEquals(13, root.children.get(2).children.get(0).parent.id);
 
         assertEquals(0, root.children.get(3).children.size());
 
@@ -158,11 +223,15 @@ public class BoxTreePartitionerTest {
         BoxNode child10 = root.children.get(1).children.get(0);
         assertEquals(1, child10.children.size());
         assertEquals(5, child10.children.get(0).id);
+        assertEquals(4, child10.children.get(0).parent.id);
 
         BoxNode child20 = root.children.get(2).children.get(0);
         assertEquals(2, child20.children.size());
         assertEquals(11, child20.children.get(0).id);
         assertEquals(6, child20.children.get(1).id);
+
+        assertEquals(12, child20.children.get(0).parent.id);
+        assertEquals(12, child20.children.get(1).parent.id);
 
         // Depth 3
         BoxNode child100 = root.children.get(1).children.get(0).children.get(0);
@@ -170,9 +239,14 @@ public class BoxTreePartitionerTest {
         assertEquals(7, child100.children.get(0).id);
         assertEquals(8, child100.children.get(1).id);
 
+        assertEquals(5, child100.children.get(0).parent.id);
+        assertEquals(5, child100.children.get(1).parent.id);
+
         BoxNode child200 = root.children.get(2).children.get(0).children.get(0);
         assertEquals(1, child200.children.size());
         assertEquals(9, child200.children.get(0).id);
+
+        assertEquals(11, child200.children.get(0).parent.id);
 
         BoxNode child201 = root.children.get(2).children.get(0).children.get(1);
         assertEquals(0, child201.children.size());
@@ -187,8 +261,28 @@ public class BoxTreePartitionerTest {
         BoxNode child2000 = root.children.get(2).children.get(0).children.get(0).children.get(0);
         assertEquals(1, child2000.children.size());
         assertEquals(10, child2000.children.get(0).id);
+        assertEquals(9, child2000.children.get(0).parent.id);
     }
 
+    /**
+     * root (0)
+     *      node11 (1)
+     *      node12 (2)
+     *          node21 (3)
+     *          node22 (4)
+     *              node31 (5)
+     *              node32 (6)
+     * -->
+     * root (0)
+     *      node11 (1)
+     *      node12 (2)
+     *          node21 (3)
+     *          node22 (4)
+     *              node31 (5)
+     *      new node (8)
+     *          new node (7)
+     *              node32 (6)
+     */
     @Test
     public void rightBinaryTreeTest() {
         BoxNode root = new BoxNode();
@@ -222,14 +316,19 @@ public class BoxTreePartitionerTest {
         node31.parent = node22;
         node32.parent = node22;
 
-        InlineFormattingContext context = new InlineFormattingContext(0, 0);
+        InlineFormattingContext context = new InlineFormattingContext(0, 0, 0);
         boxTreePartitioner.partition(node32, context);
 
         // Depth 0
+        assertNull(root.parent);
         assertEquals(3, root.children.size());
         assertEquals(1, root.children.get(0).id);
         assertEquals(2, root.children.get(1).id);
         assertEquals(8, root.children.get(2).id);
+
+        assertEquals(0, root.children.get(0).parent.id);
+        assertEquals(0, root.children.get(1).parent.id);
+        assertEquals(0, root.children.get(2).parent.id);
 
         // Depth 1
         assertEquals(0, root.children.get(0).children.size());
@@ -237,18 +336,23 @@ public class BoxTreePartitionerTest {
         assertEquals(2, root.children.get(1).children.size());
         assertEquals(3, root.children.get(1).children.get(0).id);
         assertEquals(4, root.children.get(1).children.get(1).id);
+        assertEquals(2, root.children.get(1).children.get(0).parent.id);
+        assertEquals(2, root.children.get(1).children.get(1).parent.id);
 
         assertEquals(1, root.children.get(2).children.size());
         assertEquals(7, root.children.get(2).children.get(0).id);
+        assertEquals(8, root.children.get(2).children.get(0).parent.id);
 
         // Depth 2
         assertEquals(0, root.children.get(1).children.get(0).children.size());
 
         assertEquals(1, root.children.get(1).children.get(1).children.size());
         assertEquals(5, root.children.get(1).children.get(1).children.get(0).id);
+        assertEquals(4, root.children.get(1).children.get(1).children.get(0).parent.id);
 
         assertEquals(1, root.children.get(2).children.get(0).children.size());
         assertEquals(6, root.children.get(2).children.get(0).children.get(0).id);
+        assertEquals(7, root.children.get(2).children.get(0).children.get(0).parent.id);
     }
 
 }

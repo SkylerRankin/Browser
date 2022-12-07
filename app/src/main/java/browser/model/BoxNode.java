@@ -4,6 +4,7 @@ import static browser.css.CSSStyle.DisplayType;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class BoxNode {
 
@@ -26,6 +27,8 @@ public class BoxNode {
     public Float height = null;
     public Float maxWidth = null;
     public Float maxHeight = null;
+
+    // The range of indices for the text of this node: from textStartIndex up to (but not including) textEndIndex.
     public int textStartIndex;
     public int textEndIndex;
 
@@ -59,7 +62,9 @@ public class BoxNode {
                 other.innerDisplayType != innerDisplayType || other.isAnonymous != isAnonymous ||
                 other.isTextNode != isTextNode || ((parent == null) != (other.parent == null)) ||
                 (parent != null && (parent.id != other.parent.id)) || other.children.size() != children.size() ||
-                renderNodeId != other.renderNodeId) {
+                renderNodeId != other.renderNodeId || !Objects.equals(x, other.x) || !Objects.equals(y, other.y) ||
+                !Objects.equals(width, other.width) || !Objects.equals(height, other.height) ||
+                !Objects.equals(textStartIndex, other.textStartIndex) || !Objects.equals(textEndIndex, other.textEndIndex)) {
             return false;
         }
 
@@ -74,9 +79,12 @@ public class BoxNode {
 
     @Override
     public String toString() {
-        return String.format("id=%s, outer=%s, inner=%s, anonymous=%s, text=%s, parent id=%d, render node=%d",
-                id, outerDisplayType, innerDisplayType, isAnonymous, isTextNode, parent == null ? -1 : parent.id,
-                renderNodeId);
+        String positionSize = String.format("@(%.0f, %.0f), (%.0f x %.0f)", x, y, width, height);
+        String flags = "" + (isAnonymous ? "a" : "") + (isTextNode ? "t" : "");
+        String textRange = isTextNode ? String.format(", tx:%d-%d", textStartIndex, textEndIndex) : "";
+        return String.format("id=%s, outer=%s, inner=%s, parent=%d, %s, [%s], %s%s",
+                id, outerDisplayType, innerDisplayType, parent == null ? -1 : parent.id,
+                positionSize, flags, children.stream().map(boxNode -> boxNode.id).toList(), textRange);
     }
 
     public String toRecursiveString() {
@@ -101,6 +109,30 @@ public class BoxNode {
         }
 
         return parent.isDescendantOf(id);
+    }
+
+    public BoxNode getRootAncestor() {
+        BoxNode current = this;
+        while (current.parent != null) {
+            current = current.parent;
+        }
+        return current;
+    }
+
+    public boolean layoutEquals(BoxNode other) {
+        if (other == null || !Objects.equals(x, other.x) || !Objects.equals(y, other.y) ||
+                !Objects.equals(width, other.width) || !Objects.equals(height, other.height) || other.id != id ||
+                (parent == null) != (other.parent == null) || (parent != null && parent.id != other.parent.id)) {
+            return false;
+        }
+
+        for (int i = 0; i < children.size(); i++) {
+            if (!children.get(i).layoutEquals(other.children.get(i))) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
 }

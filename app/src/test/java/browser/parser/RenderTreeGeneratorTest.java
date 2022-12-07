@@ -185,7 +185,7 @@ public class RenderTreeGeneratorTest {
         renderLI2.addChild(renderText2);
         renderLI3.addChild(renderText3);
 
-        RenderTreeGenerator.setNextID(id);
+        RenderNode.nextId = id;
         renderTreeGenerator.transformNode(renderRoot);
 
         assertEquals(expectedRenderNode, renderRoot);

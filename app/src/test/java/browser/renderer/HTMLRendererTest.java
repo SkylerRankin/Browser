@@ -253,7 +253,7 @@ public class HTMLRendererTest {
         cssLoader.loadDefaults(root);
         BoxLayoutCalculator blc = new BoxLayoutCalculator(parentNodeMap, 500f);
         RenderTreeGenerator rtg = new RenderTreeGenerator();
-        RenderTreeGenerator.setNextID(11);
+        RenderNode.nextId = 11;
         rtg.transformNode(root);
         blc.setBoxBounds(root);
         blc.propagateMaxSizes(root);
@@ -278,7 +278,7 @@ public class HTMLRendererTest {
         RenderTreeGenerator rtg = new RenderTreeGenerator();
         rtg.removeDuplicateWhitespace(renderRoot, false);
         // For the test, consume the first 4 node IDs
-        for (int i = 0; i < 4; i++) RenderTreeGenerator.getNextID();
+        RenderNode.nextId += 4;
 
         CSSLoader cssLoader = new CSSLoader(null, parentNodeMap, new ArrayList<String>());
         cssLoader.applyAllCSS(renderRoot);

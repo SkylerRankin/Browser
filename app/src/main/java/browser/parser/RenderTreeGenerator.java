@@ -12,19 +12,10 @@ import browser.model.DOMNode;
 import browser.model.RenderNode;
 
 public class RenderTreeGenerator {
-    private static int nodeID = 0;
     private final Map<Integer, RenderNode> parentRenderNodeMap = new HashMap<Integer, RenderNode>();
 
     public RenderNode generateRenderTree(DOMNode dom, Float screenWidth) {
         return domTreeToRenderTree(dom);
-    }
-
-    public static int getNextID() {
-        return nodeID++;
-    }
-
-    public static void setNextID(int id) {
-        nodeID = id;
     }
 
     public DOMNode getBodyNode(DOMNode dom) {
@@ -44,17 +35,16 @@ public class RenderTreeGenerator {
             ErrorPageHandler.browserError = ErrorPageHandler.BrowserErrorType.NO_BODY;
             return null;
         }
-        nodeID = 0;
         return copyTree(body, null, 0);
     }
 
     private RenderNode copyTree(DOMNode dom, RenderNode parent, int depth) {
-        RenderNode renderNode = new RenderNode(dom, nodeID, depth);
+        RenderNode renderNode = new RenderNode(dom, RenderNode.nextId, depth);
         renderNode.attributes = dom.attributes;
         renderNode.parent = parent;
 //        if (parentID != null) parentRenderNodeMap.put(parentID, renderNode);
-        if (parent != null) parentRenderNodeMap.put(nodeID, parent);
-        nodeID++;
+        if (parent != null) parentRenderNodeMap.put(RenderNode.nextId, parent);
+        RenderNode.nextId++;
         for (DOMNode child : dom.children) {
             renderNode.children.add(copyTree(child, renderNode, depth + 1));
         }
@@ -200,7 +190,7 @@ public class RenderTreeGenerator {
                 // Create pseudo element for the list marker.
                 RenderNode marker = new RenderNode(HTMLElements.PSEUDO_MARKER);
                 marker.depth = child.depth;
-                marker.id = getNextID();
+                marker.id = RenderNode.nextId++;
                 marker.parent = child.parent;
                 marker.attributes.put(PseudoElementConstants.MARKER_TYPE_KEY, root.type);
                 marker.attributes.put(PseudoElementConstants.MARKER_INDEX_KEY, String.valueOf(i));
@@ -231,7 +221,6 @@ public class RenderTreeGenerator {
     }
 
     public void reset() {
-        nodeID = 0;
         parentRenderNodeMap.clear();
     }
 
