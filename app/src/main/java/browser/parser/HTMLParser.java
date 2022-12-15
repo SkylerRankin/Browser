@@ -211,7 +211,7 @@ public class HTMLParser {
     }
     
     /**
-     * TODO regex has some issues
+     * TODO: regex has some issues
      * Split a string of attributes on only the spaces that are not within quotes. Assumes that
      * input is from 'removeUselessSpaces' such that no multiple space blocks are present outside
      * of quotation marks.

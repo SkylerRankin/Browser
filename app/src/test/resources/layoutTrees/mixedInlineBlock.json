@@ -1,0 +1,347 @@
+{
+  "config": {
+    "screenWidth": 100,
+    "letterWidth": 1,
+    "letterHeight": 10
+  },
+  "renderTree": {
+    "root": {
+      "refName": "div1",
+      "template": "div",
+      "style": {
+        "padding": 10
+      },
+      "children": [
+        {
+          "refName": "div2",
+          "template": "div",
+          "style": {
+            "marginBottom": 20,
+            "width": 20,
+            "widthType": "PIXEL",
+            "height": 20,
+            "heightType": "PIXEL"
+          },
+          "children": [
+            {
+              "refName": "div3",
+              "template": "div",
+              "style": {
+                "marginRight": 5,
+                "marginLeft": 5
+              },
+              "children": [
+                {
+                  "refName": "text1",
+                  "template": "text",
+                  "text": "title"
+                }
+              ]
+            },
+            {
+              "refName": "div4",
+              "template": "div",
+              "children": [
+                {
+                  "refName": "span1",
+                  "template": "span",
+                  "style": {
+                    "marginLeft": 2
+                  },
+                  "children": [
+                    {
+                      "refName": "text2",
+                      "template": "text",
+                      "text": "subtitle"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "refName": "div5",
+          "template": "div",
+          "children": [
+            {
+              "refName": "span2",
+              "template": "span",
+              "children": [
+                {
+                  "refName": "text3",
+                  "template": "text",
+                  "text": "Some text."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "refName": "div6",
+          "template": "div",
+          "style": {
+            "padding": 20
+          },
+          "children": [
+            {
+              "refName": "text4",
+              "template": "text",
+              "text": "Scientists seek a single description of reality. But "
+            },
+            {
+              "refName": "span3",
+              "template": "span",
+              "children": [
+                {
+                  "refName": "text5",
+                  "template": "text",
+                  "text": "modern"
+                }
+              ]
+            },
+            {
+              "refName": "text6",
+              "template": "text",
+              "text": " physics allows for many different descriptions, many equivalent to one another, connected through a vast landscape of mathematical possibility."
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "boxTree": {
+    "root": {
+      "template": "block",
+      "correspondingRenderNode": "div1",
+      "children": [
+        {
+          "template": "block",
+          "correspondingRenderNode": "div2",
+          "children": [
+            {
+              "template": "block",
+              "correspondingRenderNode": "div3",
+              "children": [
+                {
+                  "template": "text",
+                  "correspondingRenderNode": "text1",
+                  "textStartIndex": 0,
+                  "textEndIndex": 5
+                }
+              ]
+            },
+            {
+              "template": "block",
+              "correspondingRenderNode": "div4",
+              "children": [
+                {
+                  "template": "inline",
+                  "correspondingRenderNode": "span1",
+                  "children": [
+                    {
+                      "template": "text",
+                      "correspondingRenderNode": "text2",
+                      "textStartIndex": 0,
+                      "textEndIndex": 8
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "template": "block",
+          "correspondingRenderNode": "div5",
+          "children": [
+            {
+              "template": "inline",
+              "correspondingRenderNode": "span2",
+              "children": [
+                {
+                  "template": "text",
+                  "correspondingRenderNode": "text3",
+                  "textStartIndex": 0,
+                  "textEndIndex": 10
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "template": "block",
+          "correspondingRenderNode": "div6",
+          "children": [
+            {
+              "template": "text",
+              "correspondingRenderNode": "text4",
+              "textStartIndex": 0,
+              "textEndIndex": 53
+            },
+            {
+              "template": "inline",
+              "correspondingRenderNode": "span3",
+              "children": [
+                {
+                  "template": "text",
+                  "correspondingRenderNode": "text5",
+                  "textStartIndex": 0,
+                  "textEndIndex": 6
+                }
+              ]
+            },
+            {
+              "template": "text",
+              "correspondingRenderNode": "text6",
+              "textStartIndex": 0,
+              "textEndIndex": 144
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "boxTreeAfterLayout": {
+    "root": {
+      "template": "block",
+      "correspondingRenderNode": "div1",
+      "x": 0, "y": 0, "width": 100, "height": 170,
+      "children": [
+        {
+          "template": "block",
+          "correspondingRenderNode": "div2",
+          "x": 10, "y": 10, "width": 20, "height": 20,
+          "children": [
+            {
+              "template": "block",
+              "correspondingRenderNode": "div3",
+              "x": 15, "y": 10, "width": 10, "height": 10,
+              "children": [
+                {
+                  "template": "text",
+                  "correspondingRenderNode": "text1",
+                  "x": 15, "y": 10, "width": 5, "height": 10,
+                  "textStartIndex": 0,
+                  "textEndIndex": 5
+                }
+              ]
+            },
+            {
+              "template": "block",
+              "correspondingRenderNode": "div4",
+              "x": 10, "y": 20, "width": 20, "height": 10,
+              "children": [
+                {
+                  "template": "inline",
+                  "correspondingRenderNode": "span1",
+                  "x": 12, "y": 20, "width": 8, "height": 10,
+                  "children": [
+                    {
+                      "template": "text",
+                      "correspondingRenderNode": "text2",
+                      "x": 12, "y": 20, "width": 8, "height": 10,
+                      "textStartIndex": 0,
+                      "textEndIndex": 8
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "template": "block",
+          "correspondingRenderNode": "div5",
+          "x": 10, "y": 50, "width": 80, "height": 10,
+          "children": [
+            {
+              "template": "inline",
+              "correspondingRenderNode": "span2",
+              "x": 10, "y": 50, "width": 10, "height": 10,
+              "children": [
+                {
+                  "template": "text",
+                  "correspondingRenderNode": "text3",
+                  "x": 10, "y": 50, "width": 10, "height": 10,
+                  "textStartIndex": 0,
+                  "textEndIndex": 10
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "template": "block",
+          "correspondingRenderNode": "div6",
+          "x": 10, "y": 60, "width": 80, "height": 100,
+          "children": [
+            {
+              "template": "text",
+              "correspondingRenderNode": "text4",
+              "x": 30, "y": 80, "width": 39, "height": 10,
+              "textStartIndex": 0,
+              "textEndIndex": 39
+            },
+            {
+              "template": "text",
+              "correspondingRenderNode": "text4",
+              "x": 30, "y": 90, "width": 13, "height": 10,
+              "textStartIndex": 40,
+              "textEndIndex": 53
+            },
+            {
+              "template": "inline",
+              "correspondingRenderNode": "span3",
+              "x": 43, "y": 90, "width": 6, "height": 10,
+              "children": [
+                {
+                  "template": "text",
+                  "correspondingRenderNode": "text5",
+                  "x": 43, "y": 90, "width": 6, "height": 10,
+                  "textStartIndex": 0,
+                  "textEndIndex": 6
+                }
+              ]
+            },
+            {
+              "template": "text",
+              "correspondingRenderNode": "text6",
+              "x": 49, "y": 90, "width": 19, "height": 10,
+              "textStartIndex": 0,
+              "textEndIndex": 19
+            },
+            {
+              "template": "text",
+              "correspondingRenderNode": "text6",
+              "x": 30, "y": 100, "width": 33, "height": 10,
+              "textStartIndex": 20,
+              "textEndIndex": 53
+            },
+            {
+              "template": "text",
+              "correspondingRenderNode": "text6",
+              "x": 30, "y": 110, "width": 36, "height": 10,
+              "textStartIndex": 54,
+              "textEndIndex": 90
+            },
+            {
+              "template": "text",
+              "correspondingRenderNode": "text6",
+              "x": 30, "y": 120, "width": 40, "height": 10,
+              "textStartIndex": 91,
+              "textEndIndex": 131
+            },
+            {
+              "template": "text",
+              "correspondingRenderNode": "text6",
+              "x": 30, "y": 130, "width": 12, "height": 10,
+              "textStartIndex": 132,
+              "textEndIndex": 144
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

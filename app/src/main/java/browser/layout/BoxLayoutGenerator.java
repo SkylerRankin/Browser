@@ -63,7 +63,7 @@ public class BoxLayoutGenerator {
                 boxNode.innerDisplayType.equals(DisplayType.FLOW_ROOT);
 
         if (fixedSizeAllowed) {
-            CSSStyle style = boxNode.correspondingRenderNode.style;
+            CSSStyle style = boxNode.style;
 
             // Block boxes should be 100% width by default, if this was not set in the stylesheets. For anonymous block
             // boxes, for instance, the width property would not have been set.
@@ -72,11 +72,12 @@ public class BoxLayoutGenerator {
                 style.widthType = CSSStyle.DimensionType.PERCENTAGE;
             }
 
+            float widthSpacing = (boxNode.parent == null ? 0 : boxNode.parent.style.paddingLeft + boxNode.parent.style.paddingRight) +
+                    boxNode.style.marginLeft + boxNode.style.marginRight;
             if (style.widthType.equals(CSSStyle.DimensionType.PERCENTAGE)) {
                 float parentWidth = boxNode.parent == null ? screenWidth : boxNode.parent.width;
-                boxNode.width = parentWidth * style.width / 100;
+                boxNode.width = (parentWidth * style.width / 100) - widthSpacing;
             } else {
-                // TODO should the margin and padding play a role here?
                 boxNode.width = style.width;
             }
 
@@ -93,11 +94,13 @@ public class BoxLayoutGenerator {
 
             if (style.height != null) {
                 Float height;
-                if (style.widthType.equals(CSSStyle.DimensionType.PERCENTAGE)) {
+                if (style.heightType.equals(CSSStyle.DimensionType.PERCENTAGE)) {
                     if (boxNode.parent == null || boxNode.parent.height == null) {
                         height = null;
                     } else {
-                        height = boxNode.parent.height * style.height / 100;
+                        float heightSpacing = boxNode.parent.style.paddingTop + boxNode.parent.style.paddingBottom +
+                                boxNode.style.marginTop + boxNode.style.marginBottom;
+                        height = (boxNode.parent.height * style.height / 100) - heightSpacing;
                     }
                 } else {
                     height = style.height;
@@ -131,8 +134,8 @@ public class BoxLayoutGenerator {
     private void setImageSizes(BoxNode boxNode) {
         if (boxNode.correspondingRenderNode.type.equals(HTMLElements.IMG)) {
             Map<String, String> attributes = boxNode.correspondingRenderNode.attributes;
-            CSSStyle style = boxNode.correspondingRenderNode.style;
-            // TODO the default size should come from the actual image dimensions. have to download the image first
+            CSSStyle style = boxNode.style;
+            // TODO: the default size should come from the actual image dimensions. have to download the image first
             float width = 50;
             float height = 50;
             if (attributes.containsKey("width")) {
@@ -173,8 +176,8 @@ public class BoxLayoutGenerator {
      */
     private void setInlineFormattingContexts(BoxNode boxNode) {
         List<BoxNode> childrenInNormalFlow = boxNode.children.stream()
-                .filter(b -> b.correspondingRenderNode.style.position == PositionType.STATIC ||
-                        b.correspondingRenderNode.style.position == PositionType.RELATIVE)
+                .filter(b -> b.style.position == PositionType.STATIC ||
+                        b.style.position == PositionType.RELATIVE)
                 .toList();
 
         if (childrenInNormalFlow.size() == 0) {
@@ -207,7 +210,7 @@ public class BoxLayoutGenerator {
      */
     private void setBlockFormattingContexts(BoxNode boxNode) {
         int id;
-        // TODO add in all other cases of new BFCs.
+        // TODO: add in all other cases of new BFCs.
         if (boxNode.innerDisplayType.equals(DisplayType.FLOW_ROOT) || boxNode.parent == null) {
             id = blockFormattingContexts.size();
             blockFormattingContexts.put(id, new BlockFormattingContext());
@@ -248,15 +251,14 @@ public class BoxLayoutGenerator {
      * @param boxNode       The box node to layout.
      */
     private void setBoxLayout(BoxNode boxNode) {
-        System.out.printf("\n\nSet Box Layout for %s:\n", boxNode);
         if (boxNode.children.size() == 0) {
             return;
         }
 
         if (boxNode.innerDisplayType.equals(CSSStyle.DisplayType.FLOW)) {
             List<BoxNode> childrenInNormalFlow = boxNode.children.stream()
-                    .filter(b -> b.correspondingRenderNode.style.position == PositionType.STATIC ||
-                            b.correspondingRenderNode.style.position == PositionType.RELATIVE)
+                    .filter(b -> b.style.position == PositionType.STATIC ||
+                            b.style.position == PositionType.RELATIVE)
                     .toList();
             DisplayType childrenDisplayType = childrenInNormalFlow.get(0).outerDisplayType;
             if (childrenDisplayType.equals(DisplayType.BLOCK)) {
@@ -272,16 +274,15 @@ public class BoxLayoutGenerator {
     }
 
     private void layoutBlockBoxes(BoxNode parentBox) {
-        BlockFormattingContext context = blockFormattingContexts.get(parentBox.id);
+        BlockFormattingContext context = blockFormattingContexts.get(parentBox.blockFormattingContextId);
 
         for (BoxNode childBox : parentBox.children) {
             BoxNode lastPlacedBox = context.getLastPlacedBoxForId(parentBox.id);
-            childBox.x = parentBox.x;
+            childBox.x = parentBox.x + parentBox.style.paddingLeft + childBox.style.marginLeft;
             if (lastPlacedBox == null) {
-                childBox.y = parentBox.y;
+                childBox.y = parentBox.y + parentBox.style.paddingTop + childBox.style.marginTop;
             } else {
-                // TODO add margin and padding and border offsets
-                childBox.y = lastPlacedBox.y + lastPlacedBox.height;
+                childBox.y = lastPlacedBox.y + lastPlacedBox.height + lastPlacedBox.style.marginBottom + childBox.style.marginTop;
             }
 
             // Recursively run layout on the child after placement. This will determine its height.
@@ -295,15 +296,21 @@ public class BoxLayoutGenerator {
     private void layoutInlineBoxes(BoxNode parentBox) {
         InlineFormattingContext context = inlineFormattingContexts.get(parentBox.inlineFormattingContextId);
         if (parentBox.id == context.contextRootId) {
-            // TODO maybe can initialize this before
             context.initialize(parentBox);
         }
 
         for (int i = 0; i < parentBox.children.size(); i++) {
             BoxNode childBox = parentBox.children.get(i);
-            System.out.printf("calling layout on child %d, index %d\n", childBox.id, i);
-            inlineLayoutFormatter.placeBox(childBox, context);
-            System.out.printf("after formatting, children of %d are %s\n", parentBox.id, parentBox.children.stream().map(boxNode -> boxNode.id).toList());
+            boolean earlyExit = inlineLayoutFormatter.placeBox(childBox, context);
+            if (earlyExit) {
+                // This child box (and its subsequent siblings) have been moved to a new branch, so the loop can stop
+                // early. If there were previous children, then the width/height calculations on the parent still need
+                // to happen.
+                if (i == 0) {
+                    return;
+                }
+                break;
+            }
             setBoxLayout(parentBox.children.get(i));
         }
 
@@ -317,15 +324,17 @@ public class BoxLayoutGenerator {
 
     private float getHeightFromChildren(BoxNode boxNode) {
         if (boxNode.children.size() == 0) {
-            return 0;
+            return boxNode.height == null ? 0 : boxNode.height;
         }
 
         float maxY = 0;
         for (BoxNode childBox : boxNode.children) {
-            maxY = Math.max(maxY, childBox.y + childBox.height);
+            float childHeight = childBox.height == null ? 0 : childBox.height;
+            float newY = childBox.y + childHeight + childBox.style.marginBottom;
+            maxY = Math.max(maxY, newY);
         }
 
-        return maxY - boxNode.y;
+        return maxY - boxNode.y + boxNode.style.paddingBottom;
     }
 
 }

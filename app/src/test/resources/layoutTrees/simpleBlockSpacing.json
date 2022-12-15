@@ -1,0 +1,76 @@
+{
+  "config": {
+    "screenWidth": 100,
+    "letterWidth": 1,
+    "letterHeight": 10
+  },
+  "renderTree": {
+    "root": {
+      "refName": "div1",
+      "template": "div",
+      "style": {
+        "padding": 20
+      },
+      "children": [
+        {
+          "refName": "div2",
+          "template": "div",
+          "style": {
+            "marginLeft": 10,
+            "marginRight": 20,
+            "paddingTop": 5
+          },
+          "children": [
+            {
+              "refName": "div3",
+              "template": "div",
+              "style": {
+                "height": 5
+              },
+              "children": []
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "boxTree": {
+    "root": {
+      "template": "block",
+      "correspondingRenderNode": "div1",
+      "children": [
+        {
+          "template": "block",
+          "correspondingRenderNode": "div2",
+          "children": [
+            {
+              "correspondingRenderNode": "div3",
+              "template": "block"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "boxTreeAfterLayout": {
+    "root": {
+      "template": "block",
+      "correspondingRenderNode": "div1",
+      "x": 0, "y": 0, "width": 100, "height": 50,
+      "children": [
+        {
+          "template": "block",
+          "correspondingRenderNode": "div2",
+          "x": 30, "y": 20, "width": 30, "height": 10,
+          "children": [
+            {
+              "correspondingRenderNode": "div3",
+              "x": 30, "y": 25, "width": 30, "height": 5,
+              "template": "block"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

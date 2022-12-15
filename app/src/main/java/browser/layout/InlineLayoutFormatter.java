@@ -1,8 +1,5 @@
 package browser.layout;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import browser.css.CSSStyle;
 import browser.model.BoxNode;
 import browser.model.Vector2;
@@ -22,28 +19,45 @@ public class InlineLayoutFormatter {
 
     // Public methods
 
-    public void placeBox(BoxNode boxNode, InlineFormattingContext context) {
-        System.out.printf("placeBox for %s\n", boxNode);
-        System.out.println(boxNode.getRootAncestor().toRecursiveString());
-
-        CSSStyle style = boxNode.correspondingRenderNode.style;
+    public boolean placeBox(BoxNode boxNode, InlineFormattingContext context) {
         float x = getBoxXPosition(boxNode, context);
         Vector2 preferredSize = getInlineBoxPreferredSize(boxNode);
         float rightSideSpacing = context.getRightSpacingForBox(boxNode.id);
         float availableWidth = context.endX - x - rightSideSpacing;
 
-        System.out.printf("preferredSize: %s, availableWidth: %.0f, right spacing: %.0f, x: %.0f\n", preferredSize, availableWidth, rightSideSpacing, x);
+        boolean fitsInCurrentLine = preferredSize.x <= availableWidth;
+        boolean canBeSplitToFit = textNodeSplitter.canSplitNodeToFitWidth(boxNode, availableWidth);
+        boolean placeOnCurrentLine = fitsInCurrentLine || (!canBeSplitToFit && !context.currentRowHasTerminalBox());
 
-        if (preferredSize.x <= availableWidth) {
-            // The box fits with its preferred width, it is added to the current line.
+        // This box will be placed on a new line, so it is partitioned and will be laid out later in the tree.
+        if (!fitsInCurrentLine && !canBeSplitToFit && context.currentRowHasTerminalBox()) {
+            context.moveToNextLine();
+            if (boxTreePartitioner.partitionAltersTree(boxNode, context)) {
+                context.clearTentativeBoxes();
+                boxTreePartitioner.partition(boxNode, context);
+                return true;
+            } else {
+                x = getBoxXPosition(boxNode, context);
+                availableWidth = context.endX - x - rightSideSpacing;
+                fitsInCurrentLine = preferredSize.x <= availableWidth;
+                canBeSplitToFit = textNodeSplitter.canSplitNodeToFitWidth(boxNode, availableWidth);
+                placeOnCurrentLine = fitsInCurrentLine || (!canBeSplitToFit && !context.currentRowHasTerminalBox());
+            }
+        }
+
+        if (placeOnCurrentLine) {
+            // 1. The box fits with its preferred width, so it is added to the current line.
+            // 2. The box does not fit and cannot be split to fit, but there are no previous terminal boxes, so the box
+            //    has to be put on this line, causing an overflow.
+
             boxNode.x = x;
             boxNode.y = context.getCurrentLineYStart();
             boxNode.width = preferredSize.x;
             boxNode.height = preferredSize.y;
             context.addBoxToCurrentLine(boxNode);
-        } else if (textNodeSplitter.canSplitNodeToFitWidth(boxNode, availableWidth)) {
-            // The box does not fit on the current line, but some substring of it can be split to fit.
-            // TODO can use the available width plus the right spacing here, since the spacing is moved to the next line.
+        } else if (canBeSplitToFit) {
+            // The box does not fit as is on the current line, but can be split to partially fit.
+
             BoxNode remainingBox = textNodeSplitter.fitNodeToWidth(boxNode, availableWidth);
             int indexInParent = boxNode.parent.children.indexOf(boxNode);
             boxNode.parent.children.add(indexInParent + 1, remainingBox);
@@ -54,7 +68,7 @@ public class InlineLayoutFormatter {
             context.setRightSpacingForBox(boxNode.id, 0);
 
             String substring = boxNode.correspondingRenderNode.text.substring(boxNode.textStartIndex, boxNode.textEndIndex);
-            Vector2 newDimensions = textDimensionCalculator.getDimension(substring, style);
+            Vector2 newDimensions = textDimensionCalculator.getDimension(substring, boxNode.style);
             boxNode.x = x;
             boxNode.y = context.getCurrentLineYStart();
             boxNode.width = newDimensions.x;
@@ -62,57 +76,9 @@ public class InlineLayoutFormatter {
 
             context.addBoxToCurrentLine(boxNode);
             context.moveToNextLine();
-        } else {
-            System.out.println("Box does not fit and cannot be split to fit.");
-            // The box does not fit and no prefix of it can be made to fit. It is moved to the next line.
-
-            // Move to the next line if there is already a terminal box on the line.
-            if (context.currentRowHasTerminalBox()) {
-                System.out.println("moving to new row");
-                context.moveToNextLine();
-            }
-
-            x = getBoxXPosition(boxNode, context);
-            availableWidth = context.endX - x - rightSideSpacing;
-
-            System.out.printf("New x = %.0f, new available width = %.0f\n", x, availableWidth);
-
-            if (preferredSize.x <= availableWidth) {
-                // The box fits with its preferred width on the next line.
-                boxNode.x = x;
-                boxNode.y = context.getCurrentLineYStart();
-                boxNode.width = preferredSize.x;
-                boxNode.height = preferredSize.y;
-                context.addBoxToCurrentLine(boxNode);
-            } else {
-                // The box still doesn't fit on the next line. It is broken on spaces regardless of any overlaps.
-                BoxNode remainingBox = textNodeSplitter.fitNodeToWidth(boxNode, availableWidth);
-                System.out.printf("After splitting node text, remaining box: %s\n", remainingBox);
-                if (remainingBox != null) {
-                    int indexInParent = boxNode.parent.children.indexOf(boxNode);
-                    boxNode.parent.children.add(indexInParent + 1, remainingBox);
-                    boxTreePartitioner.partition(remainingBox, context);
-
-                    // The newly generated box will take on whatever right side spacing the original box had.
-                    context.setRightSpacingForBox(remainingBox.id, context.getRightSpacingForBox(boxNode.id));
-                    context.setRightSpacingForBox(boxNode.id, 0);
-                }
-
-                String substring = boxNode.correspondingRenderNode.text.substring(boxNode.textStartIndex, boxNode.textEndIndex);
-                Vector2 newDimensions = textDimensionCalculator.getDimension(substring, style);
-                boxNode.x = x;
-                boxNode.y = context.getCurrentLineYStart();
-                boxNode.width = newDimensions.x;
-                boxNode.height = newDimensions.y;
-
-                context.addBoxToCurrentLine(boxNode);
-                context.moveToNextLine();
-            }
-
         }
 
-        System.out.printf("end placeBox for %s\n", boxNode);
-        System.out.println(boxNode.getRootAncestor().toRecursiveString());
+        return false;
     }
 
     /**
@@ -121,10 +87,8 @@ public class InlineLayoutFormatter {
      * @return      The box's width.
      */
     public float getWidth(BoxNode boxNode) {
-        CSSStyle style = boxNode.correspondingRenderNode.style;
-
         if (boxNode.children.size() == 0) {
-            return style.paddingLeft + style.paddingRight;
+            return boxNode.style.paddingLeft + boxNode.style.paddingRight;
         }
 
         BoxNode rightMostChild = null;
@@ -134,7 +98,7 @@ public class InlineLayoutFormatter {
             }
         }
         float maxX = rightMostChild.x + rightMostChild.width +
-                rightMostChild.correspondingRenderNode.style.marginRight + style.paddingRight;
+                rightMostChild.style.marginRight + boxNode.style.paddingRight;
         return maxX - boxNode.x;
     }
 
@@ -143,15 +107,12 @@ public class InlineLayoutFormatter {
     private float getBoxXPosition(BoxNode boxNode, InlineFormattingContext context) {
         BoxNode previousBoxInLine = context.getPreviousBoxInLine();
         if (previousBoxInLine == null) {
-            float rootPadding = context.rootBox.correspondingRenderNode.style.paddingLeft;
-            float margin = boxNode.correspondingRenderNode.style.marginLeft;
-            return context.startX + rootPadding + margin;
+            return context.startX + context.getLeftSpacingForBox(boxNode.id);
         } else {
             if (previousBoxInLine.children.contains(boxNode)) {
                 // The previous box is the parent of the current box.
-                CSSStyle previousStyle = previousBoxInLine.correspondingRenderNode.style;
-                CSSStyle style = boxNode.correspondingRenderNode.style;
-                return previousBoxInLine.x + previousStyle.paddingLeft + style.marginLeft;
+                CSSStyle previousStyle = previousBoxInLine.style;
+                return previousBoxInLine.x + previousStyle.paddingLeft + boxNode.style.marginLeft;
             } else {
                 // The previous box is some sibling, potentially higher up in the tree, of the current box.
                 BoxNode siblingBox = getAncestorSiblingInLine(boxNode, previousBoxInLine);
@@ -161,9 +122,8 @@ public class InlineLayoutFormatter {
                     System.err.printf("Previous BoxNode in line: %s\n", previousBoxInLine);
                     return 0;
                 }
-                CSSStyle previousStyle = siblingBox.correspondingRenderNode.style;
-                CSSStyle style = boxNode.correspondingRenderNode.style;
-                return siblingBox.x + siblingBox.width + previousStyle.marginRight + style.marginLeft;
+                CSSStyle previousStyle = siblingBox.style;
+                return siblingBox.x + siblingBox.width + previousStyle.marginRight + boxNode.style.marginLeft;
             }
         }
     }
@@ -188,41 +148,16 @@ public class InlineLayoutFormatter {
             if (boxNode.textEndIndex > 0) {
                 text = text.substring(boxNode.textStartIndex, boxNode.textEndIndex);
             }
-            size = textDimensionCalculator.getDimension(text, boxNode.correspondingRenderNode.style);
+            size = textDimensionCalculator.getDimension(text, boxNode.style);
         } else if (boxNode.correspondingRenderNode.type.equals(HTMLElements.IMG)) {
             size = new Vector2(boxNode.width, boxNode.height);
         } else if (boxNode.innerDisplayType.equals(CSSStyle.DisplayType.FLOW_ROOT)) {
             size = new Vector2(boxNode.width, boxNode.height);
         }
 
-        CSSStyle style = boxNode.correspondingRenderNode.style;
-        float widthDueToSpacing = style.marginLeft + style.paddingLeft + style.paddingRight + style.marginRight;
+        float widthDueToSpacing = boxNode.style.paddingLeft + boxNode.style.paddingRight;
 
         return new Vector2(size.x + widthDueToSpacing, size.y);
-    }
-
-    private boolean canSplitInlineBox(BoxNode boxNode, float availableWidth) {
-        if (boxNode.isTextNode) {
-            String[] words = boxNode.correspondingRenderNode.text.split("\s");
-            String firstWord = words[0];
-            float width = textDimensionCalculator.getDimension(firstWord, boxNode.correspondingRenderNode.style).x;
-            return width <= availableWidth;
-        } else {
-            return false;
-        }
-    }
-
-    private void injectSplitBoxesIntoTree(BoxNode original, List<BoxNode> newBoxes) {
-        int indexInParent = original.parent.children.indexOf(original);
-        List<BoxNode> newChildren = new ArrayList<>();
-        for (int i = 0; i < original.parent.children.size(); i++) {
-            if (i == indexInParent) {
-                newChildren.addAll(newBoxes);
-            } else {
-                newChildren.add(original.parent.children.get(i));
-            }
-        }
-        original.parent.children = newChildren;
     }
 
 }

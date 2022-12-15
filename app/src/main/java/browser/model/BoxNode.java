@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import browser.css.CSSStyle;
+
 public class BoxNode {
 
     public static int nextId = 0;
@@ -17,6 +19,7 @@ public class BoxNode {
     public int inlineFormattingContextId = -1;
     public int blockFormattingContextId = -1;
     public RenderNode correspondingRenderNode = null;
+    public CSSStyle style;
     public DisplayType outerDisplayType;
     public DisplayType innerDisplayType;
     public boolean isAnonymous = false;
@@ -41,6 +44,7 @@ public class BoxNode {
         this.inlineFormattingContextId = other.inlineFormattingContextId;
         this.blockFormattingContextId = other.blockFormattingContextId;
         this.correspondingRenderNode = other.correspondingRenderNode;
+        this.style = other.style == null ? null : other.style.deepCopy();
         this.outerDisplayType = other.outerDisplayType;
         this.innerDisplayType = other.innerDisplayType;
         this.isAnonymous = other.isAnonymous;
@@ -82,8 +86,8 @@ public class BoxNode {
         String positionSize = String.format("@(%.0f, %.0f), (%.0f x %.0f)", x, y, width, height);
         String flags = "" + (isAnonymous ? "a" : "") + (isTextNode ? "t" : "");
         String textRange = isTextNode ? String.format(", tx:%d-%d", textStartIndex, textEndIndex) : "";
-        return String.format("id=%s, outer=%s, inner=%s, parent=%d, %s, [%s], %s%s",
-                id, outerDisplayType, innerDisplayType, parent == null ? -1 : parent.id,
+        return String.format("id=%s, outer=%s, inner=%s, parent=%d, rid=%d, %s, [%s], %s%s",
+                id, outerDisplayType, innerDisplayType, parent == null ? -1 : parent.id, renderNodeId,
                 positionSize, flags, children.stream().map(boxNode -> boxNode.id).toList(), textRange);
     }
 

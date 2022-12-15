@@ -123,10 +123,21 @@ public class TestDataLoader {
     }
 
     private static void setRenderNodeStyle(RenderNode renderNode, JSONObject style) {
-        if (style.containsKey("marginLeft")) renderNode.style.marginLeft = Integer.parseInt((String) style.get("marginLeft"));
-        if (style.containsKey("marginRight")) renderNode.style.marginRight = Integer.parseInt((String) style.get("marginRight"));
-        if (style.containsKey("marginTop")) renderNode.style.marginTop = Integer.parseInt((String) style.get("marginTop"));
-        if (style.containsKey("marginBottom")) renderNode.style.marginBottom = Integer.parseInt((String) style.get("marginBottom"));
+        if (style.containsKey("marginLeft")) renderNode.style.marginLeft = getInt(style,"marginLeft");
+        if (style.containsKey("marginRight")) renderNode.style.marginRight = getInt(style, "marginRight");
+        if (style.containsKey("marginTop")) renderNode.style.marginTop = getInt(style, "marginTop");
+        if (style.containsKey("marginBottom")) renderNode.style.marginBottom = getInt(style, "marginBottom");
+
+        if (style.containsKey("padding")) {
+            renderNode.style.paddingLeft = getInt(style, "padding");
+            renderNode.style.paddingRight = getInt(style, "padding");
+            renderNode.style.paddingTop = getInt(style, "padding");
+            renderNode.style.paddingBottom = getInt(style, "padding");
+        }
+        if (style.containsKey("paddingLeft")) renderNode.style.paddingLeft = getInt(style, "paddingLeft");
+        if (style.containsKey("paddingRight")) renderNode.style.paddingRight = getInt(style, "paddingRight");
+        if (style.containsKey("paddingTop")) renderNode.style.paddingTop = getInt(style, "paddingTop");
+        if (style.containsKey("paddingBottom")) renderNode.style.paddingBottom = getInt(style, "paddingBottom");
 
         if (style.containsKey("width")) renderNode.style.width = getFloat(style, "width");
         if (style.containsKey("widthType")) renderNode.style.widthType = CSSStyle.DimensionType.valueOf((String) style.get("widthType"));
@@ -150,6 +161,9 @@ public class TestDataLoader {
             boxNode.correspondingRenderNode = renderNodeReferenceMap.get(referenceName);
             if (boxNode.correspondingRenderNode != null) {
                 boxNode.renderNodeId = boxNode.correspondingRenderNode.id;
+                if (boxNode.correspondingRenderNode.style != null) {
+                    boxNode.style = boxNode.correspondingRenderNode.style.deepCopy();
+                }
             }
         }
 

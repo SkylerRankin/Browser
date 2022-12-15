@@ -231,8 +231,8 @@ public class CSSStyle {
             System.out.printf("CSSStyle.parseDisplayType: unknown display type %s, reverting to block.\n", text);
         }
 
-        // TODO should the basic display even be used anymore?
-        // TODO hwo to set the default inner. not sure if "flow" is the correct choice here.
+        // TODO: should the basic display even be used anymore?
+        // TODO: hwo to set the default inner. not sure if "flow" is the correct choice here.
     }
     
     /**
@@ -332,7 +332,7 @@ public class CSSStyle {
         CSSRulePrecedent oldPrecedent = precedents.get(property);
         if (oldPrecedent == null || newPrecedent.hasPrecedentOver(oldPrecedent)) {
             properties.put(property, value);
-            // TODO dont need setProperties anymore since we have precedents
+            // TODO: dont need setProperties anymore since we have precedents
             setProperties.add(property);
             precedents.put(property, newPrecedent);
         }
@@ -353,6 +353,55 @@ public class CSSStyle {
             CSSRulePrecedent p = precedents.get(e.getKey());
             System.out.printf("%s%s %s: %s\n", padding, p.toString(), e.getKey(), e.getValue());
         }
+    }
+
+    public CSSStyle deepCopy() {
+        CSSStyle style = new CSSStyle();
+
+        // TODO: copy over the properties maps
+
+        style.backgroundColor = backgroundColor;
+        style.borderWidthTop = borderWidthTop;
+        style.borderWidthBottom = borderWidthBottom;
+        style.borderWidthLeft = borderWidthLeft;
+        style.borderWidthRight = borderWidthRight;
+        style.borderColorTop = borderColorTop;
+        style.borderColorBottom = borderColorBottom;
+        style.borderColorLeft = borderColorLeft;
+        style.borderColorRight = borderColorRight;
+        style.color = color;
+        style.display = display;
+        style.innerDisplay = innerDisplay;
+        style.outerDisplay = outerDisplay;
+        style.auxiliaryDisplay = auxiliaryDisplay;
+        style.position = position;
+        style.fontFamily = fontFamily;
+        style.fontSize = fontSize;
+        style.fontStyle = fontStyle;
+        style.fontWeight = fontWeight;
+        style.heightType = heightType;
+        style.height = height;
+        style.marginType = marginType;
+        style.margin = margin;
+        style.marginTop = marginTop;
+        style.marginRight = marginRight;
+        style.marginBottom = marginBottom;
+        style.marginLeft = marginLeft;
+        style.padding = padding;
+        style.paddingTop = paddingTop;
+        style.paddingRight = paddingRight;
+        style.paddingBottom = paddingBottom;
+        style.paddingLeft = paddingLeft;
+        style.textAlign = textAlign;
+        style.widthType = widthType;
+        style.width = width;
+        style.maxWidth = maxWidth;
+        style.maxWidthType = maxWidthType;
+        style.maxHeight = maxHeight;
+        style.maxHeightType = maxHeightType;
+        style.wordWrap = wordWrap;
+
+        return style;
     }
     
 }

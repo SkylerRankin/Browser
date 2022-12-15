@@ -288,8 +288,8 @@ public class BoxLayoutCalculator {
             switch (displayType) {
                 case INLINE:
                 case INLINE_BLOCK:
-                    // TODO handle stacking padding
-                    // TODO put new lines in a horizontal row NO MATTER WHAT, text splitter handles putting them on new lines
+                    // TODO: handle stacking padding
+                    // TODO: put new lines in a horizontal row NO MATTER WHAT, text splitter handles putting them on new lines
                     // Try in-line, but if it needs more space, continue to block case
                     float x = lastAddedChild.box.x + lastAddedChild.box.width + lastAddedChild.style.marginRight + node.style.marginLeft;
                     float boundary = parent.box.x + parent.maxWidth - parent.style.paddingRight - node.style.marginRight;
@@ -323,7 +323,7 @@ public class BoxLayoutCalculator {
                 default:
                     // Default block elements get put to the left, and right below all the other elements. The height gets updated later.
                     // Bottom padding no longer impacts the last added child, so have to subtract that when finding the new values
-                    // TODO probably other sides' padding have a stacking effect that needs to be managed
+                    // TODO: probably other sides' padding have a stacking effect that needs to be managed
                     float bottomPaddingCorrection = parent.style.paddingBottom;
                     return new Vector2(
                             parent.box.x + parent.style.paddingLeft + node.style.marginLeft,
@@ -408,7 +408,7 @@ public class BoxLayoutCalculator {
                 currentRow.add(child);
             } else {
                 // Check if current node overlaps vertically with previous node
-                // TODO should margins be included in these vertical positions?
+                // TODO: should margins be included in these vertical positions?
                 float prevTop = lastAddedNode.box.y;
                 float prevBottom = lastAddedNode.box.y + lastAddedNode.box.height;
                 float currTop = child.box.y;
@@ -483,7 +483,7 @@ public class BoxLayoutCalculator {
      * Needs to find the shift required to center each row of nodes, they will all require a different
      * shift to be centered in the parent.
      * 
-     * TODO this is a costly function, should improve the runtime
+     * TODO: this is a costly function, should improve the runtime
      * @param root
      */
     public void applyJustification(RenderNode root) {
@@ -528,7 +528,7 @@ public class BoxLayoutCalculator {
      */
     public void setTableCellWidths(RenderNode root) {
         if (root.type.equals(HTMLElements.TABLE)) {
-            // TODO check for thead, tbody, tfoot
+            // TODO: check for thead, tbody, tfoot
             List<RenderNode> rows = root.getElementsInChildren(HTMLElements.TR);
             
             int maxColumns = 0;

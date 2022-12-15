@@ -15,7 +15,7 @@ import browser.app.ErrorPageHandler;
 public class HTTPClient {
 
     // Save a reference to the site so we can build up the URLs for other local resources
-    // TODO have a better system than this
+    // TODO: have a better system than this
     private static String baseURL;
     
     public static String requestPage(String urlString) {

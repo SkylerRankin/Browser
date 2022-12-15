@@ -1,0 +1,142 @@
+{
+  "config": {
+    "screenWidth": 100,
+    "letterWidth": 1,
+    "letterHeight": 10
+  },
+  "renderTree": {
+    "root": {
+      "refName": "div",
+      "template": "div",
+      "children": [
+        {
+          "refName": "span1",
+          "template": "span",
+          "style": {
+            "paddingLeft": 10,
+            "paddingRight": 10
+          },
+          "children": [
+            {
+              "refName": "span2",
+              "template": "span",
+              "style": {
+                "marginLeft": 20
+              },
+              "children": [
+                {
+                  "refName": "text1",
+                  "template": "text",
+                  "text": "first-text-line-that-should-no"
+                }
+              ]
+            },
+            {
+              "refName": "span3",
+              "template": "span",
+              "style": {
+                "marginRight": 5
+              },
+              "children": [
+                {
+                  "refName": "text2",
+                  "template": "text",
+                  "text": "second-text-line-that-should-n"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "boxTree": {
+    "root": {
+      "template": "block",
+      "correspondingRenderNode": "div",
+      "children": [
+        {
+          "template": "inline",
+          "correspondingRenderNode": "span1",
+          "children": [
+            {
+              "template": "inline",
+              "correspondingRenderNode": "span2",
+              "children": [
+                {
+                  "correspondingRenderNode": "text1",
+                  "template": "text",
+                  "textStartIndex": 0,
+                  "textEndIndex": 30
+                }
+              ]
+            },
+            {
+              "template": "inline",
+              "correspondingRenderNode": "span3",
+              "children": [
+                {
+                  "correspondingRenderNode": "text2",
+                  "template": "text",
+                  "textStartIndex": 0,
+                  "textEndIndex": 30
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "boxTreeAfterLayout": {
+    "root": {
+      "template": "block",
+      "correspondingRenderNode": "div",
+      "x": 0, "y": 0, "width": 100, "height": 20,
+      "children": [
+        {
+          "template": "inline",
+          "correspondingRenderNode": "span1",
+          "x": 0, "y": 0, "width": 60, "height": 10,
+          "children": [
+            {
+              "template": "inline",
+              "correspondingRenderNode": "span2",
+              "x": 30, "y": 0, "width": 30, "height": 10,
+              "children": [
+                {
+                  "correspondingRenderNode": "text1",
+                  "x": 30, "y": 0, "width": 30, "height": 10,
+                  "template": "text",
+                  "textStartIndex": 0,
+                  "textEndIndex": 30
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "template": "inline",
+          "correspondingRenderNode": "span1",
+          "x": 0, "y": 10, "width": 45, "height": 10,
+          "children": [
+            {
+              "template": "inline",
+              "correspondingRenderNode": "span3",
+              "x": 0, "y": 10, "width": 30, "height": 10,
+              "children": [
+                {
+                  "correspondingRenderNode": "text2",
+                  "x": 0, "y": 10, "width": 30, "height": 10,
+                  "template": "text",
+                  "textStartIndex": 0,
+                  "textEndIndex": 30
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

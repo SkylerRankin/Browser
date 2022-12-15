@@ -38,7 +38,7 @@ public class TextDimensionCalculator {
         float height = (float) text.getBoundsInLocal().getHeight();
         Vector2 dimensions = new Vector2(width, height);
         cache.put(key, dimensions);
-        // TODO remove less used entries from cache. Is a cache even helping here anyways?
+        // TODO: remove less used entries from cache. Is a cache even helping here anyways?
         return dimensions;
     }
 

@@ -97,7 +97,7 @@ public class CSSLoader {
 
     /**
      * Parse the inline style attribute and apple that style.
-     * TODO should not apply to every node of this type, just this node specifically
+     * TODO: should not apply to every node of this type, just this node specifically
      * @param root
      */
     public void applyInline(RenderNode root) {
@@ -113,7 +113,7 @@ public class CSSLoader {
         }
     }
 
-    //TODO handle selectors for nested elements; this is just 1 level
+    //TODO: handle selectors for nested elements; this is just 1 level
     private static void applyRules(RenderNode node, Map<Selector, Map<String, String>> rules, boolean globalApplication) {
         // Create some representative selectors for this node
         CSSParser.Selector allSelector = (new CSSParser()).new Selector(CSSParser.SelectorType.ALL);

@@ -1,0 +1,308 @@
+{
+  "config": {
+    "screenWidth": 50,
+    "letterWidth": 1,
+    "letterHeight": 10
+  },
+  "renderTree": {
+    "root": {
+      "refName": "div",
+      "template": "div",
+      "style": {
+        "padding": 2
+      },
+      "children": [
+        {
+          "refName": "span1",
+          "template": "span",
+          "style": {
+            "marginLeft": 2,
+            "paddingLeft": 1,
+            "paddingRight": 1,
+            "marginRight": 2
+          },
+          "children": [
+            {
+              "refName": "span2",
+              "template": "span",
+              "style": {
+                "marginLeft": 1,
+                "paddingLeft": 2,
+                "paddingRight": 2,
+                "marginRight": 1
+              },
+              "children": [
+                {
+                  "refName": "text1",
+                  "template": "text",
+                  "text": "A block formatting context (BFC) is a part of a visual CSS rendering of a web page."
+                }
+              ]
+            },
+            {
+              "refName": "span3",
+              "template": "span",
+              "style": {
+                "marginLeft": 1,
+                "paddingLeft": 2,
+                "paddingRight": 2,
+                "marginRight": 4
+              },
+              "children": [
+                {
+                  "refName": "text2",
+                  "template": "text",
+                  "text": "It's the region in which the layout of block boxes occurs and in which floats interact with other elements."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "refName": "span4",
+          "template": "span",
+          "style": {
+            "marginLeft": 1,
+            "paddingLeft": 2,
+            "paddingRight": 2,
+            "marginRight": 1
+          },
+          "children": [
+            {
+              "refName": "text3",
+              "template": "text",
+              "text": "Formatting contexts affect layout, but typically"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "boxTree": {
+    "root": {
+      "template": "block",
+      "correspondingRenderNode": "div",
+      "children": [
+        {
+          "template": "inline",
+          "correspondingRenderNode": "span1",
+          "children": [
+            {
+              "template": "inline",
+              "correspondingRenderNode": "span2",
+              "children": [
+                {
+                  "correspondingRenderNode": "text1",
+                  "template": "text",
+                  "textStartIndex": 0,
+                  "textEndIndex": 83
+                }
+              ]
+            },
+            {
+              "template": "inline",
+              "correspondingRenderNode": "span3",
+              "children": [
+                {
+                  "correspondingRenderNode": "text2",
+                  "template": "text",
+                  "textStartIndex": 0,
+                  "textEndIndex": 107
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "template": "inline",
+          "correspondingRenderNode": "span4",
+          "children": [
+            {
+              "correspondingRenderNode": "text3",
+              "template": "text",
+              "textStartIndex": 0,
+              "textEndIndex": 48
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "boxTreeAfterLayout": {
+    "root": {
+      "template": "block",
+      "correspondingRenderNode": "div",
+      "x": 0, "y": 0, "width": 50, "height": 74,
+      "children": [
+        {
+          "template": "inline",
+          "correspondingRenderNode": "span1",
+          "x": 4, "y": 2, "width": 41, "height": 10,
+          "children": [
+            {
+              "template": "inline",
+              "correspondingRenderNode": "span2",
+              "x": 6, "y": 2, "width": 39, "height": 10,
+              "children": [
+                {
+                  "correspondingRenderNode": "text1",
+                  "x": 8, "y": 2, "width": 37, "height": 10,
+                  "template": "text",
+                  "textStartIndex": 0,
+                  "textEndIndex": 37
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "template": "inline",
+          "correspondingRenderNode": "span1",
+          "x": 2, "y": 12, "width": 39, "height": 10,
+          "children": [
+            {
+              "template": "inline",
+              "correspondingRenderNode": "span2",
+              "x": 2, "y": 12, "width": 39, "height": 10,
+              "children": [
+                {
+                  "correspondingRenderNode": "text1",
+                  "x": 2, "y": 12, "width": 39, "height": 10,
+                  "template": "text",
+                  "textStartIndex": 38,
+                  "textEndIndex": 77
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "template": "inline",
+          "correspondingRenderNode": "span1",
+          "x": 2, "y": 22, "width": 35, "height": 10,
+          "children": [
+            {
+              "template": "inline",
+              "correspondingRenderNode": "span2",
+              "x": 2, "y": 22, "width": 7, "height": 10,
+              "children": [
+                {
+                  "correspondingRenderNode": "text1",
+                  "x": 2, "y": 22, "width": 5, "height": 10,
+                  "template": "text",
+                  "textStartIndex": 78,
+                  "textEndIndex": 83
+                }
+              ]
+            },
+            {
+              "template": "inline",
+              "correspondingRenderNode": "span3",
+              "x": 11, "y": 22, "width": 26, "height": 10,
+              "children": [
+                {
+                  "correspondingRenderNode": "text2",
+                  "x": 13, "y": 22, "width": 24, "height": 10,
+                  "template": "text",
+                  "textStartIndex": 0,
+                  "textEndIndex": 24
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "template": "inline",
+          "correspondingRenderNode": "span1",
+          "x": 2, "y": 32, "width": 36, "height": 10,
+          "children": [
+            {
+              "template": "inline",
+              "correspondingRenderNode": "span3",
+              "x": 2, "y": 32, "width": 36, "height": 10,
+              "children": [
+                {
+                  "correspondingRenderNode": "text2",
+                  "x": 2, "y": 32, "width": 36, "height": 10,
+                  "template": "text",
+                  "textStartIndex": 25,
+                  "textEndIndex": 61
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "template": "inline",
+          "correspondingRenderNode": "span1",
+          "x": 2, "y": 42, "width": 35, "height": 10,
+          "children": [
+            {
+              "template": "inline",
+              "correspondingRenderNode": "span3",
+              "x": 2, "y": 42, "width": 35, "height": 10,
+              "children": [
+                {
+                  "correspondingRenderNode": "text2",
+                  "x": 2, "y": 42, "width": 35, "height": 10,
+                  "template": "text",
+                  "textStartIndex": 62,
+                  "textEndIndex": 97
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "template": "inline",
+          "correspondingRenderNode": "span1",
+          "x": 2, "y": 52, "width": 16, "height": 10,
+          "children": [
+            {
+              "template": "inline",
+              "correspondingRenderNode": "span3",
+              "x": 2, "y": 52, "width": 11, "height": 10,
+              "children": [
+                {
+                  "correspondingRenderNode": "text2",
+                  "x": 2, "y": 52, "width": 9, "height": 10,
+                  "template": "text",
+                  "textStartIndex": 98,
+                  "textEndIndex": 107
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "template": "inline",
+          "correspondingRenderNode": "span4",
+          "x": 21, "y": 52, "width": 21, "height": 10,
+          "children": [
+            {
+              "correspondingRenderNode": "text3",
+              "x": 23, "y": 52, "width": 19, "height": 10,
+              "template": "text",
+              "textStartIndex": 0,
+              "textEndIndex": 19
+            }
+          ]
+        },
+        {
+          "template": "inline",
+          "correspondingRenderNode": "span4",
+          "x": 2, "y": 62, "width": 30, "height": 10,
+          "children": [
+            {
+              "correspondingRenderNode": "text3",
+              "x": 2, "y": 62, "width": 28, "height": 10,
+              "template": "text",
+              "textStartIndex": 20,
+              "textEndIndex": 48
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

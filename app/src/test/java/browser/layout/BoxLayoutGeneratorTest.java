@@ -48,9 +48,7 @@ public class BoxLayoutGeneratorTest {
         TestDataLoader.TestData testData = TestDataLoader.loadLayoutTrees("textInPInDivWithOverflow");
         setTextDimensionOverride(testData.letterWidth, testData.letterHeight);
         BoxNode rootBoxNode = testData.rootBoxNode;
-        System.out.println(rootBoxNode.toRecursiveString());
         boxLayoutGenerator.calculateLayout(rootBoxNode, testData.screenWidth);
-        System.out.println(rootBoxNode.toRecursiveString());
         assertEquals(testData.rootBoxNodeAfterLayout, rootBoxNode);
     }
 
@@ -75,6 +73,85 @@ public class BoxLayoutGeneratorTest {
     @Test
     public void simpleSplitTextSpans() {
         TestDataLoader.TestData testData = TestDataLoader.loadLayoutTrees("splitTextSpanInDiv");
+        setTextDimensionOverride(testData.letterWidth, testData.letterHeight);
+        BoxNode rootBoxNode = testData.rootBoxNode;
+        boxLayoutGenerator.calculateLayout(rootBoxNode, testData.screenWidth);
+        assertBoxesEqualIgnoreIds(testData.rootBoxNodeAfterLayout, rootBoxNode);
+    }
+
+    /**
+     * <div id=0>
+     *     <span1 id=1>
+     *         <span2 id=2>
+     *             A block formatting context (BFC) is a part of a visual CSS rendering of a web page.
+     *         </span2>
+     *         <span3 id=4>
+     *             It's the region in which the layout of block boxes occurs and in which floats interact with other elements.
+     *         </span3>
+     *     </span1>
+     *     <span4 id=6>
+     *         Formatting contexts affect layout, but typically
+     *     </span4>
+     *     <span5 id=8>
+     *         we create a new block formatting context for the positioning and clearing floats rather than changing the layout, because an element that establishes a new block formatting context will:
+     *     </span5>
+     * </div>
+     */
+    @Test
+    public void splitTextSpansWithSpacing() {
+        TestDataLoader.TestData testData = TestDataLoader.loadLayoutTrees("inlineTextSplitsWithSpacing");
+        setTextDimensionOverride(testData.letterWidth, testData.letterHeight);
+        BoxNode rootBoxNode = testData.rootBoxNode;
+        boxLayoutGenerator.calculateLayout(rootBoxNode, testData.screenWidth);
+        assertBoxesEqualIgnoreIds(testData.rootBoxNodeAfterLayout, rootBoxNode);
+    }
+
+    @Test
+    public void newLineIfNoRoomForInlineMargin() {
+        TestDataLoader.TestData testData = TestDataLoader.loadLayoutTrees("marginForcesNewLine");
+        setTextDimensionOverride(testData.letterWidth, testData.letterHeight);
+        BoxNode rootBoxNode = testData.rootBoxNode;
+        boxLayoutGenerator.calculateLayout(rootBoxNode, testData.screenWidth);
+        assertBoxesEqualIgnoreIds(testData.rootBoxNodeAfterLayout, rootBoxNode);
+    }
+
+    /**
+     * <div padding=20>
+     *     <div marginLeft=10, marginRight=20, paddingTop=5>
+     *         <div height=5></div>
+     *     </div>
+     * </div>
+     */
+    @Test
+    public void simpleBlockSpacing() {
+        TestDataLoader.TestData testData = TestDataLoader.loadLayoutTrees("simpleBlockSpacing");
+        setTextDimensionOverride(testData.letterWidth, testData.letterHeight);
+        BoxNode rootBoxNode = testData.rootBoxNode;
+        boxLayoutGenerator.calculateLayout(rootBoxNode, testData.screenWidth);
+        assertBoxesEqualIgnoreIds(testData.rootBoxNodeAfterLayout, rootBoxNode);
+    }
+
+    /**
+     * <div1 style="padding: 10">
+     *     <div2 style="margin-bottom: 20, width: 20, height: 20">
+     *         <div3 style="margin-left: 5, margin-right: 5">title</div>
+     *         <div4>
+     *             <span style="margin-left: 2">subtitle</span>
+     *         </div>
+     *     </div2>
+     *     <div5>
+     *         <span>
+     *             Some text.
+     *         </span>
+     *     </div>
+     *     <div6 style="padding: 20">
+     *         Scientists seek a single description of reality. But <i>modern</i> physics allows for many different descriptions, many equivalent to one another, connected through a vast landscape of mathematical possibility.
+     *     </div>
+     * </div2>
+     */
+    @Test
+    public void mixedInlineBlock() {
+        TestDataLoader.TestData testData = TestDataLoader.loadLayoutTrees("mixedInlineBlock");
         setTextDimensionOverride(testData.letterWidth, testData.letterHeight);
         BoxNode rootBoxNode = testData.rootBoxNode;
         boxLayoutGenerator.calculateLayout(rootBoxNode, testData.screenWidth);

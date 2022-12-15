@@ -31,7 +31,7 @@ public class TextNodeSplitter {
         if (!boxNode.isTextNode) {
             return null;
         }
-        CSSStyle style = boxNode.correspondingRenderNode.style;
+        CSSStyle style = boxNode.style;
         float spaceWidth = textDimensionCalculator.getDimension(" ", style).x;
 
         List<Range> lineRanges = new ArrayList<>();
@@ -87,7 +87,7 @@ public class TextNodeSplitter {
             return null;
         }
 
-        CSSStyle style = boxNode.correspondingRenderNode.style;
+        CSSStyle style = boxNode.style;
         String text = boxNode.correspondingRenderNode.text.substring(boxNode.textStartIndex, boxNode.textEndIndex);
         Vector2 textDimension = textDimensionCalculator.getDimension(text, style);
         if (textDimension.x <= availableWidth) {
@@ -95,7 +95,10 @@ public class TextNodeSplitter {
             return null;
         }
 
-        if (!text.contains("\s")) {
+        int leadingSpaces = countLeadingSpaces(text);
+        int trailingSpaces = countTrailingSpaces(text);
+
+        if (!text.substring(leadingSpaces).contains("\s")) {
             // The text cannot be split to fit the space.
             return null;
         }
@@ -104,7 +107,15 @@ public class TextNodeSplitter {
         final int startIndex = boxNode.textStartIndex;
         int currentEndIndex = boxNode.textStartIndex;
         float currentWidth = 0;
-        String[] words = text.split("\s");
+
+        String leadingSpaceText = leadingSpaces > 0 ? text.substring(0, leadingSpaces) : "";
+        String trailingSpaceText = trailingSpaces > 0 ? text.substring(text.length() - trailingSpaces) : "";
+        String textWithoutSpace = text.substring(leadingSpaces, text.length() - trailingSpaces);
+
+        String[] words = textWithoutSpace.split("\s");
+        words[0] += leadingSpaceText;
+        words[words.length - 1] += trailingSpaceText;
+
         for (String word : words) {
             float wordWidth = textDimensionCalculator.getDimension(word, style).x;
             float newCurrentWidth = currentWidth + (currentEndIndex == startIndex ? 0 : spaceWidth) + wordWidth;
@@ -138,13 +149,14 @@ public class TextNodeSplitter {
             return false;
         } else {
             String text = boxNode.correspondingRenderNode.text.substring(boxNode.textStartIndex, boxNode.textEndIndex);
-            int spaceIndex = text.indexOf(" ");
+            int leadingSpaces = countLeadingSpaces(text);
+            int spaceIndex = text.indexOf(" ", leadingSpaces);
             if (spaceIndex == -1) {
                 return false;
             }
 
             String firstWord = text.substring(0, spaceIndex);
-            float firstWordWidth = textDimensionCalculator.getDimension(firstWord, boxNode.correspondingRenderNode.style).x;
+            float firstWordWidth = textDimensionCalculator.getDimension(firstWord, boxNode.style).x;
             return firstWordWidth <= availableWidth;
         }
     }
@@ -158,6 +170,25 @@ public class TextNodeSplitter {
             boxes.add(box);
         }
         return boxes;
+    }
+
+    private int countLeadingSpaces(String string) {
+        int i = 0;
+        while (i < string.length() && string.charAt(i) == ' ') {
+            i++;
+        }
+        return i;
+    }
+
+    private int countTrailingSpaces(String string) {
+        int i = string.length() - 1;
+        int count = 0;
+        while (i >= 0 && string.charAt(i) == ' ') {
+            i--;
+            count++;
+        }
+
+        return count == string.length() ? 0 : count;
     }
 
     private static class Range {

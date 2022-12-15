@@ -2,7 +2,6 @@ package browser.layout;
 
 import static browser.constants.MathConstants.DELTA;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 
 import java.util.List;
 
@@ -31,7 +30,9 @@ public class InlineFormattingContextTest {
      *     <span3>
      *         <span4></span4>
      *         <span5></span5>
-     *         <div></div>
+     *         <div1>
+     *             <div2></div2>
+     *         </div1>
      *     </span3>
      * </root>
      */
@@ -42,8 +43,8 @@ public class InlineFormattingContextTest {
         BoxNode root = createBoxNode(0, 0, 20, 10, 100, 200);
         root.x = 10f;
         root.y = 50f;
-        root.width = 8f;
-        root.height = 8f;
+        root.width = 100f;
+        root.height = 10f;
         BoxNode span1 = createBoxNode(1, 0, 5, 5, 15, 10);
         BoxNode span2 = createBoxNode(2,0, 10, 10, 3, 2);
         BoxNode span3 = createBoxNode(3,0, 5, 20, 5, 20);
@@ -67,25 +68,63 @@ public class InlineFormattingContextTest {
         context.initialize(root);
 
         assertEquals(10, context.width, DELTA);
-        assertEquals(10, context.startX, DELTA);
-        assertEquals(18, context.endX, DELTA);
+        assertEquals(30, context.startX, DELTA);
+        assertEquals(100, context.endX, DELTA);
 
         assertEquals(0, context.getLeftSpacingForBox(0), DELTA);
         assertEquals(0, context.getRightSpacingForBox(0), DELTA);
-        assertEquals(35, context.getLeftSpacingForBox(1), DELTA);
+        assertEquals(15, context.getLeftSpacingForBox(1), DELTA);
         assertEquals(10, context.getRightSpacingForBox(1), DELTA);
-        assertEquals(43, context.getLeftSpacingForBox(2), DELTA);
+        assertEquals(23, context.getLeftSpacingForBox(2), DELTA);
         assertEquals(17, context.getRightSpacingForBox(2), DELTA);
         assertEquals(5, context.getLeftSpacingForBox(3), DELTA);
-        assertEquals(30, context.getRightSpacingForBox(3), DELTA);
+        assertEquals(20, context.getRightSpacingForBox(3), DELTA);
         assertEquals(13, context.getLeftSpacingForBox(4), DELTA);
         assertEquals(4, context.getRightSpacingForBox(4), DELTA);
         assertEquals(20, context.getLeftSpacingForBox(5), DELTA);
         assertEquals(10, context.getRightSpacingForBox(5), DELTA);
         assertEquals(15, context.getLeftSpacingForBox(6), DELTA);
-        assertEquals(51, context.getRightSpacingForBox(6), DELTA);
+        assertEquals(41, context.getRightSpacingForBox(6), DELTA);
+        // Expect 0 since this div is not a part of this inline context.
         assertEquals(0, context.getLeftSpacingForBox(7), DELTA);
         assertEquals(0, context.getRightSpacingForBox(7), DELTA);
+    }
+
+    @Test
+    public void spacingDoesNotIncludeRootPadding() {
+        InlineFormattingContext context = new InlineFormattingContext(0, 100, 0);
+
+        BoxNode root = createBoxNode(0, 0, 10, 10, 100, 200);
+        root.x = 10f;
+        root.y = 50f;
+        root.width = 100f;
+        root.height = 100f;
+        root.style.paddingTop = 10;
+        root.style.paddingBottom = 10;
+        BoxNode span1 = createBoxNode(1, 0, 5, 5, 15, 10);
+        BoxNode span2 = createBoxNode(2,0, 10, 10, 3, 2);
+        BoxNode span3 = createBoxNode(3,0, 5, 20, 5, 20);
+
+        root.children.addAll(List.of(span1, span3));
+        span1.children.add(span2);
+        span1.parent = root;
+        span2.parent = span1;
+        span3.parent = root;
+
+        context.initialize(root);
+
+        assertEquals(100, context.width, DELTA);
+        assertEquals(20, context.startX, DELTA);
+        assertEquals(100, context.endX, DELTA);
+
+        assertEquals(0, context.getLeftSpacingForBox(0), DELTA);
+        assertEquals(0, context.getRightSpacingForBox(0), DELTA);
+        assertEquals(15, context.getLeftSpacingForBox(1), DELTA);
+        assertEquals(10, context.getRightSpacingForBox(1), DELTA);
+        assertEquals(23, context.getLeftSpacingForBox(2), DELTA);
+        assertEquals(17, context.getRightSpacingForBox(2), DELTA);
+        assertEquals(5, context.getLeftSpacingForBox(3), DELTA);
+        assertEquals(20, context.getRightSpacingForBox(3), DELTA);
     }
 
     private BoxNode createBoxNode(int id, int contextId, int paddingLeft, int paddingRight, int marginLeft, int marginRight) {
@@ -100,6 +139,7 @@ public class InlineFormattingContextTest {
         boxNode.id = id;
         boxNode.correspondingRenderNode = renderNode;
         boxNode.inlineFormattingContextId = contextId;
+        boxNode.style = style;
         return boxNode;
     }
 

@@ -12,6 +12,7 @@ import browser.parser.HTMLElements;
 public class InlineFormattingContext {
 
     public final int id;
+    // TODO: remove width property if it isn't used
     public final float width;
     public final int contextRootId;
     public float startX;
@@ -43,9 +44,9 @@ public class InlineFormattingContext {
 
     public void initialize(BoxNode rootBox) {
         this.rootBox = rootBox;
-        startX = rootBox.x;
-        endX = startX + rootBox.width;
-        yStartPerLine.add(rootBox.y);
+        startX = rootBox.x + rootBox.style.paddingLeft;
+        endX = startX + rootBox.width - rootBox.style.paddingLeft - rootBox.style.paddingRight;
+        yStartPerLine.add(rootBox.y + rootBox.style.paddingTop);
         maxHeightPerLine.add(0f);
         lineBoxes.add(new LineBox(width));
         terminalBoxInLine.add(false);
@@ -62,7 +63,6 @@ public class InlineFormattingContext {
 
         if (isTerminalInContext(boxNode)) {
             terminalBoxInLine.set(terminalBoxInLine.size() - 1, true);
-            System.out.printf("Adding %d boxes from tentative list in current line.\n", terminalBoxInLine.size());
             for (BoxNode tentativeBoxNode : tentativeBoxesForLine) {
                 lastLineBox().boxes.add(tentativeBoxNode);
                 if (maxHeightPerLine.get(maxHeightPerLine.size() - 1) < tentativeBoxNode.height) {
@@ -83,15 +83,15 @@ public class InlineFormattingContext {
 
         // If there are current tentative boxes, they need to be moved to the next line by updating their positions.
         if (tentativeBoxesForLine.size() > 0) {
-            float xOffset = tentativeBoxesForLine.get(0).parent.correspondingRenderNode.style.paddingLeft;
-            float previousX = xOffset;
+            float parentLeftPadding = tentativeBoxesForLine.get(0).parent.style.paddingLeft;
+            float previousX = tentativeBoxesForLine.get(0).id == contextRootId ? parentLeftPadding : 0;
             float y = yStartPerLine.get(yStartPerLine.size() - 1);
             for (BoxNode box : tentativeBoxesForLine) {
-                float marginLeft = box.correspondingRenderNode.style.marginLeft;
+                float marginLeft = box.style.marginLeft;
                 box.x = previousX + marginLeft;
                 box.y = y;
 
-                previousX += box.x + box.correspondingRenderNode.style.paddingRight;
+                previousX += box.x + box.style.paddingRight;
             }
         }
     }
@@ -107,6 +107,14 @@ public class InlineFormattingContext {
         } else {
             return lastLineBox.boxes.get(lastLineBox.boxes.size() - 1);
         }
+    }
+
+    public void clearTentativeBoxes() {
+        for (BoxNode tentativeBox : tentativeBoxesForLine) {
+            tentativeBox.x = null;
+            tentativeBox.y = null;
+        }
+        tentativeBoxesForLine.clear();
     }
 
     public boolean currentRowHasTerminalBox() {
@@ -169,6 +177,8 @@ public class InlineFormattingContext {
      * same line. The spacing values represent the distance between the given side of a box and the next terminal box.
      * As such, boxes that are the first or last children in their parent will include the spacing inherited from the
      * parent, while other boxes will just have spacing based on their own margins.
+     * The padding of the root box is not included. This is because the root is always a block box, and its padding
+     * impacts all child boxes, unlike the inline paddings which only impact the next adjacent box.
      * As text lines are split and inline boxes are moved to new lines during layout, these spacing values may be
      * updated.
      * @param rootBox       The box to start with.
@@ -179,8 +189,8 @@ public class InlineFormattingContext {
         }
 
         if (rootBox.id != contextRootId) {
-            float rightMargin = rootBox.correspondingRenderNode.style.marginRight;
-            float leftMargin = rootBox.correspondingRenderNode.style.marginLeft;
+            float rightMargin = rootBox.style.marginRight;
+            float leftMargin = rootBox.style.marginLeft;
             float parentRightPadding = 0;
             float parentLeftPadding = 0;
             float inheritedRightSpacing = 0;
@@ -190,14 +200,16 @@ public class InlineFormattingContext {
             boolean lastInParent = rootBox.parent.children.indexOf(rootBox) == rootBox.parent.children.size() - 1;
 
             if (firstInParent) {
-                parentLeftPadding = rootBox.parent.correspondingRenderNode.style.paddingLeft;
+                parentLeftPadding = rootBox.parent.id == contextRootId ? 0 : rootBox.parent.style.paddingLeft;
+
                 if (leftSpacingPerBox.containsKey(rootBox.parent.id)) {
                     inheritedLeftSpacing = leftSpacingPerBox.get(rootBox.parent.id);
                 }
             }
 
             if (lastInParent) {
-                parentRightPadding = rootBox.parent.correspondingRenderNode.style.paddingRight;
+                parentRightPadding = rootBox.parent.id == contextRootId ? 0 : rootBox.parent.style.paddingRight;
+
                 if (rightSpacingPerBox.containsKey(rootBox.parent.id)) {
                     inheritedRightSpacing = rightSpacingPerBox.get(rootBox.parent.id);
                 }

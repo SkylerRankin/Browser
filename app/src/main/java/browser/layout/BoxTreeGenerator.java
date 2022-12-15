@@ -57,6 +57,7 @@ public class BoxTreeGenerator {
         boxNode.id = BoxNode.nextId++;
         boxNode.renderNodeId = renderNode.id;
         boxNode.correspondingRenderNode = renderNode;
+        boxNode.style = renderNode.style.deepCopy();
         boxNode.parent = parentBoxNode;
         if (parentBoxNode != null) {
             parentBoxNode.children.add(boxNode);
@@ -143,7 +144,7 @@ public class BoxTreeGenerator {
             } else if (childNode.outerDisplayType.equals(DisplayType.INLINE)) {
                 currentInlineBoxes.add(childNode);
             } else {
-                // TODO what if its neither inline nor block?
+                // TODO: what if its neither inline nor block?
                 newChildren.add(childNode);
             }
         }

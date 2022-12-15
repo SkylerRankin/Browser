@@ -13,7 +13,7 @@ public class BoxTreePartitioner {
      * @param boxNode       The leaf box node to put on a separate path.
      */
     public void partition(BoxNode boxNode, InlineFormattingContext context) {
-        if (boxNode.parent == null || boxNode.parent.id == context.contextRootId) {
+        if (boxNode.parent == null) {
             return;
         }
 
@@ -29,6 +29,7 @@ public class BoxTreePartitioner {
 
                 int parentIndex = currentBox.parent.parent.children.indexOf(currentBox.parent);
                 BoxNode newBoxNode = new BoxNode(currentBox.parent);
+                BoxNode originalParent = currentBox.parent;
                 newBoxNode.children = partitions.get(1);
                 for (BoxNode childBoxNode : newBoxNode.children) {
                     childBoxNode.parent = newBoxNode;
@@ -38,13 +39,44 @@ public class BoxTreePartitioner {
                 newBoxNode.y = null;
                 newBoxNode.width = null;
                 newBoxNode.height = null;
-                currentBox.parent.parent.children.add(parentIndex + 1, newBoxNode);
 
+                // Since the original box has left and right spacing, these values are divided between the resulting
+                // two boxes; neither should not have the spacing on both sides.
+                newBoxNode.style.paddingLeft = 0;
+                newBoxNode.style.marginLeft = 0;
+                originalParent.style.paddingRight = 0;
+                originalParent.style.marginRight = 0;
+
+                currentBox.parent.parent.children.add(parentIndex + 1, newBoxNode);
                 currentBox = newBoxNode;
             } else {
                 currentBox = currentBox.parent;
             }
         }
+    }
+
+    /**
+     * Checks if running a partition starting at the given box would cause any changes to the tree.
+     * @param boxNode       The box that would be partitioned.
+     * @param context       The relevant context.
+     * @return      True if a partition would modify the box tree.
+     */
+    public boolean partitionAltersTree(BoxNode boxNode, InlineFormattingContext context) {
+        if (boxNode.parent == null) {
+            return false;
+        }
+
+        BoxNode currentBox = boxNode;
+        while (currentBox.parent.id != context.contextRootId) {
+            int indexInParent = currentBox.parent.children.indexOf(currentBox);
+            boolean previousSiblings = indexInParent > 0;
+            if (previousSiblings) {
+                return true;
+            }
+            currentBox = currentBox.parent;
+        }
+
+        return false;
     }
 
     private List<List<BoxNode>> partitionChildren(BoxNode parent, int partitionIndex) {

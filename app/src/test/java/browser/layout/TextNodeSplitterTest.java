@@ -7,7 +7,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
-import java.util.Objects;
 
 import browser.app.Pipeline;
 import browser.model.BoxNode;
@@ -186,6 +185,26 @@ public class TextNodeSplitterTest {
     }
 
     @Test
+    public void fitNodeToWidth_splitWithSpacing() {
+        RenderNode renderNode = new RenderNode(HTMLElements.TEXT);
+        renderNode.text = " has extra spaces  ";
+        BoxNode boxNode = new BoxNode();
+        boxNode.isTextNode = true;
+        boxNode.correspondingRenderNode = renderNode;
+        boxNode.textStartIndex = 0;
+        boxNode.textEndIndex = 19;
+        float width = 13;
+        BoxNode result = textNodeSplitter.fitNodeToWidth(boxNode, width);
+
+        assertEquals(0, boxNode.textStartIndex);
+        assertEquals(10, boxNode.textEndIndex);
+
+        assertNotNull(result);
+        assertEquals(11, result.textStartIndex);
+        assertEquals(19, result.textEndIndex);
+    }
+
+    @Test
     public void canSplitNodeToFitWidth() {
         RenderNode renderNode = new RenderNode(HTMLElements.TEXT);
         renderNode.text = "this is some text";
@@ -201,6 +220,25 @@ public class TextNodeSplitterTest {
 
         assertFalse(textNodeSplitter.canSplitNodeToFitWidth(boxNode, 1));
         assertFalse(textNodeSplitter.canSplitNodeToFitWidth(boxNode, 3));
+    }
+
+    @Test
+    public void canSplitNodeToFitWidth_EdgeSpaces() {
+        RenderNode renderNode = new RenderNode(HTMLElements.TEXT);
+        renderNode.text = "  this is some text ";
+        BoxNode boxNode = new BoxNode();
+        boxNode.isTextNode = true;
+        boxNode.correspondingRenderNode = renderNode;
+        boxNode.textStartIndex = 0;
+        boxNode.textEndIndex = 20;
+
+        assertTrue(textNodeSplitter.canSplitNodeToFitWidth(boxNode, 7));
+        assertTrue(textNodeSplitter.canSplitNodeToFitWidth(boxNode, 10));
+        assertTrue(textNodeSplitter.canSplitNodeToFitWidth(boxNode, 100));
+
+        assertFalse(textNodeSplitter.canSplitNodeToFitWidth(boxNode, 1));
+        assertFalse(textNodeSplitter.canSplitNodeToFitWidth(boxNode, 2));
+        assertFalse(textNodeSplitter.canSplitNodeToFitWidth(boxNode, 5));
     }
 
 }
