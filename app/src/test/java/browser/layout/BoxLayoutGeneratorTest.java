@@ -158,6 +158,15 @@ public class BoxLayoutGeneratorTest {
         assertBoxesEqualIgnoreIds(testData.rootBoxNodeAfterLayout, rootBoxNode);
     }
 
+    @Test
+    public void horizontalInlineBlockDivs() {
+        TestDataLoader.TestData testData = TestDataLoader.loadLayoutTrees("simpleInlineBlock");
+        setTextDimensionOverride(testData.letterWidth, testData.letterHeight);
+        BoxNode rootBoxNode = testData.rootBoxNode;
+        boxLayoutGenerator.calculateLayout(rootBoxNode, testData.screenWidth);
+        assertBoxesEqualIgnoreIds(testData.rootBoxNodeAfterLayout, rootBoxNode);
+    }
+
     private void assertBoxesEqualIgnoreIds(BoxNode box1, BoxNode box2) {
         assertEquals(box1.outerDisplayType, box2.outerDisplayType);
         assertEquals(box1.innerDisplayType, box2.innerDisplayType);

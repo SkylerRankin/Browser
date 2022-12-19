@@ -5,6 +5,9 @@ import browser.model.BoxNode;
 import browser.model.Vector2;
 import browser.parser.HTMLElements;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class InlineLayoutFormatter {
 
     private final TextDimensionCalculator textDimensionCalculator;
@@ -102,6 +105,39 @@ public class InlineLayoutFormatter {
         return maxX - boxNode.x;
     }
 
+    /**
+     * Calculates the width of an inline-block box, meaning the inner display is flow-root and the outer display is
+     * inline. These boxes can either have a fixed width, or fit to their content if no width is provided.
+     * @param originalBoxNode       The inline block box.
+     * @param availableWidth        The available width in the parent box.
+     * @return      The width of the inline block box.
+     */
+    public float getInlineBlockWidth(BoxNode originalBoxNode, float availableWidth) {
+        BoxLayoutGenerator generator = new BoxLayoutGenerator(textDimensionCalculator);
+
+        List<Float> widths = List.of(Float.MAX_VALUE, 0.1f);
+        List<Float> results = new ArrayList<>();
+
+        for (Float width : widths) {
+            BoxNode copyBoxNode = originalBoxNode.deepCopy();
+            copyBoxNode.innerDisplayType = CSSStyle.DisplayType.FLOW;
+            copyBoxNode.outerDisplayType = CSSStyle.DisplayType.BLOCK;
+            copyBoxNode.width = width;
+            generator.calculateLayout(copyBoxNode, copyBoxNode.width);
+            float maxX = 0;
+            for (BoxNode child : copyBoxNode.children) {
+                float childMaxX = child.x + child.width + child.style.marginRight + copyBoxNode.style.paddingRight;
+                maxX = Math.max(childMaxX, maxX);
+            }
+            float preferredWidth = maxX - copyBoxNode.x;
+            results.add(preferredWidth);
+        }
+
+        float preferredWidth = results.get(0);
+        float preferredMinWidth = results.get(1);
+        return Math.min(Math.max(preferredMinWidth, availableWidth), preferredWidth);
+    }
+
     // Private methods
 
     private float getBoxXPosition(BoxNode boxNode, InlineFormattingContext context) {
@@ -152,7 +188,9 @@ public class InlineLayoutFormatter {
         } else if (boxNode.correspondingRenderNode.type.equals(HTMLElements.IMG)) {
             size = new Vector2(boxNode.width, boxNode.height);
         } else if (boxNode.innerDisplayType.equals(CSSStyle.DisplayType.FLOW_ROOT)) {
-            size = new Vector2(boxNode.width, boxNode.height);
+            float width = boxNode.width == null ? 0 : boxNode.width;
+            float height = boxNode.height == null ? 0 : boxNode.height;
+            size = new Vector2(width, height);
         }
 
         float widthDueToSpacing = boxNode.style.paddingLeft + boxNode.style.paddingRight;

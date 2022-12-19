@@ -139,4 +139,15 @@ public class BoxNode {
         return true;
     }
 
+    public BoxNode deepCopy() {
+        BoxNode copy = new BoxNode(this);
+        copy.parent = null;
+        for (BoxNode child : children) {
+            BoxNode childCopy = child.deepCopy();
+            copy.children.add(childCopy);
+            childCopy.parent = copy;
+        }
+        return copy;
+    }
+
 }

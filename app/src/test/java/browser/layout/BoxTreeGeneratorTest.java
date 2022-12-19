@@ -643,4 +643,74 @@ public class BoxTreeGeneratorTest {
         assertEquals(div1Box, rootBoxNode);
     }
 
+    /**
+     * This test covers the situation of an inline block box in the middle of some normal inline boxes.
+     * <div1>
+     *     <span1></span1>
+     *     <div2 style="display: inline-block"></div2>
+     *     <span2></span2>
+     * </div1>
+     */
+    @Test
+    public void generateInlineBlockInInlines() {
+        RenderNode div1 = new RenderNode(HTMLElements.DIV);
+        div1.id = 0;
+        div1.style.outerDisplay = DisplayType.BLOCK;
+        div1.style.innerDisplay = DisplayType.FLOW;
+
+        RenderNode span1 = new RenderNode(HTMLElements.SPAN);
+        span1.id = 1;
+        span1.style.outerDisplay = DisplayType.INLINE;
+        span1.style.innerDisplay = DisplayType.FLOW;
+        span1.parent = div1;
+
+        RenderNode div2 = new RenderNode(HTMLElements.DIV);
+        div2.id = 2;
+        div2.style.outerDisplay = DisplayType.INLINE;
+        div2.style.innerDisplay = DisplayType.FLOW_ROOT;
+        div2.parent = div1;
+
+        RenderNode span2 = new RenderNode(HTMLElements.SPAN);
+        span2.id = 3;
+        span2.style.outerDisplay = DisplayType.INLINE;
+        span2.style.innerDisplay = DisplayType.FLOW;
+        span2.parent = div1;
+
+        div1.children.addAll(List.of(span1, div2, span2));
+
+        BoxTreeGenerator boxTreeGenerator = new BoxTreeGenerator();
+        BoxNode rootBoxNode = boxTreeGenerator.generate(div1);
+
+        BoxNode div1Box = new BoxNode();
+        div1Box.id = div1.id;
+        div1Box.renderNodeId = div1.id;
+        div1Box.outerDisplayType = DisplayType.BLOCK;
+        div1Box.innerDisplayType = DisplayType.FLOW;
+
+        BoxNode span1Box = new BoxNode();
+        span1Box.id = span1.id;
+        span1Box.renderNodeId = span1.id;
+        span1Box.outerDisplayType = DisplayType.INLINE;
+        span1Box.innerDisplayType = DisplayType.FLOW;
+
+        BoxNode div2Box = new BoxNode();
+        div2Box.id = div2.id;
+        div2Box.renderNodeId = div2.id;
+        div2Box.outerDisplayType = DisplayType.INLINE;
+        div2Box.innerDisplayType = DisplayType.FLOW_ROOT;
+
+        BoxNode span2Box = new BoxNode();
+        span2Box.id = span2.id;
+        span2Box.renderNodeId = span2.id;
+        span2Box.outerDisplayType = DisplayType.INLINE;
+        span2Box.innerDisplayType = DisplayType.FLOW;
+
+        div1Box.children.addAll(List.of(span1Box, div2Box, span2Box));
+        span1Box.parent = div1Box;
+        div2Box.parent = div1Box;
+        span2Box.parent = div1Box;
+
+        assertEquals(div1Box, rootBoxNode);
+    }
+
 }

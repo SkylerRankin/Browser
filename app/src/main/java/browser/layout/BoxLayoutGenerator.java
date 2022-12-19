@@ -61,24 +61,29 @@ public class BoxLayoutGenerator {
         // Only allow fixed sizes on block boxes or boxes that establish new block context.
         boolean fixedSizeAllowed = boxNode.outerDisplayType.equals(CSSStyle.DisplayType.BLOCK) ||
                 boxNode.innerDisplayType.equals(DisplayType.FLOW_ROOT);
+        // Inline blocks, which have outer display = inline and inner display = flow-root, have optional fixed widths.
+        // If a width/height is not provided, the box fits to its contents.
+        boolean fixedWidthOptional = boxNode.innerDisplayType.equals(DisplayType.FLOW_ROOT);
 
         if (fixedSizeAllowed) {
             CSSStyle style = boxNode.style;
 
             // Block boxes should be 100% width by default, if this was not set in the stylesheets. For anonymous block
             // boxes, for instance, the width property would not have been set.
-            if (style.width == null) {
+            if (style.width == null && !fixedWidthOptional) {
                 style.width = 100f;
                 style.widthType = CSSStyle.DimensionType.PERCENTAGE;
             }
 
-            float widthSpacing = (boxNode.parent == null ? 0 : boxNode.parent.style.paddingLeft + boxNode.parent.style.paddingRight) +
-                    boxNode.style.marginLeft + boxNode.style.marginRight;
-            if (style.widthType.equals(CSSStyle.DimensionType.PERCENTAGE)) {
-                float parentWidth = boxNode.parent == null ? screenWidth : boxNode.parent.width;
-                boxNode.width = (parentWidth * style.width / 100) - widthSpacing;
-            } else {
-                boxNode.width = style.width;
+            if (style.width != null) {
+                float widthSpacing = (boxNode.parent == null ? 0 : boxNode.parent.style.paddingLeft + boxNode.parent.style.paddingRight) +
+                        boxNode.style.marginLeft + boxNode.style.marginRight;
+                if (style.widthType.equals(CSSStyle.DimensionType.PERCENTAGE)) {
+                    float parentWidth = boxNode.parent == null ? screenWidth : boxNode.parent.width;
+                    boxNode.width = (parentWidth * style.width / 100) - widthSpacing;
+                } else {
+                    boxNode.width = style.width;
+                }
             }
 
             // The max-width property overrides the width property.
@@ -186,7 +191,8 @@ public class BoxLayoutGenerator {
             DisplayType childrenDisplayType = childrenInNormalFlow.get(0).outerDisplayType;
             if (childrenDisplayType.equals(DisplayType.INLINE)) {
                 int id;
-                if (boxNode.parent != null && boxNode.parent.inlineFormattingContextId != -1) {
+                if (boxNode.parent != null && boxNode.parent.inlineFormattingContextId != -1
+                        && !boxNode.innerDisplayType.equals(DisplayType.FLOW_ROOT)) {
                     id = boxNode.parent.inlineFormattingContextId;
                 } else {
                     id = inlineFormattingContexts.size();

@@ -118,6 +118,13 @@ public class TestDataLoader {
                 renderNode.style.innerDisplay = CSSStyle.DisplayType.FLOW;
                 return renderNode;
             }
+            case "inlineBlock": {
+                RenderNode renderNode = new RenderNode(HTMLElements.DIV);
+                renderNode.style.display = CSSStyle.DisplayType.INLINE_BLOCK;
+                renderNode.style.outerDisplay = CSSStyle.DisplayType.INLINE;
+                renderNode.style.innerDisplay = CSSStyle.DisplayType.FLOW_ROOT;
+                return renderNode;
+            }
         }
         return null;
     }
@@ -215,6 +222,12 @@ public class TestDataLoader {
                 boxNode.innerDisplayType = CSSStyle.DisplayType.FLOW;
                 boxNode.isTextNode = true;
                 boxNode.isAnonymous = true;
+                return boxNode;
+            }
+            case "inlineBlock": {
+                BoxNode boxNode = new BoxNode();
+                boxNode.outerDisplayType = CSSStyle.DisplayType.INLINE;
+                boxNode.innerDisplayType = CSSStyle.DisplayType.FLOW_ROOT;
                 return boxNode;
             }
         }

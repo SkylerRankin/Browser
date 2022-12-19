@@ -1,0 +1,193 @@
+{
+  "config": {
+    "screenWidth": 100,
+    "letterWidth": 1,
+    "letterHeight": 10
+  },
+  "renderTree": {
+    "root": {
+      "refName": "div1",
+      "template": "div",
+      "style": {
+        "paddingTop": 5
+      },
+      "children": [
+        {
+          "refName": "span1",
+          "template": "span",
+          "children": [
+            {
+              "refName": "text1",
+              "template": "text",
+              "text": "first text"
+            }
+          ]
+        },
+        {
+          "refName": "div2",
+          "template": "inlineBlock",
+          "style": {
+            "width": 10
+          },
+          "children": [
+            {
+              "refName": "text2",
+              "template": "text",
+              "text": "second text"
+            }
+          ]
+        },
+        {
+          "refName": "div3",
+          "template": "inlineBlock",
+          "children": [
+            {
+              "refName": "text3",
+              "template": "text",
+              "text": "third text block"
+            }
+          ]
+        },
+        {
+          "refName": "span2",
+          "template": "span",
+          "children": [
+            {
+              "refName": "text4",
+              "template": "text",
+              "text": "fourth text"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "boxTree": {
+    "root": {
+      "template": "block",
+      "correspondingRenderNode": "div1",
+      "children": [
+        {
+          "template": "inline",
+          "correspondingRenderNode": "span1",
+          "children": [
+            {
+              "correspondingRenderNode": "text1",
+              "template": "text",
+              "textStartIndex": 0,
+              "textEndIndex": 10
+            }
+          ]
+        },
+        {
+          "template": "inlineBlock",
+          "correspondingRenderNode": "div2",
+          "children": [
+            {
+              "correspondingRenderNode": "text2",
+              "template": "text",
+              "textStartIndex": 0,
+              "textEndIndex": 11
+            }
+          ]
+        },
+        {
+          "template": "inlineBlock",
+          "correspondingRenderNode": "div3",
+          "children": [
+            {
+              "correspondingRenderNode": "text3",
+              "template": "text",
+              "textStartIndex": 0,
+              "textEndIndex": 16
+            }
+          ]
+        },
+        {
+          "template": "inline",
+          "correspondingRenderNode": "span2",
+          "children": [
+            {
+              "correspondingRenderNode": "text4",
+              "template": "text",
+              "textStartIndex": 0,
+              "textEndIndex": 11
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "boxTreeAfterLayout": {
+    "root": {
+      "template": "block",
+      "correspondingRenderNode": "div1",
+      "x": 0, "y": 0, "width": 100, "height": 25,
+      "children": [
+        {
+          "template": "inline",
+          "correspondingRenderNode": "span1",
+          "x": 0, "y": 5, "width": 10, "height": 10,
+          "children": [
+            {
+              "correspondingRenderNode": "text1",
+              "template": "text",
+              "x": 0, "y": 5, "width": 10, "height": 10,
+              "textStartIndex": 0,
+              "textEndIndex": 10
+            }
+          ]
+        },
+        {
+          "template": "inlineBlock",
+          "correspondingRenderNode": "div2",
+          "x": 10, "y": 5, "width": 10, "height": 20,
+          "children": [
+            {
+              "correspondingRenderNode": "text2",
+              "template": "text",
+              "x": 10, "y": 5, "width": 6, "height": 10,
+              "textStartIndex": 0,
+              "textEndIndex": 6
+            },
+            {
+              "correspondingRenderNode": "text2",
+              "template": "text",
+              "x": 10, "y": 15, "width": 4, "height": 10,
+              "textStartIndex": 7,
+              "textEndIndex": 11
+            }
+          ]
+        },
+        {
+          "template": "inlineBlock",
+          "correspondingRenderNode": "div3",
+          "x": 20, "y": 5, "width": 16, "height": 10,
+          "children": [
+            {
+              "correspondingRenderNode": "text3",
+              "template": "text",
+              "x": 20, "y": 5, "width": 16, "height": 10,
+              "textStartIndex": 0,
+              "textEndIndex": 16
+            }
+          ]
+        },
+        {
+          "template": "inline",
+          "correspondingRenderNode": "span2",
+          "x": 36, "y": 5, "width": 11, "height": 10,
+          "children": [
+            {
+              "correspondingRenderNode": "text4",
+              "template": "text",
+              "x": 36, "y": 5, "width": 11, "height": 10,
+              "textStartIndex": 0,
+              "textEndIndex": 11
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
