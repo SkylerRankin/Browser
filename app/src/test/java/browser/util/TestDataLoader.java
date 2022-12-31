@@ -45,7 +45,7 @@ public class TestDataLoader {
                 BoxNode.nextId = 0;
                 testData.rootBoxNode = buildBoxTree(rootObject);
             }
-            if (object.containsKey("boxTreeAfterLayout")) {
+            if (object.containsKey("boxTreeAfterLayout") && ((JSONObject) object.get("boxTreeAfterLayout")).containsKey("root")) {
                 JSONObject rootObject = (JSONObject) ((JSONObject) object.get("boxTreeAfterLayout")).get("root");
                 BoxNode.nextId = 0;
                 testData.rootBoxNodeAfterLayout = buildBoxTree(rootObject);

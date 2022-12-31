@@ -1,5 +1,7 @@
 package browser.layout;
 
+import static browser.constants.MathConstants.DELTA;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -104,14 +106,20 @@ public class InlineLayoutFormatterTest {
 //        inlineLayoutFormatter.placeBox(span1Box, context);
     }
 
+    /**
+     * This should use the preferred width of the content.
+     * <div style="display: inline-block; padding: 5;">
+     *     <div style="margin-left: 5">inline block</div>
+     * </div>
+     */
     @Test
-    public void test() {
-        TestDataLoader.TestData testData = TestDataLoader.loadLayoutTrees("singleLineSpans");
-        RenderNode rootRenderNode = testData.rootRenderNode;
-        BoxNode rootBoxNode = testData.rootBoxNode;
+    public void smallInlineBlockWidth() {
+        TestDataLoader.TestData testData = TestDataLoader.loadLayoutTrees("inlineBlockSimpleDiv");
+        BoxNode boxNode = testData.rootBoxNode;
+        System.out.println(boxNode.toRecursiveString());
 
-        rootRenderNode.print();
-        System.out.println(rootBoxNode.toRecursiveString());
+        float result = inlineLayoutFormatter.getInlineBlockWidth(boxNode, 100);
+        assertEquals(27, result, DELTA);
     }
 
 }

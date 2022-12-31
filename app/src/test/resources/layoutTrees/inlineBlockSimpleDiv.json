@@ -1,0 +1,53 @@
+{
+  "config": {
+    "screenWidth": 100,
+    "letterWidth": 1,
+    "letterHeight": 10
+  },
+  "renderTree": {
+    "root": {
+      "refName": "div1",
+      "template": "inlineBlock",
+      "style": {
+        "padding": 5
+      },
+      "children": [
+        {
+          "refName": "div2",
+          "template": "div",
+          "style": {
+            "marginLeft": 10
+          },
+          "children": [
+            {
+              "refName": "text1",
+              "template": "text",
+              "text": "inline block"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "boxTree": {
+    "root": {
+      "template": "inlineBlock",
+      "correspondingRenderNode": "div1",
+      "children": [
+        {
+          "template": "block",
+          "correspondingRenderNode": "div2",
+          "children": [
+            {
+              "correspondingRenderNode": "text1",
+              "template": "text",
+              "textStartIndex": 0,
+              "textEndIndex": 12
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "boxTreeAfterLayout": {}
+}

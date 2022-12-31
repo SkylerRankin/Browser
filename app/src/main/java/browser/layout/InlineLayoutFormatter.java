@@ -113,17 +113,20 @@ public class InlineLayoutFormatter {
      * @return      The width of the inline block box.
      */
     public float getInlineBlockWidth(BoxNode originalBoxNode, float availableWidth) {
-        BoxLayoutGenerator generator = new BoxLayoutGenerator(textDimensionCalculator);
+        if (originalBoxNode.width != null) {
+            return originalBoxNode.width;
+        }
 
-        List<Float> widths = List.of(Float.MAX_VALUE, 0.1f);
+        BoxLayoutGenerator generator = new BoxLayoutGenerator(textDimensionCalculator);
+        List<Float> widths = List.of(availableWidth, 0.1f);
         List<Float> results = new ArrayList<>();
 
         for (Float width : widths) {
             BoxNode copyBoxNode = originalBoxNode.deepCopy();
-            copyBoxNode.innerDisplayType = CSSStyle.DisplayType.FLOW;
-            copyBoxNode.outerDisplayType = CSSStyle.DisplayType.BLOCK;
-            copyBoxNode.width = width;
-            generator.calculateLayout(copyBoxNode, copyBoxNode.width);
+//            copyBoxNode.innerDisplayType = CSSStyle.DisplayType.FLOW;
+//            copyBoxNode.outerDisplayType = CSSStyle.DisplayType.BLOCK;
+//            copyBoxNode.width = width;
+            generator.calculateLayout(copyBoxNode, width);
             float maxX = 0;
             for (BoxNode child : copyBoxNode.children) {
                 float childMaxX = child.x + child.width + child.style.marginRight + copyBoxNode.style.paddingRight;
