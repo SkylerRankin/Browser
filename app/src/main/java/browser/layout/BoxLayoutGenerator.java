@@ -17,9 +17,11 @@ public class BoxLayoutGenerator {
     private final Map<Integer, InlineFormattingContext> inlineFormattingContexts = new HashMap<>();
     private final Map<Integer, BlockFormattingContext> blockFormattingContexts = new HashMap<>();
     private final InlineLayoutFormatter inlineLayoutFormatter;
+    private final InlineBlockWidthCalculator inlineBlockWidthCalculator;
 
     public BoxLayoutGenerator(final TextDimensionCalculator textDimensionCalculator) {
         inlineLayoutFormatter = new InlineLayoutFormatter(textDimensionCalculator);
+        inlineBlockWidthCalculator = new InlineBlockWidthCalculator(this);
     }
 
     // Public methods
@@ -141,6 +143,14 @@ public class BoxLayoutGenerator {
                     boxNode.height += style.paddingTop + style.paddingBottom + style.borderWidthTop + style.borderWidthBottom;
                 }
             }
+        }
+
+        boolean isInlineBlock = boxNode.outerDisplayType.equals(DisplayType.BLOCK) && boxNode.innerDisplayType.equals(DisplayType.FLOW_ROOT);
+        if (isInlineBlock && boxNode.width == null) {
+            float availableWidth = boxNode.parent == null ? screenWidth : boxNode.parent.width -
+                    boxNode.parent.style.borderWidthLeft - boxNode.parent.style.paddingLeft - boxNode.style.marginLeft -
+                    boxNode.parent.style.borderWidthRight - boxNode.parent.style.paddingRight - boxNode.style.marginRight;
+            boxNode.width = inlineBlockWidthCalculator.getWidth(boxNode, availableWidth);
         }
 
         for (BoxNode child : boxNode.children) {

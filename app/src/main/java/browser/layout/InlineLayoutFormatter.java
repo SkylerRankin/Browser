@@ -1,8 +1,5 @@
 package browser.layout;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import browser.css.CSSStyle;
 import browser.model.BoxNode;
 import browser.model.Vector2;
@@ -103,42 +100,6 @@ public class InlineLayoutFormatter {
         float maxX = rightMostChild.x + rightMostChild.width +
                 rightMostChild.style.marginRight + boxNode.style.paddingRight + boxNode.style.borderWidthRight;
         return maxX - boxNode.x;
-    }
-
-    /**
-     * Calculates the width of an inline-block box, meaning the inner display is flow-root and the outer display is
-     * inline. These boxes can either have a fixed width, or fit to their content if no width is provided.
-     * @param originalBoxNode       The inline block box.
-     * @param availableWidth        The available width in the parent box.
-     * @return      The width of the inline block box.
-     */
-    public float getInlineBlockWidth(BoxNode originalBoxNode, float availableWidth) {
-        if (originalBoxNode.width != null) {
-            return originalBoxNode.width;
-        }
-
-        BoxLayoutGenerator generator = new BoxLayoutGenerator(textDimensionCalculator);
-        List<Float> widths = List.of(availableWidth, 1f);
-        List<Float> results = new ArrayList<>();
-
-        for (Float width : widths) {
-            BoxNode copyBoxNode = originalBoxNode.deepCopy();
-            copyBoxNode.innerDisplayType = CSSStyle.DisplayType.FLOW;
-            copyBoxNode.outerDisplayType = CSSStyle.DisplayType.BLOCK;
-            copyBoxNode.width = width;
-            generator.calculateLayout(copyBoxNode, width);
-            float maxX = 0;
-            for (BoxNode child : copyBoxNode.children) {
-                float childMaxX = child.x + child.width + child.style.marginRight + copyBoxNode.style.paddingRight;
-                maxX = Math.max(childMaxX, maxX);
-            }
-            float preferredWidth = maxX - copyBoxNode.x;
-            results.add(preferredWidth);
-        }
-
-        float preferredWidth = results.get(0);
-        float preferredMinWidth = results.get(1);
-        return Math.min(Math.max(preferredMinWidth, availableWidth), preferredWidth);
     }
 
     // Private methods
