@@ -1,12 +1,12 @@
 package browser.layout;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import browser.css.CSSStyle;
 import browser.model.BoxNode;
 import browser.model.Vector2;
 import browser.parser.HTMLElements;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class InlineLayoutFormatter {
 
@@ -91,7 +91,7 @@ public class InlineLayoutFormatter {
      */
     public float getWidth(BoxNode boxNode) {
         if (boxNode.children.size() == 0) {
-            return boxNode.style.paddingLeft + boxNode.style.paddingRight;
+            return boxNode.style.paddingLeft + boxNode.style.paddingRight + boxNode.style.borderWidthLeft + boxNode.style.borderWidthRight;
         }
 
         BoxNode rightMostChild = null;
@@ -101,7 +101,7 @@ public class InlineLayoutFormatter {
             }
         }
         float maxX = rightMostChild.x + rightMostChild.width +
-                rightMostChild.style.marginRight + boxNode.style.paddingRight;
+                rightMostChild.style.marginRight + boxNode.style.paddingRight + boxNode.style.borderWidthRight;
         return maxX - boxNode.x;
     }
 
@@ -118,14 +118,14 @@ public class InlineLayoutFormatter {
         }
 
         BoxLayoutGenerator generator = new BoxLayoutGenerator(textDimensionCalculator);
-        List<Float> widths = List.of(availableWidth, 0.1f);
+        List<Float> widths = List.of(availableWidth, 1f);
         List<Float> results = new ArrayList<>();
 
         for (Float width : widths) {
             BoxNode copyBoxNode = originalBoxNode.deepCopy();
-//            copyBoxNode.innerDisplayType = CSSStyle.DisplayType.FLOW;
-//            copyBoxNode.outerDisplayType = CSSStyle.DisplayType.BLOCK;
-//            copyBoxNode.width = width;
+            copyBoxNode.innerDisplayType = CSSStyle.DisplayType.FLOW;
+            copyBoxNode.outerDisplayType = CSSStyle.DisplayType.BLOCK;
+            copyBoxNode.width = width;
             generator.calculateLayout(copyBoxNode, width);
             float maxX = 0;
             for (BoxNode child : copyBoxNode.children) {
@@ -151,7 +151,7 @@ public class InlineLayoutFormatter {
             if (previousBoxInLine.children.contains(boxNode)) {
                 // The previous box is the parent of the current box.
                 CSSStyle previousStyle = previousBoxInLine.style;
-                return previousBoxInLine.x + previousStyle.paddingLeft + boxNode.style.marginLeft;
+                return previousBoxInLine.x + previousStyle.borderWidthLeft + previousStyle.paddingLeft + boxNode.style.marginLeft;
             } else {
                 // The previous box is some sibling, potentially higher up in the tree, of the current box.
                 BoxNode siblingBox = getAncestorSiblingInLine(boxNode, previousBoxInLine);

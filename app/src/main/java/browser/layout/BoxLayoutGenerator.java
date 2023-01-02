@@ -61,8 +61,8 @@ public class BoxLayoutGenerator {
         // Only allow fixed sizes on block boxes or boxes that establish new block context.
         boolean fixedSizeAllowed = boxNode.outerDisplayType.equals(CSSStyle.DisplayType.BLOCK) ||
                 boxNode.innerDisplayType.equals(DisplayType.FLOW_ROOT);
-        // Inline blocks, which have outer display = inline and inner display = flow-root, have optional fixed widths.
-        // If a width/height is not provided, the box fits to its contents.
+
+        // Inline block boxes have optional fixed widths. If a width/height is not provided, the box fits to its contents.
         boolean fixedWidthOptional = boxNode.innerDisplayType.equals(DisplayType.FLOW_ROOT);
 
         if (fixedSizeAllowed) {
@@ -70,9 +70,11 @@ public class BoxLayoutGenerator {
 
             // Block boxes should be 100% width by default, if this was not set in the stylesheets. For anonymous block
             // boxes, for instance, the width property would not have been set.
+            boolean noSetWidth = false;
             if (style.width == null && !fixedWidthOptional) {
                 style.width = 100f;
                 style.widthType = CSSStyle.DimensionType.PERCENTAGE;
+                noSetWidth = true;
             }
 
             if (style.width != null) {
@@ -122,6 +124,21 @@ public class BoxLayoutGenerator {
                     }
                 } else if (style.maxHeightType.equals(CSSStyle.DimensionType.PIXEL)) {
                     boxNode.height = Math.min(boxNode.height, style.maxHeight);
+                }
+            }
+
+            // If using content box sizing, the original width and height is reserved for the box content, so padding
+            // and border values are added.
+            // For width, block boxes are automatically set to 100% as default. In the case of 100% width and content-box
+            // box sizing, the box should not extend past the bounds of its parent, so the padding/border addition is
+            // skipped.
+            if (boxNode.style.boxSizing.equals(CSSStyle.BoxSizingType.CONTENT_BOX)) {
+                if (boxNode.width != null && !noSetWidth) {
+                    boxNode.width += style.paddingLeft + style.paddingRight + style.borderWidthLeft + style.borderWidthRight;
+                }
+
+                if (boxNode.height != null) {
+                    boxNode.height += style.paddingTop + style.paddingBottom + style.borderWidthTop + style.borderWidthBottom;
                 }
             }
         }
@@ -284,9 +301,9 @@ public class BoxLayoutGenerator {
 
         for (BoxNode childBox : parentBox.children) {
             BoxNode lastPlacedBox = context.getLastPlacedBoxForId(parentBox.id);
-            childBox.x = parentBox.x + parentBox.style.paddingLeft + childBox.style.marginLeft;
+            childBox.x = parentBox.x + parentBox.style.borderWidthLeft + parentBox.style.paddingLeft + childBox.style.marginLeft;
             if (lastPlacedBox == null) {
-                childBox.y = parentBox.y + parentBox.style.paddingTop + childBox.style.marginTop;
+                childBox.y = parentBox.y + parentBox.style.borderWidthTop + parentBox.style.paddingTop + childBox.style.marginTop;
             } else {
                 childBox.y = lastPlacedBox.y + lastPlacedBox.height + lastPlacedBox.style.marginBottom + childBox.style.marginTop;
             }
@@ -296,7 +313,9 @@ public class BoxLayoutGenerator {
             context.setLastPlacedBoxForId(parentBox.id, childBox);
         }
 
-        parentBox.height = getHeightFromChildren(parentBox);
+        if (parentBox.height == null) {
+            parentBox.height = getHeightFromChildren(parentBox);
+        }
     }
 
     private void layoutInlineBoxes(BoxNode parentBox) {
@@ -325,7 +344,13 @@ public class BoxLayoutGenerator {
         if (parentBox.outerDisplayType.equals(DisplayType.INLINE) && !parentBox.innerDisplayType.equals(DisplayType.FLOW_ROOT)) {
             parentBox.width = inlineLayoutFormatter.getWidth(parentBox);
         }
-        parentBox.height = getHeightFromChildren(parentBox);
+
+        // Inline boxes will have their height derived from their children. If this was a block box containing inline
+        // boxes, then it will either have a predefined height or will need to derive the height from its children as
+        // well.
+        if (parentBox.style.outerDisplay.equals(DisplayType.INLINE) || parentBox.height == null) {
+            parentBox.height = getHeightFromChildren(parentBox);
+        }
     }
 
     private float getHeightFromChildren(BoxNode boxNode) {
@@ -340,7 +365,11 @@ public class BoxLayoutGenerator {
             maxY = Math.max(maxY, newY);
         }
 
-        return maxY - boxNode.y + boxNode.style.paddingBottom;
+        // Vertical borders and padding do not contribute to the layout of inline boxes. Inline-block is the one exception.
+        float bottomSpacing = !boxNode.outerDisplayType.equals(DisplayType.INLINE) || boxNode.innerDisplayType.equals(DisplayType.FLOW_ROOT) ?
+                boxNode.style.borderWidthBottom + boxNode.style.paddingBottom : 0;
+
+        return maxY - boxNode.y + bottomSpacing;
     }
 
 }

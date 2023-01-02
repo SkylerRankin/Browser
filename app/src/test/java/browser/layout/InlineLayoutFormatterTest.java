@@ -118,6 +118,7 @@ public class InlineLayoutFormatterTest {
         BoxNode boxNode = testData.rootBoxNode;
         System.out.println(boxNode.toRecursiveString());
 
+        // Available width = 100. Text width = 12, other spacing = 5 + 5 + 5. Preferred width = 27
         float result = inlineLayoutFormatter.getInlineBlockWidth(boxNode, 100);
         assertEquals(27, result, DELTA);
     }

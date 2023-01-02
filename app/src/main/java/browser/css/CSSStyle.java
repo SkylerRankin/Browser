@@ -41,6 +41,8 @@ public class CSSStyle {
 
     public enum PositionType { STATIC, RELATIVE, ABSOLUTE, FIXED, STICKY }
 
+    public enum BoxSizingType { CONTENT_BOX, BORDER_BOX }
+
     public static enum fontStyleType {NORMAL, ITALIC, ITALICS}
 
     public static enum fontWeightType {NORMAL, BOLD, OTHER}
@@ -64,6 +66,8 @@ public class CSSStyle {
     public int borderWidthRight = 0;
     public int borderWidthBottom = 0;
     public int borderWidthLeft = 0;
+
+    public BoxSizingType boxSizing = BoxSizingType.CONTENT_BOX;
     
     public CSSColor color = new CSSColor("Black");
     
@@ -234,6 +238,14 @@ public class CSSStyle {
         // TODO: should the basic display even be used anymore?
         // TODO: hwo to set the default inner. not sure if "flow" is the correct choice here.
     }
+
+    private BoxSizingType parseBoxSizingType(String text) {
+        switch (text) {
+            case "content-box": return BoxSizingType.CONTENT_BOX;
+            case "border-box": return BoxSizingType.BORDER_BOX;
+            default: return BoxSizingType.CONTENT_BOX;
+        }
+    }
     
     /**
      * Convert the string properties and values to actual properties on this class
@@ -242,7 +254,7 @@ public class CSSStyle {
         for (Entry<String, String> e : properties.entrySet()) {
             String value = e.getValue().trim();
             switch (e.getKey()) {
-            case "background-color":     backgroundColor = new CSSColor(value); break;
+            case "background-color":    backgroundColor = new CSSColor(value); break;
             case "border":              borderWidthTop = parseBorderWidth(value);
                                         borderWidthBottom = parseBorderWidth(value);
                                         borderWidthLeft = parseBorderWidth(value);
@@ -275,6 +287,7 @@ public class CSSStyle {
             case "border-bottom-width": borderWidthBottom = parseDimension(value); break;
             case "border-left-width":   borderWidthLeft = parseDimension(value); break;
             case "border-right-width":  borderWidthRight = parseDimension(value); break;
+            case "box-sizing":          boxSizing = parseBoxSizingType(value); break;
             case "color":               color = new CSSColor(value); break;
             case "display":             parseDisplayType(value); break;
             case "font-family":         fontFamily = FontLoader.getValidFont(value.split(",")); break;
@@ -369,6 +382,7 @@ public class CSSStyle {
         style.borderColorBottom = borderColorBottom;
         style.borderColorLeft = borderColorLeft;
         style.borderColorRight = borderColorRight;
+        style.boxSizing = boxSizing;
         style.color = color;
         style.display = display;
         style.innerDisplay = innerDisplay;

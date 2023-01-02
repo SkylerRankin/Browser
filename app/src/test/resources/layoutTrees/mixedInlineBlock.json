@@ -9,7 +9,8 @@
       "refName": "div1",
       "template": "div",
       "style": {
-        "padding": 10
+        "padding": 10,
+        "boxSizing": "borderBox"
       },
       "children": [
         {
@@ -81,7 +82,8 @@
           "refName": "div6",
           "template": "div",
           "style": {
-            "padding": 20
+            "padding": 20,
+            "boxSizing": "borderBox"
           },
           "children": [
             {

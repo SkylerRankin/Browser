@@ -54,11 +54,7 @@ public class BoxLayoutGeneratorTest {
 
     @Test
     public void simpleInlineSpans() {
-        TestDataLoader.TestData testData = TestDataLoader.loadLayoutTrees("singleLineSpansInDiv");
-        setTextDimensionOverride(testData.letterWidth, testData.letterHeight);
-        BoxNode rootBoxNode = testData.rootBoxNode;
-        boxLayoutGenerator.calculateLayout(rootBoxNode, testData.screenWidth);
-        assertEquals(testData.rootBoxNodeAfterLayout, rootBoxNode);
+        testLayout("singleLineSpansInDiv");
     }
 
     @Test
@@ -92,27 +88,36 @@ public class BoxLayoutGeneratorTest {
      *     <span4 id=6>
      *         Formatting contexts affect layout, but typically
      *     </span4>
-     *     <span5 id=8>
-     *         we create a new block formatting context for the positioning and clearing floats rather than changing the layout, because an element that establishes a new block formatting context will:
-     *     </span5>
      * </div>
      */
     @Test
     public void splitTextSpansWithSpacing() {
-        TestDataLoader.TestData testData = TestDataLoader.loadLayoutTrees("inlineTextSplitsWithSpacing");
-        setTextDimensionOverride(testData.letterWidth, testData.letterHeight);
-        BoxNode rootBoxNode = testData.rootBoxNode;
-        boxLayoutGenerator.calculateLayout(rootBoxNode, testData.screenWidth);
-        assertBoxesEqualIgnoreIds(testData.rootBoxNodeAfterLayout, rootBoxNode);
+        testLayout("inlineTextSplitsWithSpacing");
+    }
+
+    /**
+     * <div id=0, padding=2>
+     *     <span1 id=1, marginLeft=2, borderWidthLeft=1, paddingLeft=1, paddingRight=1, borderWidthRight=1, marginRight=2, borderWidthTop=1, borderWidthBottom=1>
+     *         <span2 id=2, marginLeft=1, borderWidthLeft=2, paddingLeft=2, paddingRight=2, marginRight=1>
+     *             A block formatting context (BFC) is a part of a visual CSS rendering of a web page.
+     *         </span2>
+     *         <span3 id=4, marginLeft=1, paddingLeft=2, paddingRight=2, borderWidthRight=2, marginRight=4>
+     *             It's the region in which the layout of block boxes occurs and in which floats interact with other elements.
+     *         </span3>
+     *     </span1>
+     *     <span4 id=6, marginLeft=1, borderWidthLeft=3, paddingLeft=2, paddingRight=2, borderWidthRight=1, marginRight=1, borderWidthBottom=2>
+     *         Formatting contexts affect layout, but typically
+     *     </span4>
+     * </div>
+     */
+    @Test
+    public void splitTextSpansWithSpacingAndBorders() {
+        testLayout("inlineTextSplitsWithSpacingAndBorders");
     }
 
     @Test
     public void newLineIfNoRoomForInlineMargin() {
-        TestDataLoader.TestData testData = TestDataLoader.loadLayoutTrees("marginForcesNewLine");
-        setTextDimensionOverride(testData.letterWidth, testData.letterHeight);
-        BoxNode rootBoxNode = testData.rootBoxNode;
-        boxLayoutGenerator.calculateLayout(rootBoxNode, testData.screenWidth);
-        assertBoxesEqualIgnoreIds(testData.rootBoxNodeAfterLayout, rootBoxNode);
+        testLayout("marginForcesNewLine");
     }
 
     /**
@@ -158,12 +163,69 @@ public class BoxLayoutGeneratorTest {
         assertBoxesEqualIgnoreIds(testData.rootBoxNodeAfterLayout, rootBoxNode);
     }
 
+    /**
+     * <div1>
+     *      <div2 style="width: 70px; box-sizing: content-box; padding: 10px; borderWidth: 1px;">
+     *          first div
+     *      </div2>
+     *      <div3 style="width: 70px; box-sizing: border-box; padding: 10px; borderWidth: 1px;">
+     *          second div
+     *      </div3>
+     * </div1>
+     */
+    @Test
+    public void boxSizing() {
+        testLayout("boxSizing");
+    }
+
+    /**
+     * <div style="width: 50px; background-color: bisque;">
+     *      <div style="padding: 10px;">a</div>
+     *      <div style="width: 100%; padding: 10px; box-sizing: content-box;">b</div>
+     *      <div style="width: 100%; padding: 10px; box-sizing: border-box;">c</div>
+     * </div>
+     */
+    @Test
+    public void boxSizingBlockDefault() {
+        testLayout("boxSizingBlockDefault");
+    }
+
+    /**
+     * <div style="width: 100px;">
+     *     <div style="box-sizing: content-box; width: 50px; height: 50px; border-color: aquamarine; border-style: solid; border-top-width: 10px; border-bottom-width: 10px; border-left-width: 5px; border-right-width: 2px;">
+     *          div with border
+     *     </div>
+     *     <div style="box-sizing: border-box; width: 50px; height: 50px; border-color: aquamarine; border-style: solid; border-top-width: 10px; border-bottom-width: 10px; border-left-width: 5px; border-right-width: 2px;">
+     *          div with border
+     *     </div>
+     * </div>
+     */
+    @Test
+    public void simpleDivWithBorder() {
+        testLayout("simpleDivWithBorder");
+    }
+
     @Test
     public void horizontalInlineBlockDivs() {
         TestDataLoader.TestData testData = TestDataLoader.loadLayoutTrees("simpleInlineBlock");
         setTextDimensionOverride(testData.letterWidth, testData.letterHeight);
         BoxNode rootBoxNode = testData.rootBoxNode;
         boxLayoutGenerator.calculateLayout(rootBoxNode, testData.screenWidth);
+        assertBoxesEqualIgnoreIds(testData.rootBoxNodeAfterLayout, rootBoxNode);
+    }
+
+    private void testLayout(String filename) {
+        testLayout(filename, false);
+    }
+
+    private void testLayout(String filename, boolean log) {
+        TestDataLoader.TestData testData = TestDataLoader.loadLayoutTrees(filename);
+        setTextDimensionOverride(testData.letterWidth, testData.letterHeight);
+        BoxNode rootBoxNode = testData.rootBoxNode;
+        boxLayoutGenerator.calculateLayout(rootBoxNode, testData.screenWidth);
+        if (log) {
+            System.out.printf("Expected:\n%s\nActual:\n%s\n", testData.rootBoxNodeAfterLayout.toRecursiveString(), rootBoxNode.toRecursiveString());
+        }
         assertBoxesEqualIgnoreIds(testData.rootBoxNodeAfterLayout, rootBoxNode);
     }
 

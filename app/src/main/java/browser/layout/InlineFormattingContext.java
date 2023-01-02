@@ -44,9 +44,9 @@ public class InlineFormattingContext {
 
     public void initialize(BoxNode rootBox) {
         this.rootBox = rootBox;
-        startX = rootBox.x + rootBox.style.paddingLeft;
-        endX = startX + rootBox.width - rootBox.style.paddingLeft - rootBox.style.paddingRight;
-        yStartPerLine.add(rootBox.y + rootBox.style.paddingTop);
+        startX = rootBox.x + rootBox.style.borderWidthLeft + rootBox.style.paddingLeft;
+        endX = startX + rootBox.width - rootBox.style.paddingLeft - rootBox.style.paddingRight - rootBox.style.borderWidthLeft - rootBox.style.borderWidthRight;
+        yStartPerLine.add(rootBox.y + rootBox.style.borderWidthTop + rootBox.style.paddingTop);
         maxHeightPerLine.add(0f);
         lineBoxes.add(new LineBox(width));
         terminalBoxInLine.add(false);
@@ -83,15 +83,17 @@ public class InlineFormattingContext {
 
         // If there are current tentative boxes, they need to be moved to the next line by updating their positions.
         if (tentativeBoxesForLine.size() > 0) {
+            float parentX = tentativeBoxesForLine.get(0).parent.x;
             float parentLeftPadding = tentativeBoxesForLine.get(0).parent.style.paddingLeft;
-            float previousX = tentativeBoxesForLine.get(0).id == contextRootId ? parentLeftPadding : 0;
+            float parentLeftBorder = tentativeBoxesForLine.get(0).parent.style.borderWidthLeft;
+            float previousX = parentX + (tentativeBoxesForLine.get(0).id == contextRootId ? parentLeftBorder + parentLeftPadding : 0);
             float y = yStartPerLine.get(yStartPerLine.size() - 1);
             for (BoxNode box : tentativeBoxesForLine) {
                 float marginLeft = box.style.marginLeft;
                 box.x = previousX + marginLeft;
                 box.y = y;
 
-                previousX += box.x + box.style.paddingRight;
+                previousX += box.x + box.style.borderWidthRight + box.style.paddingRight;
             }
         }
     }
@@ -193,6 +195,8 @@ public class InlineFormattingContext {
             float leftMargin = rootBox.style.marginLeft;
             float parentRightPadding = 0;
             float parentLeftPadding = 0;
+            float parentRightBorder = 0;
+            float parentLeftBorder = 0;
             float inheritedRightSpacing = 0;
             float inheritedLeftSpacing = 0;
 
@@ -201,6 +205,7 @@ public class InlineFormattingContext {
 
             if (firstInParent) {
                 parentLeftPadding = rootBox.parent.id == contextRootId ? 0 : rootBox.parent.style.paddingLeft;
+                parentLeftBorder = rootBox.parent.id == contextRootId ? 0 : rootBox.parent.style.borderWidthLeft;
 
                 if (leftSpacingPerBox.containsKey(rootBox.parent.id)) {
                     inheritedLeftSpacing = leftSpacingPerBox.get(rootBox.parent.id);
@@ -209,14 +214,15 @@ public class InlineFormattingContext {
 
             if (lastInParent) {
                 parentRightPadding = rootBox.parent.id == contextRootId ? 0 : rootBox.parent.style.paddingRight;
+                parentRightBorder = rootBox.parent.id == contextRootId ? 0 : rootBox.parent.style.borderWidthRight;
 
                 if (rightSpacingPerBox.containsKey(rootBox.parent.id)) {
                     inheritedRightSpacing = rightSpacingPerBox.get(rootBox.parent.id);
                 }
             }
 
-            rightSpacingPerBox.put(rootBox.id, parentRightPadding + rightMargin + inheritedRightSpacing);
-            leftSpacingPerBox.put(rootBox.id, parentLeftPadding + leftMargin + inheritedLeftSpacing);
+            rightSpacingPerBox.put(rootBox.id, parentRightBorder + parentRightPadding + rightMargin + inheritedRightSpacing);
+            leftSpacingPerBox.put(rootBox.id, parentLeftBorder + parentLeftPadding + leftMargin + inheritedLeftSpacing);
         }
 
         for (BoxNode child : rootBox.children) {

@@ -1,44 +1,65 @@
 {
   "config": {
-    "screenWidth": 100,
-    "letterWidth": 1,
+    "screenWidth": 50,
+    "letterWidth": 5,
     "letterHeight": 10
   },
   "renderTree": {
     "root": {
-      "refName": "div",
+      "refName": "div1",
       "template": "div",
+      "style": {
+        "width": 50
+      },
       "children": [
         {
-          "refName": "span1",
-          "template": "span",
+          "refName": "div2",
+          "template": "div",
+          "style": {
+            "padding": 10
+          },
           "children": [
             {
               "refName": "text1",
               "template": "text",
-              "text": "first text"
+              "text": "a",
+              "children": []
             }
           ]
         },
         {
-          "refName": "span2",
-          "template": "span",
+          "refName": "div3",
+          "template": "div",
+          "style": {
+            "padding": 10,
+            "boxSizing": "contentBox",
+            "width": 100,
+            "widthType": "PERCENTAGE"
+          },
           "children": [
             {
               "refName": "text2",
               "template": "text",
-              "text": "second text"
+              "text": "b",
+              "children": []
             }
           ]
         },
         {
-          "refName": "span3",
-          "template": "span",
+          "refName": "div4",
+          "template": "div",
+          "style": {
+            "padding": 10,
+            "boxSizing": "borderBox",
+            "width": 100,
+            "widthType": "PERCENTAGE"
+          },
           "children": [
             {
               "refName": "text3",
               "template": "text",
-              "text": "third text"
+              "text": "c",
+              "children": []
             }
           ]
         }
@@ -48,41 +69,41 @@
   "boxTree": {
     "root": {
       "template": "block",
-      "correspondingRenderNode": "div",
+      "correspondingRenderNode": "div1",
       "children": [
         {
-          "template": "inline",
-          "correspondingRenderNode": "span1",
+          "template": "block",
+          "correspondingRenderNode": "div2",
           "children": [
             {
               "correspondingRenderNode": "text1",
               "template": "text",
               "textStartIndex": 0,
-              "textEndIndex": 10
+              "textEndIndex": 1
             }
           ]
         },
         {
-          "template": "inline",
-          "correspondingRenderNode": "span2",
+          "template": "block",
+          "correspondingRenderNode": "div3",
           "children": [
             {
               "correspondingRenderNode": "text2",
               "template": "text",
               "textStartIndex": 0,
-              "textEndIndex": 11
+              "textEndIndex": 1
             }
           ]
         },
         {
-          "template": "inline",
-          "correspondingRenderNode": "span3",
+          "template": "block",
+          "correspondingRenderNode": "div4",
           "children": [
             {
               "correspondingRenderNode": "text3",
               "template": "text",
               "textStartIndex": 0,
-              "textEndIndex": 10
+              "textEndIndex": 1
             }
           ]
         }
@@ -92,48 +113,48 @@
   "boxTreeAfterLayout": {
     "root": {
       "template": "block",
-      "correspondingRenderNode": "div",
-      "x": 0, "y": 0, "width": 100, "height": 10,
+      "correspondingRenderNode": "div1",
+      "x": 0, "y": 0, "width": 50, "height": 90,
       "children": [
         {
-          "template": "inline",
-          "correspondingRenderNode": "span1",
-          "x": 0, "y": 0, "width": 10, "height": 10,
+          "template": "block",
+          "correspondingRenderNode": "div2",
+          "x": 0, "y": 0, "width": 50, "height": 30,
           "children": [
             {
               "correspondingRenderNode": "text1",
-              "x": 0, "y": 0, "width": 10, "height": 10,
               "template": "text",
+              "x": 10, "y": 10, "width": 5, "height": 10,
               "textStartIndex": 0,
-              "textEndIndex": 10
+              "textEndIndex": 1
             }
           ]
         },
         {
-          "template": "inline",
-          "correspondingRenderNode": "span2",
-          "x": 10, "y": 0, "width": 11, "height": 10,
+          "template": "block",
+          "correspondingRenderNode": "div3",
+          "x": 0, "y": 30, "width": 70, "height": 30,
           "children": [
             {
               "correspondingRenderNode": "text2",
-              "x": 10, "y": 0, "width": 11, "height": 10,
               "template": "text",
+              "x": 10, "y": 40, "width": 5, "height": 10,
               "textStartIndex": 0,
-              "textEndIndex": 11
+              "textEndIndex": 1
             }
           ]
         },
         {
-          "template": "inline",
-          "correspondingRenderNode": "span3",
-          "x": 21, "y": 0, "width": 10, "height": 10,
+          "template": "block",
+          "correspondingRenderNode": "div4",
+          "x": 0, "y": 60, "width": 50, "height": 30,
           "children": [
             {
               "correspondingRenderNode": "text3",
-              "x": 21, "y": 0, "width": 10, "height": 10,
               "template": "text",
+              "x": 10, "y": 70, "width": 5, "height": 10,
               "textStartIndex": 0,
-              "textEndIndex": 10
+              "textEndIndex": 1
             }
           ]
         }

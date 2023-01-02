@@ -123,22 +123,6 @@ public class BoxNode {
         return current;
     }
 
-    public boolean layoutEquals(BoxNode other) {
-        if (other == null || !Objects.equals(x, other.x) || !Objects.equals(y, other.y) ||
-                !Objects.equals(width, other.width) || !Objects.equals(height, other.height) || other.id != id ||
-                (parent == null) != (other.parent == null) || (parent != null && parent.id != other.parent.id)) {
-            return false;
-        }
-
-        for (int i = 0; i < children.size(); i++) {
-            if (!children.get(i).layoutEquals(other.children.get(i))) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
     public BoxNode deepCopy() {
         BoxNode copy = new BoxNode(this);
         copy.parent = null;

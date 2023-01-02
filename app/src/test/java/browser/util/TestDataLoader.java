@@ -100,8 +100,6 @@ public class TestDataLoader {
                 renderNode.style.display = CSSStyle.DisplayType.BLOCK;
                 renderNode.style.outerDisplay = CSSStyle.DisplayType.BLOCK;
                 renderNode.style.innerDisplay = CSSStyle.DisplayType.FLOW;
-                renderNode.style.width = 100f;
-                renderNode.style.widthType = CSSStyle.DimensionType.PERCENTAGE;
                 return renderNode;
             }
             case "span": {
@@ -150,6 +148,24 @@ public class TestDataLoader {
         if (style.containsKey("widthType")) renderNode.style.widthType = CSSStyle.DimensionType.valueOf((String) style.get("widthType"));
         if (style.containsKey("height")) renderNode.style.height = getFloat(style, "height");
         if (style.containsKey("heightType")) renderNode.style.heightType = CSSStyle.DimensionType.valueOf((String) style.get("heightType"));
+
+        if (style.containsKey("boxSizing")) {
+            String value = (String) style.get("boxSizing");
+            renderNode.style.boxSizing = value.equals("borderBox") ? CSSStyle.BoxSizingType.BORDER_BOX : CSSStyle.BoxSizingType.CONTENT_BOX;
+        }
+
+        if (style.containsKey("borderWidth")) {
+            int width = getInt(style, "borderWidth");
+            renderNode.style.borderWidthTop = width;
+            renderNode.style.borderWidthBottom = width;
+            renderNode.style.borderWidthLeft = width;
+            renderNode.style.borderWidthRight = width;
+        }
+
+        if (style.containsKey("borderWidthTop")) renderNode.style.borderWidthTop = getInt(style, "borderWidthTop");
+        if (style.containsKey("borderWidthBottom")) renderNode.style.borderWidthBottom = getInt(style, "borderWidthBottom");
+        if (style.containsKey("borderWidthLeft")) renderNode.style.borderWidthLeft = getInt(style, "borderWidthLeft");
+        if (style.containsKey("borderWidthRight")) renderNode.style.borderWidthRight = getInt(style, "borderWidthRight");
     }
 
     private static BoxNode buildBoxTree(JSONObject root) {

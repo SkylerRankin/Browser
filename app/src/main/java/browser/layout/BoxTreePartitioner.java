@@ -43,8 +43,10 @@ public class BoxTreePartitioner {
                 // Since the original box has left and right spacing, these values are divided between the resulting
                 // two boxes; neither should not have the spacing on both sides.
                 newBoxNode.style.paddingLeft = 0;
+                newBoxNode.style.borderWidthLeft = 0;
                 newBoxNode.style.marginLeft = 0;
                 originalParent.style.paddingRight = 0;
+                originalParent.style.borderWidthRight = 0;
                 originalParent.style.marginRight = 0;
 
                 currentBox.parent.parent.children.add(parentIndex + 1, newBoxNode);
