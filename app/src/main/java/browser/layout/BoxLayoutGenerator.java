@@ -84,7 +84,7 @@ public class BoxLayoutGenerator {
                         boxNode.style.marginLeft + boxNode.style.marginRight;
                 if (style.widthType.equals(CSSStyle.DimensionType.PERCENTAGE)) {
                     float parentWidth = boxNode.parent == null ? screenWidth : boxNode.parent.width;
-                    boxNode.width = (parentWidth * style.width / 100) - widthSpacing;
+                    boxNode.width = Math.max(0, (parentWidth * style.width / 100) - widthSpacing);
                 } else {
                     boxNode.width = style.width;
                 }
@@ -109,7 +109,7 @@ public class BoxLayoutGenerator {
                     } else {
                         float heightSpacing = boxNode.parent.style.paddingTop + boxNode.parent.style.paddingBottom +
                                 boxNode.style.marginTop + boxNode.style.marginBottom;
-                        height = (boxNode.parent.height * style.height / 100) - heightSpacing;
+                        height = Math.max(0, (boxNode.parent.height * style.height / 100) - heightSpacing);
                     }
                 } else {
                     height = style.height;
@@ -145,7 +145,7 @@ public class BoxLayoutGenerator {
             }
         }
 
-        boolean isInlineBlock = boxNode.outerDisplayType.equals(DisplayType.BLOCK) && boxNode.innerDisplayType.equals(DisplayType.FLOW_ROOT);
+        boolean isInlineBlock = boxNode.outerDisplayType.equals(DisplayType.INLINE) && boxNode.innerDisplayType.equals(DisplayType.FLOW_ROOT);
         if (isInlineBlock && boxNode.width == null) {
             float availableWidth = boxNode.parent == null ? screenWidth : boxNode.parent.width -
                     boxNode.parent.style.borderWidthLeft - boxNode.parent.style.paddingLeft - boxNode.style.marginLeft -
@@ -223,7 +223,7 @@ public class BoxLayoutGenerator {
                     id = boxNode.parent.inlineFormattingContextId;
                 } else {
                     id = inlineFormattingContexts.size();
-                    inlineFormattingContexts.put(id, new InlineFormattingContext(id, boxNode.width, boxNode.id));
+                    inlineFormattingContexts.put(id, new InlineFormattingContext(id, boxNode.id));
                 }
                 boxNode.inlineFormattingContextId = id;
             }
@@ -288,7 +288,7 @@ public class BoxLayoutGenerator {
             return;
         }
 
-        if (boxNode.innerDisplayType.equals(CSSStyle.DisplayType.FLOW)) {
+        if (boxNode.innerDisplayType.equals(CSSStyle.DisplayType.FLOW) || boxNode.innerDisplayType.equals(DisplayType.FLOW_ROOT)) {
             List<BoxNode> childrenInNormalFlow = boxNode.children.stream()
                     .filter(b -> b.style.position == PositionType.STATIC ||
                             b.style.position == PositionType.RELATIVE)
@@ -323,7 +323,13 @@ public class BoxLayoutGenerator {
             context.setLastPlacedBoxForId(parentBox.id, childBox);
         }
 
-        if (parentBox.height == null) {
+        if (parentBox.shrinkBlockWidthToContent) {
+            parentBox.width = getWidthFromChildren(parentBox);
+        }
+
+        // The width should be set based on the box's content if the width was not defined in the style, or if the
+        // box is an inline-block box.
+        if (parentBox.style.outerDisplay.equals(DisplayType.INLINE) || parentBox.height == null) {
             parentBox.height = getHeightFromChildren(parentBox);
         }
     }
@@ -355,12 +361,17 @@ public class BoxLayoutGenerator {
             parentBox.width = inlineLayoutFormatter.getWidth(parentBox);
         }
 
+        if (parentBox.shrinkBlockWidthToContent) {
+            parentBox.width = getWidthFromChildren(parentBox);
+        }
+
         // Inline boxes will have their height derived from their children. If this was a block box containing inline
         // boxes, then it will either have a predefined height or will need to derive the height from its children as
         // well.
-        if (parentBox.style.outerDisplay.equals(DisplayType.INLINE) || parentBox.height == null) {
+        if ((parentBox.style.outerDisplay.equals(DisplayType.INLINE) && !parentBox.innerDisplayType.equals(DisplayType.FLOW_ROOT)) || parentBox.height == null) {
             parentBox.height = getHeightFromChildren(parentBox);
         }
+
     }
 
     private float getHeightFromChildren(BoxNode boxNode) {
@@ -380,6 +391,23 @@ public class BoxLayoutGenerator {
                 boxNode.style.borderWidthBottom + boxNode.style.paddingBottom : 0;
 
         return maxY - boxNode.y + bottomSpacing;
+    }
+
+    private float getWidthFromChildren(BoxNode boxNode) {
+        if (boxNode.children.size() == 0) {
+            float width = boxNode.style.borderWidthLeft + boxNode.style.paddingLeft + boxNode.style.paddingRight + boxNode.style.borderWidthRight;
+            return boxNode.width == null ? width : boxNode.width;
+        }
+
+        float maxX = 0;
+        for (BoxNode childBox : boxNode.children) {
+            float childWidth = childBox.width == null ? 0 : childBox.width;
+            float newX = childBox.x + childWidth + childBox.style.marginRight;
+            maxX = Math.max(maxX, newX);
+        }
+
+        float rightSpacing = boxNode.style.borderWidthRight + boxNode.style.paddingRight;
+        return maxX - boxNode.x + rightSpacing;
     }
 
 }

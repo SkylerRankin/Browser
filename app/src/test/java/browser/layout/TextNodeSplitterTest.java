@@ -205,6 +205,26 @@ public class TextNodeSplitterTest {
     }
 
     @Test
+    public void gitNodeToWidth_overlapWithNonZeroStartIndex() {
+        RenderNode renderNode = new RenderNode(HTMLElements.TEXT);
+        renderNode.text = "fifty percent width";
+        BoxNode boxNode = new BoxNode();
+        boxNode.isTextNode = true;
+        boxNode.correspondingRenderNode = renderNode;
+        boxNode.textStartIndex = 6;
+        boxNode.textEndIndex = 19;
+        float width = 1;
+        BoxNode result = textNodeSplitter.fitNodeToWidth(boxNode, width);
+
+        assertEquals(6, boxNode.textStartIndex);
+        assertEquals(13, boxNode.textEndIndex);
+
+        assertNotNull(result);
+        assertEquals(14, result.textStartIndex);
+        assertEquals(19, result.textEndIndex);
+    }
+
+    @Test
     public void canSplitNodeToFitWidth() {
         RenderNode renderNode = new RenderNode(HTMLElements.TEXT);
         renderNode.text = "this is some text";

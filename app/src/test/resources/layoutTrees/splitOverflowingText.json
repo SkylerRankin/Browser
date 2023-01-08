@@ -1,0 +1,57 @@
+{
+  "config": {
+    "screenWidth": 20,
+    "letterWidth": 1,
+    "letterHeight": 10
+  },
+  "renderTree": {
+    "root": {
+      "refName": "div",
+      "template": "div",
+      "children": [
+        {
+          "refName": "text",
+          "template": "text",
+          "text": "a-long-section-of-text that should be split"
+        }
+      ]
+    }
+  },
+  "boxTree": {
+    "root": {
+      "template": "block",
+      "correspondingRenderNode": "div",
+      "children": [
+        {
+          "correspondingRenderNode": "text",
+          "template": "text",
+          "textStartIndex": 0,
+          "textEndIndex": 43
+        }
+      ]
+    }
+  },
+  "boxTreeAfterLayout": {
+    "root": {
+      "template": "block",
+      "correspondingRenderNode": "div",
+      "x": 0, "y": 0, "width": 20, "height": 20,
+      "children": [
+        {
+          "correspondingRenderNode": "text",
+          "x": 0, "y": 0, "width": 22, "height": 10,
+          "template": "text",
+          "textStartIndex": 0,
+          "textEndIndex": 22
+        },
+        {
+          "correspondingRenderNode": "text",
+          "x": 0, "y": 10, "width": 20, "height": 10,
+          "template": "text",
+          "textStartIndex": 23,
+          "textEndIndex": 43
+        }
+      ]
+    }
+  }
+}

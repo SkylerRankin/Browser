@@ -1,0 +1,181 @@
+{
+  "config": {
+    "screenWidth": 100,
+    "letterWidth": 1,
+    "letterHeight": 10
+  },
+  "renderTree": {
+    "root": {
+      "refName": "div1",
+      "template": "div",
+      "style": {
+        "padding": 10,
+        "width": 80
+      },
+      "children": [
+        {
+          "refName": "span",
+          "template": "span",
+          "style": {
+            "marginRight": 5
+          },
+          "children": [
+            {
+              "refName": "text1",
+              "template": "text",
+              "text": "File:"
+            }
+          ]
+        },
+        {
+          "refName": "div2",
+          "template": "inlineBlock",
+          "style": {
+            "padding": 5,
+            "width": 40
+          },
+          "children": [
+            {
+              "refName": "div3",
+              "template": "inlineBlock",
+              "style": {
+                "width": 15,
+                "height": 15
+              },
+              "children": [
+                {
+                  "refName": "text2",
+                  "template": "text",
+                  "text": "Save"
+                }
+              ]
+            },
+            {
+              "refName": "div4",
+              "template": "inlineBlock",
+              "style": {
+                "width": 20,
+                "height": 20
+              },
+              "children": [
+                {
+                  "refName": "text3",
+                  "template": "text",
+                  "text": "Cancel"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "boxTree": {
+    "root": {
+      "template": "block",
+      "correspondingRenderNode": "div1",
+      "children": [
+        {
+          "template": "inline",
+          "correspondingRenderNode": "span",
+          "children": [
+            {
+              "template": "text",
+              "correspondingRenderNode": "text1",
+              "textStartIndex": 0,
+              "textEndIndex": 5
+            }
+          ]
+        },
+        {
+          "template": "inlineBlock",
+          "correspondingRenderNode": "div2",
+          "children": [
+            {
+              "template": "inlineBlock",
+              "correspondingRenderNode": "div3",
+              "children": [
+                {
+                  "correspondingRenderNode": "text2",
+                  "template": "text",
+                  "textStartIndex": 0,
+                  "textEndIndex": 4
+                }
+              ]
+            },
+            {
+              "template": "inlineBlock",
+              "correspondingRenderNode": "div4",
+              "children": [
+                {
+                  "correspondingRenderNode": "text3",
+                  "template": "text",
+                  "textStartIndex": 0,
+                  "textEndIndex": 6
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "boxTreeAfterLayout": {
+    "root": {
+      "template": "block",
+      "correspondingRenderNode": "div1",
+      "x": 0, "y": 0, "width": 100, "height": 50,
+      "children": [
+        {
+          "template": "inline",
+          "correspondingRenderNode": "span",
+          "x": 10, "y": 10, "width": 5, "height": 10,
+          "children": [
+            {
+              "template": "text",
+              "correspondingRenderNode": "text1",
+              "x": 10, "y": 10, "width": 5, "height": 10,
+              "textStartIndex": 0,
+              "textEndIndex": 5
+            }
+          ]
+        },
+        {
+          "template": "inlineBlock",
+          "correspondingRenderNode": "div2",
+          "x": 20, "y": 10, "width": 50, "height": 30,
+          "children": [
+            {
+              "template": "inlineBlock",
+              "correspondingRenderNode": "div3",
+              "x": 25, "y": 15, "width": 15, "height": 15,
+              "children": [
+                {
+                  "correspondingRenderNode": "text2",
+                  "template": "text",
+                  "x": 25, "y": 15, "width": 4, "height": 10,
+                  "textStartIndex": 0,
+                  "textEndIndex": 4
+                }
+              ]
+            },
+            {
+              "template": "inlineBlock",
+              "correspondingRenderNode": "div4",
+              "x": 40, "y": 15, "width": 20, "height": 20,
+              "children": [
+                {
+                  "correspondingRenderNode": "text3",
+                  "template": "text",
+                  "x": 40, "y": 15, "width": 6, "height": 10,
+                  "textStartIndex": 0,
+                  "textEndIndex": 6
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

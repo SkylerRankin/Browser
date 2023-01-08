@@ -35,6 +35,10 @@ public class BoxNode {
     public int textStartIndex;
     public int textEndIndex;
 
+    // Block boxes generally have fixed widths. However, when inline block widths are calculated, there can be
+    // instances where a block box's width should be shrunk to its content. This flag enables that shrinking.
+    public boolean shrinkBlockWidthToContent = false;
+
     public BoxNode() {}
 
     public BoxNode(BoxNode other) {

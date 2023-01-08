@@ -7,16 +7,13 @@
   "renderTree": {
     "root": {
       "refName": "div1",
-      "template": "inlineBlock",
-      "style": {
-        "padding": 5
-      },
+      "template": "div",
       "children": [
         {
           "refName": "div2",
-          "template": "div",
+          "template": "inlineBlock",
           "style": {
-            "marginLeft": 10
+            "padding": 5
           },
           "children": [
             {
@@ -31,11 +28,11 @@
   },
   "boxTree": {
     "root": {
-      "template": "inlineBlock",
+      "template": "block",
       "correspondingRenderNode": "div1",
       "children": [
         {
-          "template": "block",
+          "template": "inlineBlock",
           "correspondingRenderNode": "div2",
           "children": [
             {
@@ -49,5 +46,27 @@
       ]
     }
   },
-  "boxTreeAfterLayout": {}
+  "boxTreeAfterLayout": {
+    "root": {
+      "template": "block",
+      "correspondingRenderNode": "div1",
+      "x": 0, "y": 0, "width": 100, "height": 20,
+      "children": [
+        {
+          "template": "inlineBlock",
+          "correspondingRenderNode": "div2",
+          "x": 0, "y": 0, "width": 22, "height": 20,
+          "children": [
+            {
+              "correspondingRenderNode": "text1",
+              "template": "text",
+              "x": 5, "y": 5, "width": 12, "height": 10,
+              "textStartIndex": 0,
+              "textEndIndex": 12
+            }
+          ]
+        }
+      ]
+    }
+  }
 }

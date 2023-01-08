@@ -30,7 +30,7 @@ public class BoxTreePartitionerTest {
         node1.parent = root;
         node2.parent = root;
 
-        InlineFormattingContext context = new InlineFormattingContext(0, 0, 0);
+        InlineFormattingContext context = new InlineFormattingContext(0, 0);
         assertFalse(boxTreePartitioner.partitionAltersTree(node2, context));
 
         boxTreePartitioner.partition(node2, context);
@@ -70,7 +70,7 @@ public class BoxTreePartitionerTest {
         node3.parent = node2;
         node4.parent = root;
 
-        InlineFormattingContext context = new InlineFormattingContext(0, 0, 0);
+        InlineFormattingContext context = new InlineFormattingContext(0, 0);
         assertFalse(boxTreePartitioner.partitionAltersTree(root, context));
         assertFalse(boxTreePartitioner.partitionAltersTree(node1, context));
         assertFalse(boxTreePartitioner.partitionAltersTree(node2, context));
@@ -122,7 +122,7 @@ public class BoxTreePartitionerTest {
         node22.parent = node11;
         node23.parent = node12;
 
-        InlineFormattingContext context = new InlineFormattingContext(0, 0, 0);
+        InlineFormattingContext context = new InlineFormattingContext(0, 0);
 
         assertTrue(boxTreePartitioner.partitionAltersTree(node22, context));
 
@@ -228,7 +228,7 @@ public class BoxTreePartitionerTest {
         node43.parent = node31;
         node51.parent = node43;
 
-        InlineFormattingContext context = new InlineFormattingContext(0, 0, 0);
+        InlineFormattingContext context = new InlineFormattingContext(0, 0);
 
         assertTrue(boxTreePartitioner.partitionAltersTree(node51, context));
 
@@ -358,7 +358,7 @@ public class BoxTreePartitionerTest {
         node31.parent = node22;
         node32.parent = node22;
 
-        InlineFormattingContext context = new InlineFormattingContext(0, 0, 0);
+        InlineFormattingContext context = new InlineFormattingContext(0, 0);
 
         assertTrue(boxTreePartitioner.partitionAltersTree(node32, context));
 

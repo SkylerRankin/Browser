@@ -16,6 +16,20 @@ public class TextNodeSplitter {
     }
 
     /**
+     * Checks if a box can be split. Text splits only happen on spaces.
+     * @param boxNode       The box to check.
+     * @return      True if the box is a text node that can be split.
+     */
+    public boolean canBeSplit(BoxNode boxNode) {
+        if (!boxNode.isTextNode) {
+            return false;
+        }
+
+        String text = boxNode.correspondingRenderNode.text.substring(boxNode.textStartIndex, boxNode.textEndIndex);
+        return text.contains(" ");
+    }
+
+    /**
      * Given a box that represents a text render node, this method splits the text into a list of box nodes such that
      * each fits into the available width. Text splitting is only done on spaces within the text. The `textStartIndex`
      * and `textEndIndex` values are populated in each box node such that they all map to a different subsequence of
@@ -116,13 +130,17 @@ public class TextNodeSplitter {
         words[0] += leadingSpaceText;
         words[words.length - 1] += trailingSpaceText;
 
-        for (String word : words) {
+        for (int i = 0; i < words.length; i++) {
+            String word = words[i];
             float wordWidth = textDimensionCalculator.getDimension(word, style).x;
             float newCurrentWidth = currentWidth + (currentEndIndex == startIndex ? 0 : spaceWidth) + wordWidth;
             if (newCurrentWidth <= availableWidth) {
                 currentWidth = newCurrentWidth;
                 currentEndIndex += word.length() + (currentEndIndex == startIndex ? 0 : 1);
             } else {
+                if (i == 0) {
+                    currentEndIndex = boxNode.textStartIndex + word.length();
+                }
                 break;
             }
         }

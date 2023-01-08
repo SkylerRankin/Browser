@@ -38,7 +38,7 @@ public class InlineFormattingContextTest {
      */
     @Test
     public void initializeTest() {
-        InlineFormattingContext context = new InlineFormattingContext(0, 10, 0);
+        InlineFormattingContext context = new InlineFormattingContext(0, 0);
 
         BoxNode root = createBoxNode(0, 0, 20, 10, 100, 200);
         root.x = 10f;
@@ -67,7 +67,6 @@ public class InlineFormattingContextTest {
 
         context.initialize(root);
 
-        assertEquals(10, context.width, DELTA);
         assertEquals(30, context.startX, DELTA);
         assertEquals(100, context.endX, DELTA);
 
@@ -92,7 +91,7 @@ public class InlineFormattingContextTest {
 
     @Test
     public void spacingDoesNotIncludeRootPadding() {
-        InlineFormattingContext context = new InlineFormattingContext(0, 100, 0);
+        InlineFormattingContext context = new InlineFormattingContext(0, 0);
 
         BoxNode root = createBoxNode(0, 0, 10, 10, 100, 200);
         root.x = 10f;
@@ -113,7 +112,6 @@ public class InlineFormattingContextTest {
 
         context.initialize(root);
 
-        assertEquals(100, context.width, DELTA);
         assertEquals(20, context.startX, DELTA);
         assertEquals(100, context.endX, DELTA);
 

@@ -12,8 +12,6 @@ import browser.parser.HTMLElements;
 public class InlineFormattingContext {
 
     public final int id;
-    // TODO: remove width property if it isn't used
-    public final float width;
     public final int contextRootId;
     public float startX;
     public float endX;
@@ -27,9 +25,8 @@ public class InlineFormattingContext {
     private final Map<Integer, Float> rightSpacingPerBox;
     private final Map<Integer, Float> leftSpacingPerBox;
 
-    public InlineFormattingContext(int id, float width, int rootId) {
+    public InlineFormattingContext(int id, int rootId) {
         this.id = id;
-        this.width = width;
         this.contextRootId = rootId;
         lineBoxes = new ArrayList<>();
         maxHeightPerLine = new ArrayList<>();
@@ -48,7 +45,7 @@ public class InlineFormattingContext {
         endX = startX + rootBox.width - rootBox.style.paddingLeft - rootBox.style.paddingRight - rootBox.style.borderWidthLeft - rootBox.style.borderWidthRight;
         yStartPerLine.add(rootBox.y + rootBox.style.borderWidthTop + rootBox.style.paddingTop);
         maxHeightPerLine.add(0f);
-        lineBoxes.add(new LineBox(width));
+        lineBoxes.add(new LineBox());
         terminalBoxInLine.add(false);
 
         initializeSpacingValues(rootBox);
@@ -65,7 +62,8 @@ public class InlineFormattingContext {
             terminalBoxInLine.set(terminalBoxInLine.size() - 1, true);
             for (BoxNode tentativeBoxNode : tentativeBoxesForLine) {
                 lastLineBox().boxes.add(tentativeBoxNode);
-                if (maxHeightPerLine.get(maxHeightPerLine.size() - 1) < tentativeBoxNode.height) {
+                float tentativeBoxHeight = tentativeBoxNode.height == null ? 0 : tentativeBoxNode.height;
+                if (maxHeightPerLine.get(maxHeightPerLine.size() - 1) < tentativeBoxHeight) {
                     maxHeightPerLine.set(maxHeightPerLine.size() - 1, tentativeBoxNode.height);
                 }
             }
@@ -78,7 +76,7 @@ public class InlineFormattingContext {
         float lastMaxHeight = maxHeightPerLine.get(maxHeightPerLine.size() - 1);
         yStartPerLine.add(lastYStart + lastMaxHeight);
         maxHeightPerLine.add(0f);
-        lineBoxes.add(new LineBox(width));
+        lineBoxes.add(new LineBox());
         terminalBoxInLine.add(false);
 
         // If there are current tentative boxes, they need to be moved to the next line by updating their positions.
@@ -232,11 +230,6 @@ public class InlineFormattingContext {
 
     public static class LineBox {
         public final List<BoxNode> boxes = new ArrayList<>();
-        public final float width;
-
-        public LineBox(float width) {
-            this.width = width;
-        }
     }
 
 }

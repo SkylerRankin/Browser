@@ -89,7 +89,7 @@ public class InlineLayoutFormatterTest {
         span1Box.children.add(text1Box);
         span2Box.children.add(text2Box);
 
-        InlineFormattingContext context = new InlineFormattingContext(0, 50, 0);
+        InlineFormattingContext context = new InlineFormattingContext(0, 0);
         context.initialize(rootBox);
 
         System.out.println(rootBox.toRecursiveString());

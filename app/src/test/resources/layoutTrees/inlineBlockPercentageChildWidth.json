@@ -1,0 +1,99 @@
+{
+  "config": {
+    "screenWidth": 100,
+    "letterWidth": 1,
+    "letterHeight": 10
+  },
+  "renderTree": {
+    "root": {
+      "refName": "div1",
+      "template": "div",
+      "children": [
+        {
+          "refName": "div2",
+          "template": "inlineBlock",
+          "children": [
+            {
+              "refName": "div3",
+              "template": "div",
+              "style": {
+                "width": 80,
+                "widthType": "PERCENTAGE"
+              },
+              "children": [
+                {
+                  "refName": "text1",
+                  "template": "text",
+                  "text": "fifty percent width!"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "boxTree": {
+    "root": {
+      "template": "block",
+      "correspondingRenderNode": "div1",
+      "children": [
+        {
+          "template": "inlineBlock",
+          "correspondingRenderNode": "div2",
+          "children": [
+            {
+              "template": "block",
+              "correspondingRenderNode": "div3",
+              "children": [
+                {
+                  "correspondingRenderNode": "text1",
+                  "template": "text",
+                  "textStartIndex": 0,
+                  "textEndIndex": 20
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "boxTreeAfterLayout": {
+    "root": {
+      "template": "block",
+      "correspondingRenderNode": "div1",
+      "x": 0, "y": 0, "width": 100, "height": 20,
+      "children": [
+        {
+          "template": "inlineBlock",
+          "correspondingRenderNode": "div2",
+          "x": 0, "y": 0, "width": 20, "height": 20,
+          "children": [
+            {
+              "template": "block",
+              "correspondingRenderNode": "div3",
+              "x": 0, "y": 0, "width": 16, "height": 20,
+              "children": [
+                {
+                  "correspondingRenderNode": "text1",
+                  "template": "text",
+                  "x": 0, "y": 0, "width": 13, "height": 10,
+                  "textStartIndex": 0,
+                  "textEndIndex": 13
+                },
+                {
+                  "correspondingRenderNode": "text1",
+                  "template": "text",
+                  "x": 0, "y": 10, "width": 6, "height": 10,
+                  "textStartIndex": 14,
+                  "textEndIndex": 20
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

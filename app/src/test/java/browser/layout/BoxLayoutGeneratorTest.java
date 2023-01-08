@@ -36,20 +36,12 @@ public class BoxLayoutGeneratorTest {
 
     @Test
     public void simpleTextInPInDiv() {
-        TestDataLoader.TestData testData = TestDataLoader.loadLayoutTrees("textInPInDiv");
-        setTextDimensionOverride(testData.letterWidth, testData.letterHeight);
-        BoxNode rootBoxNode = testData.rootBoxNode;
-        boxLayoutGenerator.calculateLayout(rootBoxNode, testData.screenWidth);
-        assertEquals(testData.rootBoxNodeAfterLayout, rootBoxNode);
+        testLayout("textInPInDiv");
     }
 
     @Test
     public void simpleTextInPInDivWithOverflow() {
-        TestDataLoader.TestData testData = TestDataLoader.loadLayoutTrees("textInPInDivWithOverflow");
-        setTextDimensionOverride(testData.letterWidth, testData.letterHeight);
-        BoxNode rootBoxNode = testData.rootBoxNode;
-        boxLayoutGenerator.calculateLayout(rootBoxNode, testData.screenWidth);
-        assertEquals(testData.rootBoxNodeAfterLayout, rootBoxNode);
+        testLayout("textInPInDivWithOverflow");
     }
 
     @Test
@@ -59,20 +51,12 @@ public class BoxLayoutGeneratorTest {
 
     @Test
     public void moveInlineParentsToNextLine() {
-        TestDataLoader.TestData testData = TestDataLoader.loadLayoutTrees("moveInlineParentsToNextLine");
-        setTextDimensionOverride(testData.letterWidth, testData.letterHeight);
-        BoxNode rootBoxNode = testData.rootBoxNode;
-        boxLayoutGenerator.calculateLayout(rootBoxNode, testData.screenWidth);
-        assertBoxesEqualIgnoreIds(testData.rootBoxNodeAfterLayout, rootBoxNode);
+        testLayout("moveInlineParentsToNextLine");
     }
 
     @Test
     public void simpleSplitTextSpans() {
-        TestDataLoader.TestData testData = TestDataLoader.loadLayoutTrees("splitTextSpanInDiv");
-        setTextDimensionOverride(testData.letterWidth, testData.letterHeight);
-        BoxNode rootBoxNode = testData.rootBoxNode;
-        boxLayoutGenerator.calculateLayout(rootBoxNode, testData.screenWidth);
-        assertBoxesEqualIgnoreIds(testData.rootBoxNodeAfterLayout, rootBoxNode);
+        testLayout("splitTextSpanInDiv");
     }
 
     /**
@@ -116,6 +100,11 @@ public class BoxLayoutGeneratorTest {
     }
 
     @Test
+    public void splitOverflowingText() {
+        testLayout("splitOverflowingText");
+    }
+
+    @Test
     public void newLineIfNoRoomForInlineMargin() {
         testLayout("marginForcesNewLine");
     }
@@ -129,11 +118,7 @@ public class BoxLayoutGeneratorTest {
      */
     @Test
     public void simpleBlockSpacing() {
-        TestDataLoader.TestData testData = TestDataLoader.loadLayoutTrees("simpleBlockSpacing");
-        setTextDimensionOverride(testData.letterWidth, testData.letterHeight);
-        BoxNode rootBoxNode = testData.rootBoxNode;
-        boxLayoutGenerator.calculateLayout(rootBoxNode, testData.screenWidth);
-        assertBoxesEqualIgnoreIds(testData.rootBoxNodeAfterLayout, rootBoxNode);
+        testLayout("simpleBlockSpacing");
     }
 
     /**
@@ -156,11 +141,7 @@ public class BoxLayoutGeneratorTest {
      */
     @Test
     public void mixedInlineBlock() {
-        TestDataLoader.TestData testData = TestDataLoader.loadLayoutTrees("mixedInlineBlock");
-        setTextDimensionOverride(testData.letterWidth, testData.letterHeight);
-        BoxNode rootBoxNode = testData.rootBoxNode;
-        boxLayoutGenerator.calculateLayout(rootBoxNode, testData.screenWidth);
-        assertBoxesEqualIgnoreIds(testData.rootBoxNodeAfterLayout, rootBoxNode);
+        testLayout("mixedInlineBlock");
     }
 
     /**
@@ -205,13 +186,61 @@ public class BoxLayoutGeneratorTest {
         testLayout("simpleDivWithBorder");
     }
 
+    /**
+     * <div1>
+     *     <span1>
+     *         <text1>first text</text1>
+     *     </span1>
+     *     <div2>
+     *         <text2>second text</text2>
+     *     </div2>
+     *     <div3>
+     *         <text3>third text block</text3>
+     *     </div3>
+     *     <span2>
+     *         <text4>fourth text</text4>
+     *     </span2>
+     * </div1>
+     */
     @Test
     public void horizontalInlineBlockDivs() {
-        TestDataLoader.TestData testData = TestDataLoader.loadLayoutTrees("simpleInlineBlock");
-        setTextDimensionOverride(testData.letterWidth, testData.letterHeight);
-        BoxNode rootBoxNode = testData.rootBoxNode;
-        boxLayoutGenerator.calculateLayout(rootBoxNode, testData.screenWidth);
-        assertBoxesEqualIgnoreIds(testData.rootBoxNodeAfterLayout, rootBoxNode);
+        testLayout("horizontalInlineBlockDivs");
+    }
+
+    /**
+     * <div style="width: 100%;">
+     *     <div style="display: inline-block; padding: 5px;">
+     *         <text>inline block</text>
+     *     </div>
+     * </div>
+     */
+    @Test
+    public void simpleShrinkInlineBlock() {
+        testLayout("simpleShrinkInlineBlock");
+    }
+
+    @Test
+    public void inlineBlockPercentageChildWidth() {
+        testLayout("inlineBlockPercentageChildWidth");
+    }
+
+    @Test
+    public void inlineBlockPixelChildWidth() {
+        testLayout("inlineBlockPixelChildWidth");
+    }
+
+    /**
+     * <div1 style="padding: 10px; width: 80px;">
+     *     <span style="margin-right: 5px;">File:</span>
+     *     <div2 style="display: inline-block; padding: 5px; width: 40px;">
+     *         <div3 style="display: inline-block; width: 15px; height: 15px;">Save</div3>
+     *         <div4 style="display: inline-block; width: 20px; height: 20px;">Cancel</div4>
+     *     </div2>
+     * </div1>
+     */
+    @Test
+    public void inlineBlockNested() {
+        testLayout("inlineBlockNested");
     }
 
     private void testLayout(String filename) {

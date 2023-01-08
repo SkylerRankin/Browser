@@ -1,0 +1,98 @@
+{
+  "config": {
+    "screenWidth": 100,
+    "letterWidth": 1,
+    "letterHeight": 10
+  },
+  "renderTree": {
+    "root": {
+      "refName": "div1",
+      "template": "div",
+      "children": [
+        {
+          "refName": "div2",
+          "template": "inlineBlock",
+          "children": [
+            {
+              "refName": "div3",
+              "template": "div",
+              "style": {
+                "width": 80
+              },
+              "children": [
+                {
+                  "refName": "text1",
+                  "template": "text",
+                  "text": "The static-position containing block is the containing block of a hypothetical box..."
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "boxTree": {
+    "root": {
+      "template": "block",
+      "correspondingRenderNode": "div1",
+      "children": [
+        {
+          "template": "inlineBlock",
+          "correspondingRenderNode": "div2",
+          "children": [
+            {
+              "template": "block",
+              "correspondingRenderNode": "div3",
+              "children": [
+                {
+                  "correspondingRenderNode": "text1",
+                  "template": "text",
+                  "textStartIndex": 0,
+                  "textEndIndex": 85
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "boxTreeAfterLayout": {
+    "root": {
+      "template": "block",
+      "correspondingRenderNode": "div1",
+      "x": 0, "y": 0, "width": 100, "height": 20,
+      "children": [
+        {
+          "template": "inlineBlock",
+          "correspondingRenderNode": "div2",
+          "x": 0, "y": 0, "width": 80, "height": 20,
+          "children": [
+            {
+              "template": "block",
+              "correspondingRenderNode": "div3",
+              "x": 0, "y": 0, "width": 80, "height": 20,
+              "children": [
+                {
+                  "correspondingRenderNode": "text1",
+                  "template": "text",
+                  "x": 0, "y": 0, "width": 78, "height": 10,
+                  "textStartIndex": 0,
+                  "textEndIndex": 78
+                },
+                {
+                  "correspondingRenderNode": "text1",
+                  "template": "text",
+                  "x": 0, "y": 10, "width": 6, "height": 10,
+                  "textStartIndex": 79,
+                  "textEndIndex": 85
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

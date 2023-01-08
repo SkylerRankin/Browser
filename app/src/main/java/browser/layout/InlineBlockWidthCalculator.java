@@ -36,9 +36,11 @@ public class InlineBlockWidthCalculator {
 
         for (Float width : widths) {
             BoxNode copyBoxNode = boxNode.deepCopy();
+            removePercentageWidthBlockBoxes(copyBoxNode);
             copyBoxNode.innerDisplayType = CSSStyle.DisplayType.FLOW;
             copyBoxNode.outerDisplayType = CSSStyle.DisplayType.BLOCK;
-            copyBoxNode.width = width;
+            copyBoxNode.style.width = width;
+            copyBoxNode.style.widthType = CSSStyle.DimensionType.PIXEL;
             boxLayoutGenerator.calculateLayout(copyBoxNode, width);
             float maxX = 0;
             for (BoxNode child : copyBoxNode.children) {
@@ -69,18 +71,17 @@ public class InlineBlockWidthCalculator {
         boolean isBlockBox = boxNode.outerDisplayType.equals(BLOCK);
         boolean isInlineBlockBox = boxNode.outerDisplayType.equals(INLINE) && boxNode.innerDisplayType.equals(FLOW_ROOT);
 
-        if ((isBlockBox || isInlineBlockBox) && boxNode.style.width != null &&boxNode.style.widthType.equals(CSSStyle.DimensionType.PERCENTAGE)) {
-            boxNode.style.width = null;
-            boxNode.style.widthType = CSSStyle.DimensionType.PIXEL;
+        if ((isBlockBox || isInlineBlockBox) && (boxNode.style.width == null || boxNode.style.widthType.equals(CSSStyle.DimensionType.PERCENTAGE))) {
+            boxNode.shrinkBlockWidthToContent = true;
         }
 
         // Percentages that are contained within a block with a pixel width are valid, so no removals need to happen.
-        if ((isBlockBox || isInlineBlockBox) && boxNode.style.width != null) {
+        if ((isBlockBox || isInlineBlockBox) && boxNode.style.width != null && boxNode.style.widthType.equals(CSSStyle.DimensionType.PIXEL)) {
             return;
         }
 
         // There shouldn't be any block boxes within an inline box, so no removals need to happen.
-        if (!isBlockBox) {
+        if (!isBlockBox && !isInlineBlockBox) {
             return;
         }
 
