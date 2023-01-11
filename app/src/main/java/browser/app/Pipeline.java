@@ -5,7 +5,10 @@ import javafx.scene.canvas.GraphicsContext;
 import browser.css.CSSLoader;
 import browser.css.DefaultColors;
 import browser.css.FontLoader;
-import browser.layout.BoxLayoutCalculator;
+import browser.layout.BoxLayoutGenerator;
+import browser.layout.BoxTreeGenerator;
+import browser.layout.TextDimensionCalculator;
+import browser.model.BoxNode;
 import browser.model.DOMNode;
 import browser.model.RenderNode;
 import browser.network.ResourceLoader;
@@ -16,19 +19,28 @@ import browser.parser.SpecialSymbolHandler;
 import browser.renderer.HTMLRenderer;
 import browser.renderer.ImageCache;
 
+import lombok.Getter;
+import lombok.Setter;
+
 public class Pipeline {
 
     private static boolean initialized = false;
 
     private final ResourceLoader resourceLoader;
+    private final TextDimensionCalculator textDimensionCalculator;
+    @Getter
+    @Setter
     private DOMNode domRoot;
-    private RenderNode renderRoot;
+    @Getter
+    private RenderNode rootRenderNode;
+    private BoxNode rootBoxNode;
     private boolean loaded;
 
-    public String title;
-    public float width;
-    public float height;
-
+    @Getter
+    private String title;
+    private float width;
+    @Getter
+    private float height;
 
     public static void init() {
         if (initialized) {
@@ -46,6 +58,7 @@ public class Pipeline {
 
     public Pipeline() {
         resourceLoader = new ResourceLoader();
+        textDimensionCalculator = new TextDimensionCalculator();
     }
 
     /**
@@ -64,25 +77,17 @@ public class Pipeline {
      * @param screenWidth        Width in pixels of the screen.
      */
     public void calculateLayout(float screenWidth) {
-        RenderTreeGenerator rtg = new RenderTreeGenerator();
-        renderRoot = rtg.generateRenderTree(domRoot, screenWidth);
-        CSSLoader cssLoader = new CSSLoader(domRoot, rtg.getParentRenderNodeMap(), resourceLoader.getExternalCSS());
-        cssLoader.applyAllCSS(renderRoot);
+        RenderTreeGenerator renderTreeGenerator = new RenderTreeGenerator();
+        rootRenderNode = renderTreeGenerator.generateRenderTree(domRoot, screenWidth);
+        CSSLoader cssLoader = new CSSLoader(domRoot, renderTreeGenerator.getParentRenderNodeMap(), resourceLoader.getExternalCSS());
+        cssLoader.applyAllCSS(rootRenderNode);
 
-        // Run text cleanup after CSS properties have been set.
-        rtg.cleanupRenderNodeText(renderRoot);
+        BoxTreeGenerator boxTreeGenerator = new BoxTreeGenerator();
+        rootBoxNode = boxTreeGenerator.generate(rootRenderNode);
+        BoxLayoutGenerator boxLayoutGenerator = new BoxLayoutGenerator(textDimensionCalculator);
+        boxLayoutGenerator.calculateLayout(rootBoxNode, screenWidth);
 
-        BoxLayoutCalculator blc = new BoxLayoutCalculator(rtg.getParentRenderNodeMap(), screenWidth);
-
-        rtg.transformNode(renderRoot);
-
-        blc.setBoxBounds(renderRoot);
-        blc.propagateMaxSizes(renderRoot);
-        blc.finalizeDimensions(renderRoot);
-        blc.setTableCellWidths(renderRoot);
-        blc.calculateBoxes(renderRoot);
-        blc.applyJustification(renderRoot);
-        height = renderRoot.box.height;
+        height = rootBoxNode.height;
         width = screenWidth;
     }
 
@@ -91,21 +96,8 @@ public class Pipeline {
      * @param gc        An instance of GraphicsContext to render on.
      */
     public void render(GraphicsContext gc) {
-        HTMLRenderer.setBackground(gc, renderRoot.style.backgroundColor, width, height);
-        HTMLRenderer.render(gc, renderRoot);
-    }
-
-    // Expose the render tree for the inspector
-    public RenderNode getRootRenderNode() {
-        return renderRoot;
-    }
-
-    // Expose the DOM root for testing.
-    public DOMNode getDomRoot() {
-        return domRoot;
-    }
-    public void setDomRoot(DOMNode domRoot) {
-        this.domRoot = domRoot;
+        HTMLRenderer.setBackground(gc, rootRenderNode.style.backgroundColor, width, height);
+        HTMLRenderer.render(gc, rootRenderNode);
     }
 
     public boolean loadedWebpage() {

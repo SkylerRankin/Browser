@@ -116,15 +116,15 @@ public class CSSParserTest {
         Map<Selector, Map<String, String>> actual = parser.getRules();
         Map<Selector, Map> expected = new HashMap<Selector, Map>();
 
-        Selector s1 = parser.new Selector(CSSParser.SelectorType.ELEMENT);
+        Selector s1 = new Selector(CSSParser.SelectorType.ELEMENT);
         s1.values.add("h1");
         Map<String, String> m1 = new HashMap<String, String>();
         m1.put("color", "black");
         m1.put("font-size", "120%");
         expected.put(s1, m1);
 
-        Selector s2 = parser.new Selector(CSSParser.SelectorType.ELEMENT);
-        Selector s4 = parser.new Selector(CSSParser.SelectorType.ELEMENT);
+        Selector s2 = new Selector(CSSParser.SelectorType.ELEMENT);
+        Selector s4 = new Selector(CSSParser.SelectorType.ELEMENT);
         s2.values.add("h2");
         s4.values.add("h3");
         Map<String, String> m2 = new HashMap<String, String>();
@@ -132,7 +132,7 @@ public class CSSParserTest {
         expected.put(s2, m2);
         expected.put(s4, m2);
 
-        Selector s3 = parser.new Selector(CSSParser.SelectorType.ELEMENT);
+        Selector s3 = new Selector(CSSParser.SelectorType.ELEMENT);
         s3.values.add("p");
         Map<String, String> m3 = new HashMap<String, String>();
         m3.put("display", "none");
@@ -157,15 +157,15 @@ public class CSSParserTest {
         Map<Selector, Map<String, String>> actual = parser.getRules();
         Map<Selector, Map> expected = new HashMap<Selector, Map>();
 
-        Selector s1 = parser.new Selector(CSSParser.SelectorType.ELEMENT);
+        Selector s1 = new Selector(CSSParser.SelectorType.ELEMENT);
         s1.values.add("h1");
         Map<String, String> m1 = new HashMap<String, String>();
         m1.put("color", "blue");
         m1.put("font-size", "120%");
         expected.put(s1, m1);
 
-        Selector s2 = parser.new Selector(CSSParser.SelectorType.ELEMENT);
-        Selector s3 = parser.new Selector(CSSParser.SelectorType.ELEMENT);
+        Selector s2 = new Selector(CSSParser.SelectorType.ELEMENT);
+        Selector s3 = new Selector(CSSParser.SelectorType.ELEMENT);
         s2.values.add("h2");
         s3.values.add("h3");
         Map<String, String> m2 = new HashMap<String, String>();
@@ -191,15 +191,15 @@ public class CSSParserTest {
         Map<Selector, Map<String, String>> actual = parser.getRules();
         Map<Selector, Map> expected = new HashMap<Selector, Map>();
 
-        Selector s1 = parser.new Selector(CSSParser.SelectorType.ELEMENT);
+        Selector s1 = new Selector(CSSParser.SelectorType.ELEMENT);
         s1.values.add("h1");
         Map<String, String> m1 = new HashMap<String, String>();
         m1.put("color", "black");
         m1.put("font-size", "120%");
         expected.put(s1, m1);
 
-        Selector s2 = parser.new Selector(CSSParser.SelectorType.ELEMENT);
-        Selector s3 = parser.new Selector(CSSParser.SelectorType.ELEMENT);
+        Selector s2 = new Selector(CSSParser.SelectorType.ELEMENT);
+        Selector s3 = new Selector(CSSParser.SelectorType.ELEMENT);
         s2.values.add("h2");
         s3.values.add("h3");
         Map<String, String> m2 = new HashMap<String, String>();
@@ -260,13 +260,13 @@ public class CSSParserTest {
 
         // Single class
         CSSParser.Selector actual = parser.parseSelector(".title");
-        CSSParser.Selector expected = parser.new Selector(CSSParser.SelectorType.CLASS);
+        CSSParser.Selector expected = new Selector(CSSParser.SelectorType.CLASS);
         expected.values.add("title");
         assertEquals(expected, actual);
 
         // Multiple classes
         actual = parser.parseSelector(".title.pointer.row-4");
-        expected = parser.new Selector(CSSParser.SelectorType.CLASS);
+        expected = new Selector(CSSParser.SelectorType.CLASS);
         expected.values.add("title");
         expected.values.add("pointer");
         expected.values.add("row-4");
@@ -277,7 +277,7 @@ public class CSSParserTest {
     public void testParseSelector_NESTED_CLASS() {
         CSSParser parser = new CSSParser();
         CSSParser.Selector actual = parser.parseSelector(".title .primary .col");
-        CSSParser.Selector expected = parser.new Selector(CSSParser.SelectorType.NESTED_CLASS);
+        CSSParser.Selector expected = new Selector(CSSParser.SelectorType.NESTED_CLASS);
         expected.values.add("title");
         expected.values.add("primary");
         expected.values.add("col");
@@ -288,7 +288,7 @@ public class CSSParserTest {
     public void testParseSelector_ID() {
         CSSParser parser = new CSSParser();
         CSSParser.Selector actual = parser.parseSelector("#title");
-        CSSParser.Selector expected = parser.new Selector(CSSParser.SelectorType.ID);
+        CSSParser.Selector expected = new Selector(CSSParser.SelectorType.ID);
         expected.values.add("title");
         assertEquals(expected, actual);
     }
@@ -297,7 +297,7 @@ public class CSSParserTest {
     public void testParseSelector_ALL() {
         CSSParser parser = new CSSParser();
         CSSParser.Selector actual = parser.parseSelector("*");
-        CSSParser.Selector expected = parser.new Selector(CSSParser.SelectorType.ALL);
+        CSSParser.Selector expected = new Selector(CSSParser.SelectorType.ALL);
         assertEquals(expected, actual);
     }
 
@@ -307,13 +307,13 @@ public class CSSParserTest {
 
         // Single element
         CSSParser.Selector actual = parser.parseSelector("div");
-        CSSParser.Selector expected = parser.new Selector(CSSParser.SelectorType.ELEMENT);
+        CSSParser.Selector expected = new Selector(CSSParser.SelectorType.ELEMENT);
         expected.values.add("div");
         assertEquals(expected, actual);
 
         // Multiple classes
         actual = parser.parseSelector("div, p,span");
-        expected = parser.new Selector(CSSParser.SelectorType.ELEMENT);
+        expected = new Selector(CSSParser.SelectorType.ELEMENT);
         expected.values.add("div");
         expected.values.add("p");
         expected.values.add("span");
@@ -324,7 +324,7 @@ public class CSSParserTest {
     public void testParseSelector_NESTED_ELEMENT() {
         CSSParser parser = new CSSParser();
         CSSParser.Selector actual = parser.parseSelector("div p span");
-        CSSParser.Selector expected = parser.new Selector(CSSParser.SelectorType.NESTED_ELEMENT);
+        CSSParser.Selector expected = new Selector(CSSParser.SelectorType.NESTED_ELEMENT);
         expected.values.add("div");
         expected.values.add("p");
         expected.values.add("span");
@@ -335,7 +335,7 @@ public class CSSParserTest {
     public void testParseSelector_ELEMENT_CLASS() {
         CSSParser parser = new CSSParser();
         CSSParser.Selector actual = parser.parseSelector("h1.title");
-        CSSParser.Selector expected = parser.new Selector(CSSParser.SelectorType.ELEMENT_CLASS);
+        CSSParser.Selector expected = new Selector(CSSParser.SelectorType.ELEMENT_CLASS);
         expected.values.add("h1");
         expected.values.add("title");
         assertEquals(expected, actual);

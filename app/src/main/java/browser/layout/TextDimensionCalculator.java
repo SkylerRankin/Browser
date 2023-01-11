@@ -23,7 +23,7 @@ public class TextDimensionCalculator {
      * @return      A vector of the text's width and height;
      */
     public Vector2 getDimension(String string, CSSStyle style) {
-        int key = new TextCacheKey(style.fontFamily, style.fontSize, style.fontWeight.ordinal()).hashCode();
+        int key = new TextCacheKey(string, style.fontFamily, style.fontSize, style.fontWeight.ordinal()).hashCode();
         if (cache.containsKey(key)) {
             return cache.get(key);
         }
@@ -44,6 +44,7 @@ public class TextDimensionCalculator {
 
     @Data
     private static class TextCacheKey {
+        private final String text;
         private final String fontFamily;
         private final int fontSize;
         private final int fontWeight;

@@ -23,15 +23,15 @@ public class ResourceLoader {
     private enum resourceType {IMG, CSS}
     
     private DOMNode dom;
-    private Map<resourceType, Set<String>> resources;
-    private List<String> externalCSS;
+    private final Map<resourceType, Set<String>> resources;
+    private final List<String> externalCSS;
 
     public ResourceLoader() {
         dom = null;
-        resources = new HashMap<resourceType, Set<String>>();
-        resources.put(resourceType.IMG, new HashSet<String>());
-        resources.put(resourceType.CSS, new HashSet<String>());
-        externalCSS = new ArrayList<String>();
+        resources = new HashMap<>();
+        resources.put(resourceType.IMG, new HashSet<>());
+        resources.put(resourceType.CSS, new HashSet<>());
+        externalCSS = new ArrayList<>();
     }
     
     public DOMNode getDOM() { return dom; }
@@ -39,7 +39,6 @@ public class ResourceLoader {
     
     /**
      * Load the HTML for a given URL, and load all other resources linked in that file
-     * @param url
      */
     public void loadWebpage(String url) {
         

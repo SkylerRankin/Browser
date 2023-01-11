@@ -3,6 +3,7 @@ package browser.app;
 import static browser.constants.MathConstants.DELTA;
 import static org.junit.Assert.assertEquals;
 
+import browser.app.Pipeline;
 import browser.model.DOMNode;
 import browser.model.RenderNode;
 import browser.parser.HTMLElements;

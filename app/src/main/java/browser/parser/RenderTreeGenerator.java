@@ -1,6 +1,5 @@
 package browser.parser;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,8 +13,17 @@ import browser.model.RenderNode;
 public class RenderTreeGenerator {
     private final Map<Integer, RenderNode> parentRenderNodeMap = new HashMap<Integer, RenderNode>();
 
+    // Public methods
+
     public RenderNode generateRenderTree(DOMNode dom, Float screenWidth) {
-        return domTreeToRenderTree(dom);
+        RenderNode root = domTreeToRenderTree(dom);
+
+        if (root != null) {
+            addListMarkers(root);
+            cleanupRenderNodeText(root);
+        }
+
+        return root;
     }
 
     public DOMNode getBodyNode(DOMNode dom) {
@@ -28,10 +36,19 @@ public class RenderTreeGenerator {
         return bodyCandidate;
     }
 
-    public RenderNode domTreeToRenderTree(DOMNode dom) {
+    public Map<Integer, RenderNode> getParentRenderNodeMap() {
+        return this.parentRenderNodeMap;
+    }
+
+    public void reset() {
+        parentRenderNodeMap.clear();
+    }
+
+    // Private methods
+
+    private RenderNode domTreeToRenderTree(DOMNode dom) {
         DOMNode body = getBodyNode(dom);
         if (body == null) {
-            System.out.println("RenderTreeGenerator: no body element found");
             ErrorPageHandler.browserError = ErrorPageHandler.BrowserErrorType.NO_BODY;
             return null;
         }
@@ -42,7 +59,6 @@ public class RenderTreeGenerator {
         RenderNode renderNode = new RenderNode(dom, RenderNode.nextId, depth);
         renderNode.attributes = dom.attributes;
         renderNode.parent = parent;
-//        if (parentID != null) parentRenderNodeMap.put(parentID, renderNode);
         if (parent != null) parentRenderNodeMap.put(RenderNode.nextId, parent);
         RenderNode.nextId++;
         for (DOMNode child : dom.children) {
@@ -51,7 +67,7 @@ public class RenderTreeGenerator {
         return renderNode;
     }
 
-    public void cleanupRenderNodeText(RenderNode renderNode) {
+    private void cleanupRenderNodeText(RenderNode renderNode) {
         removeDuplicateWhitespace(renderNode, false);
         trimTextWhitespace(renderNode);
     }
@@ -62,6 +78,7 @@ public class RenderTreeGenerator {
      * @param root  The render node to start on.
      * @param inPre True if the node is within a pre-formatted block.
      */
+    // TODO make this private
     public void removeDuplicateWhitespace(RenderNode root, boolean inPre) {
         if (root == null) return;
         if (root.text != null && !inPre) {
@@ -95,6 +112,7 @@ public class RenderTreeGenerator {
      *
      * @param node  The node to start on.
      */
+    // TODO make this private
     public void trimTextWhitespace(RenderNode node) {
         if (node == null ) return;
 
@@ -121,11 +139,11 @@ public class RenderTreeGenerator {
         }
     }
 
-    public RenderNode getNextInlineTextNode(RenderNode node) {
+    private RenderNode getNextInlineTextNode(RenderNode node) {
         return getRelativeInlineTextNode(node, 1);
     }
 
-    public RenderNode getPreviousInlineTextNode(RenderNode node) {
+    private RenderNode getPreviousInlineTextNode(RenderNode node) {
         return getRelativeInlineTextNode(node, -1);
     }
 
@@ -155,73 +173,25 @@ public class RenderTreeGenerator {
     }
 
     /**
-     * Some elements need to be transformed into what actually gets rendered: for instance,
-     * multiple lines need to get broken up, and list elements need to be assigned numbers.
-     * @param root
+     * Lists require the insertion of pseudo-elements to render the list bullet points, numbers, or other character.
+     * Each list item will have a corresponding marker added after it.
+     * @param renderNode        The render node to potentially add list markers to.
      */
-    public void transformNode(RenderNode root) {
-        for (int i = 0; i < root.children.size(); i++) {
-            RenderNode child = root.children.get(i);
-            switch (child.type) {
-                case HTMLElements.OL:
-                case HTMLElements.UL:
-                    transformList(child);
-                    break;
+    private void addListMarkers(RenderNode renderNode) {
+        if (renderNode.style.auxiliaryDisplay != null && renderNode.style.auxiliaryDisplay.equals(CSSStyle.DisplayType.LIST_ITEM)) {
+            RenderNode marker = new RenderNode(HTMLElements.PSEUDO_MARKER);
+            if (renderNode.parent.type.equals(HTMLElements.OL)) {
+                List<RenderNode> nonMarkerChildren = renderNode.parent.children.stream().filter(node -> !node.type.equals(HTMLElements.PSEUDO_MARKER)).toList();
+                int indexInParent = nonMarkerChildren.indexOf(renderNode);
+                marker.properties.put(PseudoElementConstants.MARKER_INDEX_KEY, indexInParent);
             }
+            int indexInParent = renderNode.parent.children.indexOf(renderNode);
+            renderNode.parent.children.add(indexInParent + 1, marker);
         }
 
-        for (RenderNode child : root.children) {
-            transformNode(child);
+        for (RenderNode child : renderNode.children) {
+            addListMarkers(child);
         }
-    }
-
-    /**
-     * HTML lists require the addition of pseudo-elements to represent the
-     * bullet points or numbers. Each <li></li> will have a corresponding
-     * pseudo-element added before it, and the <li></li> style will be set
-     * to display = inline.
-     * @param root The <ul> or <ol> RenderNode to transform.
-     */
-    private void transformList(RenderNode root) {
-        List<RenderNode> newChildren = new ArrayList<>();
-        for (int i = 0; i < root.children.size(); i++) {
-            RenderNode child = root.children.get(i);
-            if (child.type.equals(HTMLElements.LI)) {
-                // Create pseudo element for the list marker.
-                RenderNode marker = new RenderNode(HTMLElements.PSEUDO_MARKER);
-                marker.depth = child.depth;
-                marker.id = RenderNode.nextId++;
-                marker.parent = child.parent;
-                marker.attributes.put(PseudoElementConstants.MARKER_TYPE_KEY, root.type);
-                marker.attributes.put(PseudoElementConstants.MARKER_INDEX_KEY, String.valueOf(i));
-                marker.style.display = PseudoElementConstants.MARKER_DISPLAY_TYPE;
-                marker.style.width = PseudoElementConstants.MARKER_WIDTH;
-                marker.style.height = PseudoElementConstants.MARKER_HEIGHT;
-
-                // Update the root node to be inline-block. In needs to be inline with the marker element, but should
-                // otherwise be a block element.
-                child.style.display = CSSStyle.DisplayType.INLINE_BLOCK;
-
-                // Save the parent reference for the new render node.
-                parentRenderNodeMap.put(marker.id, marker.parent);
-
-                newChildren.add(marker);
-                newChildren.add(child);
-            } else {
-                newChildren.add(child);
-            }
-        }
-
-        root.children.clear();
-        root.children.addAll(newChildren);
-    }
-
-    public Map<Integer, RenderNode> getParentRenderNodeMap() {
-        return this.parentRenderNodeMap;
-    }
-
-    public void reset() {
-        parentRenderNodeMap.clear();
     }
 
 }

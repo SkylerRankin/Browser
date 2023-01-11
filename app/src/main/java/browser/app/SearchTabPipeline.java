@@ -1,6 +1,5 @@
 package browser.app;
 
-import browser.model.RenderNode;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.event.EventHandler;
 import javafx.scene.canvas.Canvas;
@@ -8,6 +7,7 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Tab;
 
 import browser.interaction.InteractionHandler;
+import browser.model.RenderNode;
 import browser.tasks.LoadWebpageTask;
 import browser.tasks.RedrawWebpageTask;
 import browser.tasks.RenderCompleteCallback;
@@ -48,8 +48,8 @@ public class SearchTabPipeline {
         lwt.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
             @Override
             public void handle(WorkerStateEvent event) {
-                canvas.setHeight(Math.max(pipeline.height, (float) gc.getCanvas().getHeight()));
-                tab.setText(pipeline.title == null ? url : pipeline.title);
+                canvas.setHeight(Math.max(pipeline.getHeight(), (float) gc.getCanvas().getHeight()));
+                tab.setText(pipeline.getTitle() == null ? url : pipeline.getTitle());
                 synchronized (pipeline) {
                     pipeline.render(gc);
                 }
@@ -80,7 +80,7 @@ public class SearchTabPipeline {
         crt.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
             @Override
             public void handle(WorkerStateEvent event) {
-                canvas.setHeight(Math.max(pipeline.height, (float) gc.getCanvas().getHeight()));
+                canvas.setHeight(Math.max(pipeline.getHeight(), (float) gc.getCanvas().getHeight()));
                 synchronized (pipeline) {
                     pipeline.render(gc);
                 }

@@ -19,6 +19,8 @@ public class BoxLayoutGenerator {
     private final InlineLayoutFormatter inlineLayoutFormatter;
     private final InlineBlockWidthCalculator inlineBlockWidthCalculator;
 
+    private enum LayoutAlgorithmType { Block, Inline, List, Invalid }
+
     public BoxLayoutGenerator(final TextDimensionCalculator textDimensionCalculator) {
         inlineLayoutFormatter = new InlineLayoutFormatter(textDimensionCalculator);
         inlineBlockWidthCalculator = new InlineBlockWidthCalculator(this);
@@ -288,21 +290,33 @@ public class BoxLayoutGenerator {
             return;
         }
 
+        LayoutAlgorithmType layoutAlgorithm = getLayoutAlgorithm(boxNode);
+        switch (layoutAlgorithm) {
+            case Block -> layoutBlockBoxes(boxNode);
+            case Inline -> layoutInlineBoxes(boxNode);
+            case List -> layoutListBoxes(boxNode);
+            case Invalid -> System.err.printf("BoxLayoutGenerator.setBoxLayout: no supported layout algorithm for box: %s\n", boxNode);
+        }
+    }
+
+    private LayoutAlgorithmType getLayoutAlgorithm(BoxNode boxNode) {
         if (boxNode.innerDisplayType.equals(CSSStyle.DisplayType.FLOW) || boxNode.innerDisplayType.equals(DisplayType.FLOW_ROOT)) {
-            List<BoxNode> childrenInNormalFlow = boxNode.children.stream()
-                    .filter(b -> b.style.position == PositionType.STATIC ||
-                            b.style.position == PositionType.RELATIVE)
-                    .toList();
-            DisplayType childrenDisplayType = childrenInNormalFlow.get(0).outerDisplayType;
-            if (childrenDisplayType.equals(DisplayType.BLOCK)) {
-                // Assume all children are block. Use the block formatting algorithm.
-                layoutBlockBoxes(boxNode);
+            boolean hasListChildren = boxNode.children.stream().anyMatch(child -> child.auxiliaryDisplayType != null && child.auxiliaryDisplayType.equals(DisplayType.LIST_ITEM));
+            boolean hasBlockChildren = boxNode.children.stream().anyMatch(child -> child.outerDisplayType != null && child.outerDisplayType.equals(DisplayType.BLOCK));
+            boolean hasInlineChildren = boxNode.children.stream().anyMatch(child -> child.outerDisplayType != null && child.outerDisplayType.equals(DisplayType.INLINE));
+
+            if (hasListChildren) {
+                return LayoutAlgorithmType.List;
+            } else if (hasBlockChildren) {
+                return LayoutAlgorithmType.Block;
+            } else if (hasInlineChildren) {
+                return LayoutAlgorithmType.Inline;
             } else {
-                // Assume all children are inline. Use the inline formatting algorithm.
-                layoutInlineBoxes(boxNode);
+                return LayoutAlgorithmType.Invalid;
             }
         } else {
-            System.err.printf("BoxLayoutGenerator.setBoxLayout: unsupported inner display type: %s\n", boxNode.innerDisplayType);
+            // Only flow layouts are currently supported.
+            return LayoutAlgorithmType.Invalid;
         }
     }
 
@@ -327,7 +341,7 @@ public class BoxLayoutGenerator {
             parentBox.width = getWidthFromChildren(parentBox);
         }
 
-        // The width should be set based on the box's content if the width was not defined in the style, or if the
+        // The height should be set based on the box's content if the width was not defined in the style, or if the
         // box is an inline-block box.
         if (parentBox.style.outerDisplay.equals(DisplayType.INLINE) || parentBox.height == null) {
             parentBox.height = getHeightFromChildren(parentBox);
@@ -372,6 +386,38 @@ public class BoxLayoutGenerator {
             parentBox.height = getHeightFromChildren(parentBox);
         }
 
+    }
+
+    private void layoutListBoxes(BoxNode parentBox) {
+        BlockFormattingContext context = blockFormattingContexts.get(parentBox.blockFormattingContextId);
+
+        for (int i = 0; i < parentBox.children.size(); i++) {
+            BoxNode childBox = parentBox.children.get(i);
+            BoxNode lastPlacedBox = context.getLastPlacedBoxForId(parentBox.id);
+            childBox.x = parentBox.x + parentBox.style.borderWidthLeft + parentBox.style.paddingLeft + childBox.style.marginLeft;
+            if (lastPlacedBox == null) {
+                childBox.y = parentBox.y + parentBox.style.borderWidthTop + parentBox.style.paddingTop + childBox.style.marginTop;
+            } else {
+                childBox.y = lastPlacedBox.y + lastPlacedBox.height + lastPlacedBox.style.marginBottom + childBox.style.marginTop;
+            }
+
+            setBoxLayout(childBox);
+            context.setLastPlacedBoxForId(parentBox.id, childBox);
+        }
+
+        if (parentBox.shrinkBlockWidthToContent) {
+            parentBox.width = getWidthFromChildren(parentBox);
+        }
+
+        // The height should be set based on the box's content if the width was not defined in the style, or if the
+        // box is an inline-block box.
+        if (parentBox.style.outerDisplay.equals(DisplayType.INLINE) || parentBox.height == null) {
+            parentBox.height = getHeightFromChildren(parentBox);
+        }
+
+        for (BoxNode child : parentBox.children) {
+            setBoxLayout(child);
+        }
     }
 
     private float getHeightFromChildren(BoxNode boxNode) {

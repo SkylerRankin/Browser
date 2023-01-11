@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 
 import browser.css.CSSStyle;
-import browser.parser.RenderTreeGenerator;
 
 public class RenderNode {
 
@@ -21,10 +20,14 @@ public class RenderNode {
     public RenderNode parent;
     public CSSStyle style;
     public Box box;
+    public BoxNode boxNode;
     public Float maxWidth = null;
     public Float maxHeight = null;
     public String cssAttribute = null;
+    // A map of the attributes appearing in the HTML tag, such as style.
     public Map<String, String> attributes;
+    // A generic set of properties used during layout and rendering.
+    public final Map<String, Object> properties = new HashMap<>();
     
     // False until the BoxLayoutCalculator sets this node's box object correctly
     // This way we don't consider nodes to be at position (0, 0) when they are 

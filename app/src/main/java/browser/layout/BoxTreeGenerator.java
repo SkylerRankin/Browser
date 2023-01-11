@@ -56,6 +56,7 @@ public class BoxTreeGenerator {
         BoxNode boxNode = new BoxNode();
         boxNode.id = BoxNode.nextId++;
         boxNode.renderNodeId = renderNode.id;
+        renderNode.boxNode = boxNode;
         boxNode.correspondingRenderNode = renderNode;
         boxNode.style = renderNode.style.deepCopy();
         boxNode.parent = parentBoxNode;
@@ -64,6 +65,7 @@ public class BoxTreeGenerator {
         }
         boxNode.outerDisplayType = renderNode.style.outerDisplay;
         boxNode.innerDisplayType = renderNode.style.innerDisplay;
+        boxNode.auxiliaryDisplayType = renderNode.style.auxiliaryDisplay;
         boxNode.isTextNode = renderNode.type.equals(HTMLElements.TEXT);
 
         if (boxNode.isTextNode) {

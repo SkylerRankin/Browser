@@ -19,11 +19,13 @@ public class BoxNode {
     public int inlineFormattingContextId = -1;
     public int blockFormattingContextId = -1;
     public RenderNode correspondingRenderNode = null;
-    public CSSStyle style;
+    public CSSStyle style = new CSSStyle();
     public DisplayType outerDisplayType;
     public DisplayType innerDisplayType;
+    public DisplayType auxiliaryDisplayType = null;
     public boolean isAnonymous = false;
     public boolean isTextNode = false;
+    public boolean isPseudo = false;
     public Float x = null;
     public Float y = null;
     public Float width = null;
@@ -51,6 +53,7 @@ public class BoxNode {
         this.style = other.style == null ? null : other.style.deepCopy();
         this.outerDisplayType = other.outerDisplayType;
         this.innerDisplayType = other.innerDisplayType;
+        this.auxiliaryDisplayType = other.auxiliaryDisplayType;
         this.isAnonymous = other.isAnonymous;
         this.isTextNode = other.isTextNode;
         this.x = other.x;
@@ -90,9 +93,9 @@ public class BoxNode {
         String positionSize = String.format("@(%.0f, %.0f), (%.0f x %.0f)", x, y, width, height);
         String flags = "" + (isAnonymous ? "a" : "") + (isTextNode ? "t" : "");
         String textRange = isTextNode ? String.format(", tx:%d-%d", textStartIndex, textEndIndex) : "";
-        return String.format("id=%s, outer=%s, inner=%s, parent=%d, rid=%d, %s, [%s], %s%s",
+        return String.format("id=%s, outer=%s, inner=%s, parent=%d, rid=%d, %s, [%s], %s%s, font-size=%d",
                 id, outerDisplayType, innerDisplayType, parent == null ? -1 : parent.id, renderNodeId,
-                positionSize, flags, children.stream().map(boxNode -> boxNode.id).toList(), textRange);
+                positionSize, flags, children.stream().map(boxNode -> boxNode.id).toList(), textRange, style.fontSize);
     }
 
     public String toRecursiveString() {

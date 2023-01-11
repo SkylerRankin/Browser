@@ -168,21 +168,24 @@ public class CSSStyle {
         return Integer.parseInt(value.substring(0, value.length() - offset));
     }
     
-    private int parseFontSizeValue(String value) {
-        if (value.matches("\\d+")) return Integer.parseInt(value);
-        if (value.endsWith("rem")) {
+    private void parseFontSizeValue(String value) {
+        if (value.matches("\\d+")) {
+            fontSize = Integer.parseInt(value);
+        } else if (value.matches("(\\d+)px")) {
+            fontSize = Integer.parseInt(value.substring(0, value.length() - 2));
+        } else if (value.endsWith("rem")) {
             String remsString = value.substring(0, value.indexOf("rem"));
             if (remsString.matches("\\d+(\\.\\d+?)?")) {
                 double rems = Double.parseDouble(remsString);
-                return (int) (rems * 16.0);
-                
+                fontSize = (int) (rems * 16.0);
             }
-        }
-        if (value.endsWith("%") && value.substring(0, value.length()-1).matches("\\d+")) {
+        } else if (value.endsWith("%") && value.substring(0, value.length()-1).matches("\\d+")) {
             double percent = Double.parseDouble(value.substring(0, value.length()-1));
-            return (int) (16.0 * 100.0 / percent);
+            fontSize = (int) (16.0 * 100.0 / percent);
+        } else {
+            System.out.printf("CSSStyle.parseFontSizeValue: invalid font property: %s\n", value);
         }
-        return 16;
+
     }
     
     private int parseBorderWidth(String value) {
@@ -236,7 +239,7 @@ public class CSSStyle {
         }
 
         // TODO: should the basic display even be used anymore?
-        // TODO: hwo to set the default inner. not sure if "flow" is the correct choice here.
+        // TODO: how to set the default inner. not sure if "flow" is the correct choice here.
     }
 
     private BoxSizingType parseBoxSizingType(String text) {
@@ -291,7 +294,7 @@ public class CSSStyle {
             case "color":               color = new CSSColor(value); break;
             case "display":             parseDisplayType(value); break;
             case "font-family":         fontFamily = FontLoader.getValidFont(value.split(",")); break;
-            case "font-size":           fontSize = parseFontSizeValue(value.toLowerCase()); break;
+            case "font-size":           parseFontSizeValue(value.toLowerCase()); break;
             case "font-style":          fontStyle = fontStyleType.valueOf(value.toUpperCase()); break;
             case "font-weight":         fontWeight = fontWeightType.valueOf(value.toUpperCase()); break;
             case "height":              height = (float) parseDimension(value);

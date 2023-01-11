@@ -257,7 +257,7 @@ public class CSSParser {
         System.out.println("---------------------------\n");
     }
     
-    public class Selector {
+    public static class Selector {
         public SelectorType type;
         public List<String> values;
         public Selector(SelectorType type) {

@@ -58,7 +58,6 @@ public class CSSLoader {
         applyInline(root);
         propagateCSS(root);
         finalizeCSS(root);
-//      root.printStyle();
     }
 
     public void loadDefaults(RenderNode root) {
@@ -83,7 +82,6 @@ public class CSSLoader {
             Map<Selector, Map<String, String>> rules = parser.getRules();
             applyRules(root, rules, true);
         }
-
     }
 
     public void loadStyleTags(RenderNode root) {
@@ -116,19 +114,19 @@ public class CSSLoader {
     //TODO: handle selectors for nested elements; this is just 1 level
     private static void applyRules(RenderNode node, Map<Selector, Map<String, String>> rules, boolean globalApplication) {
         // Create some representative selectors for this node
-        CSSParser.Selector allSelector = (new CSSParser()).new Selector(CSSParser.SelectorType.ALL);
-        CSSParser.Selector elementSelector = (new CSSParser()).new Selector(CSSParser.SelectorType.ELEMENT);
+        CSSParser.Selector allSelector = new Selector(CSSParser.SelectorType.ALL);
+        CSSParser.Selector elementSelector = new Selector(CSSParser.SelectorType.ELEMENT);
         elementSelector.values.add(node.type);
         List<CSSParser.Selector> classSelectors = new ArrayList<>();
         if (node.attributes.get("class") != null) {
             for (String classString : node.attributes.get("class").split(" ")) {
-                CSSParser.Selector classSelector = (new CSSParser()).new Selector(CSSParser.SelectorType.CLASS);
+                CSSParser.Selector classSelector = new Selector(CSSParser.SelectorType.CLASS);
                 classSelector.values.add(classString);
                 classSelectors.add(classSelector);
             }
         }
 
-        CSSParser.Selector idSelector = (new CSSParser()).new Selector(CSSParser.SelectorType.ID);
+        CSSParser.Selector idSelector = new Selector(CSSParser.SelectorType.ID);
         idSelector.values.add(node.attributes.get("id"));
 
         Map<String, String> allRule = rules.get(allSelector);
