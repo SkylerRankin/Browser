@@ -7,6 +7,7 @@ import browser.css.DefaultColors;
 import browser.css.FontLoader;
 import browser.layout.BoxLayoutGenerator;
 import browser.layout.BoxTreeGenerator;
+import browser.layout.ListMarkerGenerator;
 import browser.layout.TextDimensionCalculator;
 import browser.model.BoxNode;
 import browser.model.DOMNode;
@@ -78,9 +79,14 @@ public class Pipeline {
      */
     public void calculateLayout(float screenWidth) {
         RenderTreeGenerator renderTreeGenerator = new RenderTreeGenerator();
-        rootRenderNode = renderTreeGenerator.generateRenderTree(domRoot, screenWidth);
+        rootRenderNode = renderTreeGenerator.generateRenderTree(domRoot);
         CSSLoader cssLoader = new CSSLoader(domRoot, renderTreeGenerator.getParentRenderNodeMap(), resourceLoader.getExternalCSS());
         cssLoader.applyAllCSS(rootRenderNode);
+
+        // Insert list markers, propagate any CSS to them, and update their content.
+        ListMarkerGenerator.addMarkers(rootRenderNode);
+        cssLoader.applyAllCSS(rootRenderNode);
+        ListMarkerGenerator.setMarkerStyles(rootRenderNode);
 
         BoxTreeGenerator boxTreeGenerator = new BoxTreeGenerator();
         rootBoxNode = boxTreeGenerator.generate(rootRenderNode);

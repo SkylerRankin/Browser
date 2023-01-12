@@ -1,25 +1,9 @@
 package browser.app;
 
-import static browser.constants.MathConstants.DELTA;
-import static org.junit.Assert.*;
-
 import java.io.IOException;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
-import browser.css.CSSStyle;
-import browser.layout.TextDimensionCalculator;
-import browser.model.BoxNode;
-
-import browser.model.Vector2;
 import browser.util.LayoutIntegrationTestDriver;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Attribute;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -70,5 +54,10 @@ public class LayoutIntegrationTests {
     @Test
     public void stackedPaddingTest() throws IOException {
         driver.runLayoutTest("stackedPadding", 1000);
+    }
+
+    @Test
+    public void simpleOrderedList() throws IOException {
+        driver.runLayoutTest("simpleOrderedList", 400);
     }
 }

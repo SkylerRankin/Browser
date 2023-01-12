@@ -11,7 +11,6 @@ import browser.parser.HTMLElements;
 public class BoxTreeGenerator {
 
     private final Map<Integer, BoxNode> renderNodeIdToBoxNode = new HashMap<>();
-    private final Map<Integer, Integer> boxNodeIdToRenderNodeId = new HashMap<>();
     private BoxNode rootBoxNode;
 
     // Public methods
@@ -29,7 +28,6 @@ public class BoxTreeGenerator {
             BoxNode parentBoxNode = parentBoxNodeList.remove(0);
             BoxNode boxNode = createBoxNode(renderNode, parentBoxNode);
             renderNodeIdToBoxNode.put(renderNode.id, boxNode);
-            boxNodeIdToRenderNodeId.put(boxNode.id, renderNode.id);
 
             if (parentBoxNode == null) {
                 rootBoxNode = boxNode;
@@ -67,6 +65,7 @@ public class BoxTreeGenerator {
         boxNode.innerDisplayType = renderNode.style.innerDisplay;
         boxNode.auxiliaryDisplayType = renderNode.style.auxiliaryDisplay;
         boxNode.isTextNode = renderNode.type.equals(HTMLElements.TEXT);
+        boxNode.isPseudo = HTMLElements.isPseudoElement(renderNode.type);
 
         if (boxNode.isTextNode) {
             boxNode.isAnonymous = true;

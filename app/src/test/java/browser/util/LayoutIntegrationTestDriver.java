@@ -1,6 +1,5 @@
 package browser.util;
 
-import static browser.constants.MathConstants.DELTA;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
@@ -22,8 +21,11 @@ import org.jsoup.nodes.Element;
 public class LayoutIntegrationTestDriver {
 
     private static final String testDataDirectory = "./src/test/resources/layoutIntegrationTests";
+    private static final float layoutTolerance = 0.01f;
 
     private final Pipeline pipeline;
+
+    // Public methods
 
     public LayoutIntegrationTestDriver(Pipeline pipeline) {
         this.pipeline = pipeline;
@@ -44,6 +46,8 @@ public class LayoutIntegrationTestDriver {
         }
         assertBoxNodesEqual(expectedRootBoxNode, rootBoxNode);
     }
+
+    // Private methods
 
     private BoxNode createExpectedBoxTree(String filename) throws IOException {
         Document document = Jsoup.parse(Paths.get(String.format("%s/html/%s_layout.html", testDataDirectory, filename)).toFile());
@@ -102,10 +106,10 @@ public class LayoutIntegrationTestDriver {
     }
 
     private void assertBoxNodesEqual(BoxNode expected, BoxNode actual) {
-        assertEquals(expected.x, actual.x, DELTA);
-        assertEquals(expected.y, actual.y, DELTA);
-        assertEquals(expected.width, actual.width, DELTA);
-        assertEquals(expected.height, actual.height, DELTA);
+        assertEquals(expected.x, actual.x, layoutTolerance);
+        assertEquals(expected.y, actual.y, layoutTolerance);
+        assertEquals(expected.width, actual.width, layoutTolerance);
+        assertEquals(expected.height, actual.height, layoutTolerance);
         assertEquals(expected.textStartIndex, actual.textStartIndex);
         assertEquals(expected.textEndIndex, actual.textEndIndex);
         assertEquals(expected.children.size(), actual.children.size());

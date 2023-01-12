@@ -106,3 +106,7 @@ ul, ol {
     margin-top: 12px;
     margin-bottom: 12px;
 }
+
+li {
+    display: list-item;
+}

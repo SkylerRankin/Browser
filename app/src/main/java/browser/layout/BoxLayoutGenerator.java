@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import browser.constants.PseudoElementConstants;
 import browser.css.CSSStyle;
 import browser.model.BoxNode;
 import browser.parser.HTMLElements;
@@ -62,6 +63,14 @@ public class BoxLayoutGenerator {
      * @param boxNode       The box to set the fixed size of.
      */
     private void setFixedSizes(BoxNode boxNode) {
+        if (boxNode.isPseudo) {
+            if (boxNode.correspondingRenderNode.type.equals(HTMLElements.PSEUDO_MARKER)) {
+                // Markers always contain a single line of text or image, so the size is fixed.
+                ListMarkerGenerator.setMarkerSize(boxNode);
+            }
+            return;
+        }
+
         // Only allow fixed sizes on block boxes or boxes that establish new block context.
         boolean fixedSizeAllowed = boxNode.outerDisplayType.equals(CSSStyle.DisplayType.BLOCK) ||
                 boxNode.innerDisplayType.equals(DisplayType.FLOW_ROOT);
@@ -244,6 +253,10 @@ public class BoxLayoutGenerator {
      * @param boxNode       The box node to set the block formatting context of.
      */
     private void setBlockFormattingContexts(BoxNode boxNode) {
+        if (boxNode.isPseudo) {
+            return;
+        }
+
         int id;
         // TODO: add in all other cases of new BFCs.
         if (boxNode.innerDisplayType.equals(DisplayType.FLOW_ROOT) || boxNode.parent == null) {
@@ -394,29 +407,35 @@ public class BoxLayoutGenerator {
         for (int i = 0; i < parentBox.children.size(); i++) {
             BoxNode childBox = parentBox.children.get(i);
             BoxNode lastPlacedBox = context.getLastPlacedBoxForId(parentBox.id);
-            childBox.x = parentBox.x + parentBox.style.borderWidthLeft + parentBox.style.paddingLeft + childBox.style.marginLeft;
-            if (lastPlacedBox == null) {
-                childBox.y = parentBox.y + parentBox.style.borderWidthTop + parentBox.style.paddingTop + childBox.style.marginTop;
+            if (childBox.isPseudo) {
+                // Position the marker pseudo-element to the left of the previous box.
+                childBox.y = lastPlacedBox.y;
+                childBox.x = lastPlacedBox.x - childBox.width;
             } else {
-                childBox.y = lastPlacedBox.y + lastPlacedBox.height + lastPlacedBox.style.marginBottom + childBox.style.marginTop;
-            }
+                childBox.x = parentBox.x + parentBox.style.borderWidthLeft + parentBox.style.paddingLeft + childBox.style.marginLeft;
+                if (lastPlacedBox == null) {
+                    childBox.y = parentBox.y + parentBox.style.borderWidthTop + parentBox.style.paddingTop + childBox.style.marginTop;
+                } else {
+                    childBox.y = lastPlacedBox.y + lastPlacedBox.height + lastPlacedBox.style.marginBottom + childBox.style.marginTop;
+                }
 
-            setBoxLayout(childBox);
-            context.setLastPlacedBoxForId(parentBox.id, childBox);
+                setBoxLayout(childBox);
+                context.setLastPlacedBoxForId(parentBox.id, childBox);
+            }
         }
 
         if (parentBox.shrinkBlockWidthToContent) {
             parentBox.width = getWidthFromChildren(parentBox);
         }
 
-        // The height should be set based on the box's content if the width was not defined in the style, or if the
-        // box is an inline-block box.
         if (parentBox.style.outerDisplay.equals(DisplayType.INLINE) || parentBox.height == null) {
             parentBox.height = getHeightFromChildren(parentBox);
         }
 
         for (BoxNode child : parentBox.children) {
-            setBoxLayout(child);
+            if (child.style.auxiliaryDisplay == null || !child.style.auxiliaryDisplay.equals(DisplayType.LIST_ITEM)) {
+                setBoxLayout(child);
+            }
         }
     }
 

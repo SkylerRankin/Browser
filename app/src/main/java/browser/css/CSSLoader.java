@@ -28,6 +28,20 @@ public class CSSLoader {
         extractStyleTagsCSS(dom);
     }
 
+    // Public methods
+
+    public void applyAllCSS(RenderNode root) {
+        resetSetProperties(root);
+        loadDefaults(root);
+        loadExternalCSS(root);
+        loadStyleTags(root);
+        applyInline(root);
+        propagateCSS(root);
+        finalizeCSS(root);
+    }
+
+    // Private methods
+
     /**
      * Searches through the DOM tree for all style elements and adds their contents to the
      * styleTagCSS list. Assumes that the first and only child of a style element is a text
@@ -50,17 +64,7 @@ public class CSSLoader {
         }
     }
 
-    public void applyAllCSS(RenderNode root) {
-        resetSetProperties(root);
-        loadDefaults(root);
-        loadExternalCSS(root);
-        loadStyleTags(root);
-        applyInline(root);
-        propagateCSS(root);
-        finalizeCSS(root);
-    }
-
-    public void loadDefaults(RenderNode root) {
+    private void loadDefaults(RenderNode root) {
         CSSParser parser = new CSSParser();
         String cssString = "";
         try {
@@ -75,7 +79,7 @@ public class CSSLoader {
         applyRules(root, rules, true);
     }
 
-    public void loadExternalCSS(RenderNode root) {
+    private void loadExternalCSS(RenderNode root) {
         for (String cssString : externalCSS) {
             CSSParser parser = new CSSParser();
             parser.parse(cssString);
@@ -84,7 +88,7 @@ public class CSSLoader {
         }
     }
 
-    public void loadStyleTags(RenderNode root) {
+    private void loadStyleTags(RenderNode root) {
         for (String cssString : styleTagCSS) {
             CSSParser parser = new CSSParser();
             parser.parse(cssString);
@@ -98,7 +102,7 @@ public class CSSLoader {
      * TODO: should not apply to every node of this type, just this node specifically
      * @param root
      */
-    public void applyInline(RenderNode root) {
+    private void applyInline(RenderNode root) {
         if (root.attributes.containsKey("style")) {
             CSSParser parser = new CSSParser();
             String style = root.attributes.get("style");
@@ -158,7 +162,7 @@ public class CSSLoader {
      * then the parent should not override it.
      * @param root
      */
-    public void propagateCSS(RenderNode root) {
+    private void propagateCSS(RenderNode root) {
         RenderNode parent = parentRenderNodeMap.get(root.id);
         if (parent != null) {
             for (Entry<String, String> e : parent.style.getAllProperties().entrySet()) {
@@ -182,7 +186,7 @@ public class CSSLoader {
      * the values themselves.
      * @param root
      */
-    public void resetSetProperties(RenderNode root) {
+    private void resetSetProperties(RenderNode root) {
         if (root.style == null) {
             root.style = new CSSStyle();
         }
@@ -192,7 +196,7 @@ public class CSSLoader {
         }
     }
 
-    public void finalizeCSS(RenderNode root) {
+    private void finalizeCSS(RenderNode root) {
         root.style.finalizeCSS();
         for (RenderNode child : root.children) {
             finalizeCSS(child);

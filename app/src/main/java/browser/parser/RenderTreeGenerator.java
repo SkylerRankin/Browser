@@ -1,25 +1,23 @@
 package browser.parser;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import browser.app.ErrorPageHandler;
-import browser.constants.PseudoElementConstants;
 import browser.css.CSSStyle;
+import browser.layout.ListMarkerGenerator;
 import browser.model.DOMNode;
 import browser.model.RenderNode;
 
 public class RenderTreeGenerator {
-    private final Map<Integer, RenderNode> parentRenderNodeMap = new HashMap<Integer, RenderNode>();
+    private final Map<Integer, RenderNode> parentRenderNodeMap = new HashMap<>();
 
     // Public methods
 
-    public RenderNode generateRenderTree(DOMNode dom, Float screenWidth) {
+    public RenderNode generateRenderTree(DOMNode dom) {
         RenderNode root = domTreeToRenderTree(dom);
 
         if (root != null) {
-            addListMarkers(root);
             cleanupRenderNodeText(root);
         }
 
@@ -169,28 +167,6 @@ public class RenderTreeGenerator {
             return current;
         } else {
             return null;
-        }
-    }
-
-    /**
-     * Lists require the insertion of pseudo-elements to render the list bullet points, numbers, or other character.
-     * Each list item will have a corresponding marker added after it.
-     * @param renderNode        The render node to potentially add list markers to.
-     */
-    private void addListMarkers(RenderNode renderNode) {
-        if (renderNode.style.auxiliaryDisplay != null && renderNode.style.auxiliaryDisplay.equals(CSSStyle.DisplayType.LIST_ITEM)) {
-            RenderNode marker = new RenderNode(HTMLElements.PSEUDO_MARKER);
-            if (renderNode.parent.type.equals(HTMLElements.OL)) {
-                List<RenderNode> nonMarkerChildren = renderNode.parent.children.stream().filter(node -> !node.type.equals(HTMLElements.PSEUDO_MARKER)).toList();
-                int indexInParent = nonMarkerChildren.indexOf(renderNode);
-                marker.properties.put(PseudoElementConstants.MARKER_INDEX_KEY, indexInParent);
-            }
-            int indexInParent = renderNode.parent.children.indexOf(renderNode);
-            renderNode.parent.children.add(indexInParent + 1, marker);
-        }
-
-        for (RenderNode child : renderNode.children) {
-            addListMarkers(child);
         }
     }
 
