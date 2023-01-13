@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import browser.constants.PseudoElementConstants;
 import browser.css.CSSStyle;
 import browser.model.BoxNode;
 import browser.parser.HTMLElements;
@@ -35,9 +34,6 @@ public class BoxLayoutGenerator {
         // Set all fixed heights/widths.
         setFixedSizes(rootBoxNode);
         setImageSizes(rootBoxNode);
-
-        // Set the max width of each inline box, based on the closest parent block box.
-        setInlineMaxWidths(rootBoxNode);
 
         // Set the formatting context ids for each box.
         setInlineFormattingContexts(rootBoxNode);
@@ -175,7 +171,7 @@ public class BoxLayoutGenerator {
      * @param boxNode       The box to set the fixed size of, if it's an image.
      */
     private void setImageSizes(BoxNode boxNode) {
-        if (boxNode.correspondingRenderNode.type.equals(HTMLElements.IMG)) {
+        if (boxNode.correspondingRenderNode != null && boxNode.correspondingRenderNode.type.equals(HTMLElements.IMG)) {
             Map<String, String> attributes = boxNode.correspondingRenderNode.attributes;
             CSSStyle style = boxNode.style;
             // TODO: the default size should come from the actual image dimensions. have to download the image first
@@ -269,28 +265,6 @@ public class BoxLayoutGenerator {
 
         for (BoxNode child : boxNode.children) {
             setBlockFormattingContexts(child);
-        }
-    }
-
-    /**
-     * Inline boxes do not have set widths, but they are placed horizontally in a line box that extends the full
-     * available width. This method sets the max width property such that an inline element can know when to wrap
-     * the contained inline boxes into a new line.
-     * @param boxNode       The box node to set the max width of.
-     */
-    private void setInlineMaxWidths(BoxNode boxNode) {
-        if (boxNode.outerDisplayType.equals(DisplayType.INLINE)) {
-            if (boxNode.parent == null) {
-                boxNode.maxWidth = screenWidth;
-            } else if (boxNode.parent.outerDisplayType.equals(DisplayType.BLOCK)) {
-                boxNode.maxWidth = boxNode.parent.width;
-            } else {
-                boxNode.maxWidth = boxNode.parent.maxWidth;
-            }
-        }
-
-        for (BoxNode child : boxNode.children) {
-            setInlineMaxWidths(child);
         }
     }
 
@@ -395,7 +369,7 @@ public class BoxLayoutGenerator {
         // Inline boxes will have their height derived from their children. If this was a block box containing inline
         // boxes, then it will either have a predefined height or will need to derive the height from its children as
         // well.
-        if ((parentBox.style.outerDisplay.equals(DisplayType.INLINE) && !parentBox.innerDisplayType.equals(DisplayType.FLOW_ROOT)) || parentBox.height == null) {
+        if ((parentBox.outerDisplayType.equals(DisplayType.INLINE) && !parentBox.innerDisplayType.equals(DisplayType.FLOW_ROOT)) || parentBox.height == null) {
             parentBox.height = getHeightFromChildren(parentBox);
         }
 
@@ -428,12 +402,12 @@ public class BoxLayoutGenerator {
             parentBox.width = getWidthFromChildren(parentBox);
         }
 
-        if (parentBox.style.outerDisplay.equals(DisplayType.INLINE) || parentBox.height == null) {
+        if (parentBox.outerDisplayType.equals(DisplayType.INLINE) || parentBox.height == null) {
             parentBox.height = getHeightFromChildren(parentBox);
         }
 
         for (BoxNode child : parentBox.children) {
-            if (child.style.auxiliaryDisplay == null || !child.style.auxiliaryDisplay.equals(DisplayType.LIST_ITEM)) {
+            if (child.auxiliaryDisplayType == null || !child.auxiliaryDisplayType.equals(DisplayType.LIST_ITEM)) {
                 setBoxLayout(child);
             }
         }

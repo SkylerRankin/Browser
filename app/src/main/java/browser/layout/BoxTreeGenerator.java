@@ -117,8 +117,9 @@ public class BoxTreeGenerator {
 
         for (int i = 0; i < baseBoxNode.children.size(); i++) {
             BoxNode childNode = baseBoxNode.children.get(i);
-            if (childNode.outerDisplayType.equals(DisplayType.BLOCK) || i == baseBoxNode.children.size() - 1) {
-
+            if (childNode.isPseudo) {
+                newChildren.add(childNode);
+            } else if (childNode.outerDisplayType.equals(DisplayType.BLOCK) || i == baseBoxNode.children.size() - 1) {
                 // On the last iteration, add an inline child node to the list, so it can be wrapped in an anonymous block.
                 if (i == baseBoxNode.children.size() - 1 && childNode.outerDisplayType.equals(DisplayType.INLINE)) {
                     currentInlineBoxes.add(childNode);
@@ -187,16 +188,16 @@ public class BoxTreeGenerator {
     }
 
     private boolean boxHasValidDisplayConfiguration(BoxNode boxNode) {
-        List<BoxNode> blockChildren = boxNode.children.stream().filter(node -> !node.isTextNode).filter(node -> node.outerDisplayType.equals(DisplayType.BLOCK)).toList();
-        List<BoxNode> inlineChildren = boxNode.children.stream().filter(node -> !node.isTextNode).filter(node -> node.outerDisplayType.equals(DisplayType.INLINE)).toList();
+        List<BoxNode> blockChildren = boxNode.children.stream().filter(node -> !node.isTextNode && !node.isPseudo).filter(node -> node.outerDisplayType.equals(DisplayType.BLOCK)).toList();
+        List<BoxNode> inlineChildren = boxNode.children.stream().filter(node -> !node.isTextNode && !node.isPseudo).filter(node -> node.outerDisplayType != null && node.outerDisplayType.equals(DisplayType.INLINE)).toList();
         List<BoxNode> textChildren = boxNode.children.stream().filter(node -> node.isTextNode).toList();
 
-        if (boxNode.outerDisplayType.equals(DisplayType.BLOCK)) {
+        if (boxNode.outerDisplayType != null && boxNode.outerDisplayType.equals(DisplayType.BLOCK)) {
             if (blockChildren.size() > 0 && (inlineChildren.size() > 0 || textChildren.size() > 0)) {
                 // The block level element contains both inline (or text) and block elements.
                 return false;
             }
-        } else if (boxNode.outerDisplayType.equals(DisplayType.INLINE)) {
+        } else if (boxNode.outerDisplayType != null && boxNode.outerDisplayType.equals(DisplayType.INLINE) && !boxNode.innerDisplayType.equals(DisplayType.FLOW_ROOT)) {
             if (blockChildren.size() > 0) {
                 // The inline level element contains block level elements.
                 return false;

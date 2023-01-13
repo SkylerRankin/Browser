@@ -60,4 +60,14 @@ public class LayoutIntegrationTests {
     public void simpleOrderedList() throws IOException {
         driver.runLayoutTest("simpleOrderedList", 400);
     }
+
+    @Test
+    public void nestedList() throws IOException {
+        driver.runLayoutTest("nestedList", 500);
+    }
+
+    @Test
+    public void inlineBlockList() throws IOException {
+        driver.runLayoutTest("inlineBlockList", 500);
+    }
 }

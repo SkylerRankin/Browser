@@ -30,8 +30,6 @@ public class BoxNode {
     public Float y = null;
     public Float width = null;
     public Float height = null;
-    public Float maxWidth = null;
-    public Float maxHeight = null;
 
     // The range of indices for the text of this node: from textStartIndex up to (but not including) textEndIndex.
     public int textStartIndex;
@@ -56,12 +54,11 @@ public class BoxNode {
         this.auxiliaryDisplayType = other.auxiliaryDisplayType;
         this.isAnonymous = other.isAnonymous;
         this.isTextNode = other.isTextNode;
+        this.isPseudo = other.isPseudo;
         this.x = other.x;
         this.y = other.y;
         this.width = other.width;
         this.height = other.height;
-        this.maxWidth = other.maxWidth;
-        this.maxHeight = other.maxHeight;
         this.textStartIndex = other.textStartIndex;
         this.textEndIndex = other.textEndIndex;
     }

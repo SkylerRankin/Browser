@@ -73,7 +73,7 @@ public class CSSStyle {
     
     public DisplayType display = DisplayType.BLOCK;
     public DisplayType innerDisplay;
-    public DisplayType outerDisplay = DisplayType.BLOCK;
+    public DisplayType outerDisplay;
     // Some display types, such as list-item, set a third value in addition to the inner and outer display types. This
     // auxiliary display type captures that information.
     public DisplayType auxiliaryDisplay;

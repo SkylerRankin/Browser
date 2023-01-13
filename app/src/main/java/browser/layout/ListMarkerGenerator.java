@@ -9,7 +9,6 @@ import browser.model.RenderNode;
 import browser.model.Vector2;
 import browser.parser.HTMLElements;
 
-
 public class ListMarkerGenerator {
 
     private static final String bulletPointUnicode = "\u2022";
@@ -24,6 +23,9 @@ public class ListMarkerGenerator {
     public static void addMarkers(RenderNode renderNode) {
         if (renderNode.style.auxiliaryDisplay != null && renderNode.style.auxiliaryDisplay.equals(CSSStyle.DisplayType.LIST_ITEM)) {
             RenderNode marker = new RenderNode(HTMLElements.PSEUDO_MARKER);
+            // TODO Set the marker display properties from the user agent CSS.
+            marker.style.outerDisplay = CSSStyle.DisplayType.BLOCK;
+            marker.style.innerDisplay = CSSStyle.DisplayType.FLOW;
             if (renderNode.parent.type.equals(HTMLElements.OL)) {
                 List<RenderNode> nonMarkerChildren = renderNode.parent.children.stream().filter(node -> !node.type.equals(HTMLElements.PSEUDO_MARKER)).toList();
                 int indexInParent = nonMarkerChildren.indexOf(renderNode);
