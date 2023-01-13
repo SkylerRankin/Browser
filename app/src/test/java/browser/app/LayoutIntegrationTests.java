@@ -56,6 +56,8 @@ public class LayoutIntegrationTests {
         driver.runLayoutTest("stackedPadding", 1000);
     }
 
+    // List tests
+
     @Test
     public void simpleOrderedList() throws IOException {
         driver.runLayoutTest("simpleOrderedList", 400);
@@ -69,5 +71,15 @@ public class LayoutIntegrationTests {
     @Test
     public void inlineBlockList() throws IOException {
         driver.runLayoutTest("inlineBlockList", 500);
+    }
+
+    @Test
+    public void listThatsActuallyJustADiv() throws IOException {
+        driver.runLayoutTest("listThatsActuallyJustADiv", 400);
+    }
+
+    @Test
+    public void inlineListWithInlineItems() throws IOException {
+        driver.runLayoutTest("inlineListWithInlineItems", 500);
     }
 }
