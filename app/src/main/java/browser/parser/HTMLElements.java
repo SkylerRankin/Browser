@@ -34,8 +34,14 @@ public class HTMLElements {
     public static final String IMG = "img";
     public static final String A = "a";
     public static final String TABLE = "table";
+    public static final String THEAD = "thead";
+    public static final String TBODY = "tbody";
+    public static final String TFOOT = "tfoot";
     public static final String TR = "tr";
     public static final String TD = "td";
+    public static final String COL = "col";
+    public static final String COLGROUP = "colgroup";
+    public static final String CAPTION = "caption";
     public static final String PRE = "pre";
     public static final String TT = "tt";
     public static final String BR = "br";
@@ -49,28 +55,24 @@ public class HTMLElements {
     public static final String PSEUDO_MARKER = "marker";
     public static final String ANONYMOUS = "anonymous";
     
-    private static final String[] VALID_ELEMENTS = {TEXT, HTML, HEAD, STYLE, TITLE, BODY, H1, H2, H3, H4, H5, H6, DIV, SPAN, P, UL, OL, LI, HR, B, IMG, A, PRE, TT, CODE, EM, STRONG, CENTER, TABLE, TR, TD};
+    private static final String[] VALID_ELEMENTS = {TEXT, HTML, HEAD, STYLE, TITLE, BODY, H1, H2, H3, H4, H5, H6, DIV, SPAN, P, UL, OL, LI, HR, B, IMG, A, PRE, TT, CODE, EM, STRONG, CENTER, TABLE, THEAD, TBODY, TFOOT, TR, TD, COL, COLGROUP, CAPTION};
     private static final String[] EMPTY_ELEMENTS = {DOCTYPE, IMG, BR, LINK, BR, INPUT, META, HR};
     public static final String[] NOT_IN_RENDER_TREE_ELEMENTS = {STYLE, HTML, HEAD, TITLE};
-    public static final String[] BLOCK_LEVEL_ELEMENTS = {H1, H2, H3, H4, H5, H6, DIV, P, PRE};
-    
+
     private static Set<String> validElements;
     private static Set<String> emptyElements;
-    private static Set<String> blockElements;
     private static Set<String> renderElements;
     private static Set<String> pseudoElements;
     
     public static void init() {
         validElements = new HashSet<String>();
         emptyElements = new HashSet<String>();
-        blockElements = new HashSet<String>();
         renderElements = new HashSet<String>();
         pseudoElements = new HashSet<>();
 
         validElements.addAll(Arrays.asList(VALID_ELEMENTS));
         emptyElements.addAll(Arrays.asList(EMPTY_ELEMENTS));
         pseudoElements.add(PSEUDO_MARKER);
-        blockElements.addAll(Arrays.asList(BLOCK_LEVEL_ELEMENTS));
         renderElements.addAll(Arrays.asList(VALID_ELEMENTS));
         renderElements.removeAll(Arrays.asList(NOT_IN_RENDER_TREE_ELEMENTS));
     }
@@ -82,11 +84,7 @@ public class HTMLElements {
     public static boolean isEmptyElement(String element) {
         return emptyElements.contains(element);
     }
-    
-    public static boolean isBlockLevelElement(String element) {
-        return blockElements.contains(element);
-    }
-    
+
     public static boolean usedInRenderTree(String element) {
         return renderElements.contains(element);
     }

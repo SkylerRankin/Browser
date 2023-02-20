@@ -139,6 +139,8 @@ public class InlineLayoutFormatter {
             float width = boxNode.width == null ? 0 : boxNode.width;
             float height = boxNode.height == null ? 0 : boxNode.height;
             return new Vector2(width, height);
+        } else if (boxNode.innerDisplayType.equals(CSSStyle.DisplayType.TABLE)) {
+            return new Vector2(boxNode.width, 0);
         } else {
             return new Vector2(widthDueToSpacing, 0);
         }

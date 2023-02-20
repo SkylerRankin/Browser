@@ -2,11 +2,13 @@ package browser.layout;
 
 import static browser.css.CSSStyle.DisplayType;
 import static browser.css.CSSStyle.PositionType;
+import static browser.layout.TableLayoutFormatter.TableLayoutFormatterFlag;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import browser.constants.CSSConstants;
 import browser.css.CSSStyle;
 import browser.model.BoxNode;
 import browser.parser.HTMLElements;
@@ -16,14 +18,17 @@ public class BoxLayoutGenerator {
     private float screenWidth;
     private final Map<Integer, InlineFormattingContext> inlineFormattingContexts = new HashMap<>();
     private final Map<Integer, BlockFormattingContext> blockFormattingContexts = new HashMap<>();
+    private final Map<Integer, TableFormattingContext> tableFormattingContexts = new HashMap<>();
     private final InlineLayoutFormatter inlineLayoutFormatter;
     private final InlineBlockWidthCalculator inlineBlockWidthCalculator;
+    private final TableLayoutFormatter tableLayoutFormatter;
 
-    private enum LayoutAlgorithmType { Block, Inline, List, Invalid }
+    private enum LayoutAlgorithmType { Block, Inline, List, Table, Invalid }
 
     public BoxLayoutGenerator(final TextDimensionCalculator textDimensionCalculator) {
         inlineLayoutFormatter = new InlineLayoutFormatter(textDimensionCalculator);
         inlineBlockWidthCalculator = new InlineBlockWidthCalculator(this);
+        tableLayoutFormatter = new TableLayoutFormatter(this);
     }
 
     // Public methods
@@ -31,13 +36,14 @@ public class BoxLayoutGenerator {
     public void calculateLayout(BoxNode rootBoxNode, float screenWidth) {
         this.screenWidth = screenWidth;
 
-        // Set all fixed heights/widths.
-        setFixedSizes(rootBoxNode);
-        setImageSizes(rootBoxNode);
-
         // Set the formatting context ids for each box.
         setInlineFormattingContexts(rootBoxNode);
         setBlockFormattingContexts(rootBoxNode);
+        setTableFormattingContexts(rootBoxNode);
+
+        // Set all fixed heights/widths.
+        setFixedSizes(rootBoxNode);
+        setImageSizes(rootBoxNode);
 
         // Set the position of the root node.
         rootBoxNode.x = 0f;
@@ -72,7 +78,9 @@ public class BoxLayoutGenerator {
                 boxNode.innerDisplayType.equals(DisplayType.FLOW_ROOT);
 
         // Inline block boxes have optional fixed widths. If a width/height is not provided, the box fits to its contents.
-        boolean fixedWidthOptional = boxNode.innerDisplayType.equals(DisplayType.FLOW_ROOT);
+        // Tables also have optional fixed widths. They shrink to their content if no width is provided.
+        boolean fixedWidthOptional = boxNode.innerDisplayType.equals(DisplayType.FLOW_ROOT) ||
+                boxNode.innerDisplayType.equals(DisplayType.TABLE);
 
         if (fixedSizeAllowed) {
             CSSStyle style = boxNode.style;
@@ -158,6 +166,14 @@ public class BoxLayoutGenerator {
                     boxNode.parent.style.borderWidthLeft - boxNode.parent.style.paddingLeft - boxNode.style.marginLeft -
                     boxNode.parent.style.borderWidthRight - boxNode.parent.style.paddingRight - boxNode.style.marginRight;
             boxNode.width = inlineBlockWidthCalculator.getWidth(boxNode, availableWidth);
+        }
+
+        boolean isTable = boxNode.innerDisplayType.equals(DisplayType.TABLE);
+        if (isTable) {
+            float availableWidth = boxNode.parent == null ? screenWidth : boxNode.parent.width -
+                    boxNode.parent.style.borderWidthLeft - boxNode.parent.style.paddingLeft - boxNode.style.marginLeft -
+                    boxNode.parent.style.borderWidthRight - boxNode.parent.style.paddingRight - boxNode.style.marginRight;
+            tableLayoutFormatter.setTableWidths(boxNode, availableWidth, tableFormattingContexts.get(boxNode.tableFormattingContextId));
         }
 
         for (BoxNode child : boxNode.children) {
@@ -269,6 +285,28 @@ public class BoxLayoutGenerator {
     }
 
     /**
+     * Sets the id of the corresponding table formatting context. Only boxes participating in a table will have this
+     * set, and each table element will define a new table formatting context.
+     * @param boxNode       The box node to set the table formatting context of.
+     */
+    private void setTableFormattingContexts(BoxNode boxNode) {
+        if (CSSConstants.tableInnerDisplayTypes.contains(boxNode.innerDisplayType)) {
+            if (boxNode.innerDisplayType.equals(DisplayType.TABLE)) {
+                boxNode.tableFormattingContextId = tableFormattingContexts.size();
+                TableFormattingContext context = new TableFormattingContext();
+                context.tableBoxNode = boxNode;
+                tableFormattingContexts.put(boxNode.tableFormattingContextId, context);
+            } else {
+                boxNode.tableFormattingContextId = boxNode.parent.tableFormattingContextId;
+            }
+        }
+
+        for (BoxNode child : boxNode.children) {
+            setTableFormattingContexts(child);
+        }
+    }
+
+    /**
      * Sets the position and size of the given box node's children.
      * @param boxNode       The box node to layout.
      */
@@ -282,16 +320,17 @@ public class BoxLayoutGenerator {
             case Block -> layoutBlockBoxes(boxNode);
             case Inline -> layoutInlineBoxes(boxNode);
             case List -> layoutListBoxes(boxNode);
+            case Table -> layoutTableBoxes(boxNode);
             case Invalid -> System.err.printf("BoxLayoutGenerator.setBoxLayout: no supported layout algorithm for box: %s\n", boxNode);
         }
     }
 
     private LayoutAlgorithmType getLayoutAlgorithm(BoxNode boxNode) {
-        if (boxNode.innerDisplayType.equals(CSSStyle.DisplayType.FLOW) || boxNode.innerDisplayType.equals(DisplayType.FLOW_ROOT)) {
-            boolean hasListChildren = boxNode.children.stream().anyMatch(child -> child.auxiliaryDisplayType != null && child.auxiliaryDisplayType.equals(DisplayType.LIST_ITEM));
-            boolean hasBlockChildren = boxNode.children.stream().anyMatch(child -> child.outerDisplayType != null && child.outerDisplayType.equals(DisplayType.BLOCK));
-            boolean hasInlineChildren = boxNode.children.stream().anyMatch(child -> child.outerDisplayType != null && child.outerDisplayType.equals(DisplayType.INLINE));
+        boolean hasListChildren = boxNode.children.stream().anyMatch(child -> child.auxiliaryDisplayType != null && child.auxiliaryDisplayType.equals(DisplayType.LIST_ITEM));
+        boolean hasBlockChildren = boxNode.children.stream().anyMatch(child -> child.outerDisplayType != null && child.outerDisplayType.equals(DisplayType.BLOCK));
+        boolean hasInlineChildren = boxNode.children.stream().anyMatch(child -> child.outerDisplayType != null && child.outerDisplayType.equals(DisplayType.INLINE));
 
+        if (boxNode.innerDisplayType.equals(CSSStyle.DisplayType.FLOW) || boxNode.innerDisplayType.equals(DisplayType.FLOW_ROOT)) {
             if (hasListChildren) {
                 return LayoutAlgorithmType.List;
             } else if (hasBlockChildren) {
@@ -301,6 +340,10 @@ public class BoxLayoutGenerator {
             } else {
                 return LayoutAlgorithmType.Invalid;
             }
+        } else if (boxNode.innerDisplayType.equals(DisplayType.TABLE_CELL)) {
+            return hasInlineChildren ? LayoutAlgorithmType.Inline : LayoutAlgorithmType.Block;
+        } else if (CSSConstants.tableInnerDisplayTypes.contains(boxNode.innerDisplayType)) {
+            return LayoutAlgorithmType.Table;
         } else {
             // Only flow layouts are currently supported.
             return LayoutAlgorithmType.Invalid;
@@ -409,6 +452,30 @@ public class BoxLayoutGenerator {
         for (BoxNode child : parentBox.children) {
             if (child.auxiliaryDisplayType == null || !child.auxiliaryDisplayType.equals(DisplayType.LIST_ITEM)) {
                 setBoxLayout(child);
+            }
+        }
+    }
+
+    private void layoutTableBoxes(BoxNode parentBox) {
+        TableFormattingContext context = tableFormattingContexts.get(parentBox.tableFormattingContextId);
+        for (BoxNode child : parentBox.children) {
+            List<TableLayoutFormatterFlag> flags = tableLayoutFormatter.placeBox(child, context);
+
+            setBoxLayout(child);
+        }
+
+        parentBox.height = tableLayoutFormatter.getHeightFromChildren(parentBox, context);
+
+        // If last cell in row, update all cells in the row to have the same height.
+        if (parentBox.innerDisplayType.equals(DisplayType.TABLE_CELL) &&
+                parentBox.parent.children.indexOf(parentBox) == parentBox.children.size() - 1) {
+            BoxNode row = parentBox.parent;
+            float maxHeight = 0;
+            for (BoxNode child : row.children) {
+                maxHeight = Math.max(maxHeight, child.height);
+            }
+            for (BoxNode child : row.children) {
+                child.height = maxHeight;
             }
         }
     }

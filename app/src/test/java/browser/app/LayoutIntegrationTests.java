@@ -82,4 +82,10 @@ public class LayoutIntegrationTests {
     public void inlineListWithInlineItems() throws IOException {
         driver.runLayoutTest("inlineListWithInlineItems", 500);
     }
+
+    @Test
+    public void simplestTable() throws IOException {
+        driver.runLayoutTest("simplestTable", 500, true);
+    }
+
 }

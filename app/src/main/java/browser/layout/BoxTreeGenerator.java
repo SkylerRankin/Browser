@@ -39,7 +39,8 @@ public class BoxTreeGenerator {
             }
         }
 
-        addAnonymousBoxes(rootBoxNode);
+        addAnonymousFlowBoxes(rootBoxNode);
+        addAnonymousTableBoxes(rootBoxNode);
 
         return rootBoxNode;
     }
@@ -76,7 +77,7 @@ public class BoxTreeGenerator {
         return boxNode;
     }
 
-    private void addAnonymousBoxes(BoxNode rootBoxNode) {
+    private void addAnonymousFlowBoxes(BoxNode rootBoxNode) {
         if (rootBoxNode.children.size() == 0) {
             return;
         }
@@ -102,6 +103,11 @@ public class BoxTreeGenerator {
             }
             queue.addAll(boxNode.children);
         }
+    }
+
+    private void addAnonymousTableBoxes(BoxNode rootBoxNode) {
+        TableAnonymousBoxAdder anonymousBoxAdder = new TableAnonymousBoxAdder();
+        anonymousBoxAdder.addAnonymousBoxes(rootBoxNode);
     }
 
     private void addAnonymousBlockBoxes(BoxNode boxNode) {

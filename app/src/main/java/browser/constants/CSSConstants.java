@@ -13,6 +13,18 @@ public class CSSConstants {
             CSSStyle.DisplayType.RUN_IN
     );
 
+    public static final List<CSSStyle.DisplayType> tableInnerDisplayTypes = List.of(
+            CSSStyle.DisplayType.TABLE,
+            CSSStyle.DisplayType.TABLE_HEADER_GROUP,
+            CSSStyle.DisplayType.TABLE_ROW_GROUP,
+            CSSStyle.DisplayType.TABLE_FOOTER_GROUP,
+            CSSStyle.DisplayType.TABLE_COLUMN_GROUP,
+            CSSStyle.DisplayType.TABLE_CAPTION,
+            CSSStyle.DisplayType.TABLE_ROW,
+            CSSStyle.DisplayType.TABLE_COLUMN,
+            CSSStyle.DisplayType.TABLE_CELL
+    );
+
     // Mappings from the CSS display type string to the corresponding display enum.
     private final static Map<String, CSSStyle.DisplayType> displayTypeStringToType = Map.ofEntries(
             Map.entry("block", CSSStyle.DisplayType.BLOCK),

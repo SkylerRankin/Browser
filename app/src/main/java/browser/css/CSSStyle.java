@@ -68,6 +68,8 @@ public class CSSStyle {
     public int borderWidthLeft = 0;
 
     public BoxSizingType boxSizing = BoxSizingType.CONTENT_BOX;
+
+    public int borderSpacing = 2;
     
     public CSSColor color = new CSSColor("Black");
     
@@ -291,6 +293,7 @@ public class CSSStyle {
             case "border-left-width":   borderWidthLeft = parseDimension(value); break;
             case "border-right-width":  borderWidthRight = parseDimension(value); break;
             case "box-sizing":          boxSizing = parseBoxSizingType(value); break;
+            case "border-spacing":      borderSpacing = parseDimension(value); break;
             case "color":               color = new CSSColor(value); break;
             case "display":             parseDisplayType(value); break;
             case "font-family":         fontFamily = FontLoader.getValidFont(value.split(",")); break;
