@@ -2,7 +2,6 @@ package browser.layout;
 
 import static browser.css.CSSStyle.DisplayType;
 import static browser.css.CSSStyle.PositionType;
-import static browser.layout.TableLayoutFormatter.TableLayoutFormatterFlag;
 
 import java.util.HashMap;
 import java.util.List;
@@ -70,6 +69,13 @@ public class BoxLayoutGenerator {
                 // Markers always contain a single line of text or image, so the size is fixed.
                 ListMarkerGenerator.setMarkerSize(boxNode);
             }
+            return;
+        }
+
+        // The widths of table elements (except the table itself, which is a block or inline element) are managed
+        // independently.
+        if (!boxNode.innerDisplayType.equals(DisplayType.TABLE) &&
+                CSSConstants.tableInnerDisplayTypes.contains(boxNode.innerDisplayType)) {
             return;
         }
 
@@ -459,22 +465,18 @@ public class BoxLayoutGenerator {
     private void layoutTableBoxes(BoxNode parentBox) {
         TableFormattingContext context = tableFormattingContexts.get(parentBox.tableFormattingContextId);
         for (BoxNode child : parentBox.children) {
-            List<TableLayoutFormatterFlag> flags = tableLayoutFormatter.placeBox(child, context);
-
+            tableLayoutFormatter.placeBox(child, context);
             setBoxLayout(child);
         }
 
         parentBox.height = tableLayoutFormatter.getHeightFromChildren(parentBox, context);
 
-        // If last cell in row, update all cells in the row to have the same height.
-        if (parentBox.innerDisplayType.equals(DisplayType.TABLE_CELL) &&
-                parentBox.parent.children.indexOf(parentBox) == parentBox.children.size() - 1) {
-            BoxNode row = parentBox.parent;
+        if (parentBox.innerDisplayType.equals(DisplayType.TABLE_ROW)) {
             float maxHeight = 0;
-            for (BoxNode child : row.children) {
+            for (BoxNode child : parentBox.children) {
                 maxHeight = Math.max(maxHeight, child.height);
             }
-            for (BoxNode child : row.children) {
+            for (BoxNode child : parentBox.children) {
                 child.height = maxHeight;
             }
         }

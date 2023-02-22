@@ -83,9 +83,31 @@ public class LayoutIntegrationTests {
         driver.runLayoutTest("inlineListWithInlineItems", 500);
     }
 
+    // Table tests
+
     @Test
     public void simplestTable() throws IOException {
-        driver.runLayoutTest("simplestTable", 500, true);
+        driver.runLayoutTest("simplestTable", 500);
+    }
+
+    @Test
+    public void tableFixedWidthAutoCells() throws IOException {
+        driver.runLayoutTest("tableFixedWidthAutoCells", 500);
+    }
+
+    @Test
+    public void tableFixedWidthOneFixedColumn() throws IOException {
+        driver.runLayoutTest("tableFixedWidthOneFixedColumn", 500);
+    }
+
+    @Test
+    public void tableVaryingCellHeights() throws IOException {
+        driver.runLayoutTest("tableVaryingCellHeights", 500);
+    }
+
+    @Test
+    public void simpleMultiColumnSpanTable() throws IOException {
+        driver.runLayoutTest("simpleMultiColumnSpanTable", 500);
     }
 
 }

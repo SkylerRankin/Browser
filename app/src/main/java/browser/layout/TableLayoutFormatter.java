@@ -14,20 +14,17 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class TableLayoutFormatter {
 
-    public enum TableLayoutFormatterFlag { SetHeightFromChildren, SetHeightForRow }
-
     private final BoxLayoutGenerator boxLayoutGenerator;
 
     // Public methods
 
-    public List<TableLayoutFormatterFlag> placeBox(BoxNode boxNode, TableFormattingContext context) {
+    public void placeBox(BoxNode boxNode, TableFormattingContext context) {
         switch (boxNode.innerDisplayType) {
-            case TABLE_CAPTION -> { return placeCaption(boxNode, context); }
-            case TABLE_HEADER_GROUP, TABLE_ROW_GROUP, TABLE_FOOTER_GROUP -> { return placeRowGroup(boxNode, context); }
-            case TABLE_ROW -> { return placeRow(boxNode, context); }
-            case TABLE_CELL -> { return placeCell(boxNode, context); }
+            case TABLE_CAPTION -> { placeCaption(boxNode, context); }
+            case TABLE_HEADER_GROUP, TABLE_ROW_GROUP, TABLE_FOOTER_GROUP -> { placeRowGroup(boxNode, context); }
+            case TABLE_ROW -> { placeRow(boxNode, context); }
+            case TABLE_CELL -> { placeCell(boxNode, context); }
         }
-        return new ArrayList<>();
     }
 
     /**
@@ -80,9 +77,8 @@ public class TableLayoutFormatter {
      * table. Their width is set to the full width of the table.
      * @param boxNode       The caption box.
      * @param context       The table formatting context.
-     * @return      A list of flags used in box layout generator.
      */
-    private List<TableLayoutFormatterFlag> placeCaption(BoxNode boxNode, TableFormattingContext context) {
+    private void placeCaption(BoxNode boxNode, TableFormattingContext context) {
         boxNode.width = context.tableBoxNode.width;
         boxNode.x = context.tableBoxNode.x + context.tableBoxNode.style.paddingLeft + boxNode.style.borderWidthLeft;
 
@@ -92,16 +88,14 @@ public class TableLayoutFormatter {
             boxNode.y = context.lastPlacedCaption.y + context.lastPlacedCaption.style.marginBottom + boxNode.style.borderWidthTop;
         }
         context.lastPlacedCaption = boxNode;
-        return List.of(TableLayoutFormatterFlag.SetHeightFromChildren);
     }
 
     /**
      * Places a header, row, or footer group. These are stacked vertically beneath any caption boxes.
      * @param boxNode       The caption box.
      * @param context       The table formatting context.
-     * @return      A list of flags used in box layout generator.
      */
-    private List<TableLayoutFormatterFlag> placeRowGroup(BoxNode boxNode, TableFormattingContext context) {
+    private void placeRowGroup(BoxNode boxNode, TableFormattingContext context) {
         boxNode.width = context.tableBoxNode.width - context.borderSpacing.x * 2;
         boxNode.x = context.tableBoxNode.x + context.tableBoxNode.style.paddingLeft + boxNode.style.borderWidthLeft + context.borderSpacing.x;
 
@@ -116,16 +110,14 @@ public class TableLayoutFormatter {
         }
 
         context.lastPlacedRowGroup = boxNode;
-        return List.of(TableLayoutFormatterFlag.SetHeightFromChildren);
     }
 
     /**
      * Places a row. These are stacked vertically beneath any caption box, and within any row groups.
      * @param boxNode       The caption box.
      * @param context       The table formatting context.
-     * @return      A list of flags used in box layout generator.
      */
-    private List<TableLayoutFormatterFlag> placeRow(BoxNode boxNode, TableFormattingContext context) {
+    private void placeRow(BoxNode boxNode, TableFormattingContext context) {
         boxNode.width = context.tableBoxNode.width - context.borderSpacing.x * 2;
 
         if (context.lastPlacedRowGroup == null) {
@@ -153,7 +145,6 @@ public class TableLayoutFormatter {
         }
 
         context.lastPlacedRow = boxNode;
-        return List.of(TableLayoutFormatterFlag.SetHeightFromChildren);
     }
 
     /**
@@ -161,11 +152,8 @@ public class TableLayoutFormatter {
      * TODO: remove the padding consideration. Rows should not have padding/margins.
      * @param boxNode       The caption box.
      * @param context       The table formatting context.
-     * @return      A list of flags used in box layout generator.
      */
-    private List<TableLayoutFormatterFlag> placeCell(BoxNode boxNode, TableFormattingContext context) {
-        int colSpan = Integer.parseInt(boxNode.correspondingRenderNode.attributes.getOrDefault("colspan", "1"));
-
+    private void placeCell(BoxNode boxNode, TableFormattingContext context) {
         int startingColumn = 0;
         for (BoxNode child : boxNode.parent.children) {
             if (child == boxNode) {
@@ -175,12 +163,6 @@ public class TableLayoutFormatter {
             startingColumn += span;
         }
 
-        float width = 0;
-        for (int i = startingColumn; i < startingColumn + colSpan; i++) {
-            width += context.columnWidths.get(i);
-        }
-
-        boxNode.width = width;
         float x = context.lastPlacedRow.x + context.lastPlacedRow.style.paddingLeft;
         if (startingColumn > 0) {
             for (int i = 0; i < startingColumn; i++) {
@@ -189,8 +171,6 @@ public class TableLayoutFormatter {
         }
         boxNode.x = x;
         boxNode.y = context.lastPlacedRow.y + context.lastPlacedRow.style.paddingTop + boxNode.style.borderWidthTop;
-
-        return List.of(TableLayoutFormatterFlag.SetHeightFromChildren, TableLayoutFormatterFlag.SetHeightForRow);
     }
 
     /**
@@ -241,6 +221,9 @@ public class TableLayoutFormatter {
         for (int x = 0; x < tableWidth; x++) {
             for (int y = 0; y < tableHeight; y++) {
                 BoxNode cell = context.getCell(x, y).boxNode;
+                if (context.getCell(x, y).isSpannedCell) {
+                    continue;
+                }
                 IntVector2 span = context.getCell(x, y).span;
                 if (span.x > 1) {
                     for (int i = 0; i < span.x - 1; i++) {
@@ -294,8 +277,8 @@ public class TableLayoutFormatter {
                     cell.minimumPreferredWidth = widths.get(0);
                     cell.maximumPreferredWidth = widths.get(1);
                 } else {
-                    cell.minimumPreferredWidth = cell.boxNode.width;
-                    cell.maximumPreferredWidth = cell.boxNode.width;
+                    cell.minimumPreferredWidth = cell.boxNode.style.width;
+                    cell.maximumPreferredWidth = cell.boxNode.style.width;
                 }
             }
         }
@@ -358,7 +341,6 @@ public class TableLayoutFormatter {
             }
         }
 
-
         float tablePadding = 0;
         float totalBorderSpacing = context.borderSpacing.x * (context.width + 1);
         float remainingWidth = context.tableBoxNode.width - totalFixedColumnWidth - totalNonFixedMinimumWidth - tablePadding - totalBorderSpacing;
@@ -379,8 +361,22 @@ public class TableLayoutFormatter {
 
         for (int columnIndex = 0; columnIndex < context.width; columnIndex++) {
             for (int rowIndex = 0; rowIndex < context.height; rowIndex++) {
+                if (context.getCell(columnIndex, rowIndex).isSpannedCell) {
+                    continue;
+                }
+
                 BoxNode cell = context.getCell(columnIndex, rowIndex).boxNode;
-                cell.width = context.columnWidths.get(columnIndex);
+                IntVector2 span = context.getCell(columnIndex, rowIndex).span;
+                if (span.x == 1) {
+                    cell.width = context.columnWidths.get(columnIndex);
+                } else {
+                    float borderSpacing = context.borderSpacing.x * (span.x - 1);
+                    float cellWidthSum = 0;
+                    for (int spannedColumn = columnIndex; spannedColumn < columnIndex + span.x; spannedColumn++) {
+                        cellWidthSum += context.columnWidths.get(spannedColumn);
+                    }
+                    cell.width = cellWidthSum + borderSpacing;
+                }
             }
         }
     }
@@ -430,7 +426,7 @@ public class TableLayoutFormatter {
 
         for (int y = 0; y < context.height; y++) {
             TableFormattingContext.TableCell cell = context.getCell(columnIndex, y);
-            if (cell.span.x == 1) {
+            if (!cell.isSpannedCell && cell.span.x == 1) {
                 if (minimumColumnWidth < cell.minimumPreferredWidth) {
                     minimumColumnWidth = cell.minimumPreferredWidth;
                 }
@@ -451,13 +447,14 @@ public class TableLayoutFormatter {
                     continue;
                 }
                 float requiredWidth = cell.minimumPreferredWidth;
-                float totalColumnWidth = context.minimumColumnWidths.subList(colIndex, colIndex + cell.span.x).stream().reduce(Float::sum).get();
+                float totalBorderSpacing = context.borderSpacing.x * (cell.span.x - 1);
+                float totalColumnWidth = context.minimumColumnWidths.subList(colIndex, colIndex + cell.span.x).stream().reduce(Float::sum).get() + totalBorderSpacing;
                 if (totalColumnWidth >= requiredWidth) {
                     continue;
                 }
 
                 float diff = requiredWidth - totalColumnWidth;
-                int[] adjustableColumns = IntStream.range(colIndex, colIndex + cell.span.x).filter(context.fixedColumnWidths::get).toArray();
+                int[] adjustableColumns = IntStream.range(colIndex, colIndex + cell.span.x).filter(i -> !context.fixedColumnWidths.get(i)).toArray();
                 if (adjustableColumns.length > 0) {
                     float additionalWidth = diff / adjustableColumns.length;
                     for (int i : adjustableColumns) {
