@@ -4,22 +4,27 @@ import java.util.*;
 
 import browser.model.BoxNode;
 import browser.model.IntVector2;
+import browser.model.TableCell;
 
 public class TableFormattingContext {
 
     public int width, height;
+    public float availableWidth, fixedWidth;
+    public boolean hasFixedWidth = false;
     public IntVector2 borderSpacing;
     public BoxNode tableBoxNode;
-    public List<Float> minimumColumnWidths, maximumColumnWidths, columnWidths;
-    public List<Boolean> fixedColumnWidths;
+    public List<Float> columnWidths;
+    public List<Float> rowHeights;
+    public List<Boolean> fixedColumnWidths = new ArrayList<>();
+    public List<Boolean> fixedRowHeights = new ArrayList<>();
     public boolean hasCaption = false;
     public List<BoxNode> captions = new ArrayList<>();
+    public final List<TableRow> rows = new ArrayList<>();
 
     public BoxNode lastPlacedCaption = null;
     public BoxNode lastPlacedRowGroup = null;
     public BoxNode lastPlacedRow = null;
 
-    private final List<TableRow> rows = new ArrayList<>();
 
     public void addRow(BoxNode boxNode) {
         TableRow row = new TableRow();
@@ -36,10 +41,12 @@ public class TableFormattingContext {
         rows.get(rowIndex).cells.add(cell);
     }
 
-    public void addSpannedCell(BoxNode boxNode, int rowIndex, int columnIndex) {
+    public void addSpannedCell(BoxNode boxNode, int rowIndex, int columnIndex, IntVector2 origin) {
         TableCell cell = new TableCell();
-        cell.isSpannedCell = true;
+        cell.isSpannedX = columnIndex != origin.x;
+        cell.isSpannedY = rowIndex != origin.y;
         cell.boxNode = boxNode;
+        cell.spannedCellOrigin = origin;
         // Cells spanning outside the table rows are ignored.
         if (rows.size() <= rowIndex) {
             return;
@@ -55,17 +62,13 @@ public class TableFormattingContext {
         return rows.get(y).cells.get(x);
     }
 
-    private static class TableRow {
-        BoxNode rowBoxNode;
-        List<TableCell> cells = new ArrayList<>();
+    public List<TableCell> getRowCells(int y) {
+        return rows.get(y).cells;
     }
 
-    public static class TableCell {
-        boolean isSpannedCell = false;
-        BoxNode boxNode;
-        IntVector2 span;
-        Float minimumPreferredWidth;
-        float maximumPreferredWidth;
+    public static class TableRow {
+        BoxNode rowBoxNode;
+        List<TableCell> cells = new ArrayList<>();
     }
 
 }

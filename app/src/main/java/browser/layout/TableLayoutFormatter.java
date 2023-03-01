@@ -3,11 +3,11 @@ package browser.layout;
 import static browser.css.CSSStyle.DisplayType.*;
 
 import java.util.*;
-import java.util.stream.IntStream;
 
 import browser.css.CSSStyle;
 import browser.model.BoxNode;
 import browser.model.IntVector2;
+import browser.model.TableCell;
 
 import lombok.RequiredArgsConstructor;
 
@@ -41,16 +41,15 @@ public class TableLayoutFormatter {
 
         // Save the caption, if any, in the context.
         updateContextWithCaption(boxNode, context);
-        // Organize the cells into rows
-        initializeContext(boxNode, context);
-        // Set the preferred sizes of each cell
+        // Organize the cells into rows.
+        initializeContext(boxNode, availableWidth, context);
+        // Set the widths of each cell, column, and the table.
         calculateCellWidths(context);
-        // Set the minimum and maximum widths of each column.
-        setColumnMinMaxWidths(context);
-        // Set the width of the table box.
-        setTableWidth(context, boxNode, availableWidth);
-        // Set the width of each cell/column.
-        setCellWidths(context);
+        setHorizontalWidths(context);
+        // Set the heights of each cell, column, and the table.
+        calculateCellHeights(context);
+        setVerticalHeights(context);
+        setTableBoxSizes(context);
     }
 
     public float getHeightFromChildren(BoxNode boxNode, TableFormattingContext context) {
@@ -118,8 +117,6 @@ public class TableLayoutFormatter {
      * @param context       The table formatting context.
      */
     private void placeRow(BoxNode boxNode, TableFormattingContext context) {
-        boxNode.width = context.tableBoxNode.width - context.borderSpacing.x * 2;
-
         if (context.lastPlacedRowGroup == null) {
             boxNode.x = context.tableBoxNode.x + boxNode.style.borderWidthLeft + context.borderSpacing.x;
         } else {
@@ -179,7 +176,7 @@ public class TableLayoutFormatter {
      * @param boxNode       The table box node.
      * @param context       The table formatting context to initialize.
      */
-    private void initializeContext(BoxNode boxNode, TableFormattingContext context) {
+    private void initializeContext(BoxNode boxNode, float availableWidth, TableFormattingContext context) {
         Set<CSSStyle.DisplayType> tableRowDisplayTypes = Set.of(
                 CSSStyle.DisplayType.TABLE_HEADER_GROUP,
                 CSSStyle.DisplayType.TABLE_ROW_GROUP,
@@ -192,9 +189,6 @@ public class TableLayoutFormatter {
                 rows.addAll(child.children);
             } else if (child.innerDisplayType.equals(CSSStyle.DisplayType.TABLE_ROW)) {
                 rows.add(child);
-            } else {
-                // not a row group, not a row
-                // could be a caption, but anything else is invalid
             }
         }
 
@@ -208,8 +202,6 @@ public class TableLayoutFormatter {
                 if (child.innerDisplayType.equals(CSSStyle.DisplayType.TABLE_CELL)) {
                     context.addCell(child, i);
                     columnsInRow++;
-                } else {
-                    // invalid
                 }
             }
             maxColumns = Math.max(maxColumns, columnsInRow);
@@ -221,30 +213,58 @@ public class TableLayoutFormatter {
         for (int x = 0; x < tableWidth; x++) {
             for (int y = 0; y < tableHeight; y++) {
                 BoxNode cell = context.getCell(x, y).boxNode;
-                if (context.getCell(x, y).isSpannedCell) {
+                if (context.getCell(x, y).isSpannedX || context.getCell(x, y).isSpannedY) {
                     continue;
                 }
                 IntVector2 span = context.getCell(x, y).span;
-                if (span.x > 1) {
+                if (span.x > 1 && span.y == 1) {
                     for (int i = 0; i < span.x - 1; i++) {
-                        context.addSpannedCell(cell, y, x + 1);
+                        context.addSpannedCell(cell, y, x + i + 1, new IntVector2(x, y));
+                    }
+                } else if (span.y > 1 && span.x == 1) {
+                    for (int i = 0; i < span.y - 1; i++) {
+                        context.addSpannedCell(cell, y + i + 1, x, new IntVector2(x, y));
+                    }
+                } else if (span.x > 1 && span.y > 1) {
+                    for (int i = 0; i < span.x; i++) {
+                        for (int j = 0; j < span.y; j++) {
+                            if (i == 0 && j == 0) continue;
+                            context.addSpannedCell(cell, y + j, x + i, new IntVector2(x, y));
+                        }
                     }
                 }
+            }
+        }
 
-                if (span.y > 1) {
-                    for (int i = 0; i < span.y - 1; i++) {
-                        context.addSpannedCell(cell, y + i + 1, x);
-                    }
+        // Set the fixed width columns list
+        context.fixedColumnWidths.addAll(Collections.nCopies(tableWidth, false));
+        for (int x = 0; x < tableWidth; x++) {
+            for (int y = 0; y < tableHeight; y++) {
+                BoxNode cell = context.getCell(x, y).boxNode;
+                if (cell.style.width != null && cell.style.widthType.equals(CSSStyle.DimensionType.PIXEL)) {
+                    context.fixedColumnWidths.set(x, true);
+                }
+            }
+        }
+
+        // Set the fixed height rows list
+        context.fixedRowHeights.addAll(Collections.nCopies(tableHeight, false));
+        for (int y = 0; y < tableHeight; y++) {
+            for (int x = 0; x < tableWidth; x++) {
+                BoxNode cell = context.getCell(x, y).boxNode;
+                if (cell.style.width != null && cell.style.widthType.equals(CSSStyle.DimensionType.PIXEL)) {
+                    context.fixedRowHeights.set(y, true);
                 }
             }
         }
 
         context.width = tableWidth;
         context.height = tableHeight;
-        context.minimumColumnWidths = new ArrayList<>(Collections.nCopies(tableWidth, Float.MAX_VALUE));
-        context.maximumColumnWidths = new ArrayList<>(Collections.nCopies(tableWidth, 0.0f));
-        context.columnWidths = new ArrayList<>(Collections.nCopies(tableWidth, 0.0f));
-        context.fixedColumnWidths = new ArrayList<>(Collections.nCopies(tableWidth, false));
+        context.availableWidth = availableWidth;
+        if (boxNode.width != null) {
+            context.fixedWidth = boxNode.width;
+            context.hasFixedWidth = true;
+        }
 
         int colSpan = Integer.parseInt(boxNode.correspondingRenderNode.attributes.getOrDefault("colspan", "1"));
         int rowSpan = Integer.parseInt(boxNode.correspondingRenderNode.attributes.getOrDefault("rowspan", "1"));
@@ -267,201 +287,196 @@ public class TableLayoutFormatter {
     private void calculateCellWidths(TableFormattingContext context) {
         for (int rowIndex = 0; rowIndex < context.height; rowIndex++) {
             for (int colIndex = 0; colIndex < context.width; colIndex++) {
-                TableFormattingContext.TableCell cell = context.getCell(colIndex, rowIndex);
-                if (cell.isSpannedCell) {
+                TableCell cell = context.getCell(colIndex, rowIndex);
+                if (cell.isSpannedX) {
                     continue;
                 }
 
                 if (cell.boxNode.style.width == null || cell.boxNode.style.widthType.equals(CSSStyle.DimensionType.PERCENTAGE)) {
                     List<Float> widths = getCellWidths(cell.boxNode);
-                    cell.minimumPreferredWidth = widths.get(0);
-                    cell.maximumPreferredWidth = widths.get(1);
+                    cell.minWidth = widths.get(0);
+                    cell.maxWidth = widths.get(1);
                 } else {
-                    cell.minimumPreferredWidth = cell.boxNode.style.width;
-                    cell.maximumPreferredWidth = cell.boxNode.style.width;
+                    cell.minWidth = cell.boxNode.style.width;
+                    cell.maxWidth = cell.boxNode.style.width;
+                    cell.fixedWidth = true;
                 }
             }
         }
     }
 
-    private void setColumnMinMaxWidths(TableFormattingContext context) {
-        // Collect the column widths based on the single column spanning cells.
-        for (int x = 0; x < context.width; x++) {
-            Float fixedWidth = getSingleColumnFixedWidth(context, x, false);
-            if (fixedWidth != null) {
-                context.minimumColumnWidths.set(x, fixedWidth);
-                context.maximumColumnWidths.set(x, fixedWidth);
-                context.fixedColumnWidths.set(x, true);
-            } else {
-                List<Float> widths = getSingleSpanColumnAutoWidths(context, x);
-                context.minimumColumnWidths.set(x, widths.get(0));
-                context.maximumColumnWidths.set(x, widths.get(1));
-            }
-        }
-
-        // Adjust the column widths based on multiple column spanning cells.
-        // TODO add support for column groups having a fixed width
-        increaseMinimumColumnWidthsForSpanningCells(context);
-    }
-
-    private void setTableWidth(TableFormattingContext context, BoxNode boxNode, float availableWidth) {
-        float minimumRequiredWidth = context.minimumColumnWidths.stream().reduce(Float::sum).get();
-        float maximumRequiredWidth = context.maximumColumnWidths.stream().reduce(Float::sum).get();
-        float totalBorderSpacing = context.borderSpacing.x * (context.width + 1);
-        float totalCellSpacing = 0;
-        float totalBorderWidth = 0;
-        float totalMinWidth = minimumRequiredWidth + totalCellSpacing + totalBorderWidth + totalBorderSpacing;
-        float totalMaxWidth = maximumRequiredWidth + totalCellSpacing + totalBorderWidth + totalBorderSpacing;
-
-        // Set the width of the table box.
-        if (boxNode.style.width == null) {
-            // Table does not have a fixed width, so set width between min and max, constrained by the available width.
-            boxNode.width = Math.max(totalMinWidth, Math.min(availableWidth, totalMaxWidth));
-        } else {
-            float fixedWidth = boxNode.style.widthType.equals(CSSStyle.DimensionType.PERCENTAGE) ?
-                    boxNode.parent.width * boxNode.style.width / 100.0f : boxNode.style.width;
-            // The table width was not large enough for the columns. Fixed width is overwritten.
-            boxNode.width = Math.max(fixedWidth, totalMinWidth);
-        }
-    }
-
-    private void setCellWidths(TableFormattingContext context) {
-        float totalFixedColumnWidth = 0;
-        float totalNonFixedMinimumWidth = 0;
-
-        // Set the width of any fixed single-column width columns
-        for (int columnIndex = 0; columnIndex < context.width; columnIndex++) {
-            // TODO include percentage cell widths in this calculation.
-            Float fixedWidth = getSingleColumnFixedWidth(context, columnIndex, false);
-            if (fixedWidth != null) {
-                context.columnWidths.set(columnIndex, fixedWidth);
-                totalFixedColumnWidth += fixedWidth;
-            } else {
-                totalNonFixedMinimumWidth += context.minimumColumnWidths.get(columnIndex);
-            }
-        }
-
-        float tablePadding = 0;
-        float totalBorderSpacing = context.borderSpacing.x * (context.width + 1);
-        float remainingWidth = context.tableBoxNode.width - totalFixedColumnWidth - totalNonFixedMinimumWidth - tablePadding - totalBorderSpacing;
-        int numAutomaticColumns = context.fixedColumnWidths.stream().filter(v -> !v).toList().size();
-        if (numAutomaticColumns > 0) {
-            float additionalWidthPerColumn = remainingWidth / numAutomaticColumns;
-
-            // Set the width of columns width automatic widths
-            for (int columnIndex = 0; columnIndex < context.width; columnIndex++) {
-                if (context.fixedColumnWidths.get(columnIndex)) {
-                    continue;
-                }
-
-                float columnWidth = context.minimumColumnWidths.get(columnIndex) + additionalWidthPerColumn;
-                context.columnWidths.set(columnIndex, columnWidth);
-            }
-        }
-
-        for (int columnIndex = 0; columnIndex < context.width; columnIndex++) {
-            for (int rowIndex = 0; rowIndex < context.height; rowIndex++) {
-                if (context.getCell(columnIndex, rowIndex).isSpannedCell) {
-                    continue;
-                }
-
-                BoxNode cell = context.getCell(columnIndex, rowIndex).boxNode;
-                IntVector2 span = context.getCell(columnIndex, rowIndex).span;
-                if (span.x == 1) {
-                    cell.width = context.columnWidths.get(columnIndex);
-                } else {
-                    float borderSpacing = context.borderSpacing.x * (span.x - 1);
-                    float cellWidthSum = 0;
-                    for (int spannedColumn = columnIndex; spannedColumn < columnIndex + span.x; spannedColumn++) {
-                        cellWidthSum += context.columnWidths.get(spannedColumn);
-                    }
-                    cell.width = cellWidthSum + borderSpacing;
-                }
-            }
-        }
-    }
-
-    /**
-     * A column in the table has a fixed width if any of the cells of that column have fixed widths. If multiple have
-     * fixed widths, the largest is used.
-     * Only single column spanning cells and pixel width cells are considered in the pass.
-     * @param context       The corresponding table formatting context.
-     * @param columnIndex       The index of the column to check.
-     * @return      Null if there is no fixed width, otherwise the width as a float.
-     */
-    private Float getSingleColumnFixedWidth(TableFormattingContext context, int columnIndex, boolean includePercentage) {
-        boolean hasFixedWidth = false;
-        float width = 0;
-        for (int rowIndex = 0; rowIndex < context.height; rowIndex++) {
-            BoxNode cell = context.getCell(columnIndex, rowIndex).boxNode;
-            IntVector2 span = context.getCell(columnIndex, rowIndex).span;
-            boolean fixedWidth = cell.style.width != null &&
-                    (cell.style.widthType.equals(CSSStyle.DimensionType.PIXEL) ||
-                            (cell.style.widthType.equals(CSSStyle.DimensionType.PERCENTAGE) && includePercentage));
-            if (fixedWidth && span.x == 1) {
-                hasFixedWidth = true;
-                float newWidth = cell.style.width;
-                if (cell.style.widthType.equals(CSSStyle.DimensionType.PERCENTAGE)) {
-                    newWidth /= 100.0f * context.tableBoxNode.width;
-                }
-                width = Math.max(width, newWidth);
-            }
-        }
-
-        return hasFixedWidth ? width : null;
-    }
-
-    /**
-     * For a given column, calculates the minimum and maximum widths needed for the content of each cell in the column.
-     * The largest minimum and maximum among all the cells is returned.
-     * Only cells that span a single column are considered in this pass. Multi-column spanning cells are considered
-     * afterwards.
-     * @param context       The table formatting context.
-     * @param columnIndex       The column to use.
-     * @return      A list of the form [minimum width, maximum width].
-     */
-    private List<Float> getSingleSpanColumnAutoWidths(TableFormattingContext context, int columnIndex) {
-        float minimumColumnWidth = Float.MIN_VALUE;
-        float maximumColumnWidth = Float.MIN_VALUE;
-
-        for (int y = 0; y < context.height; y++) {
-            TableFormattingContext.TableCell cell = context.getCell(columnIndex, y);
-            if (!cell.isSpannedCell && cell.span.x == 1) {
-                if (minimumColumnWidth < cell.minimumPreferredWidth) {
-                    minimumColumnWidth = cell.minimumPreferredWidth;
-                }
-                if (maximumColumnWidth < cell.maximumPreferredWidth) {
-                    maximumColumnWidth = cell.maximumPreferredWidth;
-                }
-            }
-        }
-
-        return List.of(minimumColumnWidth, maximumColumnWidth);
-    }
-
-    private void increaseMinimumColumnWidthsForSpanningCells(TableFormattingContext context) {
+    private void calculateCellHeights(TableFormattingContext context) {
         for (int rowIndex = 0; rowIndex < context.height; rowIndex++) {
             for (int colIndex = 0; colIndex < context.width; colIndex++) {
-                TableFormattingContext.TableCell cell = context.getCell(colIndex, rowIndex);
-                if (cell.isSpannedCell || cell.span.x == 1) {
-                    continue;
-                }
-                float requiredWidth = cell.minimumPreferredWidth;
-                float totalBorderSpacing = context.borderSpacing.x * (cell.span.x - 1);
-                float totalColumnWidth = context.minimumColumnWidths.subList(colIndex, colIndex + cell.span.x).stream().reduce(Float::sum).get() + totalBorderSpacing;
-                if (totalColumnWidth >= requiredWidth) {
+                TableCell cell = context.getCell(colIndex, rowIndex);
+                if (cell.isSpannedY) {
                     continue;
                 }
 
-                float diff = requiredWidth - totalColumnWidth;
-                int[] adjustableColumns = IntStream.range(colIndex, colIndex + cell.span.x).filter(i -> !context.fixedColumnWidths.get(i)).toArray();
-                if (adjustableColumns.length > 0) {
-                    float additionalWidth = diff / adjustableColumns.length;
-                    for (int i : adjustableColumns) {
-                        float newMinimumWidth = context.minimumColumnWidths.get(i) + additionalWidth;
-                        context.minimumColumnWidths.set(i, newMinimumWidth);
+                if (cell.boxNode.style.height == null || cell.boxNode.style.heightType.equals(CSSStyle.DimensionType.PERCENTAGE)) {
+                    cell.minHeight = getCellHeight(cell.boxNode);
+                } else {
+                    cell.minHeight = cell.boxNode.style.height;
+                    cell.fixedHeight = true;
+                }
+            }
+        }
+    }
+
+    private void setHorizontalWidths(TableFormattingContext context) {
+        // Get the list of minimum working column widths
+        TableCellAligner aligner = new TableCellAligner();
+        List<Float> columnMinimumWidths = new ArrayList<>();
+        float totalMinWidth = (context.width + 1) * context.borderSpacing.x;
+        for (float width : aligner.alignColumnsMinWidth(context)) {
+            columnMinimumWidths.add(width);
+            totalMinWidth += width;
+        }
+
+        // Find the maximum width the cells would utilize.
+        float totalMaxWidth = (context.width + 1) * context.borderSpacing.x;
+        for (float width : aligner.alignColumnsMaxWidth(context)) {
+            totalMaxWidth += width;
+        }
+
+        if (context.tableBoxNode.width != null) {
+            // The table has fixed width, update cells or table width.
+            float width = context.tableBoxNode.width;
+            context.columnWidths = columnMinimumWidths;
+            if (width <= totalMinWidth) {
+                // Table set width is too small for the contents. Table is expanded.
+                context.tableBoxNode.width = totalMinWidth;
+            } else {
+                // There is extra space to be distributed between the columns.
+                float diff = width - totalMinWidth;
+                distributeSpaceBetweenSections(diff, context.columnWidths, context.fixedColumnWidths);
+            }
+        } else {
+            // Table has no fixed width. Width is constrained by available space and contents.
+            float width = Math.max(totalMinWidth, Math.min(context.availableWidth, totalMaxWidth));
+            context.tableBoxNode.width = width;
+            context.columnWidths = columnMinimumWidths;
+            if (width > totalMinWidth) {
+                float diff = width - totalMinWidth;
+                distributeSpaceBetweenSections(diff, context.columnWidths, context.fixedColumnWidths);
+            }
+        }
+
+        for (int x = 0; x < context.width; x++) {
+            for (int y = 0; y < context.height; y++) {
+                TableCell cell = context.getCell(x, y);
+                if (cell.isSpannedX || cell.isSpannedY) continue;
+                float width = 0;
+                for (int column = x; column < x + cell.span.x; column++) {
+                    width += context.columnWidths.get(column);
+                    if (column > x) {
+                        width += context.borderSpacing.x;
                     }
                 }
+
+                cell.boxNode.width = width;
+            }
+        }
+
+        for (int y = 0; y < context.height; y++) {
+            BoxNode rowBoxNode = context.rows.get(y).rowBoxNode;
+            rowBoxNode.width = context.tableBoxNode.width - context.borderSpacing.x * 2;
+        }
+    }
+
+    private void setVerticalHeights(TableFormattingContext context) {
+        // Get the list of minimum working row heights
+        TableCellAligner aligner = new TableCellAligner();
+        List<Float> rowMinimumHeights = new ArrayList<>();
+        float totalMinHeight = (context.height - 1) * context.borderSpacing.y;
+        for (float height : aligner.alignRowsMinHeight(context)) {
+            rowMinimumHeights.add(height);
+            totalMinHeight += height;
+        }
+
+        if (context.tableBoxNode.height != null) {
+            // The table has fixed height, update cells or table height.
+            float height = context.tableBoxNode.height;
+            context.columnWidths = rowMinimumHeights;
+            if (height <= totalMinHeight) {
+                // Table set height is too small for the contents. Table is expanded.
+                context.tableBoxNode.height = totalMinHeight;
+            } else {
+                // There is extra space to be distributed between the rows.
+                float diff = height - totalMinHeight;
+                distributeSpaceBetweenSections(diff, context.rowHeights, context.fixedRowHeights);
+            }
+        } else {
+            // Table has no fixed height. The height is set to the height needed by the rows.
+            context.tableBoxNode.height = totalMinHeight;
+            context.rowHeights = rowMinimumHeights;
+        }
+
+        // Set the height of each cell based on the row heights.
+        for (int x = 0; x < context.width; x++) {
+            for (int y = 0; y < context.height; y++) {
+                TableCell cell = context.getCell(x, y);
+                if (cell.isSpannedX || cell.isSpannedY) continue;
+                float height = 0;
+                for (int row = y; row < y + cell.span.y; row++) {
+                    height += context.rowHeights.get(row);
+                    if (row > y) {
+                        height += context.borderSpacing.y;
+                    }
+                }
+                cell.boxNode.height = height;
+            }
+        }
+
+        // Set the height of each row box
+        for (int y = 0; y < context.height; y++) {
+            BoxNode rowBoxNode = context.rows.get(y).rowBoxNode;
+            rowBoxNode.height = context.rowHeights.get(y);
+        }
+    }
+
+    private void setTableBoxSizes(TableFormattingContext context) {
+        // Set the width and height of each cell based on its span.
+        for (int x = 0; x < context.width; x++) {
+            for (int y = 0; y < context.height; y++) {
+                TableCell cell = context.getCell(x, y);
+                if (cell.isSpannedX || cell.isSpannedY) continue;
+                float width = 0, height = 0;
+                for (int column = x; column < x + cell.span.x; column++) {
+                    width += context.columnWidths.get(column);
+                    if (column > x) {
+                        width += context.borderSpacing.x;
+                    }
+                }
+                for (int row = y; row < y + cell.span.y; row++) {
+                    height += context.rowHeights.get(row);
+                    if (row > y) {
+                        height += context.borderSpacing.y;
+                    }
+                }
+
+                cell.boxNode.width = width;
+                cell.boxNode.height = height;
+            }
+        }
+
+        // Set the width and height of each row box
+        for (int y = 0; y < context.height; y++) {
+            BoxNode rowBoxNode = context.rows.get(y).rowBoxNode;
+            rowBoxNode.width = context.tableBoxNode.width - context.borderSpacing.x * 2;
+            rowBoxNode.height = context.rowHeights.get(y);
+        }
+    }
+
+    private void distributeSpaceBetweenSections(float diff, List<Float> sizes, List<Boolean> fixed) {
+        int adjustableSections = fixed.stream().filter(f -> !f).toList().size();
+        if (adjustableSections == 0) {
+            return;
+        }
+        float spacePerSection = diff / adjustableSections;
+        for (int i = 0; i < fixed.size(); i++) {
+            if (!fixed.get(i)) {
+                sizes.set(i, sizes.get(i) + spacePerSection);
             }
         }
     }
@@ -492,6 +507,26 @@ public class TableLayoutFormatter {
         }
 
         return results;
+    }
+
+    private Float getCellHeight(BoxNode boxNode) {
+        if (boxNode.style.height != null && boxNode.style.heightType.equals(CSSStyle.DimensionType.PIXEL)) {
+            return boxNode.style.height;
+        }
+
+        BoxNode copyBoxNode = boxNode.deepCopy();
+        removePercentageWidthBlockBoxes(copyBoxNode);
+        copyBoxNode.innerDisplayType = CSSStyle.DisplayType.FLOW;
+        copyBoxNode.outerDisplayType = CSSStyle.DisplayType.BLOCK;
+        copyBoxNode.style.width = boxNode.width;
+        copyBoxNode.style.widthType = CSSStyle.DimensionType.PIXEL;
+        boxLayoutGenerator.calculateLayout(copyBoxNode, boxNode.width);
+        float maxY = 0;
+        for (BoxNode child : copyBoxNode.children) {
+            float childMaxY = child.y + child.height + child.style.marginBottom + copyBoxNode.style.paddingBottom + copyBoxNode.style.borderWidthBottom;
+            maxY = Math.max(childMaxY, maxY);
+        }
+        return maxY - copyBoxNode.y;
     }
 
     /**

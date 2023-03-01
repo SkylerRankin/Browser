@@ -470,16 +470,6 @@ public class BoxLayoutGenerator {
         }
 
         parentBox.height = tableLayoutFormatter.getHeightFromChildren(parentBox, context);
-
-        if (parentBox.innerDisplayType.equals(DisplayType.TABLE_ROW)) {
-            float maxHeight = 0;
-            for (BoxNode child : parentBox.children) {
-                maxHeight = Math.max(maxHeight, child.height);
-            }
-            for (BoxNode child : parentBox.children) {
-                child.height = maxHeight;
-            }
-        }
     }
 
     private float getHeightFromChildren(BoxNode boxNode) {
