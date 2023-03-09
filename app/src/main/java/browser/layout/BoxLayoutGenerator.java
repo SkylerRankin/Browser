@@ -76,6 +76,9 @@ public class BoxLayoutGenerator {
         // independently.
         if (!boxNode.innerDisplayType.equals(DisplayType.TABLE) &&
                 CSSConstants.tableInnerDisplayTypes.contains(boxNode.innerDisplayType)) {
+            for (BoxNode child : boxNode.children) {
+                setFixedSizes(child);
+            }
             return;
         }
 

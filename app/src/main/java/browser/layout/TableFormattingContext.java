@@ -51,11 +51,12 @@ public class TableFormattingContext {
         if (rows.size() <= rowIndex) {
             return;
         }
-        // Cells spanning outside the table columns are ignored.
-        if (rows.get(rowIndex).cells.size() <= columnIndex) {
-            return;
+
+        if (columnIndex == rows.get(rowIndex).cells.size()) {
+            rows.get(rowIndex).cells.add(cell);
+        } else if (rows.get(rowIndex).cells.size() > columnIndex) {
+            rows.get(rowIndex).cells.add(columnIndex, cell);
         }
-        rows.get(rowIndex).cells.add(columnIndex, cell);
     }
 
     public TableCell getCell(int x, int y) {

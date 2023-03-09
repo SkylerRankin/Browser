@@ -115,4 +115,9 @@ public class LayoutIntegrationTests {
         driver.runLayoutTest("simpleMultiRowSpanTable", 500);
     }
 
+    @Test
+    public void tableMixedSpans() throws IOException {
+        driver.runLayoutTest("tableMixedSpans", 500);
+    }
+
 }
