@@ -110,4 +110,9 @@ public class LayoutIntegrationTests {
         driver.runLayoutTest("simpleMultiColumnSpanTable", 500);
     }
 
+    @Test
+    public void simpleMultiRowSpanTable() throws IOException {
+        driver.runLayoutTest("simpleMultiRowSpanTable", 500);
+    }
+
 }

@@ -57,6 +57,12 @@ public class TableLayoutFormatter {
             return boxNode.height == null ? 0 : boxNode.height;
         }
 
+        // TODO calculate cell, row group, and table sizes based on the context as well, not based on children sizes.
+        if (boxNode.innerDisplayType.equals(TABLE_ROW)) {
+            int rowIndex = boxNode.parent.children.indexOf(boxNode);
+            return context.rowHeights.get(rowIndex);
+        }
+
         float maxY = 0;
         for (BoxNode childBox : boxNode.children) {
             float childHeight = childBox.height == null ? 0 : childBox.height;
@@ -151,14 +157,9 @@ public class TableLayoutFormatter {
      * @param context       The table formatting context.
      */
     private void placeCell(BoxNode boxNode, TableFormattingContext context) {
-        int startingColumn = 0;
-        for (BoxNode child : boxNode.parent.children) {
-            if (child == boxNode) {
-                break;
-            }
-            int span = Integer.parseInt(child.correspondingRenderNode.attributes.getOrDefault("colspan", "1"));
-            startingColumn += span;
-        }
+        int rowIndex = boxNode.parent.parent.children.indexOf(boxNode.parent);
+        List<Integer> rowCellIds = context.rows.get(rowIndex).cells.stream().map(cell -> cell.boxNode.id).toList();
+        int startingColumn = rowCellIds.indexOf(boxNode.id);
 
         float x = context.lastPlacedRow.x + context.lastPlacedRow.style.paddingLeft;
         if (startingColumn > 0) {

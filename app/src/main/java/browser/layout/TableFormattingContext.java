@@ -62,10 +62,6 @@ public class TableFormattingContext {
         return rows.get(y).cells.get(x);
     }
 
-    public List<TableCell> getRowCells(int y) {
-        return rows.get(y).cells;
-    }
-
     public static class TableRow {
         BoxNode rowBoxNode;
         List<TableCell> cells = new ArrayList<>();
