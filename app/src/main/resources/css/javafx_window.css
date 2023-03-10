@@ -32,6 +32,8 @@
 
 .tab-pane {
 	-fx-background-color: rgb(50, 54, 57);
+	-fx-open-tab-animation: NONE;
+	-fx-close-tab-animation: NONE;
 }
 
 .tab {

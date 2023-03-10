@@ -1,16 +1,16 @@
 package browser.layout;
 
 import browser.model.Box;
-import browser.model.RenderNode;
+import browser.model.BoxNode;
 
 public class BoxUtils {
 
-    public static Box getBoxWithoutPadding(RenderNode node) {
+    public static Box getBoxWithoutPadding(BoxNode node) {
         Box box = new Box();
-        box.x = node.box.x + node.style.paddingLeft;
-        box.y = node.box.y + node.style.paddingTop;
-        box.width = node.box.width - node.style.paddingRight - node.style.paddingLeft;
-        box.height = node.box.height - node.style.paddingBottom - node.style.paddingTop;
+        box.x = node.x + node.style.paddingLeft;
+        box.y = node.y + node.style.paddingTop;
+        box.width = node.width - node.style.paddingRight - node.style.paddingLeft;
+        box.height = node.height - node.style.paddingBottom - node.style.paddingTop;
         return box;
     }
 

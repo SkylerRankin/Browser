@@ -103,7 +103,7 @@ public class Pipeline {
      */
     public void render(GraphicsContext gc) {
         HTMLRenderer.setBackground(gc, rootRenderNode.style.backgroundColor, width, height);
-        HTMLRenderer.render(gc, rootRenderNode);
+        HTMLRenderer.render(gc, rootBoxNode);
     }
 
     public boolean loadedWebpage() {

@@ -55,6 +55,8 @@ public class BrowserWindow extends Application {
     private double offsetY = 0;
     
     private InspectorHandler inspectorHandler;
+
+    private final String startupPageURL = "file://src/main/resources/html/startup_page.html";
     
     private void setupUI(Stage stage) {
         this.stage = stage;
@@ -67,7 +69,7 @@ public class BrowserWindow extends Application {
 
         tabPane.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue.getId() != null && newValue.getId().equals(TabType.NEW.toString())) {
-                addNewTab(stage, TabType.SEARCH);
+                addNewTab(stage, TabType.SEARCH, startupPageURL);
             } else {
                 for (BrowserTab tab : tabs) {
                     if (tab.getActor().equals(newValue)) {
@@ -102,15 +104,12 @@ public class BrowserWindow extends Application {
         tabPane.setTabClosingPolicy(TabClosingPolicy.ALL_TABS);
         
         // Prevent swiping from making new tabs
-        tabPane.addEventFilter(SwipeEvent.ANY, new EventHandler<SwipeEvent>() {
-            @Override
-            public void handle(SwipeEvent event) {
-                System.out.println("swipe");
-                event.consume();
-            }
+        tabPane.addEventFilter(SwipeEvent.ANY, event -> {
+            System.out.println("swipe");
+            event.consume();
         });
         
-        tabPane.setOnMousePressed(new EventHandler<MouseEvent>() {
+        tabPane.setOnMousePressed(new EventHandler<>() {
             @Override
             public void handle(MouseEvent event) {
                 offsetX = stage.getX() - event.getScreenX();
@@ -118,12 +117,9 @@ public class BrowserWindow extends Application {
             }
         });
         
-        tabPane.setOnMouseDragged(new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent event) {
-                stage.setX(event.getScreenX() + offsetX);
-                stage.setY(event.getScreenY() + offsetY);
-            }
+        tabPane.setOnMouseDragged(event -> {
+            stage.setX(event.getScreenX() + offsetX);
+            stage.setY(event.getScreenY() + offsetY);
         });
         
         File windowCSSFile = new File("./src/main/resources/css/javafx_window.css");
@@ -137,7 +133,9 @@ public class BrowserWindow extends Application {
 
         for (BrowserTab tab : tabs) {
             tab.scene = scene;
-            tab.onResize(stage);
+            if (tab instanceof SearchTab) {
+                ((SearchTab) tab).initialLoad(stage, startupPageURL);
+            }
         }
         
         ChangeListener<Number> stageSizeListener = (obs, oldValue, newValue) -> {
@@ -160,8 +158,7 @@ public class BrowserWindow extends Application {
     }
 
     private void addNewTab(Stage stage, TabType type) {
-        String startupPageURL = "file://src/main/resources/html/startup_page.html";
-        addNewTab(stage, type, startupPageURL);
+        addNewTab(stage, type, null);
     }
     
     private void addNewTab(Stage stage, TabType type, String urlToLoad) {
@@ -187,7 +184,9 @@ public class BrowserWindow extends Application {
             currentTabIndex = newTabIndex;
             tabPane.getTabs().add(newTabIndex, newTab.getActor());
             tabPane.getSelectionModel().select(currentTabIndex);
-            ((SearchTab) newTab).loadURL(urlToLoad);
+            if (urlToLoad != null) {
+                ((SearchTab) newTab).initialLoad(stage, urlToLoad);
+            }
         }
     }
     

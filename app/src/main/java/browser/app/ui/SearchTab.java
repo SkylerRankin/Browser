@@ -84,6 +84,19 @@ public class SearchTab extends BrowserTab {
         });
     }
 
+    public void initialLoad(Stage stage, String url) {
+        grid.setPrefWidth(stage.getWidth());
+        urlInput.setPrefWidth(stage.getWidth() - statusLabel.getWidth() - 20);
+        if (scene != null) {
+            double usedHeight = urlInput.getHeight() + 50;
+            scroll.setPrefSize(scene.getWidth(), scene.getHeight() - usedHeight);
+            canvas.setWidth(scene.getWidth());
+            pipeline.updateScreenWidth((float) canvas.getWidth());
+            canvas.setHeight(scene.getHeight() - usedHeight);
+            loadURL(url);
+        }
+    }
+
     @Override
     public void onResize(Stage stage) {
         grid.setPrefWidth(stage.getWidth());

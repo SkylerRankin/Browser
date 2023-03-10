@@ -1,7 +1,5 @@
 package browser.app;
 
-import javafx.concurrent.WorkerStateEvent;
-import javafx.event.EventHandler;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Tab;
@@ -45,25 +43,18 @@ public class SearchTabPipeline {
     
     public void loadWebpage(String url) {
         LoadWebpageTask lwt = new LoadWebpageTask(url, width, pipeline);
-        lwt.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
-            @Override
-            public void handle(WorkerStateEvent event) {
-                canvas.setHeight(Math.max(pipeline.getHeight(), (float) gc.getCanvas().getHeight()));
-                tab.setText(pipeline.getTitle() == null ? url : pipeline.getTitle());
-                synchronized (pipeline) {
-                    pipeline.render(gc);
-                }
-                renderCompleteCallback.onRenderCompleted(pipeline.getRootRenderNode(), RenderCompleteCallback.RenderType.NewLayout);
-                interactionHandler.setRootRenderNode(pipeline.getRootRenderNode());
+        lwt.setOnSucceeded(event -> {
+            System.out.printf("Setting canvas height to %.2f\n", Math.max(pipeline.getHeight(), (float) gc.getCanvas().getHeight()));
+            canvas.setHeight(Math.max(pipeline.getHeight(), (float) gc.getCanvas().getHeight()));
+            tab.setText(pipeline.getTitle() == null ? url : pipeline.getTitle());
+            synchronized (pipeline) {
+                pipeline.render(gc);
             }
+            renderCompleteCallback.onRenderCompleted(pipeline.getRootRenderNode(), RenderCompleteCallback.RenderType.NewLayout);
+            interactionHandler.setRootRenderNode(pipeline.getRootRenderNode());
         });
         Thread thread = new Thread(lwt);
-        thread.setUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
-            @Override
-            public void uncaughtException(Thread t, Throwable e) {
-                System.err.printf("Uncaught exception: %s\n", e);
-            }
-        });
+        thread.setUncaughtExceptionHandler((t, e) -> System.err.printf("Uncaught exception: %s\n", e));
         thread.start();
     }
 
@@ -77,26 +68,20 @@ public class SearchTabPipeline {
             currentRedrawTask.cancel(true);
         }
         currentRedrawTask = crt;
-        crt.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
-            @Override
-            public void handle(WorkerStateEvent event) {
-                canvas.setHeight(Math.max(pipeline.getHeight(), (float) gc.getCanvas().getHeight()));
-                synchronized (pipeline) {
-                    pipeline.render(gc);
-                }
-                renderCompleteCallback.onRenderCompleted(pipeline.getRootRenderNode(), renderType);
-                interactionHandler.setRootRenderNode(pipeline.getRootRenderNode());
-                currentRedrawTask = null;
+        crt.setOnSucceeded(event -> {
+            canvas.setHeight(Math.max(pipeline.getHeight(), (float) gc.getCanvas().getHeight()));
+            synchronized (pipeline) {
+                pipeline.render(gc);
             }
+            renderCompleteCallback.onRenderCompleted(pipeline.getRootRenderNode(), renderType);
+            interactionHandler.setRootRenderNode(pipeline.getRootRenderNode());
+            currentRedrawTask = null;
         });
         Thread thread = new Thread(crt);
-        thread.setUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
-            @Override
-            public void uncaughtException(Thread t, Throwable e) {
-                System.err.println("SearchTabPipeline:redrawWebpage() thread uncaught exception handler");
-                e.printStackTrace();
-                currentRedrawTask = null;
-            }
+        thread.setUncaughtExceptionHandler((t, e) -> {
+            System.err.println("SearchTabPipeline:redrawWebpage() thread uncaught exception handler");
+            e.printStackTrace();
+            currentRedrawTask = null;
         });
         thread.start();
     }
