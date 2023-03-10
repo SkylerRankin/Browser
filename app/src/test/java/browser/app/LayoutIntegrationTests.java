@@ -125,4 +125,14 @@ public class LayoutIntegrationTests {
         driver.runLayoutTest("tableCellSpanningRowAndCol", 500);
     }
 
+    @Test
+    public void inlineTable() throws IOException {
+        driver.runLayoutTest("inlineTable", 200);
+    }
+
+    @Test
+    public void tableInTable() throws IOException {
+        driver.runLayoutTest("tableInTable", 200);
+    }
+
 }

@@ -84,7 +84,8 @@ public class BoxLayoutGenerator {
 
         // Only allow fixed sizes on block boxes or boxes that establish new block context.
         boolean fixedSizeAllowed = boxNode.outerDisplayType.equals(CSSStyle.DisplayType.BLOCK) ||
-                boxNode.innerDisplayType.equals(DisplayType.FLOW_ROOT);
+                boxNode.innerDisplayType.equals(DisplayType.FLOW_ROOT) ||
+                boxNode.innerDisplayType.equals(DisplayType.TABLE);
 
         // Inline block boxes have optional fixed widths. If a width/height is not provided, the box fits to its contents.
         // Tables also have optional fixed widths. They shrink to their content if no width is provided.

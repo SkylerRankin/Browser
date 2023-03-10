@@ -4,6 +4,7 @@ import static browser.css.CSSStyle.DisplayType;
 
 import java.util.*;
 
+import browser.constants.CSSConstants;
 import browser.model.BoxNode;
 import browser.model.RenderNode;
 import browser.parser.HTMLElements;
@@ -194,6 +195,11 @@ public class BoxTreeGenerator {
     }
 
     private boolean boxHasValidDisplayConfiguration(BoxNode boxNode) {
+        if (CSSConstants.tableInnerDisplayTypes.contains(boxNode.innerDisplayType)) {
+            // Table boxes do not abide by the flow display types. Inline vs block children are not relevant.
+            return true;
+        }
+
         List<BoxNode> blockChildren = boxNode.children.stream().filter(node -> !node.isTextNode && !node.isPseudo).filter(node -> node.outerDisplayType.equals(DisplayType.BLOCK)).toList();
         List<BoxNode> inlineChildren = boxNode.children.stream().filter(node -> !node.isTextNode && !node.isPseudo).filter(node -> node.outerDisplayType != null && node.outerDisplayType.equals(DisplayType.INLINE)).toList();
         List<BoxNode> textChildren = boxNode.children.stream().filter(node -> node.isTextNode).toList();
