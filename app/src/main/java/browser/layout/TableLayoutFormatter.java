@@ -202,7 +202,7 @@ public class TableLayoutFormatter {
                 BoxNode child = rowBoxNode.children.get(j);
                 if (child.innerDisplayType.equals(CSSStyle.DisplayType.TABLE_CELL)) {
                     context.addCell(child, i);
-                    columnsInRow++;
+                    columnsInRow += context.getCell(j, i).span.x;
                 }
             }
             maxColumns = Math.max(maxColumns, columnsInRow);
@@ -253,7 +253,7 @@ public class TableLayoutFormatter {
         for (int y = 0; y < tableHeight; y++) {
             for (int x = 0; x < tableWidth; x++) {
                 BoxNode cell = context.getCell(x, y).boxNode;
-                if (cell.style.width != null && cell.style.widthType.equals(CSSStyle.DimensionType.PIXEL)) {
+                if (cell.style.height != null && cell.style.heightType.equals(CSSStyle.DimensionType.PIXEL)) {
                     context.fixedRowHeights.set(y, true);
                 }
             }
@@ -267,9 +267,10 @@ public class TableLayoutFormatter {
             context.hasFixedWidth = true;
         }
 
-        int colSpan = Integer.parseInt(boxNode.correspondingRenderNode.attributes.getOrDefault("colspan", "1"));
-        int rowSpan = Integer.parseInt(boxNode.correspondingRenderNode.attributes.getOrDefault("rowspan", "1"));
-        context.borderSpacing = new IntVector2(colSpan, rowSpan);
+        removeFullySpannedColumns(context);
+        removeFullySpannedRows(context);
+
+        context.borderSpacing = new IntVector2(boxNode.style.borderSpacing, boxNode.style.borderSpacing);
     }
 
     private void updateContextWithCaption(BoxNode table, TableFormattingContext context) {
@@ -336,7 +337,9 @@ public class TableLayoutFormatter {
 
         // Find the maximum width the cells would utilize.
         float totalMaxWidth = (context.width + 1) * context.borderSpacing.x;
+        List<Float> columnMaxWidths = new ArrayList<>();
         for (float width : aligner.alignColumnsMaxWidth(context)) {
+            columnMaxWidths.add(width);
             totalMaxWidth += width;
         }
 
@@ -350,7 +353,7 @@ public class TableLayoutFormatter {
             } else {
                 // There is extra space to be distributed between the columns.
                 float diff = width - totalMinWidth;
-                distributeSpaceBetweenSections(diff, context.columnWidths, context.fixedColumnWidths);
+                distributeSpaceBetweenSections(diff, context.columnWidths, context.fixedColumnWidths, null);
             }
         } else {
             // Table has no fixed width. Width is constrained by available space and contents.
@@ -359,7 +362,7 @@ public class TableLayoutFormatter {
             context.columnWidths = columnMinimumWidths;
             if (width > totalMinWidth) {
                 float diff = width - totalMinWidth;
-                distributeSpaceBetweenSections(diff, context.columnWidths, context.fixedColumnWidths);
+                distributeSpaceBetweenSections(diff, context.columnWidths, context.fixedColumnWidths, columnMaxWidths);
             }
         }
 
@@ -398,14 +401,14 @@ public class TableLayoutFormatter {
         if (context.tableBoxNode.height != null) {
             // The table has fixed height, update cells or table height.
             float height = context.tableBoxNode.height;
-            context.columnWidths = rowMinimumHeights;
+            context.rowHeights = rowMinimumHeights;
             if (height <= totalMinHeight) {
                 // Table set height is too small for the contents. Table is expanded.
                 context.tableBoxNode.height = totalMinHeight;
             } else {
                 // There is extra space to be distributed between the rows.
                 float diff = height - totalMinHeight;
-                distributeSpaceBetweenSections(diff, context.rowHeights, context.fixedRowHeights);
+                distributeSpaceBetweenSections(diff, context.rowHeights, context.fixedRowHeights, null);
             }
         } else {
             // Table has no fixed height. The height is set to the height needed by the rows.
@@ -469,15 +472,45 @@ public class TableLayoutFormatter {
         }
     }
 
-    private void distributeSpaceBetweenSections(float diff, List<Float> sizes, List<Boolean> fixed) {
-        int adjustableSections = fixed.stream().filter(f -> !f).toList().size();
-        if (adjustableSections == 0) {
+    private void distributeSpaceBetweenSections(float spaceToDistribute, List<Float> sizes, List<Boolean> fixed, List<Float> maxSizes) {
+        if (maxSizes == null) {
+            // maxSizes being null indicates that there are no enforced max sizes.
+            maxSizes = Collections.nCopies(sizes.size(), Float.MAX_VALUE);
+        }
+
+        List<Boolean> adjustableSections = new ArrayList<>();
+        for (int i = 0; i < sizes.size(); i++) {
+            adjustableSections.add(!fixed.get(i) && sizes.get(i) < maxSizes.get(i));
+        }
+
+        if (!adjustableSections.contains(true)) {
+            // All sections are either fixed or already at their maximum size.
             return;
         }
-        float spacePerSection = diff / adjustableSections;
-        for (int i = 0; i < fixed.size(); i++) {
-            if (!fixed.get(i)) {
-                sizes.set(i, sizes.get(i) + spacePerSection);
+
+        int numAdjustableSections = adjustableSections.stream().filter(Boolean::booleanValue).toList().size();
+        float spacePerSection = spaceToDistribute / numAdjustableSections;
+
+        // Evenly distribute the available space to each section, respecting max section sizes.
+        while (spaceToDistribute > 0) {
+            for (int i = 0; i < sizes.size(); i++) {
+                if (adjustableSections.get(i)) {
+                    float maxAddition = maxSizes.get(i) - sizes.get(i);
+                    float addition = Math.min(maxAddition, spacePerSection);
+                    float newSize = sizes.get(i) + addition;
+                    sizes.set(i, newSize);
+                    if (newSize >= maxSizes.get(i)) {
+                        adjustableSections.set(i, false);
+                    }
+                    spaceToDistribute -= addition;
+                }
+            }
+
+            numAdjustableSections = adjustableSections.stream().filter(Boolean::booleanValue).toList().size();
+            if (numAdjustableSections == 0) {
+                break;
+            } else {
+                spacePerSection = spaceToDistribute / numAdjustableSections;
             }
         }
     }
@@ -528,6 +561,64 @@ public class TableLayoutFormatter {
             maxY = Math.max(childMaxY, maxY);
         }
         return maxY - copyBoxNode.y;
+    }
+
+    private void removeFullySpannedColumns(TableFormattingContext context) {
+        for (int x = context.width - 1; x >= 0; x--) {
+            boolean containsNonSpanningCell = false;
+            for (int y = 0; y < context.height; y++) {
+                if (!context.getCell(x, y).isSpannedX) {
+                    containsNonSpanningCell = true;
+                    break;
+                }
+            }
+
+            if (!containsNonSpanningCell) {
+                // Entire column is x-spanning cells, so it can be removed.
+                Set<IntVector2> reducedCells = new HashSet<>();
+                for (int y = 0; y < context.height; y++) {
+                    TableCell spannedCell = context.getCell(x, y);
+                    if (!reducedCells.contains(spannedCell.spannedCellOrigin)) {
+                        TableCell originalCell = context.getCell(spannedCell.spannedCellOrigin.x, spannedCell.spannedCellOrigin.y);
+                        originalCell.span.x--;
+                        reducedCells.add(spannedCell.spannedCellOrigin);
+                    }
+                    context.rows.get(y).cells.remove(x);
+                }
+                context.fixedColumnWidths.remove(x);
+                context.width--;
+                x--;
+            }
+        }
+    }
+
+    private void removeFullySpannedRows(TableFormattingContext context) {
+        for (int y = context.height - 1; y >= 0; y--) {
+            boolean containsNonSpanningCell = false;
+            for (int x = 0; x < context.width; x++) {
+                if (!context.getCell(x, y).isSpannedY) {
+                    containsNonSpanningCell = true;
+                    break;
+                }
+            }
+
+            if (!containsNonSpanningCell) {
+                // Entire row is y-spanning cells, so it can be removed.
+                Set<IntVector2> reducedCells = new HashSet<>();
+                for (int x = 0; x < context.width; x++) {
+                    TableCell spannedCell = context.getCell(x, y);
+                    if (!reducedCells.contains(spannedCell.spannedCellOrigin)) {
+                        TableCell originalCell = context.getCell(spannedCell.spannedCellOrigin.x, spannedCell.spannedCellOrigin.y);
+                        originalCell.span.y--;
+                        reducedCells.add(spannedCell.spannedCellOrigin);
+                    }
+                    context.rows.remove(y);
+                }
+                context.fixedRowHeights.remove(y);
+                context.height--;
+                y--;
+            }
+        }
     }
 
     /**

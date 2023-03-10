@@ -120,4 +120,9 @@ public class LayoutIntegrationTests {
         driver.runLayoutTest("tableMixedSpans", 500);
     }
 
+    @Test
+    public void tableCellSpanningRowAndCol() throws IOException {
+        driver.runLayoutTest("tableCellSpanningRowAndCol", 500);
+    }
+
 }

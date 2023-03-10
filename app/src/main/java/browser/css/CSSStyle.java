@@ -389,6 +389,7 @@ public class CSSStyle {
         style.borderColorLeft = borderColorLeft;
         style.borderColorRight = borderColorRight;
         style.boxSizing = boxSizing;
+        style.borderSpacing = borderSpacing;
         style.color = color;
         style.display = display;
         style.innerDisplay = innerDisplay;
