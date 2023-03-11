@@ -143,3 +143,7 @@ td, th {
 caption {
     display: table-caption;
 }
+
+img {
+    display: inline-block;
+}

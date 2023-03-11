@@ -135,4 +135,16 @@ public class LayoutIntegrationTests {
         driver.runLayoutTest("tableInTable", 200);
     }
 
+    @Test
+    public void tableInlineBlockCells() throws IOException {
+        driver.runLayoutTest("tableInlineBlockCells", 500, true);
+    }
+
+    // Inline block tests
+
+    @Test
+    public void inlineBlockWithinInline() throws IOException {
+        driver.runLayoutTest("inlineBlockWithinInline", 500, true);
+    }
+
 }

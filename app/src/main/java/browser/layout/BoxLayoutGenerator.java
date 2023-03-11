@@ -172,6 +172,7 @@ public class BoxLayoutGenerator {
 
         boolean isInlineBlock = boxNode.outerDisplayType.equals(DisplayType.INLINE) && boxNode.innerDisplayType.equals(DisplayType.FLOW_ROOT);
         if (isInlineBlock && boxNode.width == null) {
+            // TODO parent may not have a fixed width, since inline-block boxes can be inside inline boxes. Need to find available width some other way
             float availableWidth = boxNode.parent == null ? screenWidth : boxNode.parent.width -
                     boxNode.parent.style.borderWidthLeft - boxNode.parent.style.paddingLeft - boxNode.style.marginLeft -
                     boxNode.parent.style.borderWidthRight - boxNode.parent.style.paddingRight - boxNode.style.marginRight;
