@@ -49,12 +49,12 @@ public class HTMLParser {
                     String content = html.substring(end-1, end).equals("/") ? html.substring(index+1, end-1) : html.substring(index+1, end);
                     int spaceIndex = content.indexOf(' ');
                     if (spaceIndex == -1) {
-                        n = new DOMNode(content);
+                        n = new DOMNode(content.toLowerCase());
                     } else {
-                        n = new DOMNode(content.substring(0, spaceIndex));
+                        n = new DOMNode(content.substring(0, spaceIndex).toLowerCase());
                         n.attributes = getAttributes(content.substring(spaceIndex));
                         if (loader != null) {
-                            loader.checkAttributes(content.substring(0, spaceIndex), n.attributes);
+                            loader.checkAttributes(content.substring(0, spaceIndex).toLowerCase(), n.attributes);
                         }
                     }
                     
@@ -63,10 +63,6 @@ public class HTMLParser {
                     if (!HTMLElements.isEmptyElement(n.type)) {
                         current = n;
                     }
-//                    System.out.printf("node = %s, current = %s, isEmpty = %b\n", n.type, current.type, HTMLElements.isEmptyElement(n.type));
-//                    if (!isSingular(fullTag)) {
-//                        current = n;
-//                    }
                 }
                 index += (end - index + 1);
             } else {
@@ -164,7 +160,7 @@ public class HTMLParser {
             if (attribute.contains("=")) {
                 int equalsIndex = attribute.indexOf("=");
                 attributes.put(
-                        attribute.substring(0, equalsIndex), 
+                        attribute.substring(0, equalsIndex).toLowerCase(),
                         attribute.substring(equalsIndex+2, attribute.length()-1));
             } else {
                 attributes.put(attribute, null);

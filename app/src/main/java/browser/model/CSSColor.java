@@ -61,6 +61,11 @@ public class CSSColor {
         }
     }
 
+    public static CSSColor getColor(String color) {
+        CSSColor c = new CSSColor(color);
+        return c.getHex() == null ? null : c;
+    }
+
     private void setRGB(String hex) {
         if (hex.length() == 3) {
             char c1 = hex.charAt(0);

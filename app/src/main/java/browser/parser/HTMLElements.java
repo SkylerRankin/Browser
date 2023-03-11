@@ -22,6 +22,7 @@ public class HTMLElements {
     public static final String H4 = "h4";
     public static final String H5 = "h5";
     public static final String H6 = "h6";
+    public static final String HEADER = "header";
     public static final String DIV = "div";
     public static final String SPAN = "span";
     public static final String P = "p";
@@ -51,11 +52,12 @@ public class HTMLElements {
     public static final String STRONG = "strong";
     public static final String CENTER = "center";
     public static final String NOBR = "nobr";
+    public static final String ASIDE = "aside";
 
     public static final String PSEUDO_MARKER = "marker";
     public static final String ANONYMOUS = "anonymous";
     
-    private static final String[] VALID_ELEMENTS = {TEXT, HTML, HEAD, STYLE, TITLE, BODY, H1, H2, H3, H4, H5, H6, DIV, SPAN, P, UL, OL, LI, HR, B, IMG, A, PRE, TT, CODE, EM, STRONG, CENTER, TABLE, THEAD, TBODY, TFOOT, TR, TD, COL, COLGROUP, CAPTION};
+    private static final String[] VALID_ELEMENTS = {TEXT, HTML, HEAD, STYLE, TITLE, BODY, H1, H2, H3, H4, H5, H6, HEADER, DIV, SPAN, P, UL, OL, LI, HR, B, IMG, A, PRE, TT, CODE, EM, STRONG, CENTER, TABLE, THEAD, TBODY, TFOOT, TR, TD, COL, COLGROUP, CAPTION, ASIDE};
     private static final String[] EMPTY_ELEMENTS = {DOCTYPE, IMG, BR, LINK, BR, INPUT, META, HR};
     public static final String[] NOT_IN_RENDER_TREE_ELEMENTS = {STYLE, HTML, HEAD, TITLE};
 

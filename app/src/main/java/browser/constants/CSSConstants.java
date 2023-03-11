@@ -68,6 +68,19 @@ public class CSSConstants {
             Map.entry(CSSStyle.DisplayType.NONE, List.of(CSSStyle.DisplayType.NONE, CSSStyle.DisplayType.NONE, CSSStyle.DisplayType.NONE))
             );
 
+    public static final List<String> borderLineStyles = List.of(
+            "none",
+            "hidden",
+            "dotted",
+            "dashed",
+            "solid",
+            "double",
+            "groove",
+            "ridge",
+            "inset",
+            "outset"
+    );
+
     /**
      * Convert a CSS display type string into the matching display type enum value.
      * @param text      A CSS display type string.

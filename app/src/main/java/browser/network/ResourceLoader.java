@@ -41,7 +41,6 @@ public class ResourceLoader {
      * Load the HTML for a given URL, and load all other resources linked in that file
      */
     public void loadWebpage(String url) {
-        
         String html = null;
         if (url.startsWith(FILE_PREFIX)) {
             try {
@@ -85,7 +84,6 @@ public class ResourceLoader {
      * @param attributes
      */
     public void checkAttributes(String tag, Map<String, String> attributes) {
-        
         if (tag.equals("img")) {
             String src = attributes.get("src");
             if (src != null) {

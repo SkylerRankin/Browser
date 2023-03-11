@@ -51,9 +51,16 @@ public class LayoutIntegrationTests {
         driver = new LayoutIntegrationTestDriver(new Pipeline());
     }
 
+    // Flow tests
+
     @Test
     public void stackedPaddingTest() throws IOException {
         driver.runLayoutTest("stackedPadding", 1000);
+    }
+
+    @Test
+    public void blockBoxNoChildren() throws IOException {
+        driver.runLayoutTest("blockBoxNoChildren", 500);
     }
 
     // List tests

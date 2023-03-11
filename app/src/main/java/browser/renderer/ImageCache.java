@@ -1,7 +1,8 @@
 package browser.renderer;
 
+import static browser.constants.ResourceConstants.FILE_PREFIX;
+
 import java.io.File;
-import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -9,14 +10,13 @@ import java.util.Set;
 
 import javafx.scene.image.Image;
 
+import browser.model.Vector2;
 import browser.network.HTTPClient;
-
-import static browser.constants.ResourceConstants.FILE_PREFIX;
 
 public class ImageCache {
 
-    private static Map<String, Image> images = new HashMap<String, Image>();
-    private static Set<String> brokenImageLinks = new HashSet<String>();
+    private static final Map<String, Image> images = new HashMap<>();
+    private static final Set<String> brokenImageLinks = new HashSet<>();
 
     public static void loadDefaultImages() {
         File file = new File("./src/main/resources//images//defaultImage.png");
@@ -32,6 +32,11 @@ public class ImageCache {
     }
 
     public static void loadLocalImage(String imagePath, String url) {
+        // Replace backslashes (Windows local file paths) with forward slashes.
+        if (url.contains("\\")) {
+            url = url.replace("\\", "/");
+        }
+
         String originalImagePath = imagePath;
         url = url.startsWith(FILE_PREFIX) ? url.substring(FILE_PREFIX.length()) : url;
         imagePath = imagePath.startsWith("./") ? imagePath.substring(2) : imagePath;
@@ -71,6 +76,15 @@ public class ImageCache {
         Image image = images.get(url);
         if (image == null) image = images.get("default");
         return image;
+    }
+
+    public static Vector2 getImageDimensions(String url) {
+        if (images.containsKey(url)) {
+            Image image = images.get(url);
+            return new Vector2((float) image.getWidth(), (float) image.getHeight());
+        } else {
+            return new Vector2(50, 50);
+        }
     }
 
 }

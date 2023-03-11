@@ -10,7 +10,9 @@ import java.util.Map;
 import browser.constants.CSSConstants;
 import browser.css.CSSStyle;
 import browser.model.BoxNode;
+import browser.model.Vector2;
 import browser.parser.HTMLElements;
+import browser.renderer.ImageCache;
 
 public class BoxLayoutGenerator {
 
@@ -43,6 +45,7 @@ public class BoxLayoutGenerator {
         // Set all fixed heights/widths.
         setFixedSizes(rootBoxNode);
         setImageSizes(rootBoxNode);
+        setEmptyBoxSizes(rootBoxNode);
 
         // Set the position of the root node.
         rootBoxNode.x = 0f;
@@ -118,9 +121,11 @@ public class BoxLayoutGenerator {
             // The max-width property overrides the width property.
             if (style.maxWidth != null) {
                 if (style.maxWidthType.equals(CSSStyle.DimensionType.PERCENTAGE)) {
-                    float parentWidth = boxNode.parent == null ? screenWidth : boxNode.parent.width;
-                    float maxWidthValue = parentWidth * style.maxWidth / 100;
-                    boxNode.width = Math.min(boxNode.width, maxWidthValue);
+                    if (boxNode.parent == null || boxNode.parent.width != null) {
+                        float parentWidth = boxNode.parent == null ? screenWidth : boxNode.parent.width;
+                        float maxWidthValue = parentWidth * style.maxWidth / 100;
+                        boxNode.width = Math.min(boxNode.width, maxWidthValue);
+                    }
                 } else if (style.maxWidthType.equals(CSSStyle.DimensionType.PIXEL)) {
                     boxNode.width = Math.min(boxNode.width, style.maxWidth);
                 }
@@ -172,10 +177,16 @@ public class BoxLayoutGenerator {
 
         boolean isInlineBlock = boxNode.outerDisplayType.equals(DisplayType.INLINE) && boxNode.innerDisplayType.equals(DisplayType.FLOW_ROOT);
         if (isInlineBlock && boxNode.width == null) {
-            // TODO parent may not have a fixed width, since inline-block boxes can be inside inline boxes. Need to find available width some other way
-            float availableWidth = boxNode.parent == null ? screenWidth : boxNode.parent.width -
-                    boxNode.parent.style.borderWidthLeft - boxNode.parent.style.paddingLeft - boxNode.style.marginLeft -
-                    boxNode.parent.style.borderWidthRight - boxNode.parent.style.paddingRight - boxNode.style.marginRight;
+            float availableWidth = screenWidth;
+            if (boxNode.parent != null) {
+                BoxNode currentParent = boxNode.parent;
+                while (currentParent != null && currentParent.width == null) {
+                    currentParent = currentParent.parent;
+                }
+                availableWidth = currentParent.width -
+                        boxNode.parent.style.borderWidthLeft - boxNode.parent.style.paddingLeft - boxNode.style.marginLeft -
+                        boxNode.parent.style.borderWidthRight - boxNode.parent.style.paddingRight - boxNode.style.marginRight;
+            }
             boxNode.width = inlineBlockWidthCalculator.getWidth(boxNode, availableWidth);
         }
 
@@ -201,9 +212,14 @@ public class BoxLayoutGenerator {
         if (boxNode.correspondingRenderNode != null && boxNode.correspondingRenderNode.type.equals(HTMLElements.IMG)) {
             Map<String, String> attributes = boxNode.correspondingRenderNode.attributes;
             CSSStyle style = boxNode.style;
-            // TODO: the default size should come from the actual image dimensions. have to download the image first
             float width = 50;
             float height = 50;
+            if (attributes.containsKey("src")) {
+                Vector2 defaultSize = ImageCache.getImageDimensions(attributes.get("src"));
+                width = defaultSize.x;
+                height = defaultSize.y;
+            }
+
             if (attributes.containsKey("width")) {
                 try {
                     width = Float.parseFloat(attributes.get("width"));
@@ -230,6 +246,27 @@ public class BoxLayoutGenerator {
 
         for (BoxNode child : boxNode.children) {
             setImageSizes(child);
+        }
+    }
+
+    /**
+     * Empty boxes will not run any layout logic since they have no children. This method sets any missing widths or
+     * heights for empty boxes as 0.
+     * @param boxNode       The box to set.
+     */
+    private void setEmptyBoxSizes(BoxNode boxNode) {
+        if (boxNode.children.size() == 0 && !boxNode.isTextNode) {
+            if (boxNode.width == null) {
+                boxNode.width = 0.0f;
+            }
+
+            if (boxNode.height == null) {
+                boxNode.height = 0.0f;
+            }
+        }
+
+        for (BoxNode child : boxNode.children) {
+            setEmptyBoxSizes(child);
         }
     }
 
@@ -384,7 +421,7 @@ public class BoxLayoutGenerator {
 
         // The height should be set based on the box's content if the width was not defined in the style, or if the
         // box is an inline-block box.
-        if (parentBox.style.outerDisplay.equals(DisplayType.INLINE) || parentBox.height == null) {
+        if (parentBox.outerDisplayType.equals(DisplayType.INLINE) || parentBox.height == null) {
             parentBox.height = getHeightFromChildren(parentBox);
         }
     }

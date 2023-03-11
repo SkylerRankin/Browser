@@ -6,6 +6,7 @@ import static org.junit.Assert.assertEquals;
 import java.util.List;
 
 import browser.app.Pipeline;
+import browser.model.CSSColor;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -82,6 +83,31 @@ public class CSSStyleTest {
             assertEquals(displayTypes.get(i).get(0), style.outerDisplay);
             assertEquals(displayTypes.get(i).get(1), style.innerDisplay);
             assertEquals(displayTypes.get(i).get(2), style.auxiliaryDisplay);
+        }
+    }
+
+    @Test
+    public void parseBorderCombinedTest() {
+        List<String> permutations = List.of(
+                "solid 1px #121212;",
+                "solid #121212 1px;",
+                "1px solid #121212;",
+                "1px #121212 solid;",
+                "#121212 1px solid;",
+                "#121212 solid 1px;"
+        );
+        for (String borderValue : permutations) {
+            CSSStyle style = new CSSStyle();
+            style.setProperty("border", borderValue);
+            style.finalizeCSS();
+            assertEquals(1, style.borderWidthLeft);
+            assertEquals(1, style.borderWidthRight);
+            assertEquals(1, style.borderWidthTop);
+            assertEquals(1, style.borderWidthBottom);
+            assertEquals(new CSSColor("#121212"), style.borderColorLeft);
+            assertEquals(new CSSColor("#121212"), style.borderColorRight);
+            assertEquals(new CSSColor("#121212"), style.borderColorTop);
+            assertEquals(new CSSColor("#121212"), style.borderColorBottom);
         }
     }
 

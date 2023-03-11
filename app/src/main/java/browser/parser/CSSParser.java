@@ -169,6 +169,9 @@ public class CSSParser {
                String declarationsText = declarationMatcher.group().trim();
                lastIndex = declarationMatcher.end();
                for (String declaration : declarationsText.split(";")) {
+                   if (declaration.isEmpty()) {
+                       continue;
+                   }
                    declarations.put(
                            declaration.substring(0, declaration.indexOf(":")).trim(),
                            declaration.substring(declaration.indexOf(":") + 1).trim());

@@ -2,6 +2,8 @@ package browser.css;
 
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import browser.constants.CSSConstants;
 import browser.model.CSSColor;
@@ -17,6 +19,8 @@ public class CSSStyle {
     private final Set<String> setProperties = new HashSet<>();
     private final Map<String, String> properties = new HashMap<>();
     private final Map<String, CSSRulePrecedent> precedents = new HashMap<>();
+
+    private final Pattern lengthPattern = Pattern.compile("^([0-9]+)([a-zA-Z]{1,5})$");
 
     public enum DimensionType { PIXEL, PERCENTAGE }
 
@@ -37,6 +41,17 @@ public class CSSStyle {
         CONTENTS, NONE,
         // display-legacy values
         INLINE_BLOCK, INLINE_TABLE, INLINE_FLEX, INLINE_GRID;
+    }
+
+    public enum LengthUnit {
+        // Font relative units
+        CH, EM, EX, IC, REM,
+        // Viewport relative units
+        VH, VW, VMAX, VMIN, VB, VI,
+        // Container query units
+        CQW, CQH, CQI, CQB, CQMIN, CQMAX,
+        // Absolute units
+        PX, CM, MM, Q, IN, PC, PT
     }
 
     public enum PositionType { STATIC, RELATIVE, ABSOLUTE, FIXED, STICKY }
@@ -201,6 +216,68 @@ public class CSSStyle {
     }
 
     /**
+     * The border property can contain up to 3 values, in any order: line width, line style, and line color.
+     * @param value The CSS value string to parse
+     */
+    private void parseBorder(String value) {
+        value = value.trim();
+        if (value.endsWith(";")) {
+            value = value.substring(0, value.length() - 1);
+        }
+        String[] items = value.split("\s");
+        for (int i = 0; i < items.length; i++) {
+            if (CSSConstants.borderLineStyles.contains(items[i])) {
+                System.out.printf("Border styles are not supported. Ignored '%s' within '%s'.\n", items[i], value);
+            } else {
+                // Check if the value is a length
+                if (items[i].equals("0")) {
+                    // Zero is a special case that does not require a unit.
+                    borderWidthTop = 0;
+                    borderWidthBottom = 0;
+                    borderWidthLeft = 0;
+                    borderWidthRight = 0;
+                } else {
+                    Matcher lengthMatcher = lengthPattern.matcher(items[i]);
+                    if (lengthMatcher.find()) {
+                        int length = Integer.parseInt(lengthMatcher.group(1));
+                        String unitString = lengthMatcher.group(2);
+                        LengthUnit unit = parseLengthUnit(unitString);
+                        if (unit != null) {
+                            if (!unit.equals(LengthUnit.PX)) {
+                                System.out.printf("Unsupported border width unit %s, defaulting to 1px.\n", unitString);
+                                length = 1;
+                            }
+                            borderWidthTop = length;
+                            borderWidthBottom = length;
+                            borderWidthLeft = length;
+                            borderWidthRight = length;
+                            continue;
+                        }
+                    }
+
+                    // Check if the value is a color
+                    CSSColor color = CSSColor.getColor(items[i]);
+                    if (color != null) {
+                        borderColorTop = color;
+                        borderColorBottom = color;
+                        borderColorLeft = color;
+                        borderColorRight = color;
+                    }
+                }
+            }
+        }
+    }
+
+    private LengthUnit parseLengthUnit(String value) {
+        value = value.toUpperCase();
+        try {
+            return LengthUnit.valueOf(value);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
+
+    /**
      * Populates the inner and outer display types based on a display CSS string. There are a few configurations
      * for this property.
      *   - Single value: This can be an inner or outer value. Depending on which it is, the remaining display type is
@@ -260,14 +337,7 @@ public class CSSStyle {
             String value = e.getValue().trim();
             switch (e.getKey()) {
             case "background-color":    backgroundColor = new CSSColor(value); break;
-            case "border":              borderWidthTop = parseBorderWidth(value);
-                                        borderWidthBottom = parseBorderWidth(value);
-                                        borderWidthLeft = parseBorderWidth(value);
-                                        borderWidthRight = parseBorderWidth(value);
-                                        borderColorTop = parseBorderColor(value);
-                                        borderColorBottom = parseBorderColor(value);
-                                        borderColorLeft = parseBorderColor(value);
-                                        borderColorRight = parseBorderColor(value); break;
+            case "border":              parseBorder(value); break;
             case "border-color":        borderColorTop = new CSSColor(value);
                                         borderColorBottom = new CSSColor(value);
                                         borderColorLeft = new CSSColor(value);

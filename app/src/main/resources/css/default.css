@@ -28,6 +28,10 @@ h3 {
 	margin-bottom: 10;
 }
 
+header {
+    display: block;
+}
+
 div {
     display: block;
 }
@@ -146,4 +150,8 @@ caption {
 
 img {
     display: inline-block;
+}
+
+aside {
+    display: block;
 }

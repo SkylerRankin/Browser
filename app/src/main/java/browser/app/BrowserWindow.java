@@ -20,8 +20,8 @@ import browser.tasks.RenderCompleteCallback;
 
 public class BrowserWindow extends Application {
 
-//    private final String startupPageURL = "file://src/main/resources/html/startup_page.html";
-    private final String startupPageURL = "file://C:/Users/Skyler/Desktop/menhir/Menhir.html";
+    private final String startupPageURL = "file://src/main/resources/html/startup_page.html";
+    private final float scrollMultiple = 0.001f;
 
     private Scene scene;
     private Canvas canvas;
@@ -45,6 +45,9 @@ public class BrowserWindow extends Application {
         scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         scroll.setContent(canvas);
         scroll.setFitToWidth(true);
+        scroll.getContent().setOnScroll(event -> {
+            scroll.setVvalue(scroll.getVvalue() - event.getDeltaY() * scrollMultiple);
+        });
         VBox.setVgrow(scroll, Priority.ALWAYS);
         vbox.getChildren().addAll(controlBar, scroll);
 
