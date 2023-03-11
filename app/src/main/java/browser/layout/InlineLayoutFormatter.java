@@ -30,7 +30,8 @@ public class InlineLayoutFormatter {
         boolean canBeSplitToFit = canBeSplit && textNodeSplitter.canSplitNodeToFitWidth(boxNode, availableWidth);
         boolean placeFullyOnCurrentLine = fitsInCurrentLine || (!canBeSplit && !context.currentRowHasTerminalBox());
         boolean placePartiallyOnCurrentLine = !placeFullyOnCurrentLine && (canBeSplitToFit || !context.currentRowHasTerminalBox());
-        boolean placeOnNextLine = !placeFullyOnCurrentLine && !placePartiallyOnCurrentLine;
+        boolean isLineBreak = boxNode.correspondingRenderNode != null && boxNode.correspondingRenderNode.type.equals(HTMLElements.BR);
+        boolean placeOnNextLine = (!placeFullyOnCurrentLine && !placePartiallyOnCurrentLine) || isLineBreak;
 
         // The box is too large for the current line, but cannot be split to fit, and is the first terminal box in
         // the row. The layout moves to the next line in the context. In the case where the box is the first child in

@@ -63,6 +63,11 @@ public class LayoutIntegrationTests {
         driver.runLayoutTest("blockBoxNoChildren", 500);
     }
 
+    @Test
+    public void simpleLineBreaks() throws IOException {
+        driver.runLayoutTest("simpleLineBreaks", 100);
+    }
+
     // List tests
 
     @Test
