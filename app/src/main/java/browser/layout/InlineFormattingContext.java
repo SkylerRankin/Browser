@@ -16,8 +16,8 @@ public class InlineFormattingContext {
     public float startX;
     public float endX;
     public BoxNode rootBox;
+    public final List<LineBox> lineBoxes;
 
-    private final List<LineBox> lineBoxes;
     private final List<BoxNode> tentativeBoxesForLine;
     private final List<Float> maxHeightPerLine;
     private final List<Float> yStartPerLine;
@@ -151,6 +151,25 @@ public class InlineFormattingContext {
             return 0;
         }
         return leftSpacingPerBox.get(id);
+    }
+
+    public BoxNode getFirstTopLevelBoxInLine(int lineIndex) {
+        for (BoxNode box : lineBoxes.get(lineIndex).boxes) {
+            if (box.parent.id == contextRootId) {
+                return box;
+            }
+        }
+        return null;
+    }
+
+    public BoxNode getLastTopLevelBoxInLine(int lineIndex) {
+        for (int i = lineBoxes.get(lineIndex).boxes.size() - 1; i >= 0; i--) {
+            BoxNode box = lineBoxes.get(lineIndex).boxes.get(i);
+            if (box.parent.id == contextRootId) {
+                return box;
+            }
+        }
+        return null;
     }
 
     // Private methods

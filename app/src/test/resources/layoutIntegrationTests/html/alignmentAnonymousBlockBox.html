@@ -1,0 +1,29 @@
+<!--
+The 'p' tag is block while the sibling 'a' tag is inline, so an anonymous block box is added to wrap the 'a' tag.
+If functioning correctly, the added anonymous box will need to retain the text-align information from its parent.
+-->
+<html>
+<head>
+    <style>
+            * {
+                font-family: Consolas;
+                font-size: 12px;
+            }
+
+            body {
+                padding: 0;
+            }
+
+            p {
+                margin-top: 10px;
+                margin-bottom: 10px;
+            }
+        </style>
+</head>
+<body>
+    <div style="text-align: center;">
+        <p>a</p>
+        <a>b</a>
+    </div>
+</body>
+</html>

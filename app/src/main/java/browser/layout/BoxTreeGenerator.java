@@ -139,6 +139,7 @@ public class BoxTreeGenerator {
                     anonymousBox.outerDisplayType = DisplayType.BLOCK;
                     anonymousBox.innerDisplayType = DisplayType.FLOW;
                     anonymousBox.isAnonymous = true;
+                    anonymousBox.style = baseBoxNode.style.deepCopy();
 
                     for (BoxNode inlineBox : currentInlineBoxes) {
                         inlineBox.parent = anonymousBox;
@@ -172,6 +173,7 @@ public class BoxTreeGenerator {
         containingAnonymousBox.innerDisplayType = DisplayType.FLOW;
         containingAnonymousBox.parent = inlineBox.parent;
         containingAnonymousBox.isAnonymous = true;
+        containingAnonymousBox.style = inlineBox.parent.style.deepCopy();
 
         // Add the anonymous containing box to the parent's children, and remove the inline box.
         BoxNode parent = inlineBox.parent;

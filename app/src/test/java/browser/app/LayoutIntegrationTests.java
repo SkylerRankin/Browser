@@ -78,6 +78,28 @@ public class LayoutIntegrationTests {
         driver.runLayoutTest("preserveInlineSpaces", 200);
     }
 
+    // Text alignment
+
+    @Test
+    public void simpleTextAlignCenter() throws IOException {
+        driver.runLayoutTest("simpleTextAlignCenter", 500);
+    }
+
+    @Test
+    public void mixedTextAlign() throws IOException {
+        driver.runLayoutTest("mixedTextAlign", 100);
+    }
+
+    @Test
+    public void alignmentMultipleRows() throws IOException {
+        driver.runLayoutTest("alignmentMultipleRows", 100);
+    }
+
+    @Test
+    public void alignmentAnonymousBlockBox() throws IOException {
+        driver.runLayoutTest("alignmentAnonymousBlockBox", 100);
+    }
+
     // List tests
 
     @Test

@@ -102,7 +102,7 @@ td {
 }
 
 center {
-    display: inline;
+    display: block;
 	text-align: center;
 }
 

@@ -53,6 +53,9 @@ public class BoxLayoutGenerator {
 
         // Layout all box nodes within the root.
         setBoxLayout(rootBoxNode);
+
+        applyTextJustifications(rootBoxNode);
+
     }
 
     // Private methods
@@ -548,6 +551,60 @@ public class BoxLayoutGenerator {
 
         float rightSpacing = boxNode.style.borderWidthRight + boxNode.style.paddingRight;
         return maxX - boxNode.x + rightSpacing;
+    }
+
+    /**
+     * Applies the text-align property to inline boxes. Block boxes are not impacted.
+     * @param boxNode       The box to adjust.
+     */
+    private void applyTextJustifications(BoxNode boxNode) {
+        boolean inlineBox = getLayoutAlgorithm(boxNode).equals(LayoutAlgorithmType.Inline);
+        boolean isRootInlineBox = false;
+        InlineFormattingContext context = null;
+        if (inlineBox) {
+            context = inlineFormattingContexts.get(boxNode.inlineFormattingContextId);
+            isRootInlineBox = context.contextRootId == boxNode.id;
+        }
+
+        // Only apply an offset for inline boxes that are not left aligned.
+        if (isRootInlineBox && !boxNode.style.textAlign.equals(CSSStyle.textAlignType.LEFT)) {
+            for (int lineBoxIndex = 0; lineBoxIndex < context.lineBoxes.size(); lineBoxIndex++) {
+                // Find the actual width used by boxes in the line.
+                BoxNode firstBoxInLine = context.getFirstTopLevelBoxInLine(lineBoxIndex);
+                BoxNode lastBoxInLine = context.getLastTopLevelBoxInLine(lineBoxIndex);
+                float minX = firstBoxInLine.x - firstBoxInLine.style.marginLeft;
+                float maxX = lastBoxInLine.x + lastBoxInLine.width + lastBoxInLine.style.marginRight;
+                float usedLineWidth = maxX - minX;
+
+                // Find the remaining space in the line.
+                float availableWidth = boxNode.width - boxNode.style.borderWidthLeft - boxNode.style.paddingLeft -
+                        boxNode.style.paddingRight - boxNode.style.borderWidthRight;
+                float diff = availableWidth - usedLineWidth;
+                float xOffset = boxNode.style.textAlign.equals(CSSStyle.textAlignType.RIGHT) ?
+                        diff :
+                        diff / 2;
+
+                // Move each top level box in this line by the x offset.
+                for (BoxNode child : context.lineBoxes.get(lineBoxIndex).boxes) {
+                    if (child.parent.id == context.contextRootId) {
+                        moveBoxAndDescendants(child, new Vector2(xOffset, 0));
+                    }
+                }
+            }
+        }
+
+        for (BoxNode child : boxNode.children) {
+            applyTextJustifications(child);
+        }
+    }
+
+    private void moveBoxAndDescendants(BoxNode boxNode, Vector2 delta) {
+        boxNode.x += delta.x;
+        boxNode.y += delta.y;
+
+        for (BoxNode child : boxNode.children) {
+            moveBoxAndDescendants(child, delta);
+        }
     }
 
 }

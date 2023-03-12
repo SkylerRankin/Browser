@@ -110,6 +110,13 @@ public class CSSLoader {
             applyRules(root, parser.getRules(), false);
         }
 
+        String legacyAttributesCSS = LegacyCSSLoader.getCSSFromAttributes(root);
+        if (legacyAttributesCSS != null) {
+            CSSParser parser = new CSSParser();
+            parser.parse(legacyAttributesCSS);
+            applyRules(root, parser.getRules(), false);
+        }
+
         for (RenderNode child : root.children) {
             applyInline(child);
         }
