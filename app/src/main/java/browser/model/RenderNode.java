@@ -24,6 +24,8 @@ public class RenderNode {
     public Float maxWidth = null;
     public Float maxHeight = null;
     public String cssAttribute = null;
+    // True if the original HTML tag had any whitespace after its closing tag.
+    public boolean whiteSpaceAfter;
     // A map of the attributes appearing in the HTML tag, such as style.
     public Map<String, String> attributes;
     // A generic set of properties used during layout and rendering.
@@ -134,6 +136,10 @@ public class RenderNode {
                 return false;
             }
         } else if (!cssAttribute.equals(node.cssAttribute)) {
+            return false;
+        }
+
+        if (whiteSpaceAfter != node.whiteSpaceAfter) {
             return false;
         }
 

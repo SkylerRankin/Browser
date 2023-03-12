@@ -1,5 +1,6 @@
 * {
 	font-family: Times New Roman;
+	font-size: 16px;
 }
 
 body {
@@ -50,6 +51,10 @@ a {
 b {
 	font-weight: bold;
 	display: inline;
+}
+
+i {
+    display: inline;
 }
 
 span {

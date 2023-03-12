@@ -15,6 +15,8 @@ public class DOMNode {
     public Map<String, String> attributes;
     public List<DOMNode> children;
     public DOMNode parent;
+    // True if the original tag was followed by some form of whitespace.
+    public boolean whiteSpaceAfter;
     
     public DOMNode(String type) {
         this.type = type;
@@ -41,7 +43,7 @@ public class DOMNode {
         if (this.type.equals((HTMLElements.TEXT))) {
             System.out.printf("%sTEXT: [%s]\n", pad, content);
         } else {
-            System.out.print(pad + type);
+            System.out.print(pad + type + (whiteSpaceAfter ? " +w" : ""));
             for (Entry<String, String> entry : this.attributes.entrySet()) {
                 System.out.print(String.format(" %s=%s", entry.getKey(), entry.getValue()));
             }
@@ -75,7 +77,11 @@ public class DOMNode {
                 if (!e.getValue().equals(n.attributes.get(e.getKey()))) return false;
             }
         }
-        
+
+        if (n.whiteSpaceAfter != whiteSpaceAfter) {
+            return false;
+        }
+
         if (this.children.size() != n.children.size()) {
             if (printDifference) System.out.printf("DOMNode: children size mismatch: %d != %d\n", n.children.size(), this.children.size());
             return false;
@@ -107,6 +113,10 @@ public class DOMNode {
         } else if (n.parent != null) {
             // Cannot check if parents are equal, will cause infinite loop.
             if (this.parent == null) return false;
+        }
+
+        if (n.whiteSpaceAfter != whiteSpaceAfter) {
+            return false;
         }
         
         for (Entry<String, String> e : attributes.entrySet()) {

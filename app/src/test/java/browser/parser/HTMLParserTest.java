@@ -6,6 +6,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.List;
 import java.util.Map;
 
 import browser.model.DOMNode;
@@ -247,11 +248,13 @@ public class HTMLParserTest {
         DOMNode expected = new DOMNode("root");
         DOMNode html = new DOMNode(HTMLElements.HTML);
         DOMNode head = new DOMNode(HTMLElements.HEAD);
+        head.whiteSpaceAfter = true;
         DOMNode title = new DOMNode(HTMLElements.TITLE);
         title.attributes.put("required", null);
         DOMNode titleText = new DOMNode(HTMLElements.TEXT);
-        titleText.content = "Watchmen 2008";
+        titleText.content = " Watchmen 2008";
         DOMNode body = new DOMNode(HTMLElements.BODY);
+        body.whiteSpaceAfter = true;
         DOMNode h1 = new DOMNode(HTMLElements.H1);
         DOMNode h1Text = new DOMNode(HTMLElements.TEXT);
         h1Text.content = "Rorschach's Journal";
@@ -263,6 +266,11 @@ public class HTMLParserTest {
         title.addChild(titleText);
         body.addChild(h1);
         h1.addChild(h1Text);
+
+        System.out.println("Expected:");
+        expected.print();
+        System.out.println("\nActual:");
+        dom.print();
 
         assertEquals(expected, dom);
     }
@@ -492,24 +500,29 @@ public class HTMLParserTest {
         meta4.attributes.put("itemprop", "image");
 
         DOMNode title = new DOMNode("title");
+        title.whiteSpaceAfter = true;
         DOMNode titleText = new DOMNode("text");
         title.children.add(titleText);
 
         DOMNode script1 = new DOMNode("script");
         script1.attributes.put("nonce", "F9ODBlC0ILATNLFjZsdiKA==");
+        script1.whiteSpaceAfter = true;
         DOMNode script1Text = new DOMNode("text");
         script1.children.add(script1Text);
 
         DOMNode style1 = new DOMNode("style");
+        style1.whiteSpaceAfter = true;
         DOMNode style1Text = new DOMNode("text");
         style1.children.add(style1Text);
 
         DOMNode style2 = new DOMNode("style");
+        style2.whiteSpaceAfter = true;
         DOMNode style2Text = new DOMNode("text");
         style2.children.add(style2Text);
 
         DOMNode script2 = new DOMNode("script");
         script2.attributes.put("nonce", "F9ODBlC0ILATNLFjZsdiKA==");
+        script2.whiteSpaceAfter = true;
 
         expected.children.add(head);
         head.children.add(meta1);
@@ -522,11 +535,60 @@ public class HTMLParserTest {
         head.children.add(style2);
         head.children.add(script2);
 
-        actual.print();
-        System.out.println("\n-----\n");
-        expected.print();
-
         assertTrue(expected.equalsIgnoreText(actual, true));
+    }
+
+    @Test
+    public void testWhiteSpaceBetweenSpans() {
+        HTMLParser parser = new HTMLParser(null);
+        List<String> htmlStrings = List.of(
+                "<span>a</span><span>b</span>",
+                "<span>a</span> <span>b</span>",
+                "<span>a</span>\n<span>b</span>"
+        );
+        List<Boolean> span1WhiteSpaceAfter = List.of(false, true, true);
+
+        for (int i = 0; i < htmlStrings.size(); i++) {
+            DOMNode dom = parser.generateDOMTree(htmlStrings.get(i));
+
+            DOMNode expectedRoot = new DOMNode("root");
+            DOMNode span1 = new DOMNode("span");
+            span1.whiteSpaceAfter = span1WhiteSpaceAfter.get(i);
+            DOMNode text1 = new DOMNode("text");
+            text1.content = "a";
+            span1.addChild(text1);
+
+            DOMNode span2 = new DOMNode("span");
+            DOMNode text2 = new DOMNode("text");
+            text2.content = "b";
+            span2.addChild(text2);
+
+            expectedRoot.addChildren(span1, span2);
+
+            assertEquals(expectedRoot, dom);
+        }
+    }
+
+    @Test
+    public void testWhiteSpaceInTextBeforeInline() {
+        HTMLParser parser = new HTMLParser(null);
+        String html = "<p>some text <code>c</code></p>";
+
+        DOMNode expectedRoot = new DOMNode("root");
+        DOMNode p = new DOMNode("p");
+        DOMNode text1 = new DOMNode("text");
+        text1.content = "some text ";
+        DOMNode code = new DOMNode("code");
+        DOMNode text2 = new DOMNode("text");
+        text2.content = "c";
+
+        p.addChildren(text1, code);
+        code.addChild(text2);
+        expectedRoot.addChildren(p);
+
+        DOMNode actual = parser.generateDOMTree(html);
+
+        assertEquals(expectedRoot, actual);
     }
 
 }

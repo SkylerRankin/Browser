@@ -26,238 +26,6 @@ public class RenderTreeGeneratorTest {
     }
 
     @Test
-    public void transformNode_BasicListTest() {
-        int id = 0;
-        RenderNode renderRoot = new RenderNode("root");
-        renderRoot.id = id++;
-        renderRoot.depth = 0;
-        RenderNode body = new RenderNode(HTMLElements.BODY);
-        body.id = id++;
-        body.depth = 1;
-        RenderNode ol = new RenderNode(HTMLElements.OL);
-        ol.id = id++;
-        ol.depth = 2;
-        RenderNode li1 = new RenderNode(HTMLElements.LI);
-        li1.id = id++;
-        li1.depth = 3;
-        RenderNode text1 = new RenderNode(HTMLElements.TEXT);
-        text1.id = id++;
-        text1.depth = 4;
-        text1.text = "first list item";
-        RenderNode li2 = new RenderNode(HTMLElements.LI);
-        li2.id = id++;
-        li2.depth = 3;
-        RenderNode text2 = new RenderNode(HTMLElements.TEXT);
-        text2.id = id++;
-        text2.depth = 4;
-        text2.text = "second list item";
-        RenderNode li3 = new RenderNode(HTMLElements.LI);
-        li3.id = id++;
-        li3.depth = 3;
-        RenderNode text3 = new RenderNode(HTMLElements.TEXT);
-        text3.id = id++;
-        text3.depth = 4;
-        text3.text = "third list item";
-
-        renderRoot.addChild(body);
-        body.addChild(ol);
-        ol.addChildren(li1, li2, li3);
-        li1.addChild(text1);
-        li2.addChild(text2);
-        li3.addChild(text3);
-
-        id = 0;
-
-        RenderNode expectedRenderNode = new RenderNode("root");
-        expectedRenderNode.id = id++;
-        expectedRenderNode.depth = 0;
-        RenderNode renderBody = new RenderNode(HTMLElements.BODY);
-        renderBody.id = id++;
-        renderBody.depth = 1;
-        RenderNode renderOL = new RenderNode(HTMLElements.OL);
-        renderOL.id = id++;
-        renderOL.depth = 2;
-
-        RenderNode renderMarker1 = new RenderNode(HTMLElements.PSEUDO_MARKER);
-        renderMarker1.depth = 3;
-//        renderMarker1.style.width = PseudoElementConstants.MARKER_WIDTH;
-//        renderMarker1.style.height = PseudoElementConstants.MARKER_HEIGHT;
-//        renderMarker1.style.display = PseudoElementConstants.MARKER_DISPLAY_TYPE;
-//        renderMarker1.attributes.put(PseudoElementConstants.MARKER_INDEX_KEY, "0");
-//        renderMarker1.attributes.put(PseudoElementConstants.MARKER_TYPE_KEY, "ol");
-        RenderNode renderLI1 = new RenderNode(HTMLElements.LI);
-        renderLI1.id = id++;
-        renderLI1.depth = 3;
-        renderLI1.style.display = CSSStyle.DisplayType.INLINE;
-        RenderNode renderText1 = new RenderNode(HTMLElements.TEXT);
-        renderText1.id = id++;
-        renderText1.depth = 4;
-        renderText1.text = "first list item";
-
-        RenderNode renderMarker2 = new RenderNode(HTMLElements.PSEUDO_MARKER);
-        renderMarker2.depth = 3;
-//        renderMarker2.style.width = PseudoElementConstants.MARKER_WIDTH;
-//        renderMarker2.style.height = PseudoElementConstants.MARKER_HEIGHT;
-//        renderMarker2.style.display = PseudoElementConstants.MARKER_DISPLAY_TYPE;
-//        renderMarker2.attributes.put(PseudoElementConstants.MARKER_INDEX_KEY, "1");
-//        renderMarker2.attributes.put(PseudoElementConstants.MARKER_TYPE_KEY, "ol");
-        RenderNode renderLI2 = new RenderNode(HTMLElements.LI);
-        renderLI2.id = id++;
-        renderLI2.depth = 3;
-        renderLI2.style.display = CSSStyle.DisplayType.INLINE;
-        RenderNode renderText2 = new RenderNode(HTMLElements.TEXT);
-        renderText2.id = id++;
-        renderText2.depth = 4;
-        renderText2.text = "second list item";
-
-        RenderNode renderMarker3 = new RenderNode(HTMLElements.PSEUDO_MARKER);
-        renderMarker3.depth = 3;
-//        renderMarker3.style.width = PseudoElementConstants.MARKER_WIDTH;
-//        renderMarker3.style.height = PseudoElementConstants.MARKER_HEIGHT;
-//        renderMarker3.style.display = PseudoElementConstants.MARKER_DISPLAY_TYPE;
-//        renderMarker3.attributes.put(PseudoElementConstants.MARKER_INDEX_KEY, "2");
-//        renderMarker3.attributes.put(PseudoElementConstants.MARKER_TYPE_KEY, "ol");
-        RenderNode renderLI3 = new RenderNode(HTMLElements.LI);
-        renderLI3.id = id++;
-        renderLI3.depth = 3;
-        renderLI3.style.display = CSSStyle.DisplayType.INLINE;
-        RenderNode renderText3 = new RenderNode(HTMLElements.TEXT);
-        renderText3.id = id++;
-        renderText3.depth = 4;
-        renderText3.text = "third list item";
-
-        renderMarker1.id = id;
-        renderMarker2.id = id + 1;
-        renderMarker3.id = id + 2;
-
-        expectedRenderNode.addChild(renderBody);
-        renderBody.addChild(renderOL);
-        renderOL.addChildren(renderMarker1, renderLI1, renderMarker2, renderLI2, renderMarker3, renderLI3);
-        renderLI1.addChild(renderText1);
-        renderLI2.addChild(renderText2);
-        renderLI3.addChild(renderText3);
-
-        RenderNode.nextId = id;
-//        renderTreeGenerator.transformNode(renderRoot);
-
-        assertEquals(expectedRenderNode, renderRoot);
-    }
-
-    @Test
-    public void transformNode_NestedListTest() {
-        int id = 0;
-        RenderNode renderRoot = new RenderNode("root");
-        renderRoot.id = id++;
-        renderRoot.depth = 0;
-        RenderNode body = new RenderNode(HTMLElements.BODY);
-        body.id = id++;
-        body.depth = 1;
-        RenderNode ol = new RenderNode(HTMLElements.OL);
-        ol.id = id++;
-        ol.depth = 2;
-        RenderNode li1 = new RenderNode(HTMLElements.LI);
-        li1.id = id++;
-        li1.depth = 3;
-        RenderNode ul = new RenderNode(HTMLElements.UL);
-        ul.id = id++;
-        ul.depth = 4;
-        RenderNode li2 = new RenderNode(HTMLElements.LI);
-        li2.id = id++;
-        li2.depth = 5;
-        RenderNode text1 = new RenderNode(HTMLElements.TEXT);
-        text1.id = id++;
-        text1.depth = 6;
-        text1.text = "first list item";
-        RenderNode li3 = new RenderNode(HTMLElements.LI);
-        li3.id = id++;
-        li3.depth = 5;
-        RenderNode text2 = new RenderNode(HTMLElements.TEXT);
-        text2.id = id++;
-        text2.depth = 6;
-        text2.text = "second list item";
-
-        renderRoot.addChild(body);
-        body.addChild(ol);
-        ol.addChildren(li1);
-        li1.addChild(ul);
-        ul.addChildren(li2, li3);
-        li2.addChild(text1);
-        li3.addChild(text2);
-
-        id = 0;
-
-        RenderNode expectedRenderNode = new RenderNode("root");
-        expectedRenderNode.id = id++;
-        expectedRenderNode.depth = 0;
-        RenderNode renderBody = new RenderNode(HTMLElements.BODY);
-        renderBody.id = id++;
-        renderBody.depth = 1;
-        RenderNode renderOL = new RenderNode(HTMLElements.OL);
-        renderOL.id = id++;
-        renderOL.depth = 2;
-
-        RenderNode renderMarker1 = new RenderNode(HTMLElements.PSEUDO_MARKER);
-        renderMarker1.depth = 3;
-//        renderMarker1.style.width = PseudoElementConstants.MARKER_WIDTH;
-//        renderMarker1.style.height = PseudoElementConstants.MARKER_HEIGHT;
-//        renderMarker1.style.display = PseudoElementConstants.MARKER_DISPLAY_TYPE;
-//        renderMarker1.attributes.put(PseudoElementConstants.MARKER_INDEX_KEY, "0");
-//        renderMarker1.attributes.put(PseudoElementConstants.MARKER_TYPE_KEY, "ol");
-        RenderNode renderLI1 = new RenderNode(HTMLElements.LI);
-        renderLI1.id = id++;
-        renderLI1.depth = 3;
-        renderLI1.style.display = CSSStyle.DisplayType.INLINE;
-
-        RenderNode renderUL = new RenderNode(HTMLElements.UL);
-        renderUL.id = id++;
-        renderUL.depth = 4;
-
-        RenderNode renderMarker2 = new RenderNode(HTMLElements.PSEUDO_MARKER);
-        renderMarker2.depth = 5;
-//        renderMarker2.style.width = PseudoElementConstants.MARKER_WIDTH;
-//        renderMarker2.style.height = PseudoElementConstants.MARKER_HEIGHT;
-//        renderMarker2.style.display = PseudoElementConstants.MARKER_DISPLAY_TYPE;
-//        renderMarker2.attributes.put(PseudoElementConstants.MARKER_INDEX_KEY, "0");
-//        renderMarker2.attributes.put(PseudoElementConstants.MARKER_TYPE_KEY, "ul");
-        RenderNode renderLI2 = new RenderNode(HTMLElements.LI);
-        renderLI2.id = id++;
-        renderLI2.depth = 5;
-        renderLI2.style.display = CSSStyle.DisplayType.INLINE;
-        RenderNode renderText1 = new RenderNode(HTMLElements.TEXT);
-        renderText1.id = id++;
-        renderText1.depth = 6;
-        renderText1.text = "first list item";
-
-        RenderNode renderMarker3 = new RenderNode(HTMLElements.PSEUDO_MARKER);
-        renderMarker3.depth = 5;
-//        renderMarker3.style.width = PseudoElementConstants.MARKER_WIDTH;
-//        renderMarker3.style.height = PseudoElementConstants.MARKER_HEIGHT;
-//        renderMarker3.style.display = PseudoElementConstants.MARKER_DISPLAY_TYPE;
-//        renderMarker3.attributes.put(PseudoElementConstants.MARKER_INDEX_KEY, "1");
-//        renderMarker3.attributes.put(PseudoElementConstants.MARKER_TYPE_KEY, "ul");
-        RenderNode renderLI3 = new RenderNode(HTMLElements.LI);
-        renderLI3.id = id++;
-        renderLI3.depth = 5;
-        renderLI3.style.display = CSSStyle.DisplayType.INLINE;
-        RenderNode renderText2 = new RenderNode(HTMLElements.TEXT);
-        renderText2.id = id++;
-        renderText2.depth = 6;
-        renderText2.text = "first list item";
-
-        renderMarker1.id = id;
-        renderMarker2.id = id + 1;
-        renderMarker3.id = id + 2;
-
-        expectedRenderNode.addChild(renderBody);
-        renderBody.addChild(renderOL);
-        renderOL.addChildren(renderMarker1, renderLI1);
-        renderLI1.addChild(renderUL);
-        renderUL.addChildren(renderMarker2, renderLI2, renderMarker3, renderLI3);
-        renderLI2.addChild(renderText1);
-        renderLI3.addChild(renderText2);
-    }
-
-    @Test
     public void removeDuplicateWhitespace_SingleLineWhitespace() {
         RenderNode body = new RenderNode(HTMLElements.BODY);
         RenderNode text1 = new RenderNode(HTMLElements.TEXT);
@@ -282,17 +50,26 @@ public class RenderTreeGeneratorTest {
     public void trimTextWhitespace_SingleLine() {
         // "  This text is <b>bold</b> for testing. "
         RenderNode div = new RenderNode(HTMLElements.DIV);
+        div.id = RenderNode.nextId++;
+
         RenderNode text1 = new RenderNode(HTMLElements.TEXT);
-        text1.style.display = CSSStyle.DisplayType.INLINE;
+        text1.style.outerDisplay = CSSStyle.DisplayType.INLINE;
         text1.text = "  This text is ";
+        text1.id = RenderNode.nextId++;
+
         RenderNode b = new RenderNode(HTMLElements.B);
-        b.style.display = CSSStyle.DisplayType.INLINE;
+        b.style.outerDisplay = CSSStyle.DisplayType.INLINE;
+        b.id = RenderNode.nextId++;
+
         RenderNode text2 = new RenderNode(HTMLElements.TEXT);
-        text2.style.display = CSSStyle.DisplayType.INLINE;
+        text2.style.outerDisplay = CSSStyle.DisplayType.INLINE;
         text2.text = "bold";
+        text2.id = RenderNode.nextId++;
+
         RenderNode text3 = new RenderNode(HTMLElements.TEXT);
-        text3.style.display = CSSStyle.DisplayType.INLINE;
+        text3.style.outerDisplay = CSSStyle.DisplayType.INLINE;
         text3.text = " text for testing. ";
+        text3.id = RenderNode.nextId++;
 
         div.addChildren(text1, b, text3);
         b.addChild(text2);
@@ -308,30 +85,49 @@ public class RenderTreeGeneratorTest {
     public void trimTextWhitespace_MultipleBolds() {
         // "  Start <b>b1</b>, <b>b2</b>, and <b>b3</b>"
         RenderNode div = new RenderNode(HTMLElements.DIV);
+        div.id = RenderNode.nextId++;
+
         RenderNode text1 = new RenderNode(HTMLElements.TEXT);
-        text1.style.display = CSSStyle.DisplayType.INLINE;
+        text1.style.outerDisplay = CSSStyle.DisplayType.INLINE;
         text1.text = "  Start ";
+        text1.id = RenderNode.nextId++;
+
         RenderNode b1 = new RenderNode(HTMLElements.B);
-        b1.style.display = CSSStyle.DisplayType.INLINE;
+        b1.style.outerDisplay = CSSStyle.DisplayType.INLINE;
+        b1.id = RenderNode.nextId++;
+
         RenderNode text2 = new RenderNode(HTMLElements.TEXT);
-        text2.style.display = CSSStyle.DisplayType.INLINE;
+        text2.style.outerDisplay = CSSStyle.DisplayType.INLINE;
         text2.text = "b1";
+        text2.id = RenderNode.nextId++;
+
         RenderNode text3 = new RenderNode(HTMLElements.TEXT);
-        text3.style.display = CSSStyle.DisplayType.INLINE;
+        text3.style.outerDisplay = CSSStyle.DisplayType.INLINE;
         text3.text = ", ";
+        text3.id = RenderNode.nextId++;
+
         RenderNode b2 = new RenderNode(HTMLElements.B);
-        b2.style.display = CSSStyle.DisplayType.INLINE;
+        b2.style.outerDisplay = CSSStyle.DisplayType.INLINE;
+        b2.id = RenderNode.nextId++;
+
         RenderNode text4 = new RenderNode(HTMLElements.TEXT);
-        text4.style.display = CSSStyle.DisplayType.INLINE;
+        text4.style.outerDisplay = CSSStyle.DisplayType.INLINE;
         text4.text = "b2";
+        text4.id = RenderNode.nextId++;
+
         RenderNode text5 = new RenderNode(HTMLElements.TEXT);
-        text5.style.display = CSSStyle.DisplayType.INLINE;
+        text5.style.outerDisplay = CSSStyle.DisplayType.INLINE;
         text5.text = ", and ";
+        text5.id = RenderNode.nextId++;
+
         RenderNode b3 = new RenderNode(HTMLElements.B);
-        b3.style.display = CSSStyle.DisplayType.INLINE;
+        b3.style.outerDisplay = CSSStyle.DisplayType.INLINE;
+        b3.id = RenderNode.nextId++;
+
         RenderNode text6 = new RenderNode(HTMLElements.TEXT);
-        text6.style.display = CSSStyle.DisplayType.INLINE;
+        text6.style.outerDisplay = CSSStyle.DisplayType.INLINE;
         text6.text = "b3";
+        text6.id = RenderNode.nextId++;
 
         div.addChildren(text1, b1, text3, b2, text5, b3);
         b1.addChild(text2);
@@ -346,7 +142,36 @@ public class RenderTreeGeneratorTest {
         assertEquals("b2", text4.text);
         assertEquals(", and ", text5.text);
         assertEquals("b3", text6.text);
+    }
 
+    @Test
+    public void trimTextWhitespace_spaceAfterText() {
+        // "<div> a <code> b  </code></div>"
+
+        RenderNode div = new RenderNode(HTMLElements.DIV);
+        div.id = RenderNode.nextId++;
+
+        RenderNode text1 = new RenderNode(HTMLElements.TEXT);
+        text1.id = RenderNode.nextId++;
+        text1.style.outerDisplay = CSSStyle.DisplayType.INLINE;
+        text1.text = " a ";
+
+        RenderNode code = new RenderNode(HTMLElements.CODE);
+        code.id = RenderNode.nextId++;
+        code.style.outerDisplay = CSSStyle.DisplayType.INLINE;
+
+        RenderNode text2 = new RenderNode(HTMLElements.TEXT);
+        text2.id = RenderNode.nextId++;
+        text2.style.outerDisplay = CSSStyle.DisplayType.INLINE;
+        text2.text = "b";
+
+        div.addChildren(text1, code);
+        code.addChild(text2);
+
+        renderTreeGenerator.trimTextWhitespace(div);
+
+        assertEquals("a ", text1.text);
+        assertEquals("b", text2.text);
     }
 
 }

@@ -31,6 +31,7 @@ public class BoxNode {
     public Float y = null;
     public Float width = null;
     public Float height = null;
+    public boolean whiteSpaceAfter;
 
     // The range of indices for the text of this node: from textStartIndex up to (but not including) textEndIndex.
     public int textStartIndex;
@@ -62,6 +63,7 @@ public class BoxNode {
         this.height = other.height;
         this.textStartIndex = other.textStartIndex;
         this.textEndIndex = other.textEndIndex;
+        this.whiteSpaceAfter = other.whiteSpaceAfter;
     }
 
     @Override
@@ -73,7 +75,8 @@ public class BoxNode {
                 (parent != null && (parent.id != other.parent.id)) || other.children.size() != children.size() ||
                 renderNodeId != other.renderNodeId || !Objects.equals(x, other.x) || !Objects.equals(y, other.y) ||
                 !Objects.equals(width, other.width) || !Objects.equals(height, other.height) ||
-                !Objects.equals(textStartIndex, other.textStartIndex) || !Objects.equals(textEndIndex, other.textEndIndex)) {
+                !Objects.equals(textStartIndex, other.textStartIndex) || !Objects.equals(textEndIndex, other.textEndIndex) ||
+                whiteSpaceAfter != other.whiteSpaceAfter) {
             return false;
         }
 
@@ -119,14 +122,6 @@ public class BoxNode {
         }
 
         return parent.isDescendantOf(id);
-    }
-
-    public BoxNode getRootAncestor() {
-        BoxNode current = this;
-        while (current.parent != null) {
-            current = current.parent;
-        }
-        return current;
     }
 
     public BoxNode deepCopy() {

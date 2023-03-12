@@ -68,6 +68,16 @@ public class LayoutIntegrationTests {
         driver.runLayoutTest("simpleLineBreaks", 100);
     }
 
+    @Test
+    public void basicInferredInlineSpacing() throws IOException {
+        driver.runLayoutTest("basicInferredInlineSpacing", 100);
+    }
+
+    @Test
+    public void preserveInlineSpaces() throws IOException {
+        driver.runLayoutTest("preserveInlineSpaces", 200);
+    }
+
     // List tests
 
     @Test
@@ -94,6 +104,7 @@ public class LayoutIntegrationTests {
     public void inlineListWithInlineItems() throws IOException {
         driver.runLayoutTest("inlineListWithInlineItems", 500);
     }
+
 
     // Table tests
 
@@ -149,14 +160,14 @@ public class LayoutIntegrationTests {
 
     @Test
     public void tableInlineBlockCells() throws IOException {
-        driver.runLayoutTest("tableInlineBlockCells", 500, true);
+        driver.runLayoutTest("tableInlineBlockCells", 500);
     }
 
     // Inline block tests
 
     @Test
     public void inlineBlockWithinInline() throws IOException {
-        driver.runLayoutTest("inlineBlockWithinInline", 500, true);
+        driver.runLayoutTest("inlineBlockWithinInline", 500);
     }
 
 }

@@ -68,6 +68,7 @@ public class BoxTreeGenerator {
         boxNode.auxiliaryDisplayType = renderNode.style.auxiliaryDisplay;
         boxNode.isTextNode = renderNode.type.equals(HTMLElements.TEXT);
         boxNode.isPseudo = HTMLElements.isPseudoElement(renderNode.type);
+        boxNode.whiteSpaceAfter = renderNode.whiteSpaceAfter;
 
         if (boxNode.isTextNode) {
             boxNode.isAnonymous = true;

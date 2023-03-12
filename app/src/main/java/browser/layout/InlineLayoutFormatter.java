@@ -107,7 +107,8 @@ public class InlineLayoutFormatter {
                     return 0;
                 }
                 CSSStyle previousStyle = siblingBox.style;
-                return siblingBox.x + siblingBox.width + previousStyle.marginRight + boxNode.style.marginLeft;
+                float inlineSpace = siblingBox.whiteSpaceAfter ? textDimensionCalculator.getDimension(" ", boxNode.parent.style).x : 0;
+                return siblingBox.x + siblingBox.width + previousStyle.marginRight + boxNode.style.marginLeft + inlineSpace;
             }
         }
     }

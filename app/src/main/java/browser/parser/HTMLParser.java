@@ -20,30 +20,36 @@ public class HTMLParser {
     }
     
     public DOMNode generateDOMTree(String html) {
-        
         // Trim white space and remove empty spaces between tags;
         html = html.trim();
-        html = html.replaceAll(">\\s+<", "><");
+        html = html.replaceAll(">\\s+<", "> <");
         html = removeComments(html);
         html = removeXML(html);
         html = removeDoctype(html);
-        
+        html = html.trim();
+
         int index = 0;
         DOMNode root = new DOMNode("root");
         DOMNode current = root;
         
         while (index < html.length()) {
-            
             if (atNewTag(html, index)) {
                 // If the current index is the start of an HTML tag.
                 
                 int end = html.indexOf(">", index+1);
                 String fullTag = html.substring(index, end+1);
+                boolean isOpeningTag = false;
                 
                 if (fullTag.startsWith("</")) {
+                    // Check if there is whitespace after the end of the closing tag, and set the flag if so.
+                    if (end + 1 < html.length() - 1 && Character.isWhitespace(html.charAt(end + 1))) {
+                        current.whiteSpaceAfter = true;
+                        end++;
+                    }
                     // If this is an ending tag, then move up to the parent.
                     current = current.parent;
                 } else {
+                    isOpeningTag = true;
                     DOMNode n;
                     // If this is another new tag, set it to be the current tag to explore.
                     String content = html.substring(end-1, end).equals("/") ? html.substring(index+1, end-1) : html.substring(index+1, end);
@@ -65,6 +71,14 @@ public class HTMLParser {
                     }
                 }
                 index += (end - index + 1);
+
+                // If a new tag was opened, and that tag contains another tag as the first child (as opposed to some text),
+                // then any space in between the tags is skipped. If the space is part of text, then it is not skipped.
+                if (isOpeningTag) {
+                    if (html.charAt(index) == ' ' && html.charAt(index + 1) == '<') {
+                        index++;
+                    }
+                }
             } else {
                 // If the current index is the start of the content between two tags.
                 
@@ -79,7 +93,6 @@ public class HTMLParser {
                     }
                 }
                 
-                int closing = html.indexOf(">", end);
                 String content = html.substring(index, end);
                 DOMNode n = new DOMNode(HTMLElements.TEXT);
                 n.content = content;
@@ -94,7 +107,7 @@ public class HTMLParser {
     
     private boolean atNewTag(String html, int index) {
         // TODO: better handling for < and > inside scripts
-        if (!html.substring(index, index + 1).equals("<")) return false;
+        if (html.charAt(index) != '<') return false;
         int spaceIndex = html.indexOf(" ", index + 1);
         int closeTagIndex = html.indexOf(">", index + 1);
         if (spaceIndex == -1 && closeTagIndex == -1) return false;
