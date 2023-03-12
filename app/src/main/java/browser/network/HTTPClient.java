@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.List;
 
 import javafx.scene.image.Image;
 
@@ -17,12 +18,15 @@ public class HTTPClient {
     // Save a reference to the site so we can build up the URLs for other local resources
     // TODO: have a better system than this
     private static String baseURL;
+    private static String baseHost;
     
     public static String requestPage(String urlString) {
         urlString = HTTPClient.formatURL(urlString);
         
         try {
             URL url = new URL(urlString);
+            baseHost = url.getHost();
+            System.out.println(baseHost);
             baseURL = urlString;
             if (urlString.endsWith("html")) {
                 baseURL = urlString.substring(0, baseURL.lastIndexOf("/"));
@@ -64,32 +68,27 @@ public class HTTPClient {
         }
     }
     
-    public static Image downloadImage(String urlString) {
-        if (urlString == null) return null;
-        Image image = null;
-        URL url = null;
+    public static Image downloadImage(String rawURL) {
+        if (rawURL == null) return null;
 
-        // Try to download from url directly
-        try {
-            url = new URL(formatURL(urlString));
-            InputStream in = new BufferedInputStream(url.openStream());
-            image = new Image(in);
-        } catch (IOException e) {
-            System.err.printf("HTTPClient: IO error downloading image from %s\n", url.toString());
-        } catch (Exception e) {
-            System.err.printf("HTTPClient: general error downloading image from %s\n", url.toString());
+        List<String> urls = List.of(
+                rawURL,
+                formatURL(String.format("%s//%s", baseURL, rawURL)),
+                formatURL(String.format("%s//%s", baseHost, rawURL))
+        );
+
+        for (String urlString : urls) {
+            try {
+                URL url = new URL(formatURL(urlString));
+                InputStream in = new BufferedInputStream(url.openStream());
+                Image image = new Image(in);
+                return image;
+            } catch (IOException e) {
+                System.err.printf("HTTPClient: IO error downloading image from %s\n", urlString);
+            }
         }
 
-        // Assume urlString is a relative resource; try downloading with base URL prepended
-        try {
-            url = new URL(formatURL(String.format("%s//%s", baseURL, urlString)));
-            InputStream in = new BufferedInputStream(url.openStream());
-            image = new Image(in);
-        } catch (IOException e) {
-            System.err.printf("HTTPClient: error downloading image from %s\n", url.toString());
-        }
-
-        return image;
+        return null;
     }
     
     public static String formatURL(String url) {
