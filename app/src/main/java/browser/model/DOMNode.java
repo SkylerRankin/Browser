@@ -6,8 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import browser.parser.HTMLElements;
-
 public class DOMNode {
     
     public String type;
@@ -34,27 +32,25 @@ public class DOMNode {
             addChild(node);
         }
     }
-    
-    public void print() {
-        print("");
-    }
-    
-    public void print(String pad) {
-        if (this.type.equals((HTMLElements.TEXT))) {
-            System.out.printf("%sTEXT: [%s]\n", pad, content);
-        } else {
-            System.out.print(pad + type + (whiteSpaceAfter ? " +w" : ""));
-            for (Entry<String, String> entry : this.attributes.entrySet()) {
-                System.out.print(String.format(" %s=%s", entry.getKey(), entry.getValue()));
+
+    public String toString() {
+        StringBuilder attributesStringBuilder = new StringBuilder();
+        for (Entry<String, String> e : attributes.entrySet()) {
+            if (attributesStringBuilder.length() > 0) {
+                attributesStringBuilder.append(", ");
             }
-            System.out.println();
-            for (DOMNode n : children) {
-                n.print(pad+"    ");
-            }
-            System.out.println(pad + "/" + type);
+            attributesStringBuilder.append(String.format("%s=\"%s\"", e.getKey(), e.getValue()));
         }
+        String whitespaceFlag = whiteSpaceAfter ? " +w " : "";
+        String contentString = content == null ? "" : String.format(" content=\"%s\"", content);
+        String attributesString = attributes.size() == 0 ? "" : String.format(" attrs=[%s]", attributesStringBuilder);
+        return String.format("%s%s%s%s", type, attributesString, contentString, whitespaceFlag);
     }
-    
+
+    public String toRecursiveString() {
+        return toRecursiveString("");
+    }
+
     public boolean equalsIgnoreText(Object obj) {
         return equalsIgnoreText(obj, false);
     }
@@ -137,6 +133,14 @@ public class DOMNode {
             if (!this.children.get(n.children.indexOf(c)).equals((c))) return false;
         }
         return true;
+    }
+
+    private String toRecursiveString(String padding) {
+        StringBuilder string = new StringBuilder(padding + this + "\n");
+        for (DOMNode child : children) {
+            string.append(child.toRecursiveString(padding + " "));
+        }
+        return string.toString();
     }
 
 }

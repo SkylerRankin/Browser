@@ -57,10 +57,9 @@ public class ResourceLoader {
         if (url.equals(ErrorPageHandler.errorPagePath)) html = ErrorPageHandler.populateHTML(html);
         if (url.equals(StartupPageHandler.startupPagePath)) html = StartupPageHandler.populateHTML(html);
         
-        HTMLParser parser = new HTMLParser(this);
+        HTMLParser parser = new HTMLParser();
         dom = parser.generateDOMTree(html);
-        parser.removeUnknownElements(dom);
-        
+
         for (String imgURL : resources.get(resourceType.IMG)) {
             if (url.startsWith(FILE_PREFIX)) {
                 ImageCache.loadLocalImage(imgURL, url);

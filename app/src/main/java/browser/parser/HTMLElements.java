@@ -54,6 +54,12 @@ public class HTMLElements {
     public static final String CENTER = "center";
     public static final String NOBR = "nobr";
     public static final String ASIDE = "aside";
+    public static final String AREA = "area";
+    public static final String BASE = "base";
+    public static final String EMBED = "embed";
+    public static final String SOURCE = "source";
+    public static final String TRACK = "track";
+    public static final String WBR = "wbr";
 
     public static final String PSEUDO_MARKER = "marker";
     public static final String ANONYMOUS = "anonymous";

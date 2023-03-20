@@ -32,6 +32,7 @@ public class HTMLLexer {
     private String currentTagName = "none";
     private boolean inScript;
     private boolean inComment;
+    private HTMLTokenType lastOpeningTagType = HTMLTokenType.TAG_END_OPEN;
 
     public HTMLLexer(String input) {
         this.input = input;
@@ -50,13 +51,21 @@ public class HTMLLexer {
                 if (lastToken.equals(HTMLTokenType.TAG_END_OPEN) && token.value.equalsIgnoreCase("script")) {
                     inScript = false;
                 }
-            } else if (token.type.equals(HTMLTokenType.TAG_CLOSE) && currentTagName.equalsIgnoreCase("script")) {
+            } else if (lastOpeningTagType.equals(HTMLTokenType.TAG_OPEN) &&
+                    token.type.equals(HTMLTokenType.TAG_CLOSE) &&
+                    currentTagName.equalsIgnoreCase("script")) {
                 inScript = true;
             }
 
             if (!token.type.equals(HTMLTokenType.SKIP)) {
                 tokens.add(token);
                 lastToken = token.type;
+            }
+
+            if (token.type.equals(HTMLTokenType.TAG_OPEN)) {
+                lastOpeningTagType = HTMLTokenType.TAG_OPEN;
+            } else if (token.type.equals(HTMLTokenType.TAG_END_OPEN)) {
+                lastOpeningTagType = HTMLTokenType.TAG_END_OPEN;
             }
 
             index += token.value.length();
@@ -104,9 +113,14 @@ public class HTMLLexer {
             return new HTMLToken(HTMLTokenType.TAG_OPEN, c);
         }
 
-        String name = StringUtils.substringUntilSpaceOrString(input, index, List.of(">", "/>"));
-        if (name.length() > 0) {
-            return new HTMLToken(HTMLTokenType.TAG_NAME, name);
+        // "<>"
+        if (c == '>') {
+            return new HTMLToken(HTMLTokenType.TAG_CLOSE, c);
+        }
+
+        // "</>"
+        if (StringUtils.substringMatch(input, "/>", index)) {
+            return new HTMLToken(HTMLTokenType.TAG_END_CLOSE, "/>");
         }
 
         // Skip whitespace here, its meaningless
@@ -114,8 +128,8 @@ public class HTMLLexer {
             return new HTMLToken(HTMLTokenType.SKIP, StringUtils.whitespaceSubstring(input, index));
         }
 
-        // Some other invalid character (punctuation, whitespace, etc).
-        return new HTMLToken(HTMLTokenType.TEXT, c);
+        String name = StringUtils.substringUntilSpaceOrString(input, index, List.of(">", "/>"));
+        return new HTMLToken(HTMLTokenType.TAG_NAME, name);
     }
 
     // TAG_CLOSE/TAG_END_CLOSE: Handles characters occurring after a tag closing: ">?"
@@ -312,6 +326,5 @@ public class HTMLLexer {
         String text = StringUtils.substringUntil(input, index, List.of("<"));
         return new HTMLToken(HTMLTokenType.TEXT, text);
     }
-
 
 }

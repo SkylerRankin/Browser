@@ -14,7 +14,6 @@ import browser.model.DOMNode;
 import browser.model.RenderNode;
 import browser.network.ResourceLoader;
 import browser.parser.HTMLElements;
-import browser.parser.HTMLParser;
 import browser.parser.RenderTreeGenerator;
 import browser.parser.SpecialSymbolHandler;
 import browser.renderer.HTMLRenderer;
@@ -69,7 +68,7 @@ public class Pipeline {
     public void loadWebpage(String url) {
         resourceLoader.loadWebpage(url);
         domRoot = resourceLoader.getDOM();
-        title = (new HTMLParser(null)).getTitle(domRoot);
+        title = "no title";
         loaded = true;
     }
 

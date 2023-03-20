@@ -199,6 +199,31 @@ public class HTMLLexerTest {
     }
 
     @Test
+    public void scriptAndStyleText() {
+        String input = "<script>let x = 0;</script>\n<style>\n#box: { display: inline; }\n</style>";
+        List<HTMLToken> expectedTokens = List.of(
+                new HTMLToken(HTMLTokenType.TAG_OPEN, '<'),
+                new HTMLToken(HTMLTokenType.TAG_NAME, "script"),
+                new HTMLToken(HTMLTokenType.TAG_CLOSE, '>'),
+                new HTMLToken(HTMLTokenType.TEXT, "let x = 0;"),
+                new HTMLToken(HTMLTokenType.TAG_END_OPEN, "</"),
+                new HTMLToken(HTMLTokenType.TAG_NAME, "script"),
+                new HTMLToken(HTMLTokenType.TAG_CLOSE, '>'),
+                new HTMLToken(HTMLTokenType.TEXT, "\n"),
+                new HTMLToken(HTMLTokenType.TAG_OPEN, '<'),
+                new HTMLToken(HTMLTokenType.TAG_NAME, "style"),
+                new HTMLToken(HTMLTokenType.TAG_CLOSE, '>'),
+                new HTMLToken(HTMLTokenType.TEXT, "\n#box: { display: inline; }\n"),
+                new HTMLToken(HTMLTokenType.TAG_END_OPEN, "</"),
+                new HTMLToken(HTMLTokenType.TAG_NAME, "style"),
+                new HTMLToken(HTMLTokenType.TAG_CLOSE, '>')
+        );
+        HTMLLexer htmlLexer = new HTMLLexer(input);
+        List<HTMLToken> tokens = htmlLexer.getTokens();
+        assertTokenListsEqual(expectedTokens, tokens);
+    }
+
+    @Test
     public void spaceInAttributes() {
         String input = "< div  id =  \"0\" >";
         List<HTMLToken> expectedTokens = List.of(
