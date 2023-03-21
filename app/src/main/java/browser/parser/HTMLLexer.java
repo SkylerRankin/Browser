@@ -93,6 +93,7 @@ public class HTMLLexer {
             case ATTRIBUTE_END_QUOTES -> { return handleAttributeEndQuotes(index, c); }
             case TEXT -> { return handleText(index, c); }
             case COMMENT_START -> { return handleCommentStart(index); }
+            case COMMENT -> { return handleComment(index); }
             case COMMENT_END -> { return handleCommentEnd(index, c); }
         }
 
@@ -290,11 +291,6 @@ public class HTMLLexer {
     }
 
     private HTMLToken handleText(int index, char c) {
-        if (inComment) {
-            inComment = false;
-            return new HTMLToken(HTMLTokenType.COMMENT_END, "-->");
-        }
-
         if (StringUtils.substringMatch(input, "</", index)) {
             return new HTMLToken(HTMLTokenType.TAG_END_OPEN, "</");
         }
@@ -309,7 +305,12 @@ public class HTMLLexer {
     private HTMLToken handleCommentStart(int index) {
         inComment = true;
         String commentText = StringUtils.substringUntil(input, index, "-->");
-        return new HTMLToken(HTMLTokenType.TEXT, commentText);
+        return new HTMLToken(HTMLTokenType.COMMENT, commentText);
+    }
+
+    private HTMLToken handleComment(int index) {
+        inComment = false;
+        return new HTMLToken(HTMLTokenType.COMMENT_END, "-->");
     }
 
     private HTMLToken handleCommentEnd(int index, char c) {

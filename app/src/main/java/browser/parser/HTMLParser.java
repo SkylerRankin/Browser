@@ -1,7 +1,9 @@
 package browser.parser;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.ListIterator;
+import java.util.Set;
 
 import browser.constants.HTMLConstants;
 import browser.model.DOMNode;
@@ -12,7 +14,10 @@ public class HTMLParser {
 
     public DOMNode generateDOMTree(String html) {
         HTMLLexer lexer = new HTMLLexer(html);
-        ListIterator<HTMLToken> tokenIterator = lexer.getTokens().listIterator();
+        List<HTMLToken> tokens = lexer.getTokens();
+        removeCommentTokens(tokens);
+        ListIterator<HTMLToken> tokenIterator = tokens.listIterator();
+        consumeStartingWhitespace(tokenIterator);
 
         DOMNode root = null;
         DOMNode current = null;
@@ -93,6 +98,8 @@ public class HTMLParser {
                 node.attributes.put(currentAttributeName, null);
             } else if (nextToken.type.equals(HTMLTokenType.ATTRIBUTE_VALUE)) {
                 node.attributes.put(currentAttributeName, nextToken.value);
+            } else if (nextToken.type.equals(HTMLTokenType.ATTRIBUTE_END_QUOTES)) {
+                node.attributes.putIfAbsent(currentAttributeName, "");
             }
             nextToken = tokenIterator.next();
         }
@@ -147,6 +154,34 @@ public class HTMLParser {
         if (restorePreviousToken) {
             tokenIterator.previous();
         }
+    }
+
+    private void removeCommentTokens(List<HTMLToken> tokens) {
+        Set<HTMLTokenType> commentTypes = Set.of(
+                HTMLTokenType.COMMENT_START,
+                HTMLTokenType.COMMENT,
+                HTMLTokenType.COMMENT_END);
+
+        for (int i = tokens.size() - 1; i >= 0; i--) {
+            if (tokens.get(i).type.equals(HTMLTokenType.COMMENT_END)) {
+                // If token after comment is whitespace, remove it.
+                if (i < tokens.size() - 1 && tokens.get(i + 1).type.equals(HTMLTokenType.TEXT) && tokens.get(i + 1).value.isBlank()) {
+                    tokens.remove(i + 1);
+                }
+            }
+
+            if (commentTypes.contains(tokens.get(i).type)) {
+                tokens.remove(i);
+            }
+        }
+    }
+
+    private void consumeStartingWhitespace(ListIterator<HTMLToken> tokenIterator) {
+        HTMLToken token = tokenIterator.next();
+        while (token.type.equals(HTMLTokenType.TEXT) && token.value.isBlank()) {
+            token = tokenIterator.next();
+        }
+        tokenIterator.previous();
     }
 
 }

@@ -130,7 +130,7 @@ public class HTMLLexerTest {
                 new HTMLToken(HTMLTokenType.TAG_NAME, "div"),
                 new HTMLToken(HTMLTokenType.TAG_CLOSE, '>'),
                 new HTMLToken(HTMLTokenType.COMMENT_START, "<!--"),
-                new HTMLToken(HTMLTokenType.TEXT, "comment"),
+                new HTMLToken(HTMLTokenType.COMMENT, "comment"),
                 new HTMLToken(HTMLTokenType.COMMENT_END, "-->"),
                 new HTMLToken(HTMLTokenType.TEXT, "div"),
                 new HTMLToken(HTMLTokenType.TAG_END_OPEN, "</"),

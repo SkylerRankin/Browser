@@ -40,6 +40,11 @@ dependencies {
     // jsoup HTML parser library @ https://jsoup.org/
     // This is used for loading HTML files for integration tests.
     implementation 'org.jsoup:jsoup:1.15.3'
+
+
+    // https://mvnrepository.com/artifact/org.apache.commons/commons-lang3
+    implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.0'
+
 }
 
 application {

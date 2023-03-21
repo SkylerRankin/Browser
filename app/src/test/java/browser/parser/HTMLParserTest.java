@@ -20,4 +20,19 @@ public class HTMLParserTest {
         testDriver.runParseTest("basicValidHTML");
     }
 
+    @Test
+    public void mixedComments() {
+        testDriver.runParseTest("mixedComments");
+    }
+
+    @Test
+    public void commentsWithWhitespace() {
+        testDriver.runParseTest("commentsWithWhitespace");
+    }
+
+    @Test
+    public void wikipediaFile() {
+        testDriver.runParseTest("wikipediaFilePage");
+    }
+
 }

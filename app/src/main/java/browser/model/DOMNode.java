@@ -39,7 +39,8 @@ public class DOMNode {
             if (attributesStringBuilder.length() > 0) {
                 attributesStringBuilder.append(", ");
             }
-            attributesStringBuilder.append(String.format("%s=\"%s\"", e.getKey(), e.getValue()));
+            String valueString = e.getValue() == null ? "null" : String.format("\"%s\"", e.getValue());
+            attributesStringBuilder.append(String.format("%s=%s", e.getKey(), valueString));
         }
         String whitespaceFlag = whiteSpaceAfter ? " +w " : "";
         String contentString = content == null ? "" : String.format(" content=\"%s\"", content);
