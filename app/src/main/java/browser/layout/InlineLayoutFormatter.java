@@ -107,7 +107,10 @@ public class InlineLayoutFormatter {
                     return 0;
                 }
                 CSSStyle previousStyle = siblingBox.style;
-                float inlineSpace = siblingBox.whiteSpaceAfter ? textDimensionCalculator.getDimension(" ", boxNode.parent.style).x : 0;
+                // Whitespace in the HTML source after a previous sibling inline box will add one space character's worth
+                // of horizontal space here. The line break element is an exception, which should not add space.
+                boolean ignoreWhitespaceAfter = siblingBox.correspondingRenderNode != null && siblingBox.correspondingRenderNode.type.equals(HTMLElements.BR);
+                float inlineSpace = (siblingBox.whiteSpaceAfter && !ignoreWhitespaceAfter) ? textDimensionCalculator.getDimension(" ", boxNode.parent.style).x : 0;
                 return siblingBox.x + siblingBox.width + previousStyle.marginRight + boxNode.style.marginLeft + inlineSpace;
             }
         }
