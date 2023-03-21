@@ -56,6 +56,10 @@ public class CSSColorTest {
         assertEquals(34, color.getRGB()[0]);
         assertEquals(139, color.getRGB()[1]);
         assertEquals(34, color.getRGB()[2]);
+        color = new CSSColor("FFFBFB");
+        assertEquals(255, color.getRGB()[0]);
+        assertEquals(251, color.getRGB()[1]);
+        assertEquals(251, color.getRGB()[2]);
     }
 
 }

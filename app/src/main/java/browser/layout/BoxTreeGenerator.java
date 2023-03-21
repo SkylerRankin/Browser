@@ -231,12 +231,12 @@ public class BoxTreeGenerator {
     private void setDisplaysForUnknownElements(BoxNode boxNode) {
         if (boxNode.innerDisplayType == null) {
             boxNode.innerDisplayType = DisplayType.FLOW;
-            System.out.printf("Setting default inner display for %s\n", boxNode);
+            System.out.printf("Setting default inner display for [%s] %s\n", boxNode.correspondingRenderNode.type, boxNode);
         }
 
         if (boxNode.outerDisplayType == null) {
             boxNode.outerDisplayType = DisplayType.BLOCK;
-            System.out.printf("Setting default outer display for %s\n", boxNode);
+            System.out.printf("Setting default outer display for [%s] %s\n", boxNode.correspondingRenderNode.type, boxNode);
         }
 
         for (BoxNode child : boxNode.children) {

@@ -13,7 +13,7 @@ import browser.parser.HTMLLexer.HTMLTokenType;
 public class HTMLParser {
 
     public DOMNode generateDOMTree(String html) {
-        HTMLLexer lexer = new HTMLLexer(html);
+        HTMLLexer lexer = new HTMLLexer(html.trim());
         List<HTMLToken> tokens = lexer.getTokens();
         removeCommentTokens(tokens);
         ListIterator<HTMLToken> tokenIterator = tokens.listIterator();
@@ -61,7 +61,11 @@ public class HTMLParser {
                     // A text node is created and added as a child of the current active node.
                     DOMNode textNode = new DOMNode(HTMLElements.TEXT);
                     textNode.content = nextToken.value;
-                    current.addChild(textNode);
+                    if (current == null) {
+                        // Skip starting text not in a tag.
+                    } else {
+                        current.addChild(textNode);
+                    }
                 }
                 default -> System.err.printf("Unexpected next token: %s %s.\n", nextToken.type, nextToken.value);
             }
@@ -78,7 +82,7 @@ public class HTMLParser {
             node = new DOMNode("");
         } else if (firstToken.type.equals(HTMLTokenType.TAG_NAME)) {
             // A normal tag with a name
-            node = new DOMNode(firstToken.value);
+            node = new DOMNode(firstToken.value.toLowerCase());
             setNodeAttributes(node, tokenIterator);
         } else {
             System.err.printf("Unexpected token (%s:%s) after tag open.\n", firstToken.type, firstToken.value);
@@ -94,7 +98,7 @@ public class HTMLParser {
         String currentAttributeName = null;
         while (!isTagCloseToken(nextToken)) {
             if (nextToken.type.equals(HTMLTokenType.ATTRIBUTE_NAME)) {
-                currentAttributeName = nextToken.value;
+                currentAttributeName = nextToken.value.toLowerCase();
                 node.attributes.put(currentAttributeName, null);
             } else if (nextToken.type.equals(HTMLTokenType.ATTRIBUTE_VALUE)) {
                 node.attributes.put(currentAttributeName, nextToken.value);

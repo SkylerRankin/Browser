@@ -26,6 +26,7 @@ public class HTMLConstants {
 
     public static final Set<String> elementsExcludedFromRender = Set.of(
             HTMLElements.HEAD,
+            HTMLElements.LINK,
             HTMLElements.SCRIPT,
             HTMLElements.STYLE
     );

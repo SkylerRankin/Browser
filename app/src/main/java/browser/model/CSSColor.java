@@ -18,7 +18,7 @@ public class CSSColor {
 
     public CSSColor(String color) {
         color = color.toLowerCase();
-        if (color.matches("[A-Za-z]+")) {
+        if (color.matches("[A-Za-z]+") && DefaultColors.getHex(color) != null) {
             hex = DefaultColors.getHex(color);
             if (hex != null) {
                 setRGB(hex);
@@ -45,8 +45,8 @@ public class CSSColor {
                 opacity = Integer.parseInt(match.group(8)) / 255.0;
                 setHex(rgb);
             }
-        } else if (color.matches("#([a-z0-9]{3}|[a-z0-9]{6})")) {
-            hex = color.substring(1);
+        } else if (color.matches("#?([a-z0-9]{3}|[a-z0-9]{6})")) {
+            hex = color.startsWith("#") ? color.substring(1) : color;
             if (hex.length() == 3) {
                 char c1 = hex.charAt(0);
                 char c2 = hex.charAt(1);
@@ -57,6 +57,8 @@ public class CSSColor {
         }
 
         if (hex == null || rgb.length == 0) {
+            hex = "#000000";
+            rgb = new int[]{0, 0, 0};
             System.err.printf("CSSColor : Invalid color %s\n", color);
         }
     }
