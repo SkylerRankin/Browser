@@ -15,6 +15,7 @@ import java.util.Set;
 import browser.app.ErrorPageHandler;
 import browser.app.StartupPageHandler;
 import browser.model.DOMNode;
+import browser.parser.HTMLElements;
 import browser.parser.HTMLParser;
 import browser.renderer.ImageCache;
 
@@ -60,6 +61,9 @@ public class ResourceLoader {
         HTMLParser parser = new HTMLParser();
         dom = parser.generateDOMTree(html);
 
+        // TODO combine the extraction with the image/css loading code. No need to store resources map right?
+        extractResourceAttributes(dom);
+
         for (String imgURL : resources.get(resourceType.IMG)) {
             if (url.startsWith(FILE_PREFIX)) {
                 ImageCache.loadLocalImage(imgURL, url);
@@ -75,26 +79,23 @@ public class ResourceLoader {
         }
         
     }
-    
-    /**
-     * Check the attributes of an HTML element to find resources to load. Only loads src from an
-     * img tag, and href from a link tag that links to a CSS file.
-     * @param tag
-     * @param attributes
-     */
-    public void checkAttributes(String tag, Map<String, String> attributes) {
-        if (tag.equals("img")) {
-            String src = attributes.get("src");
+
+    private void extractResourceAttributes(DOMNode domNode) {
+        if (domNode.type.equals(HTMLElements.IMG)) {
+            String src = domNode.attributes.get("src");
             if (src != null) {
                 resources.get(resourceType.IMG).add(src);
             }
-        } else if (tag.equals("link")) {
-            String href = attributes.get("href");
+        } else if (domNode.type.equals(HTMLElements.LINK)) {
+            String href = domNode.attributes.get("href");
             if (href != null && href.endsWith("css")) {
                 resources.get(resourceType.CSS).add(href);
             }
         }
-        
+
+        for (DOMNode child : domNode.children) {
+            extractResourceAttributes(child);
+        }
     }
 
 }

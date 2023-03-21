@@ -60,6 +60,7 @@ public class HTMLElements {
     public static final String SOURCE = "source";
     public static final String TRACK = "track";
     public static final String WBR = "wbr";
+    public static final String SCRIPT = "script";
 
     public static final String PSEUDO_MARKER = "marker";
     public static final String ANONYMOUS = "anonymous";

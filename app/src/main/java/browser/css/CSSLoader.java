@@ -54,8 +54,6 @@ public class CSSLoader {
             DOMNode text = root.children.get(0);
             if (text != null) {
                 styleTagCSS.add(text.content);
-            } else {
-                System.err.println("CSSLoader: findStyleTagCSS: style node had no child text");
             }
         } else {
             for (DOMNode child : root.children) {

@@ -177,30 +177,17 @@ public class RenderNode {
 
         return true;
     }
-    
-    public void print() {
-        print("");
+
+    public String toRecursiveString() {
+        return toRecursiveString("");
     }
-    
-    public void print(String pad) {
-        System.out.printf("%s%s [depth=%d id=%d]\n",pad, type, this.depth, this.id);
-        if (text != null) System.out.printf("%s\t[%s]\n", pad, text);
-        for (RenderNode n : children) {
-            n.print(pad+"\t");
+
+    private String toRecursiveString(String padding) {
+        StringBuilder string = new StringBuilder(padding + this + "\n");
+        for (RenderNode child : children) {
+            string.append(child.toRecursiveString(padding + " "));
         }
-        System.out.println(pad + "/" + type);
-    }
-    
-    public void printStyle() {
-        printStyle("");
-    }
-    
-    public void printStyle(String pad) {
-        System.out.printf("%s%s [depth=%d id=%d]\n",pad, type, this.depth, this.id);
-        style.print(pad+" ");
-        for (RenderNode n : children) {
-            n.printStyle(pad+"\t");
-        }
+        return string.toString();
     }
 
     public String toString() {

@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import browser.app.ErrorPageHandler;
+import browser.constants.HTMLConstants;
 import browser.css.CSSStyle;
 import browser.model.DOMNode;
 import browser.model.RenderNode;
@@ -26,12 +27,16 @@ public class RenderTreeGenerator {
     }
 
     public DOMNode getBodyNode(DOMNode dom) {
-        if (dom.type.equals(HTMLElements.BODY)) return dom;
+        if (dom.type.equals(HTMLElements.BODY)) {
+            return dom;
+        }
+
         DOMNode bodyCandidate = null;
         for (DOMNode child : dom.children) {
             DOMNode d = getBodyNode(child);
             if (d != null) bodyCandidate = d;
         }
+
         return bodyCandidate;
     }
 
@@ -61,7 +66,9 @@ public class RenderTreeGenerator {
         if (parent != null) parentRenderNodeMap.put(RenderNode.nextId, parent);
         RenderNode.nextId++;
         for (DOMNode child : dom.children) {
-            renderNode.children.add(copyTree(child, renderNode, depth + 1));
+            if (!HTMLConstants.elementsExcludedFromRender.contains(child.type)) {
+                renderNode.children.add(copyTree(child, renderNode, depth + 1));
+            }
         }
         renderNode.whiteSpaceAfter = dom.whiteSpaceAfter;
         return renderNode;

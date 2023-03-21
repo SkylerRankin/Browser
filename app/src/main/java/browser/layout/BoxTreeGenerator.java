@@ -40,6 +40,7 @@ public class BoxTreeGenerator {
             }
         }
 
+        setDisplaysForUnknownElements(rootBoxNode);
         addAnonymousFlowBoxes(rootBoxNode);
         addAnonymousTableBoxes(rootBoxNode);
 
@@ -222,4 +223,24 @@ public class BoxTreeGenerator {
         return true;
     }
 
+    /**
+     * Inner and outer displays are required for adding anonymous boxes and for later computing layouts. If a box did
+     * not have any display information from the page's styling, it will default to a block box.
+     * @param boxNode
+     */
+    private void setDisplaysForUnknownElements(BoxNode boxNode) {
+        if (boxNode.innerDisplayType == null) {
+            boxNode.innerDisplayType = DisplayType.FLOW;
+            System.out.printf("Setting default inner display for %s\n", boxNode);
+        }
+
+        if (boxNode.outerDisplayType == null) {
+            boxNode.outerDisplayType = DisplayType.BLOCK;
+            System.out.printf("Setting default outer display for %s\n", boxNode);
+        }
+
+        for (BoxNode child : boxNode.children) {
+            setDisplaysForUnknownElements(child);
+        }
+    }
 }

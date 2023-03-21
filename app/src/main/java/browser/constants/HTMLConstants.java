@@ -24,4 +24,10 @@ public class HTMLConstants {
 
     public static final Set<String> docTypeStrings = Set.of("!doctype", "doctype");
 
+    public static final Set<String> elementsExcludedFromRender = Set.of(
+            HTMLElements.HEAD,
+            HTMLElements.SCRIPT,
+            HTMLElements.STYLE
+    );
+
 }
