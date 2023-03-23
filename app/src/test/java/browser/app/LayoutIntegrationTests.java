@@ -78,6 +78,11 @@ public class LayoutIntegrationTests {
         driver.runLayoutTest("preserveInlineSpaces", 200);
     }
 
+    @Test
+    public void marginAuto() throws IOException {
+        driver.runLayoutTest("marginAuto", 1000);
+    }
+
     // Text alignment
 
     @Test

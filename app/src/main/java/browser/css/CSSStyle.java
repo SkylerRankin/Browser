@@ -68,7 +68,7 @@ public class CSSStyle {
 
     public static enum wordWrapType {NORMAL, BREAKWORD}
 
-    public static enum marginSizeType {AUTO, PIXEL}
+    public static enum MarginType {AUTO, LENGTH, PERCENTAGE}
     
     public CSSColor backgroundColor = new CSSColor("White");
     
@@ -105,12 +105,21 @@ public class CSSStyle {
     public DimensionType heightType = DimensionType.PIXEL;
     public Float height = null;
     
-    public marginSizeType marginType = marginSizeType.PIXEL;
-    public int margin = 0;
     public int marginTop = 0;
+    public MarginType marginTopType = MarginType.LENGTH;
+    public LengthUnit marginTopUnit = LengthUnit.PX;
+
     public int marginRight = 0;
+    public MarginType marginRightType = MarginType.LENGTH;
+    public LengthUnit marginRightUnit = LengthUnit.PX;
+
     public int marginBottom = 0;
+    public MarginType marginBottomType = MarginType.LENGTH;
+    public LengthUnit marginBottomUnit = LengthUnit.PX;
+
     public int marginLeft = 0;
+    public MarginType marginLeftType = MarginType.LENGTH;
+    public LengthUnit marginLeftUnit = LengthUnit.PX;
     
     public int padding = 0;
     public int paddingTop = 0;
@@ -328,6 +337,93 @@ public class CSSStyle {
             default: return BoxSizingType.CONTENT_BOX;
         }
     }
+
+    private void parseIndividualMargin(String text, String direction) {
+        int value = 0;
+        MarginType type = MarginType.LENGTH;
+        LengthUnit unit = LengthUnit.PX;
+
+        if (text.equalsIgnoreCase("auto")) {
+            type = MarginType.AUTO;
+        } else if (text.endsWith("%") && text.length() > 1) {
+            String percentageText = text.substring(text.length() - 1);
+            if (percentageText.matches("[0-9]+")) {
+                type = MarginType.PERCENTAGE;
+                value = Integer.parseInt(percentageText);
+            }
+        } else if (text.matches("[0-9]+")) {
+            value = Integer.parseInt(text);
+        } else {
+            Matcher lengthMatcher = lengthPattern.matcher(text);
+            if (lengthMatcher.find()) {
+                int length = Integer.parseInt(lengthMatcher.group(1));
+                String unitString = lengthMatcher.group(2);
+                LengthUnit unitCandidate = parseLengthUnit(unitString);
+                if (unitCandidate != null) {
+                    // TODO resolve non-pixel units into pixels.
+                    unit = unitCandidate;
+                    value = length;
+                }
+            }
+        }
+
+        switch (direction) {
+            case "top" -> {
+                marginTop = value;
+                marginTopType = type;
+                marginTopUnit = unit;
+            }
+            case "right" -> {
+                marginRight = value;
+                marginRightType = type;
+                marginRightUnit = unit;
+            }
+            case "bottom" -> {
+                marginBottom = value;
+                marginBottomType = type;
+                marginBottomUnit = unit;
+            }
+            case "left" -> {
+                marginLeft = value;
+                marginLeftType = type;
+                marginLeftUnit = unit;
+            }
+        }
+    }
+
+    private void parseMargin(String text, String direction) {
+        if (direction != null) {
+            parseIndividualMargin(text, direction);
+        } else {
+            String[] items = text.split("\\s");
+            switch (items.length) {
+                case 1 -> {
+                    parseIndividualMargin(text, "top");
+                    parseIndividualMargin(text, "bottom");
+                    parseIndividualMargin(text, "left");
+                    parseIndividualMargin(text, "right");
+                }
+                case 2 -> {
+                    parseIndividualMargin(items[0], "top");
+                    parseIndividualMargin(items[0], "bottom");
+                    parseIndividualMargin(items[1], "left");
+                    parseIndividualMargin(items[1], "right");
+                }
+                case 3 -> {
+                    parseIndividualMargin(items[0], "top");
+                    parseIndividualMargin(items[2], "bottom");
+                    parseIndividualMargin(items[1], "left");
+                    parseIndividualMargin(items[1], "right");
+                }
+                case 4 -> {
+                    parseIndividualMargin(items[0], "top");
+                    parseIndividualMargin(items[2], "bottom");
+                    parseIndividualMargin(items[3], "left");
+                    parseIndividualMargin(items[1], "right");
+                }
+            }
+        }
+    }
     
     /**
      * Convert the string properties and values to actual properties on this class
@@ -374,19 +470,11 @@ public class CSSStyle {
                                         heightType = value.contains("%") ?
                                                 DimensionType.PERCENTAGE :
                                                 DimensionType.PIXEL; break;
-            case "margin":              marginType = value.equals("auto") ?
-                                                marginSizeType.AUTO :
-                                                marginSizeType.PIXEL;
-                                        if (marginType.equals(marginSizeType.PIXEL)) {
-                                            marginTop = parseDimension(value);
-                                            marginRight = parseDimension(value);
-                                            marginBottom = parseDimension(value);
-                                            marginLeft = parseDimension(value);
-                                        } break;
-            case "margin-top":          marginTop = parseDimension(value);  break;
-            case "margin-right":        marginRight = parseDimension(value);  break;
-            case "margin-bottom":       marginBottom = parseDimension(value);  break;
-            case "margin-left":         marginLeft = parseDimension(value);  break;
+            case "margin":              parseMargin(value, null); break;
+            case "margin-top":          parseMargin(value, "top");  break;
+            case "margin-right":        parseMargin(value, "right");  break;
+            case "margin-bottom":       parseMargin(value, "bottom");  break;
+            case "margin-left":         parseMargin(value, "left");  break;
             case "max-width":           maxWidth = (float) parseDimension(value);
                                         maxWidthType = value.contains("%") ?
                                             DimensionType.PERCENTAGE :
@@ -472,12 +560,18 @@ public class CSSStyle {
         style.fontWeight = fontWeight;
         style.heightType = heightType;
         style.height = height;
-        style.marginType = marginType;
-        style.margin = margin;
         style.marginTop = marginTop;
+        style.marginTopType = marginTopType;
+        style.marginTopUnit = marginTopUnit;
         style.marginRight = marginRight;
+        style.marginRightType = marginRightType;
+        style.marginRightUnit = marginRightUnit;
         style.marginBottom = marginBottom;
+        style.marginBottomType = marginBottomType;
+        style.marginBottomUnit = marginBottomUnit;
         style.marginLeft = marginLeft;
+        style.marginLeftType = marginLeftType;
+        style.marginLeftUnit = marginLeftUnit;
         style.padding = padding;
         style.paddingTop = paddingTop;
         style.paddingRight = paddingRight;

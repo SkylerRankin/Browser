@@ -55,7 +55,7 @@ public class BoxLayoutGenerator {
         setBoxLayout(rootBoxNode);
 
         applyTextJustifications(rootBoxNode);
-
+        applyAutoMargins(rootBoxNode);
     }
 
     // Private methods
@@ -595,6 +595,29 @@ public class BoxLayoutGenerator {
 
         for (BoxNode child : boxNode.children) {
             applyTextJustifications(child);
+        }
+    }
+
+    /**
+     * Applies margin auto adjustment to block boxes. Only horizontal margins being set to auto impacts layout.
+     * @param boxNode       The box to adjust.
+     */
+    private void applyAutoMargins(BoxNode boxNode) {
+          boolean isBlock = boxNode.outerDisplayType.equals(DisplayType.BLOCK);
+          if (isBlock && boxNode.parent != null) {
+              CSSStyle parentStyle = boxNode.parent.style;
+              float availableWidth = boxNode.parent.width - parentStyle.borderWidthLeft - parentStyle.paddingLeft - parentStyle.borderWidthRight - parentStyle.paddingRight;
+              if (boxNode.style.marginLeftType.equals(CSSStyle.MarginType.AUTO) && boxNode.style.marginRightType.equals(CSSStyle.MarginType.AUTO)) {
+                  float diff = availableWidth - boxNode.width;
+                  moveBoxAndDescendants(boxNode, new Vector2(diff / 2, 0));
+              } else if (boxNode.style.marginLeftType.equals(CSSStyle.MarginType.AUTO)) {
+                  float diff = availableWidth - boxNode.width - boxNode.style.marginRight;
+                  moveBoxAndDescendants(boxNode, new Vector2(diff, 0));
+              }
+          }
+
+        for (BoxNode child : boxNode.children) {
+            applyAutoMargins(child);
         }
     }
 
