@@ -5,6 +5,7 @@ import java.util.List;
 import browser.constants.PseudoElementConstants;
 import browser.css.CSSStyle;
 import browser.model.BoxNode;
+import browser.model.CSSRulePrecedent;
 import browser.model.RenderNode;
 import browser.model.Vector2;
 import browser.parser.HTMLElements;
@@ -26,6 +27,9 @@ public class ListMarkerGenerator {
             // TODO Set the marker display properties from the user agent CSS.
             marker.style.outerDisplay = CSSStyle.DisplayType.BLOCK;
             marker.style.innerDisplay = CSSStyle.DisplayType.FLOW;
+            // Apply the font size property rather than setting the value directly. Using apply sets the precedent
+            // value correctly so that the property is not inherited later.
+            marker.style.apply("font-size", String.valueOf(renderNode.style.fontSize), CSSRulePrecedent.ID());
             if (renderNode.parent.type.equals(HTMLElements.OL)) {
                 List<RenderNode> nonMarkerChildren = renderNode.parent.children.stream().filter(node -> !node.type.equals(HTMLElements.PSEUDO_MARKER)).toList();
                 int indexInParent = nonMarkerChildren.indexOf(renderNode);

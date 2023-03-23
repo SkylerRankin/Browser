@@ -31,4 +31,6 @@ public class HTMLConstants {
             HTMLElements.STYLE
     );
 
+    public static int LIST_MARKER_GAP = 10;
+
 }

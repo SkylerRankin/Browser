@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import browser.constants.CSSConstants;
+import browser.constants.HTMLConstants;
 import browser.css.CSSStyle;
 import browser.model.BoxNode;
 import browser.model.Vector2;
@@ -478,7 +479,7 @@ public class BoxLayoutGenerator {
             if (childBox.isPseudo) {
                 // Position the marker pseudo-element to the left of the previous box.
                 childBox.y = lastPlacedBox.y;
-                childBox.x = lastPlacedBox.x - childBox.width;
+                childBox.x = lastPlacedBox.x - childBox.width - HTMLConstants.LIST_MARKER_GAP;
             } else {
                 childBox.x = parentBox.x + parentBox.style.borderWidthLeft + parentBox.style.paddingLeft + childBox.style.marginLeft;
                 if (lastPlacedBox == null) {

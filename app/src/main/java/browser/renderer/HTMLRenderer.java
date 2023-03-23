@@ -85,10 +85,9 @@ public class HTMLRenderer {
 
     public static void renderPseudoMarker(GraphicsContext gc, BoxNode node) {
         gc.setFill(node.style.color.toPaint());
-//        String markerType = node.attributes.get(PseudoElementConstants.MARKER_TYPE_KEY);
-//        String markerIndex = node.attributes.get(PseudoElementConstants.MARKER_INDEX_KEY);
-//        String text = markerType.equals(HTMLElements.UL) ? "\u2022" : String.format("%d.", Integer.parseInt(markerIndex) + 1);
-//        gc.fillText(text, node.box.x, node.box.y + node.box.height * textOffsetScale);
+        gc.setFont(Font.font(node.style.fontFamily, FontWeight.NORMAL, FontPosture.REGULAR, node.style.fontSize));
+        String text = node.correspondingRenderNode.text;
+        gc.fillText(text, node.x, node.y + node.height * textOffsetScale);
     }
     
     public static void drawBoxOutline(GraphicsContext gc, BoxNode box) {
