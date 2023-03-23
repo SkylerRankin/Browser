@@ -3,7 +3,6 @@ package browser.parser;
 import java.util.HashMap;
 import java.util.Map;
 
-import browser.app.ErrorPageHandler;
 import browser.constants.HTMLConstants;
 import browser.css.CSSStyle;
 import browser.model.DOMNode;
@@ -53,7 +52,6 @@ public class RenderTreeGenerator {
     private RenderNode domTreeToRenderTree(DOMNode dom) {
         DOMNode body = getBodyNode(dom);
         if (body == null) {
-            ErrorPageHandler.browserError = ErrorPageHandler.BrowserErrorType.NO_BODY;
             return null;
         }
         return copyTree(body, null, 0);

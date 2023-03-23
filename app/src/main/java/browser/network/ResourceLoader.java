@@ -4,6 +4,7 @@ import static browser.constants.ResourceConstants.FILE_PREFIX;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,18 +14,24 @@ import java.util.Map;
 import java.util.Set;
 
 import browser.app.ErrorPageHandler;
-import browser.app.StartupPageHandler;
+import browser.constants.ErrorConstants;
+import browser.constants.ErrorConstants.ErrorType;
+import browser.exception.PageLoadException;
 import browser.model.DOMNode;
 import browser.parser.HTMLElements;
 import browser.parser.HTMLParser;
 import browser.renderer.ImageCache;
 
+import lombok.Getter;
+
 public class ResourceLoader {
 
     private enum resourceType {IMG, CSS}
-    
+
+    @Getter
     private DOMNode dom;
     private final Map<resourceType, Set<String>> resources;
+    @Getter
     private final List<String> externalCSS;
 
     public ResourceLoader() {
@@ -35,33 +42,24 @@ public class ResourceLoader {
         externalCSS = new ArrayList<>();
     }
     
-    public DOMNode getDOM() { return dom; }
-    public List<String> getExternalCSS() { return externalCSS; }
-    
     /**
      * Load the HTML for a given URL, and load all other resources linked in that file
      */
-    public void loadWebpage(String url) {
-        String html = null;
-        if (url.startsWith(FILE_PREFIX)) {
-            try {
-                String filePath = url.substring(FILE_PREFIX.length());
-                html = new String(Files.readAllBytes(Paths.get(filePath)));
-            } catch (IOException e) {
-                System.err.printf("ResourceLoader: failed to load %s, %s\n", url, e.getLocalizedMessage());
-//                e.printStackTrace();
-            }
-        } else {
-            html = HTTPClient.requestPage(url);
+    public void loadWebpage(String url) throws PageLoadException {
+        String html = url.startsWith(FILE_PREFIX) ?
+                loadLocalFile(url) :
+                HTTPClient.requestPage(url);
+        
+        if (url.equals(ErrorConstants.ErrorPagePath)) {
+            html = ErrorPageHandler.populateHTML(html);
         }
-        
-        if (url.equals(ErrorPageHandler.errorPagePath)) html = ErrorPageHandler.populateHTML(html);
-        if (url.equals(StartupPageHandler.startupPagePath)) html = StartupPageHandler.populateHTML(html);
-        
+
         HTMLParser parser = new HTMLParser();
         dom = parser.generateDOMTree(html);
 
         // TODO combine the extraction with the image/css loading code. No need to store resources map right?
+        resources.get(resourceType.IMG).clear();
+        resources.get(resourceType.CSS).clear();
         extractResourceAttributes(dom);
 
         for (String imgURL : resources.get(resourceType.IMG)) {
@@ -95,6 +93,26 @@ public class ResourceLoader {
 
         for (DOMNode child : domNode.children) {
             extractResourceAttributes(child);
+        }
+    }
+
+    private String loadLocalFile(String filePath) throws PageLoadException {
+        if (filePath.endsWith(".html")) {
+            try {
+                Path path = Paths.get(filePath.substring(FILE_PREFIX.length()));
+                if (!Files.exists(path)) {
+                    throw new PageLoadException(ErrorType.LOCAL_FILE_DOES_NOT_EXIST, Map.of(ErrorConstants.PATH, filePath));
+                } else if (Files.isDirectory(path)) {
+                    throw new PageLoadException(ErrorType.LOCAL_FILE_IS_DIRECTORY, Map.of(ErrorConstants.PATH, filePath));
+                } else {
+                    return new String(Files.readAllBytes(path));
+                }
+            } catch (IOException e) {
+                System.err.printf("ResourceLoader: failed to load %s, %s\n", filePath, e.getLocalizedMessage());
+                throw new PageLoadException(ErrorType.LOCAL_FILE_FAILED_TO_LOAD, Map.of(ErrorConstants.EXCEPTION, e));
+            }
+        } else {
+            throw new PageLoadException(ErrorType.LOCAL_FILE_IS_NOT_HTML, Map.of(ErrorConstants.PATH, filePath));
         }
     }
 

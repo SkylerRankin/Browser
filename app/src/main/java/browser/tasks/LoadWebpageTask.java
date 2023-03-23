@@ -4,6 +4,7 @@ import javafx.concurrent.Task;
 
 import browser.app.ErrorPageHandler;
 import browser.app.Pipeline;
+import browser.constants.ErrorConstants;
 
 public class LoadWebpageTask extends Task<Pipeline> {
     
@@ -25,9 +26,9 @@ public class LoadWebpageTask extends Task<Pipeline> {
                 pipeline.calculateLayout(width);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            ErrorPageHandler.previousException = e;
             try {
-                pipeline.loadWebpage(ErrorPageHandler.errorPagePath);
+                pipeline.loadWebpage(ErrorConstants.ErrorPagePath);
                 pipeline.calculateLayout(width);
             } catch (Exception e2) {
                 System.out.println("LoadWebpageTask: error running pipeline on error page.");

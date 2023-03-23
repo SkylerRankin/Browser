@@ -4,6 +4,7 @@ import static browser.constants.MathConstants.DELTA;
 import static org.junit.Assert.assertEquals;
 
 import browser.app.Pipeline;
+import browser.exception.LayoutException;
 import browser.model.DOMNode;
 import browser.model.RenderNode;
 import browser.parser.HTMLElements;
@@ -21,7 +22,7 @@ public class PipelineTest {
     }
 
     @Test
-    public void calculateLayoutTest_SimpleDiv() {
+    public void calculateLayoutTest_SimpleDiv() throws LayoutException {
         final int screenWidth = 100;
         final int divHeight = 50;
         final int bodyPadding = 10;
@@ -60,7 +61,7 @@ public class PipelineTest {
     }
 
     @Test
-    public void calculateLayoutTest_NestedDivWithFixedWidth() {
+    public void calculateLayoutTest_NestedDivWithFixedWidth() throws LayoutException {
         final int screenWidth = 1000;
         final int div1Width = 600;
         final int div1Height = 600;
@@ -125,7 +126,7 @@ public class PipelineTest {
     }
 
     @Test
-    public void calculateLayoutTest_SimpleList() {
+    public void calculateLayoutTest_SimpleList() throws LayoutException {
         final int screenWidth = 100;
         final int divHeight = 50;
         final int bodyPadding = 10;

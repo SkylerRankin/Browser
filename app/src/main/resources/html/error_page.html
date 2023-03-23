@@ -3,23 +3,25 @@
         <title>Error $ERROR_CODE$</title>
         <style>
             body {
-                font-family: Verdana;
                 padding: 50px;
+                font-family: Verdana;
+                background-color: #fff;
             }
-            
-            .errorcode {
-            	font-weight: bold;
-            	color: Green;
+
+            img {
+                margin-bottom: 30px;
             }
             
         </style>
     </head>
     <body>
-        <div style="width: 50%; margin: auto; text-align: center;">
+        <div style="width: 500px; margin: auto;">
+            <img src="src/main/resources/images/noise.png" width="100" height="100">
             <h2 id="title">This page could not be reached.</h2>
             <hr/>
-            <div style="width: 50%; font-family: Consolas;">
-            	<p><span class="errorcode">$ERROR_CODE$</span>:$MESSAGE$</p>
+            <div>
+                <p>$SUBTITLE$</p>
+            	<p>$MESSAGE$</p>
             </div>
         </div>
     </body>

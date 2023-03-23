@@ -1,5 +1,7 @@
 package browser.app;
 
+import browser.exception.LayoutException;
+import browser.exception.PageLoadException;
 import javafx.scene.canvas.GraphicsContext;
 
 import browser.css.CSSLoader;
@@ -66,9 +68,9 @@ public class Pipeline {
      * Step 1 in the pipeline. Downloads and parses the HTML.
      * @param url        URL to visit.
      */
-    public void loadWebpage(String url) {
+    public void loadWebpage(String url) throws PageLoadException {
         resourceLoader.loadWebpage(url);
-        domRoot = resourceLoader.getDOM();
+        domRoot = resourceLoader.getDom();
         title = "no title";
         loaded = true;
     }
@@ -77,26 +79,30 @@ public class Pipeline {
      * Step 2 in the pipeline. Calculates the size and position of each render nodes.
      * @param screenWidth        Width in pixels of the screen.
      */
-    public void calculateLayout(float screenWidth) {
-        RenderTreeGenerator renderTreeGenerator = new RenderTreeGenerator();
-        rootRenderNode = renderTreeGenerator.generateRenderTree(domRoot);
-        CSSLoader cssLoader = new CSSLoader(domRoot, renderTreeGenerator.getParentRenderNodeMap(), resourceLoader.getExternalCSS());
-        cssLoader.applyAllCSS(rootRenderNode);
+    public void calculateLayout(float screenWidth) throws LayoutException {
+        try {
+            RenderTreeGenerator renderTreeGenerator = new RenderTreeGenerator();
+            rootRenderNode = renderTreeGenerator.generateRenderTree(domRoot);
+            CSSLoader cssLoader = new CSSLoader(domRoot, renderTreeGenerator.getParentRenderNodeMap(), resourceLoader.getExternalCSS());
+            cssLoader.applyAllCSS(rootRenderNode);
 
-        renderTreeGenerator.cleanupRenderNodeText(rootRenderNode);
+            renderTreeGenerator.cleanupRenderNodeText(rootRenderNode);
 
-        // Insert list markers, propagate any CSS to them, and update their content.
-        ListMarkerGenerator.addMarkers(rootRenderNode);
-        cssLoader.applyAllCSS(rootRenderNode);
-        ListMarkerGenerator.setMarkerStyles(rootRenderNode);
+            // Insert list markers, propagate any CSS to them, and update their content.
+            ListMarkerGenerator.addMarkers(rootRenderNode);
+            cssLoader.applyAllCSS(rootRenderNode);
+            ListMarkerGenerator.setMarkerStyles(rootRenderNode);
 
-        BoxTreeGenerator boxTreeGenerator = new BoxTreeGenerator();
-        rootBoxNode = boxTreeGenerator.generate(rootRenderNode);
-        BoxLayoutGenerator boxLayoutGenerator = new BoxLayoutGenerator(textDimensionCalculator);
-        boxLayoutGenerator.calculateLayout(rootBoxNode, screenWidth);
+            BoxTreeGenerator boxTreeGenerator = new BoxTreeGenerator();
+            rootBoxNode = boxTreeGenerator.generate(rootRenderNode);
+            BoxLayoutGenerator boxLayoutGenerator = new BoxLayoutGenerator(textDimensionCalculator);
+            boxLayoutGenerator.calculateLayout(rootBoxNode, screenWidth);
 
-        height = rootBoxNode.height;
-        width = screenWidth;
+            height = rootBoxNode.height;
+            width = screenWidth;
+        } catch (Exception e) {
+            throw new LayoutException(e);
+        }
     }
 
     /**

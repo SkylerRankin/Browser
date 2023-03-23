@@ -1,11 +1,12 @@
 package browser.network;
 
+import browser.exception.PageLoadException;
 import org.junit.Test;
 
 public class HTTPClientTest {
 
     @Test
-    public void testRequestPage() {
+    public void testRequestPage() throws PageLoadException {
         String html = HTTPClient.requestPage("https://en.wikipedia.org/wiki/Siberian_accentor");
     }
 

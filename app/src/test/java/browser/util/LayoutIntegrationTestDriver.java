@@ -31,20 +31,25 @@ public class LayoutIntegrationTestDriver {
         this.pipeline = pipeline;
     }
 
-    public void runLayoutTest(String filename, int screenWidth) throws IOException {
+    public void runLayoutTest(String filename, int screenWidth) {
         runLayoutTest(filename, screenWidth, false);
     }
 
-    public void runLayoutTest(String filename, int screenWidth, boolean log) throws IOException {
-        String inputFilePath = String.format("file://%s/html/%s.html", testDataDirectory, filename);
-        pipeline.loadWebpage(inputFilePath);
-        pipeline.calculateLayout(screenWidth);
-        BoxNode rootBoxNode = pipeline.getRootRenderNode().boxNode;
-        BoxNode expectedRootBoxNode = createExpectedBoxTree(filename);
-        if (log) {
-            System.out.printf("Expected:\n%s\nActual:\n%s\n", expectedRootBoxNode.toRecursiveString(), rootBoxNode.toRecursiveString());
+    public void runLayoutTest(String filename, int screenWidth, boolean log) {
+        try {
+            String inputFilePath = String.format("file://%s/html/%s.html", testDataDirectory, filename);
+            pipeline.loadWebpage(inputFilePath);
+            pipeline.calculateLayout(screenWidth);
+            BoxNode rootBoxNode = pipeline.getRootRenderNode().boxNode;
+            BoxNode expectedRootBoxNode = createExpectedBoxTree(filename);
+            if (log) {
+                System.out.printf("Expected:\n%s\nActual:\n%s\n", expectedRootBoxNode.toRecursiveString(), rootBoxNode.toRecursiveString());
+            }
+            assertBoxNodesEqual(expectedRootBoxNode, rootBoxNode);
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail();
         }
-        assertBoxNodesEqual(expectedRootBoxNode, rootBoxNode);
     }
 
     // Private methods

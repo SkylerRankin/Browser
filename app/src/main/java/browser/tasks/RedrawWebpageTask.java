@@ -4,12 +4,12 @@ import javafx.concurrent.Task;
 
 import browser.app.ErrorPageHandler;
 import browser.app.Pipeline;
-
+import browser.constants.ErrorConstants;
 
 public class RedrawWebpageTask extends Task<Pipeline> {
     
     private final Pipeline pipeline;
-    private float width;
+    private final float width;
     
     public RedrawWebpageTask(float width, Pipeline pipeline) {
         this.pipeline = pipeline;
@@ -17,7 +17,7 @@ public class RedrawWebpageTask extends Task<Pipeline> {
     }
 
     @Override
-    protected Pipeline call() throws Exception {
+    protected Pipeline call() {
         try {
             if (!pipeline.loadedWebpage()) {
                 System.out.println("RedrawWebpageTask: attempted redraw before first draw");
@@ -27,11 +27,12 @@ public class RedrawWebpageTask extends Task<Pipeline> {
                 pipeline.calculateLayout(width);
             }
         } catch (Exception e) {
+            ErrorPageHandler.previousException = e;
             System.out.println("LoadWebpageTask: error running pipeline on page: " + e.getLocalizedMessage());
             e.printStackTrace();
             try {
                 synchronized (pipeline) {
-                    pipeline.loadWebpage(ErrorPageHandler.errorPagePath);
+                    pipeline.loadWebpage(ErrorConstants.ErrorPagePath);
                     pipeline.calculateLayout(width);
                 }
             } catch (Exception e2) {
