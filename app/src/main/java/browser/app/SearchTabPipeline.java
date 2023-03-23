@@ -51,7 +51,7 @@ public class SearchTabPipeline {
                 pipeline.render(gc);
             }
             renderCompleteCallback.onRenderCompleted(pipeline.getRootRenderNode(), RenderCompleteCallback.RenderType.NewLayout);
-            interactionHandler.setRootRenderNode(pipeline.getRootRenderNode());
+            interactionHandler.setRootBoxNode(pipeline.getRootBoxNode());
         });
         Thread thread = new Thread(lwt);
         thread.setUncaughtExceptionHandler((t, e) -> System.err.printf("Uncaught exception: %s\n", e));
@@ -74,7 +74,7 @@ public class SearchTabPipeline {
                 pipeline.render(gc);
             }
             renderCompleteCallback.onRenderCompleted(pipeline.getRootRenderNode(), renderType);
-            interactionHandler.setRootRenderNode(pipeline.getRootRenderNode());
+            interactionHandler.setRootBoxNode(pipeline.getRootBoxNode());
             currentRedrawTask = null;
         });
         Thread thread = new Thread(crt);

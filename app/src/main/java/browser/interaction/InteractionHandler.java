@@ -5,22 +5,21 @@ import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 
-import browser.model.InteractableElement;
-import browser.model.RenderNode;
-import browser.model.Vector2;
+import browser.model.*;
 import browser.parser.HTMLElements;
 
 public class InteractionHandler {
     private final InteractionCallback interactionCallback;
-    private RenderNode rootRenderNode;
+    private BoxNode rootBoxNode;
     private List<InteractableElement> interactableElements;
+    private boolean hover = false;
 
     public InteractionHandler(InteractionCallback interactionCallback) {
         this.interactionCallback = interactionCallback;
     }
 
     public void handleClickEvent(Vector2 position) {
-        if (rootRenderNode == null) {
+        if (rootBoxNode == null) {
             return;
         }
 
@@ -29,11 +28,7 @@ public class InteractionHandler {
                 switch (element.getInteractionType()) {
                     case REDIRECT -> {
                         String url = element.getParameter(InteractableElement.URL_KEY);
-                        interactionCallback.onRedirect(url, false);
-                    }
-                    case REDIRECT_NEW_TAB -> {
-                        String url = element.getParameter(InteractableElement.URL_KEY);
-                        interactionCallback.onRedirect(url, true);
+                        interactionCallback.onEvent(InteractableElement.InteractionType.REDIRECT, url);
                     }
                 }
                 break;
@@ -41,17 +36,43 @@ public class InteractionHandler {
         }
     }
 
-    public void setRootRenderNode(RenderNode root) {
-        rootRenderNode = root;
+    public void handleMouseMoveEvent(Vector2 position) {
+        if (interactableElements == null || interactableElements.size() == 0) {
+            return;
+        }
+
+        boolean intersected = false;
+        for (final InteractableElement element : interactableElements) {
+            if (element.interactsWithPoint(position)) {
+                if (!hover) {
+                    interactionCallback.onEvent(InteractableElement.InteractionType.HOVER_START, null);
+                    hover = true;
+                }
+                intersected = true;
+                break;
+            }
+        }
+
+        if (!intersected) {
+            if (hover) {
+                interactionCallback.onEvent(InteractableElement.InteractionType.HOVER_END, null);
+                hover = false;
+            }
+        }
+
+    }
+
+    public void setRootBoxNode(BoxNode root) {
+        rootBoxNode = root;
         buildInteractableElementList();
     }
 
     private void buildInteractableElementList() {
         interactableElements = new ArrayList<>();
-        Deque<RenderNode> stack = new ArrayDeque<>();
-        stack.add(rootRenderNode);
+        Deque<BoxNode> stack = new ArrayDeque<>();
+        stack.add(rootBoxNode);
         while (!stack.isEmpty()) {
-            RenderNode currentNode = stack.removeLast();
+            BoxNode currentNode = stack.removeLast();
             InteractableElement element = getInteractableElement(currentNode);
             if (element != null) {
                 interactableElements.add(element);
@@ -61,19 +82,19 @@ public class InteractionHandler {
         }
     }
 
-    private InteractableElement getInteractableElement(RenderNode node) {
-        switch (node.type) {
+    private InteractableElement getInteractableElement(BoxNode node) {
+        if (node.correspondingRenderNode == null) {
+            return null;
+        }
+        switch (node.correspondingRenderNode.type) {
             case HTMLElements.A -> {
-                if (!node.attributes.containsKey("href")) {
+                if (!node.correspondingRenderNode.attributes.containsKey("href")) {
                     return null;
                 }
-                boolean containsNewTabAttribute = node.attributes.containsKey("target") &&
-                        node.attributes.get("target").equals("_blank");
-                InteractableElement.InteractionType interactionType = containsNewTabAttribute ?
-                        InteractableElement.InteractionType.REDIRECT_NEW_TAB :
-                        InteractableElement.InteractionType.REDIRECT;
-                InteractableElement element = new InteractableElement(HTMLElements.A, node.box, interactionType);
-                element.addParameter(InteractableElement.URL_KEY, node.attributes.get("href"));
+
+                Box box = new Box(node.x, node.y, node.width, node.height);
+                InteractableElement element = new InteractableElement(HTMLElements.A, box, InteractableElement.InteractionType.REDIRECT);
+                element.addParameter(InteractableElement.URL_KEY, node.correspondingRenderNode.attributes.get("href"));
                 return element;
             }
             default -> {

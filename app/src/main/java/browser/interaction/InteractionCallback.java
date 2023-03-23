@@ -1,7 +1,9 @@
 package browser.interaction;
 
+import browser.model.InteractableElement;
+
 public interface InteractionCallback {
 
-    void onRedirect(String url, boolean newTab);
+    void onEvent(InteractableElement.InteractionType type, String data);
 
 }

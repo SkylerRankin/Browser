@@ -33,6 +33,7 @@ public class Pipeline {
     private DOMNode domRoot;
     @Getter
     private RenderNode rootRenderNode;
+    @Getter
     private BoxNode rootBoxNode;
     private boolean loaded;
 

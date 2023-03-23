@@ -47,31 +47,31 @@ public class InteractionHandlerTest {
         handler.setRootRenderNode(renderRoot);
 
         handler.handleClickEvent(new Vector2(0, 0));
-        verify(interactionCallback, never()).onRedirect(anyString(), anyBoolean());
+        verify(interactionCallback, never()).onRedirect(anyString());
         reset(interactionCallback);
 
         handler.handleClickEvent(new Vector2(94, 45));
-        verify(interactionCallback, never()).onRedirect(anyString(), anyBoolean());
+        verify(interactionCallback, never()).onRedirect(anyString());
         reset(interactionCallback);
 
         handler.handleClickEvent(new Vector2(25, 75));
-        verify(interactionCallback, never()).onRedirect(anyString(), anyBoolean());
+        verify(interactionCallback, never()).onRedirect(anyString());
         reset(interactionCallback);
 
         handler.handleClickEvent(new Vector2(63, 41));
-        verify(interactionCallback).onRedirect(eq("link1"), eq(false));
+        verify(interactionCallback).onRedirect(eq("link1"));
         reset(interactionCallback);
 
         handler.handleClickEvent(new Vector2(60, 40));
-        verify(interactionCallback).onRedirect(eq("link1"), eq(false));
+        verify(interactionCallback).onRedirect(eq("link1"));
         reset(interactionCallback);
 
         handler.handleClickEvent(new Vector2(29, 59));
-        verify(interactionCallback).onRedirect(eq("link2"), eq(true));
+        verify(interactionCallback).onRedirect(eq("link2"));
         reset(interactionCallback);
 
         handler.handleClickEvent(new Vector2(22, 58));
-        verify(interactionCallback).onRedirect(eq("link2"), eq(true));
+        verify(interactionCallback).onRedirect(eq("link2"));
         reset(interactionCallback);
     }
 

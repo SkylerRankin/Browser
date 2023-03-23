@@ -7,7 +7,8 @@ public class InteractableElement {
 
     public enum InteractionType {
         REDIRECT,
-        REDIRECT_NEW_TAB
+        HOVER_START,
+        HOVER_END
     }
 
     public static final String URL_KEY = "url";

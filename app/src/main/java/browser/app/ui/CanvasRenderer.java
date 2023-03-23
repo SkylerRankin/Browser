@@ -48,7 +48,7 @@ public class CanvasRenderer {
                 pipeline.render(graphicsContext);
             }
             renderCompleteCallback.onRenderCompleted(pipeline.getRootRenderNode(), RenderCompleteCallback.RenderType.NewLayout);
-//            interactionHandler.setRootRenderNode(pipeline.getRootRenderNode());
+            interactionHandler.setRootBoxNode(pipeline.getRootBoxNode());
         });
         Thread thread = new Thread(lwt);
         thread.setUncaughtExceptionHandler((t, e) -> System.err.printf("Uncaught exception: %s\n", e));

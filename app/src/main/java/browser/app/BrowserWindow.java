@@ -6,6 +6,7 @@ import java.util.List;
 
 import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
+import javafx.scene.Cursor;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.*;
@@ -16,6 +17,8 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
 import browser.app.ui.*;
+import browser.interaction.InteractionHandler;
+import browser.model.Vector2;
 import browser.tasks.RenderCompleteCallback;
 
 public class BrowserWindow extends Application {
@@ -106,6 +109,29 @@ public class BrowserWindow extends Application {
             System.exit(0);
         });
 
+        InteractionHandler interactionHandler = new InteractionHandler((type, data) -> {
+            switch (type) {
+                case REDIRECT -> renderPage(data, true);
+                case HOVER_START -> scene.setCursor(Cursor.HAND);
+                case HOVER_END -> scene.setCursor(Cursor.DEFAULT);
+            }
+        });
+
+        // Register page click callback
+        canvas.setOnMouseClicked(event -> {
+            Vector2 position = new Vector2((float) event.getX(), (float) event.getY());
+            interactionHandler.handleClickEvent(position);
+        });
+
+        canvas.setOnMouseMoved(event -> {
+            Vector2 position = new Vector2((float) event.getX(), (float) event.getY());
+            interactionHandler.handleMouseMoveEvent(position);
+        });
+
+        canvas.setOnMouseExited(event -> {
+            scene.setCursor(Cursor.DEFAULT);
+        });
+
         scene = new Scene(stack, 1500, 800);
         File windowCSSFile = new File("./src/main/resources/css/javafx_window_new.css");
         scene.getStylesheets().add(windowCSSFile.toURI().toString());
@@ -115,7 +141,7 @@ public class BrowserWindow extends Application {
         RenderCompleteCallback renderCompleteCallback = (root, type) -> {
             controlBar.setLoading(false);
         };
-        canvasRenderer = new CanvasRenderer(canvas, null, renderCompleteCallback);
+        canvasRenderer = new CanvasRenderer(canvas, interactionHandler, renderCompleteCallback);
         canvas.setWidth(stage.getWidth());
 
         // Register width resize callback
