@@ -51,10 +51,7 @@ public class RenderTreeGenerator {
 
     private RenderNode domTreeToRenderTree(DOMNode dom) {
         DOMNode body = getBodyNode(dom);
-        if (body == null) {
-            return null;
-        }
-        return copyTree(body, null, 0);
+        return copyTree(body == null ? dom : body, null, 0);
     }
 
     private RenderNode copyTree(DOMNode dom, RenderNode parent, int depth) {

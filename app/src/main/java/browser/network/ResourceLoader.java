@@ -35,7 +35,6 @@ public class ResourceLoader {
     private final List<String> externalCSS;
 
     public ResourceLoader() {
-        dom = null;
         resources = new HashMap<>();
         resources.put(resourceType.IMG, new HashSet<>());
         resources.put(resourceType.CSS, new HashSet<>());
