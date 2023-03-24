@@ -52,7 +52,6 @@ public class CSSParser {
     }
     
     public CSSNode generateCSSOM() {
-        
         CSSNode root = new CSSNode("default");
         // Add default CSS styles.
         

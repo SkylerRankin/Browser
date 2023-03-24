@@ -86,6 +86,7 @@ public class Pipeline {
             CSSLoader cssLoader = new CSSLoader(domRoot, renderTreeGenerator.getParentRenderNodeMap(), resourceLoader.getExternalCSS());
             cssLoader.applyAllCSS(rootRenderNode);
 
+            renderTreeGenerator.removeDisplayNoneNodes(rootRenderNode);
             renderTreeGenerator.cleanupRenderNodeText(rootRenderNode);
 
             // Insert list markers, propagate any CSS to them, and update their content.

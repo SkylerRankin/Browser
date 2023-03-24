@@ -17,6 +17,19 @@ public class RenderTreeGenerator {
         return domTreeToRenderTree(dom);
     }
 
+    public void removeDisplayNoneNodes(RenderNode renderNode) {
+        for (int i = renderNode.children.size() - 1; i >= 0; i--) {
+            RenderNode child = renderNode.children.get(i);
+            if (child.style.outerDisplay != null && child.style.outerDisplay.equals(CSSStyle.DisplayType.NONE)) {
+                renderNode.children.remove(i);
+            }
+        }
+
+        for (RenderNode child : renderNode.children) {
+            removeDisplayNoneNodes(child);
+        }
+    }
+
     public void cleanupRenderNodeText(RenderNode renderNode) {
         if (renderNode != null) {
             removeDuplicateWhitespace(renderNode, false);

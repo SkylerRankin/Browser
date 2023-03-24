@@ -1,7 +1,5 @@
 package browser.app;
 
-import java.io.IOException;
-
 import browser.util.LayoutIntegrationTestDriver;
 
 import org.junit.Before;
@@ -54,81 +52,86 @@ public class LayoutIntegrationTests {
     // Flow tests
 
     @Test
-    public void stackedPaddingTest() throws IOException {
+    public void stackedPaddingTest() {
         driver.runLayoutTest("stackedPadding", 1000);
     }
 
     @Test
-    public void blockBoxNoChildren() throws IOException {
+    public void blockBoxNoChildren() {
         driver.runLayoutTest("blockBoxNoChildren", 500);
     }
 
     @Test
-    public void simpleLineBreaks() throws IOException {
+    public void simpleLineBreaks() {
         driver.runLayoutTest("simpleLineBreaks", 100);
     }
 
     @Test
-    public void basicInferredInlineSpacing() throws IOException {
+    public void basicInferredInlineSpacing() {
         driver.runLayoutTest("basicInferredInlineSpacing", 100);
     }
 
     @Test
-    public void preserveInlineSpaces() throws IOException {
+    public void preserveInlineSpaces() {
         driver.runLayoutTest("preserveInlineSpaces", 200);
     }
 
     @Test
-    public void marginAuto() throws IOException {
+    public void marginAuto() {
         driver.runLayoutTest("marginAuto", 1000);
+    }
+
+    @Test
+    public void displayNone() {
+        driver.runLayoutTest("displayNone", 1000, true);
     }
 
     // Text alignment
 
     @Test
-    public void simpleTextAlignCenter() throws IOException {
+    public void simpleTextAlignCenter() {
         driver.runLayoutTest("simpleTextAlignCenter", 500);
     }
 
     @Test
-    public void mixedTextAlign() throws IOException {
+    public void mixedTextAlign() {
         driver.runLayoutTest("mixedTextAlign", 100);
     }
 
     @Test
-    public void alignmentMultipleRows() throws IOException {
+    public void alignmentMultipleRows() {
         driver.runLayoutTest("alignmentMultipleRows", 100);
     }
 
     @Test
-    public void alignmentAnonymousBlockBox() throws IOException {
+    public void alignmentAnonymousBlockBox() {
         driver.runLayoutTest("alignmentAnonymousBlockBox", 100);
     }
 
     // List tests
 
     @Test
-    public void simpleOrderedList() throws IOException {
+    public void simpleOrderedList() {
         driver.runLayoutTest("simpleOrderedList", 400);
     }
 
     @Test
-    public void nestedList() throws IOException {
+    public void nestedList() {
         driver.runLayoutTest("nestedList", 500);
     }
 
     @Test
-    public void inlineBlockList() throws IOException {
+    public void inlineBlockList() {
         driver.runLayoutTest("inlineBlockList", 500);
     }
 
     @Test
-    public void listThatsActuallyJustADiv() throws IOException {
+    public void listThatsActuallyJustADiv() {
         driver.runLayoutTest("listThatsActuallyJustADiv", 400);
     }
 
     @Test
-    public void inlineListWithInlineItems() throws IOException {
+    public void inlineListWithInlineItems() {
         driver.runLayoutTest("inlineListWithInlineItems", 500);
     }
 
@@ -136,64 +139,64 @@ public class LayoutIntegrationTests {
     // Table tests
 
     @Test
-    public void simplestTable() throws IOException {
+    public void simplestTable() {
         driver.runLayoutTest("simplestTable", 500);
     }
 
     @Test
-    public void tableFixedWidthAutoCells() throws IOException {
+    public void tableFixedWidthAutoCells() {
         driver.runLayoutTest("tableFixedWidthAutoCells", 500);
     }
 
     @Test
-    public void tableFixedWidthOneFixedColumn() throws IOException {
+    public void tableFixedWidthOneFixedColumn() {
         driver.runLayoutTest("tableFixedWidthOneFixedColumn", 500);
     }
 
     @Test
-    public void tableVaryingCellHeights() throws IOException {
+    public void tableVaryingCellHeights() {
         driver.runLayoutTest("tableVaryingCellHeights", 500);
     }
 
     @Test
-    public void simpleMultiColumnSpanTable() throws IOException {
+    public void simpleMultiColumnSpanTable() {
         driver.runLayoutTest("simpleMultiColumnSpanTable", 500);
     }
 
     @Test
-    public void simpleMultiRowSpanTable() throws IOException {
+    public void simpleMultiRowSpanTable() {
         driver.runLayoutTest("simpleMultiRowSpanTable", 500);
     }
 
     @Test
-    public void tableMixedSpans() throws IOException {
+    public void tableMixedSpans() {
         driver.runLayoutTest("tableMixedSpans", 500);
     }
 
     @Test
-    public void tableCellSpanningRowAndCol() throws IOException {
+    public void tableCellSpanningRowAndCol() {
         driver.runLayoutTest("tableCellSpanningRowAndCol", 500);
     }
 
     @Test
-    public void inlineTable() throws IOException {
+    public void inlineTable() {
         driver.runLayoutTest("inlineTable", 200);
     }
 
     @Test
-    public void tableInTable() throws IOException {
+    public void tableInTable() {
         driver.runLayoutTest("tableInTable", 200);
     }
 
     @Test
-    public void tableInlineBlockCells() throws IOException {
+    public void tableInlineBlockCells() {
         driver.runLayoutTest("tableInlineBlockCells", 500);
     }
 
     // Inline block tests
 
     @Test
-    public void inlineBlockWithinInline() throws IOException {
+    public void inlineBlockWithinInline() {
         driver.runLayoutTest("inlineBlockWithinInline", 500);
     }
 

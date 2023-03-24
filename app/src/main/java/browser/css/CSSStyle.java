@@ -207,7 +207,7 @@ public class CSSStyle {
             }
         } else if (value.endsWith("%") && value.substring(0, value.length()-1).matches("\\d+")) {
             double percent = Double.parseDouble(value.substring(0, value.length()-1));
-            fontSize = (int) (16.0 * 100.0 / percent);
+            fontSize = (int) (16.0 * percent / 100.0);
         } else {
             System.out.printf("CSSStyle.parseFontSizeValue: invalid font property: %s\n", value);
         }
@@ -298,7 +298,10 @@ public class CSSStyle {
     private void parseDisplayType(String text) {
         if (CSSConstants.getDisplayType(text) != null) {
             DisplayType singleType = CSSConstants.getDisplayType(text);
-            if (CSSConstants.getDisplayTypeOverride(singleType) != null) {
+            if (singleType.equals(DisplayType.NONE)) {
+                outerDisplay = DisplayType.NONE;
+                innerDisplay = DisplayType.NONE;
+            } else if (CSSConstants.getDisplayTypeOverride(singleType) != null) {
                 // Some display types have mappings to inner/outer display types that are not evident from their names.
                 // For example, inline-block maps to inline flow-root.
                 List<DisplayType> types = CSSConstants.getDisplayTypeOverride(singleType);
