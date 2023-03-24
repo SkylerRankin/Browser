@@ -46,7 +46,7 @@ public class ResourceLoader {
      */
     public void loadWebpage(String url) throws PageLoadException {
         String html = url.startsWith(FILE_PREFIX) ?
-                loadLocalFile(url) :
+                loadLocalHTMLFile(url) :
                 HTTPClient.requestPage(url);
         
         if (url.equals(ErrorConstants.ErrorPagePath)) {
@@ -70,9 +70,13 @@ public class ResourceLoader {
         }
         
         for (String cssURL : resources.get(resourceType.CSS)) {
-            String css = HTTPClient.requestResource(cssURL);
-            externalCSS.add(css);
-            System.out.printf("Loaded %d characters of css from %s.\n", (css == null ? 0 : css.length()), cssURL);
+            String css = url.startsWith(FILE_PREFIX) ?
+                    loadLocalFileAsText(cssURL, url) :
+                    HTTPClient.requestResource(cssURL);
+            if (css !=null) {
+                externalCSS.add(css);
+                System.out.printf("Loaded %d characters of css from %s.\n", css.length(), cssURL);
+            }
         }
         
     }
@@ -95,7 +99,7 @@ public class ResourceLoader {
         }
     }
 
-    private String loadLocalFile(String filePath) throws PageLoadException {
+    private String loadLocalHTMLFile(String filePath) throws PageLoadException {
         if (filePath.endsWith(".html")) {
             try {
                 Path path = Paths.get(filePath.substring(FILE_PREFIX.length()));
@@ -113,6 +117,27 @@ public class ResourceLoader {
         } else {
             throw new PageLoadException(ErrorType.LOCAL_FILE_IS_NOT_HTML, Map.of(ErrorConstants.PATH, filePath));
         }
+    }
+
+    private String loadLocalFileAsText(String filePath, String pageURL) {
+        String separator = pageURL.contains("/") ? "/" : pageURL.contains("\\") ? "\\" : null;
+        List<String> paths = new ArrayList<>(List.of(
+                filePath,
+                Path.of(pageURL.substring(FILE_PREFIX.length()), filePath).toString()
+        ));
+        if (separator != null) {
+            paths.add(Path.of(pageURL.substring(FILE_PREFIX.length(), pageURL.lastIndexOf(separator)), filePath).toString());
+        }
+
+        for (String pathString : paths) {
+            Path path = Paths.get(pathString);
+            if (Files.exists(path) && !Files.isDirectory(path)) {
+                try {
+                    return new String(Files.readAllBytes(path));
+                } catch (IOException ignored) {}
+            }
+        }
+        return null;
     }
 
 }

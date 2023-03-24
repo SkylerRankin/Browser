@@ -39,6 +39,11 @@ public class CSSParser {
      * After calling, this object will expose the parsed information through GET functions.
      */
     public void parse(String css) {
+        if (css == null || css.isBlank() || css.isEmpty()) {
+            rules = Map.of();
+            idMap = Map.of();
+            return;
+        }
         css = css.replaceAll("[\r\n]", " ");
         css = removeComments(css);
         rules = parseRules(css);
