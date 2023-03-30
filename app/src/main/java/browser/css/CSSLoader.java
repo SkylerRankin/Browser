@@ -8,11 +8,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import browser.constants.CSSConstants.SelectorType;
 import browser.model.CSSRulePrecedent;
+import browser.model.CSSSelector;
 import browser.model.DOMNode;
 import browser.model.RenderNode;
 import browser.parser.CSSParser;
-import browser.parser.CSSParser.Selector;
 import browser.parser.HTMLElements;
 
 public class CSSLoader {
@@ -24,7 +25,7 @@ public class CSSLoader {
     public CSSLoader(DOMNode dom, Map<Integer, RenderNode> parentRenderNodeMap, List<String> externalCSS) {
         this.parentRenderNodeMap = parentRenderNodeMap;
         this.externalCSS = externalCSS;
-        styleTagCSS = new ArrayList<String>();
+        styleTagCSS = new ArrayList<>();
         extractStyleTagsCSS(dom);
     }
 
@@ -69,29 +70,21 @@ public class CSSLoader {
             cssString = new String(Files.readAllBytes(Paths.get("./src/main/resources/css/default.css")));
         } catch (IOException e) {
             System.err.println("CSSLoader: failed to load default.css, " + e.getLocalizedMessage());
-//          e.printStackTrace();
         }
-        parser.parse(cssString);
-        Map<Selector, Map<String, String>> rules = parser.getRules();
-
-        applyRules(root, rules, true);
+//        applyRules(root, parser.parse(cssString), true);
     }
 
     private void loadExternalCSS(RenderNode root) {
         for (String cssString : externalCSS) {
             CSSParser parser = new CSSParser();
-            parser.parse(cssString);
-            Map<Selector, Map<String, String>> rules = parser.getRules();
-            applyRules(root, rules, true);
+//            applyRules(root, parser.parse(cssString), true);
         }
     }
 
     private void loadStyleTags(RenderNode root) {
         for (String cssString : styleTagCSS) {
             CSSParser parser = new CSSParser();
-            parser.parse(cssString);
-            Map<Selector, Map<String, String>> rules = parser.getRules();
-            applyRules(root, rules, true);
+//            applyRules(root, parser.parse(cssString), true);
         }
     }
 
@@ -104,15 +97,14 @@ public class CSSLoader {
         if (root.attributes.containsKey("style")) {
             CSSParser parser = new CSSParser();
             String style = root.attributes.get("style");
-            parser.parse(String.format("%s { %s }", root.type, style));
-            applyRules(root, parser.getRules(), false);
+//            Map<CSSSelector, Map<String, String>> rules = parser.parse(String.format("%s { %s }", root.type, style));
+//            applyRules(root, rules, false);
         }
 
         String legacyAttributesCSS = LegacyCSSLoader.getCSSFromAttributes(root);
         if (legacyAttributesCSS != null) {
             CSSParser parser = new CSSParser();
-            parser.parse(legacyAttributesCSS);
-            applyRules(root, parser.getRules(), false);
+//            applyRules(root, parser.parse(legacyAttributesCSS), false);
         }
 
         for (RenderNode child : root.children) {
@@ -121,37 +113,34 @@ public class CSSLoader {
     }
 
     //TODO: handle selectors for nested elements; this is just 1 level
-    private static void applyRules(RenderNode node, Map<Selector, Map<String, String>> rules, boolean globalApplication) {
+    private static void applyRules(RenderNode node, Map<CSSSelector, Map<String, String>> rules, boolean globalApplication) {
         // Create some representative selectors for this node
-        CSSParser.Selector allSelector = new Selector(CSSParser.SelectorType.ALL);
-        CSSParser.Selector elementSelector = new Selector(CSSParser.SelectorType.ELEMENT);
-        elementSelector.values.add(node.type);
-        List<CSSParser.Selector> classSelectors = new ArrayList<>();
+//        CSSSelector allSelector = new CSSSelector(SelectorType.ALL);
+//        CSSSelector elementSelector = new CSSSelector(SelectorType.ELEMENT, node.type);
+        List<CSSSelector> classSelectors = new ArrayList<>();
         if (node.attributes.get("class") != null) {
             for (String classString : node.attributes.get("class").split(" ")) {
-                CSSParser.Selector classSelector = new Selector(CSSParser.SelectorType.CLASS);
-                classSelector.values.add(classString);
-                classSelectors.add(classSelector);
+//                CSSSelector classSelector = new CSSSelector(SelectorType.CLASS, classString);
+//                classSelectors.add(classSelector);
             }
         }
 
-        CSSParser.Selector idSelector = new Selector(CSSParser.SelectorType.ID);
-        idSelector.values.add(node.attributes.get("id"));
+//        CSSSelector idSelector = new CSSSelector(SelectorType.ID, node.attributes.get("id"));
 
-        Map<String, String> allRule = rules.get(allSelector);
-        Map<String, String> elementRule = rules.get(elementSelector);
+//        Map<String, String> allRule = rules.get(allSelector);
+//        Map<String, String> elementRule = rules.get(elementSelector);
         List<Map<String, String>> classRules = new ArrayList<>();
-        for (CSSParser.Selector classSelector : classSelectors) {
+        for (CSSSelector classSelector : classSelectors) {
             classRules.add(rules.get(classSelector));
         }
-        Map<String, String> idRule = rules.get(idSelector);
+//        Map<String, String> idRule = rules.get(idSelector);
 
-        if (allRule != null) node.style.apply(allRule, CSSRulePrecedent.All());
-        if (elementRule != null) node.style.apply(elementRule, CSSRulePrecedent.Element());
+//        if (allRule != null) node.style.apply(allRule, CSSRulePrecedent.All());
+//        if (elementRule != null) node.style.apply(elementRule, CSSRulePrecedent.Element());
         for (Map<String, String> classRule : classRules) {
             if (classRule != null) node.style.apply(classRule, CSSRulePrecedent.Class());
         }
-        if (idRule != null) node.style.apply(idRule, CSSRulePrecedent.ID());
+//        if (idRule != null) node.style.apply(idRule, CSSRulePrecedent.ID());
 
         if (globalApplication) {
             for (RenderNode child : node.children) {
@@ -159,6 +148,24 @@ public class CSSLoader {
             }
         }
 
+    }
+
+    private static List<CSSSelector> getSelectorsFOrNode(RenderNode node) {
+        List<CSSSelector> selectors = new ArrayList<>();
+
+        // Every node uses the all selector.
+//        selectors.add(new CSSSelector(SelectorType.ALL));
+
+        // Selector for the node type.
+//        selectors.add(new CSSSelector(SelectorType.ELEMENT, node.type));
+
+        // Selector for this node's id.
+        if (node.attributes.containsKey("id")) {
+//            selectors.add(new CSSSelector(SelectorType.ELEMENT, node.type));
+        }
+
+
+        return selectors;
     }
 
     /**

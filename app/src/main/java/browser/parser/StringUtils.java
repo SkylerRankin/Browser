@@ -43,6 +43,10 @@ public class StringUtils {
         }
     }
 
+    public static String substringUntilSpace(String string, int startIndex) {
+        return substringUntilSpaceOrString(string, startIndex, List.of());
+    }
+
     public static String substringUntilSpaceOrString(String string, int startIndex, List<String> endStrings) {
         StringBuilder stringBuilder = new StringBuilder();
         for (int i = startIndex; i < string.length(); i++) {

@@ -2,10 +2,39 @@ package browser.constants;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.regex.Pattern;
 
 import browser.css.CSSStyle;
 
 public class CSSConstants {
+
+    public enum SelectorType {
+        UNIVERSAL,
+        TYPE,
+        CLASS,
+        ID,
+        ATTRIBUTE,
+        PSEUDO
+    }
+
+    public enum SelectorCombinator {
+        DESCENDANT,
+        CHILD,
+        SIBLING,
+        ADJACENT_SIBLING
+    }
+
+    public static final Pattern CSS_IDENTIFIER_PATTERN = Pattern.compile("[0-9a-zA-Z\\-_]+");
+
+    public static final Set<Character> CSS_COMBINATOR_CHARACTERS = Set.of('>', '~', '+');
+
+    public static final Map<String, SelectorCombinator> STRING_SELECTOR_COMBINATOR_MAP = Map.ofEntries(
+            Map.entry(" ", SelectorCombinator.DESCENDANT),
+            Map.entry(">", SelectorCombinator.CHILD),
+            Map.entry("~", SelectorCombinator.SIBLING),
+            Map.entry("+", SelectorCombinator.ADJACENT_SIBLING)
+    );
 
     public final static List<CSSStyle.DisplayType> outerDisplayTypes = List.of(
             CSSStyle.DisplayType.BLOCK,

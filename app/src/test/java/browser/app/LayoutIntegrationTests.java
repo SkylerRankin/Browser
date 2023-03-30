@@ -200,4 +200,11 @@ public class LayoutIntegrationTests {
         driver.runLayoutTest("inlineBlockWithinInline", 500);
     }
 
+    // CSS specific tests
+
+    @Test
+    public void basicCSSSelectors() {
+        driver.runLayoutTest("basicCSSSelectors", 100, true);
+    }
+
 }
