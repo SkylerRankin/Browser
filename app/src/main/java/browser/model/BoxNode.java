@@ -95,9 +95,10 @@ public class BoxNode {
         String flags = "" + (isAnonymous ? "a" : "") + (isTextNode ? "t" : "");
         if (isPseudo) flags += "p";
         String textRange = isTextNode ? String.format(", tx:%d-%d", textStartIndex, textEndIndex) : "";
-        return String.format("id=%s, outer=%s, inner=%s, parent=%d, rid=%d, %s, [%s], %s%s",
-                id, outerDisplayType, innerDisplayType, parent == null ? -1 : parent.id, renderNodeId,
-                positionSize, flags, children.stream().map(boxNode -> boxNode.id).toList(), textRange);
+        return String.format("(%s) id=%s, outer=%s, inner=%s, parent=%d, rid=%d, %s, [%s], %s%s",
+                correspondingRenderNode == null ? "?" : correspondingRenderNode.type, id, outerDisplayType,
+                innerDisplayType, parent == null ? -1 : parent.id, renderNodeId, positionSize, flags,
+                children.stream().map(boxNode -> boxNode.id).toList(), textRange);
     }
 
     public String toRecursiveString() {

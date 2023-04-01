@@ -18,7 +18,7 @@ public class SelectorMatcher {
     }
 
     private static boolean selectorGroupMatchesNode(CSSSelectorGroup selectorGroup, RenderNode node, int selectorIndex) {
-        int hash = Objects.hash(selectorGroup, node.id, selectorIndex);
+        int hash = String.format("%s %s %s", selectorGroup, node.id, selectorIndex).hashCode();
         if (matchCache.containsKey(hash)) {
             return matchCache.get(hash);
         }

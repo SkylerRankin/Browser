@@ -191,7 +191,7 @@ public class RenderNode {
     }
 
     public String toString() {
-        return String.format("%s, depth=%d, id=%d, %d children, text = %s, %s", type, depth, id, children.size(), text, style.fontSize);
+        return String.format("%s, depth=%d, id=%d, %d children, text = %s", type, depth, id, children.size(), text);
     }
 
 }

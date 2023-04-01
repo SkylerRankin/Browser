@@ -110,9 +110,6 @@ public class CSSLoader {
      * @param globalApplication     True if the rules should be recursively applied to the node's children.
      */
     private void applyRules(RenderNode node, Map<CSSSelectorGroup, Map<String, String>> rules, boolean globalApplication, boolean inline) {
-        if (node.id == 46) {
-            int x = 0;
-        }
         for (CSSSelectorGroup selectorGroup : rules.keySet()) {
             if (SelectorMatcher.selectorGroupMatchesNode(selectorGroup, node)) {
                 CSSSpecificity specificity = CSSSpecificity.fromSelectorGroup(selectorGroup);
