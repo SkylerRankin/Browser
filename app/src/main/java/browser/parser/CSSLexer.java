@@ -28,11 +28,16 @@ public class CSSLexer {
         int index = 0;
         while (index < css.length()) {
             CSSToken token = getToken(css, index, lastToken);
-            index += token.value.length();
-            if (!token.type.equals(CSSTokenType.SKIP)) {
-                token.value = token.value.trim();
-                tokens.add(token);
-                lastToken = token.type;
+            if (token == null) {
+                System.err.printf("Lexing failure: failed to find token at \"%s...\".", css.substring(index, Math.min(css.length(), index + 10)));
+                index++;
+            } else {
+                index += token.value.length();
+                if (!token.type.equals(CSSTokenType.SKIP)) {
+                    token.value = token.value.trim();
+                    tokens.add(token);
+                    lastToken = token.type;
+                }
             }
         }
 
@@ -95,6 +100,8 @@ public class CSSLexer {
     private static CSSToken handlePropertyValue(String css, int index) {
         if (css.charAt(index) == ';') {
             return new CSSToken(CSSTokenType.SEMI_COLON, ";");
+        } else if (css.charAt(index) == '}') {
+            return new CSSToken(CSSTokenType.CLOSE_BRACKET, '}');
         }
         return null;
     }

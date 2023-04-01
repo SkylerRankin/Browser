@@ -9,7 +9,6 @@ import browser.model.DOMNode;
 import browser.model.RenderNode;
 
 public class RenderTreeGenerator {
-    private final Map<Integer, RenderNode> parentRenderNodeMap = new HashMap<>();
 
     // Public methods
 
@@ -52,14 +51,6 @@ public class RenderTreeGenerator {
         return bodyCandidate;
     }
 
-    public Map<Integer, RenderNode> getParentRenderNodeMap() {
-        return this.parentRenderNodeMap;
-    }
-
-    public void reset() {
-        parentRenderNodeMap.clear();
-    }
-
     // Private methods
 
     private RenderNode domTreeToRenderTree(DOMNode dom) {
@@ -71,7 +62,6 @@ public class RenderTreeGenerator {
         RenderNode renderNode = new RenderNode(dom, RenderNode.nextId, depth);
         renderNode.attributes = dom.attributes;
         renderNode.parent = parent;
-        if (parent != null) parentRenderNodeMap.put(RenderNode.nextId, parent);
         RenderNode.nextId++;
         for (DOMNode child : dom.children) {
             if (!HTMLConstants.elementsExcludedFromRender.contains(child.type)) {

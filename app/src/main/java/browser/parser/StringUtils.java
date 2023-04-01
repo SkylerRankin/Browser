@@ -16,30 +16,31 @@ public class StringUtils {
     }
 
     public static String substringUntil(String string, int startIndex, String endString) {
-        int endIndex = string.indexOf(endString, startIndex);
-        if (endIndex == -1) {
-            return string.substring(startIndex);
-        } else if (endIndex == startIndex) {
-            return "";
-        } else {
-            return string.substring(startIndex, endIndex);
-        }
+        return substringUntil(string, startIndex, List.of(endString));
     }
 
     public static String substringUntil(String string, int startIndex, List<String> endStrings) {
+        return substringUntil(string, startIndex, endStrings, false);
+    }
+
+    public static String substringUntil(String string, int startIndex, List<String> endStrings, boolean endInclusive) {
         int endIndex = -1;
+        String matchingEndString = null;
         for (String endString : endStrings) {
             int newIndex = string.indexOf(endString, startIndex);
             if (endIndex == -1 || newIndex < endIndex) {
                 endIndex = newIndex;
+                matchingEndString = endString;
             }
         }
         if (endIndex == -1) {
             return string.substring(startIndex);
         } else if (endIndex == startIndex) {
-            return "";
+            return endInclusive ? matchingEndString : "";
         } else {
-            return string.substring(startIndex, endIndex);
+            return endInclusive ?
+                    string.substring(startIndex, endIndex + matchingEndString.length()) :
+                    string.substring(startIndex, endIndex);
         }
     }
 
@@ -48,6 +49,10 @@ public class StringUtils {
     }
 
     public static String substringUntilSpaceOrString(String string, int startIndex, List<String> endStrings) {
+        return substringUntilSpaceOrString(string, startIndex, endStrings, false);
+    }
+
+    public static String substringUntilSpaceOrString(String string, int startIndex, List<String> endStrings, boolean endInclusive) {
         StringBuilder stringBuilder = new StringBuilder();
         for (int i = startIndex; i < string.length(); i++) {
             if (Character.isWhitespace(string.charAt(i))) {
@@ -58,6 +63,9 @@ public class StringUtils {
             for (String endString : endStrings) {
                 if (substringMatch(string, endString, i)) {
                     endStringMatched = true;
+                    if (endInclusive) {
+                        stringBuilder.append(endString);
+                    }
                     break;
                 }
             }

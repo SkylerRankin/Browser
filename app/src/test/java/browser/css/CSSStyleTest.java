@@ -19,13 +19,6 @@ public class CSSStyleTest {
     }
 
     @Test
-    public void setPropertyTest() {
-        CSSStyle style = new CSSStyle();
-        style.setProperty("textAlign", "LEFT");
-        assertEquals(CSSStyle.textAlignType.LEFT, style.textAlign);
-    }
-
-    @Test
     public void displayTypeTest() {
         List<List<String>> properties = List.of(
                 List.of("display", "block"),

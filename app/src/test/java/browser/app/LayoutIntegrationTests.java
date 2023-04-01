@@ -83,7 +83,7 @@ public class LayoutIntegrationTests {
 
     @Test
     public void displayNone() {
-        driver.runLayoutTest("displayNone", 1000, true);
+        driver.runLayoutTest("displayNone", 1000);
     }
 
     // Text alignment
@@ -204,7 +204,7 @@ public class LayoutIntegrationTests {
 
     @Test
     public void basicCSSSelectors() {
-        driver.runLayoutTest("basicCSSSelectors", 100, true);
+        driver.runLayoutTest("basicCSSSelectors", 100);
     }
 
 }

@@ -29,6 +29,7 @@ public class CSSSelectorGroup {
 
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(String.format("CSS Selector Group (%d): ", selectors.size()));
         for (int i = 0; i < selectors.size(); i++) {
             if (i > 0) {
                 stringBuilder.append(String.format(" [%s] ", i - 1 < combinators.size() ? combinators.get(i - 1).name() : "Missing Combinator"));

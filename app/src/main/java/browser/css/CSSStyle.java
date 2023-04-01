@@ -7,7 +7,6 @@ import java.util.regex.Pattern;
 
 import browser.constants.CSSConstants;
 import browser.model.CSSColor;
-import browser.model.CSSRulePrecedent;
 
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -16,9 +15,9 @@ import lombok.ToString;
 @ToString
 public class CSSStyle {
 
-    private final Set<String> setProperties = new HashSet<>();
     private final Map<String, String> properties = new HashMap<>();
-    private final Map<String, CSSRulePrecedent> precedents = new HashMap<>();
+    private final Map<String, CSSSpecificity> propertySpecificity = new HashMap<>();
+    private final Set<String> inheritedProperties = new HashSet<>();
 
     private final Pattern lengthPattern = Pattern.compile("^([0-9]+)([a-zA-Z]{1,5})$");
 
@@ -98,7 +97,7 @@ public class CSSStyle {
     public PositionType position = PositionType.STATIC;
     
     public String fontFamily = "Times New Roman";
-    public int fontSize = 12;
+    public int fontSize = 16;
     public fontStyleType fontStyle = fontStyleType.NORMAL;
     public fontWeightType fontWeight = fontWeightType.NORMAL;
     
@@ -137,40 +136,14 @@ public class CSSStyle {
     public Float maxHeight = null;
     public DimensionType maxHeightType = DimensionType.PIXEL;
     
-//    public textDecorationType textDecoration = textDecorationType.NONE;
-    
     public wordWrapType wordWrap = wordWrapType.NORMAL;
-    
-    public static String[] inheritedProperties = {"color", "font-family", "font-size", "font-style", "font-weight", "text-align", "background-color"};
-    
-    public static boolean propagateAttribute(String attribute) {
-        for (String s : inheritedProperties) {
-            if (s.equals(attribute)) return true;
-        }
-        return false;
-    }
-    
-    /**
-     * Check if this property has already been set by some other CSS rule.
-     * @param property
-     * @return
-     */
-    public boolean hasPropertySet(String property) {
-//        return properties.containsKey(property);
-        return setProperties.contains(property);
-    }
     
     public void setProperty(String property, String value) {
         properties.put(property, value);
-        setProperties.add(property);
     }
     
     public Map<String, String> getAllProperties() {
         return properties;
-    }
-    
-    public void resetSetProperties() {
-        setProperties.clear();
     }
     
     private int parseDimension(String value) {
@@ -301,6 +274,7 @@ public class CSSStyle {
             if (singleType.equals(DisplayType.NONE)) {
                 outerDisplay = DisplayType.NONE;
                 innerDisplay = DisplayType.NONE;
+                auxiliaryDisplay = DisplayType.NONE;
             } else if (CSSConstants.getDisplayTypeOverride(singleType) != null) {
                 // Some display types have mappings to inner/outer display types that are not evident from their names.
                 // For example, inline-block maps to inline flow-root.
@@ -503,35 +477,32 @@ public class CSSStyle {
             }
         }
     }
-    
-    public CSSRulePrecedent getPropertyPrecedent(String property) {
-        return precedents.get(property);
+
+    public CSSSpecificity getPropertySpecificity(String property) {
+        return propertySpecificity.get(property);
     }
     
-    public void apply(String property, String value, CSSRulePrecedent newPrecedent) {
-        CSSRulePrecedent oldPrecedent = precedents.get(property);
-        if (oldPrecedent == null || newPrecedent.hasPrecedentOver(oldPrecedent)) {
+    public void apply(String property, String value, CSSSpecificity specificity) {
+        if (!propertySpecificity.containsKey(property) ||
+                specificity.hasEqualOrGreaterSpecificityThan(propertySpecificity.get(property)) ||
+                inheritedProperties.contains(property)) {
+            propertySpecificity.put(property, specificity);
             properties.put(property, value);
-            // TODO: dont need setProperties anymore since we have precedents
-            setProperties.add(property);
-            precedents.put(property, newPrecedent);
+            inheritedProperties.remove(property);
         }
     }
-    
-    /**
-     * Apply some CSS rules if it has precedence over what is currently there
-     * @param css    Map<String, String> of the CSS attribute and value
-     */
-    public void apply(Map<String, String> css, CSSRulePrecedent newPrecedent) {
-        for (Entry<String, String> e : css.entrySet()) {
-            apply(e.getKey(), e.getValue(), newPrecedent);
+
+    public void applyInherited(String property, String value, CSSSpecificity specificity) {
+        if (!properties.containsKey(property) || inheritedProperties.contains(property)) {
+            properties.put(property, value);
+            inheritedProperties.add(property);
+            propertySpecificity.put(property, specificity);
         }
     }
-    
-    public void print(String padding) {
-        for (Entry<String, String> e : properties.entrySet()) {
-            CSSRulePrecedent p = precedents.get(e.getKey());
-            System.out.printf("%s%s %s: %s\n", padding, p.toString(), e.getKey(), e.getValue());
+
+    public void apply(Map<String, String> declarations, CSSSpecificity specificity) {
+        for (Entry<String, String> e : declarations.entrySet()) {
+            apply(e.getKey(), e.getValue(), specificity);
         }
     }
 

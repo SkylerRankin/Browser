@@ -19,10 +19,20 @@ public class CSSConstants {
     }
 
     public enum SelectorCombinator {
-        DESCENDANT,
+        ADJACENT_SIBLING,
         CHILD,
-        SIBLING,
-        ADJACENT_SIBLING
+        DESCENDANT,
+        SIBLING
+    }
+
+    public enum AttributeSelectorComparisonType {
+        NONE, // [attr], matches regardless of attribute value
+        EXACT, // [attr=value], matches if attribute value is exactly value
+        MEMBER_IN_LIST, // [attr~=value], matches when the attribute value is a whitespace-separated list, containing value
+        HYPHEN, // [attr|=value], matches value exactly, or if value is followed by a hyphen
+        PREFIX, // [attr^=value], matches when attribute value is preceded by value
+        SUFFIX, // [attr$=value], matches when attribute value is suffixed by value
+        OCCURRENCE // [attr*=value], matches when value occurs somewhere in the attribute value
     }
 
     public static final Pattern CSS_IDENTIFIER_PATTERN = Pattern.compile("[0-9a-zA-Z\\-_]+");
@@ -108,6 +118,16 @@ public class CSSConstants {
             "ridge",
             "inset",
             "outset"
+    );
+
+    public static Set<String> inheritedProperties = Set.of(
+            "background-color",
+            "color",
+            "font-family",
+            "font-size",
+            "font-style",
+            "font-weight",
+            "text-align"
     );
 
     /**

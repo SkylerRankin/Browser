@@ -83,7 +83,7 @@ public class Pipeline {
         try {
             RenderTreeGenerator renderTreeGenerator = new RenderTreeGenerator();
             rootRenderNode = renderTreeGenerator.generateRenderTree(domRoot);
-            CSSLoader cssLoader = new CSSLoader(domRoot, renderTreeGenerator.getParentRenderNodeMap(), resourceLoader.getExternalCSS());
+            CSSLoader cssLoader = new CSSLoader(domRoot, resourceLoader.getExternalCSS());
             cssLoader.applyAllCSS(rootRenderNode);
 
             renderTreeGenerator.removeDisplayNoneNodes(rootRenderNode);

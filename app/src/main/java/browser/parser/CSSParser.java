@@ -1,13 +1,12 @@
 package browser.parser;
 
+import java.lang.reflect.Type;
 import java.util.*;
 import java.util.regex.Matcher;
 
 import browser.constants.CSSConstants;
 import browser.constants.CSSConstants.SelectorCombinator;
-import browser.model.CSSSelector;
-import browser.model.CSSSelectorGroup;
-import browser.model.CSSToken;
+import browser.model.*;
 
 public class CSSParser {
 
@@ -80,7 +79,7 @@ public class CSSParser {
                     i++;
                 }
 
-                String itemText = StringUtils.substringUntilSpace(item, i);
+                String itemText = getSelectorListString(item, i);
                 if (expectingCombinator) {
                     boolean whitespaceCombinator = false;
                     if (!CSSConstants.CSS_COMBINATOR_CHARACTERS.contains(item.charAt(i)) && whitespace) {
@@ -110,8 +109,7 @@ public class CSSParser {
     }
 
     private static void parseSelector(String text, CSSSelectorGroup selectorGroup) {
-        List<CSSConstants.SelectorType> types = new ArrayList<>();
-        List<String> values = new ArrayList<>();
+        List<CSSUnitSelector> unitSelectors = new ArrayList<>();
 
         int i = 0;
         while (i < text.length()) {
@@ -119,15 +117,13 @@ public class CSSParser {
             Matcher matcher = CSSConstants.CSS_IDENTIFIER_PATTERN.matcher(text.substring(i));
             switch (c) {
                 case "*" -> {
-                    types.add(CSSConstants.SelectorType.UNIVERSAL);
-                    values.add(c);
+                    unitSelectors.add(new CSSUnitSelector(CSSConstants.SelectorType.UNIVERSAL, c));
                     i++;
                 }
                 case "." -> {
                     if (matcher.find()) {
                         String classString = matcher.group();
-                        types.add(CSSConstants.SelectorType.CLASS);
-                        values.add(classString);
+                        unitSelectors.add(new CSSUnitSelector(CSSConstants.SelectorType.CLASS, classString));
                         i += classString.length() + 1;
                     } else {
                         i++;
@@ -136,8 +132,7 @@ public class CSSParser {
                 case "#" -> {
                     if (matcher.find()) {
                         String idString = matcher.group();
-                        types.add(CSSConstants.SelectorType.ID);
-                        values.add(idString);
+                        unitSelectors.add(new CSSUnitSelector(CSSConstants.SelectorType.ID, idString));
                         i += idString.length() + 1;
                     } else {
                         i++;
@@ -147,9 +142,8 @@ public class CSSParser {
                     int attributeEnd = text.indexOf("]", i + 1);
                     if (attributeEnd != -1) {
                         String attributeText = text.substring(i + 1, attributeEnd);
-                        // TODO parse attribute further
-                        types.add(CSSConstants.SelectorType.ATTRIBUTE);
-                        values.add(attributeText);
+                        CSSUnitAttributeSelector attributeSelector = parseAttributeSelector(attributeText);
+                        unitSelectors.add(attributeSelector);
                         i += attributeText.length() + 2;
                     } else {
                         i++;
@@ -158,8 +152,7 @@ public class CSSParser {
                 case ":" -> {
                     if (matcher.find()) {
                         String pseudoString = matcher.group();
-                        types.add(CSSConstants.SelectorType.PSEUDO);
-                        values.add(pseudoString);
+                        unitSelectors.add(new CSSUnitSelector(CSSConstants.SelectorType.PSEUDO, pseudoString));
                         i += pseudoString.length() + 1;
                     } else {
                         i++;
@@ -168,8 +161,7 @@ public class CSSParser {
                 default -> {
                     if (matcher.find()) {
                         String typeString = matcher.group();
-                        types.add(CSSConstants.SelectorType.TYPE);
-                        values.add(typeString);
+                        unitSelectors.add(new CSSUnitSelector(CSSConstants.SelectorType.TYPE, typeString));
                         i += typeString.length();
                     } else {
                         i++;
@@ -178,7 +170,7 @@ public class CSSParser {
             }
         }
 
-        selectorGroup.selectors.add(new CSSSelector(types, values));
+        selectorGroup.selectors.add(new CSSSelector(unitSelectors));
     }
 
     private static boolean parseSelectorCombinator(String text, CSSSelectorGroup selectorGroup) {
@@ -189,6 +181,63 @@ public class CSSParser {
             selectorGroup.combinators.add(combinator);
             return true;
         }
+    }
+
+    private static CSSUnitAttributeSelector parseAttributeSelector(String text) {
+        String name;
+        String value;
+        CSSConstants.AttributeSelectorComparisonType comparisonType;
+        boolean caseInsensitive = false;
+
+        if (text.contains("=")) {
+            int operatorIndex = text.indexOf("=") - 1;
+            switch (text.charAt(operatorIndex)) {
+                case '~' -> comparisonType = CSSConstants.AttributeSelectorComparisonType.MEMBER_IN_LIST;
+                case '|' -> comparisonType = CSSConstants.AttributeSelectorComparisonType.HYPHEN;
+                case '^' -> comparisonType = CSSConstants.AttributeSelectorComparisonType.PREFIX;
+                case '$' -> comparisonType = CSSConstants.AttributeSelectorComparisonType.SUFFIX;
+                case '*' -> comparisonType = CSSConstants.AttributeSelectorComparisonType.OCCURRENCE;
+                default -> comparisonType = CSSConstants.AttributeSelectorComparisonType.EXACT;
+            }
+
+            name = comparisonType.equals(CSSConstants.AttributeSelectorComparisonType.EXACT) ?
+                    text.substring(0, operatorIndex + 1) : text.substring(0, operatorIndex);
+            value = StringUtils.substringUntilSpaceOrString(text, text.indexOf("=") + 1, List.of("]"));
+            if (value.startsWith("\"") || value.startsWith("'")) {
+                value = value.substring(1);
+            }
+            if (value.endsWith("\"") || value.endsWith("'")) {
+                value = value.substring(0, value.length() - 1);
+            }
+            if (text.endsWith(" i")) {
+                caseInsensitive = true;
+            }
+        } else {
+            name = text;
+            value = null;
+            comparisonType = CSSConstants.AttributeSelectorComparisonType.NONE;
+        }
+
+        CSSUnitAttributeSelector selector = new CSSUnitAttributeSelector(name, value, comparisonType);
+        selector.caseInsensitive = caseInsensitive;
+        return selector;
+    }
+
+    private static String getSelectorListString(String fullSelectorText, int startIndex) {
+        StringBuilder string = new StringBuilder();
+        boolean inAttribute = false;
+        for (int i = startIndex; i < fullSelectorText.length(); i++) {
+            char c = fullSelectorText.charAt(i);
+            if (c == '[') {
+                inAttribute = true;
+            } else if (c == ' ' && !inAttribute) {
+                break;
+            }
+
+            string.append(c);
+        }
+
+        return string.toString();
     }
 
 }

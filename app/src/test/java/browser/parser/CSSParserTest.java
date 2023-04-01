@@ -6,13 +6,15 @@ import static org.junit.Assert.assertTrue;
 import java.util.List;
 import java.util.Map;
 
+import browser.constants.CSSConstants.AttributeSelectorComparisonType;
 import browser.constants.CSSConstants.SelectorCombinator;
 import browser.constants.CSSConstants.SelectorType;
 import browser.model.CSSSelector;
 import browser.model.CSSSelectorGroup;
+import browser.model.CSSUnitAttributeSelector;
+import browser.model.CSSUnitSelector;
 
 import org.junit.Test;
-
 
 public class CSSParserTest {
 
@@ -22,14 +24,18 @@ public class CSSParserTest {
         Map<CSSSelectorGroup, Map<String, String>> rules = CSSParser.parseRules(css);
 
         CSSSelectorGroup group1 = new CSSSelectorGroup();
-        group1.selectors.add(new CSSSelector(List.of(SelectorType.TYPE, SelectorType.CLASS), List.of("span", "class-1")));
+        group1.selectors.add(new CSSSelector(List.of(
+                new CSSUnitSelector(SelectorType.TYPE, "span"),
+                new CSSUnitSelector(SelectorType.CLASS, "class-1"))));
         group1.combinators.add(SelectorCombinator.CHILD);
-        group1.selectors.add(new CSSSelector(List.of(SelectorType.TYPE), List.of("span")));
+        group1.selectors.add(new CSSSelector(List.of(
+                new CSSUnitSelector(SelectorType.TYPE, "span")
+        )));
 
         CSSSelectorGroup group2 = new CSSSelectorGroup();
-        group2.selectors.add(new CSSSelector(List.of(SelectorType.ID), List.of("id")));
+        group2.selectors.add(new CSSSelector(List.of(new CSSUnitSelector(SelectorType.ID, "id"))));
         group2.combinators.add(SelectorCombinator.DESCENDANT);
-        group2.selectors.add(new CSSSelector(List.of(SelectorType.TYPE), List.of("div")));
+        group2.selectors.add(new CSSSelector(List.of(new CSSUnitSelector(SelectorType.TYPE, "div"))));
 
         Map<String, String> expectedDeclarations = Map.of("background-color", "red");
 
@@ -46,15 +52,15 @@ public class CSSParserTest {
         Map<CSSSelectorGroup, Map<String, String>> rules = CSSParser.parseRules(css);
 
         CSSSelectorGroup group1 = new CSSSelectorGroup();
-        group1.selectors.add(new CSSSelector(List.of(SelectorType.CLASS), List.of("class1")));
+        group1.selectors.add(new CSSSelector(List.of(new CSSUnitSelector(SelectorType.CLASS, "class1"))));
         group1.combinators.add(SelectorCombinator.DESCENDANT);
-        group1.selectors.add(new CSSSelector(List.of(SelectorType.CLASS), List.of("class2")));
+        group1.selectors.add(new CSSSelector(List.of(new CSSUnitSelector(SelectorType.CLASS, "class2"))));
         group1.combinators.add(SelectorCombinator.CHILD);
-        group1.selectors.add(new CSSSelector(List.of(SelectorType.CLASS), List.of("class3")));
+        group1.selectors.add(new CSSSelector(List.of(new CSSUnitSelector(SelectorType.CLASS, "class3"))));
         group1.combinators.add(SelectorCombinator.SIBLING);
-        group1.selectors.add(new CSSSelector(List.of(SelectorType.CLASS), List.of("class4")));
+        group1.selectors.add(new CSSSelector(List.of(new CSSUnitSelector(SelectorType.CLASS, "class4"))));
         group1.combinators.add(SelectorCombinator.ADJACENT_SIBLING);
-        group1.selectors.add(new CSSSelector(List.of(SelectorType.CLASS), List.of("class5")));
+        group1.selectors.add(new CSSSelector(List.of(new CSSUnitSelector(SelectorType.CLASS, "class5"))));
 
         Map<String, String> expectedDeclarations = Map.of("background-color", "green");
 
@@ -66,18 +72,28 @@ public class CSSParserTest {
 
     @Test
     public void allSelectors() {
-        String css = "*div#id.class[attr=\"value\"]:hover, div:hover[attr=\"value\"]#id*.class { background-color: yellow; }";
+        String css = "*div#id.class[attr=\"value\"]:hover, div:hover[attr2=\"value2\"]#id*.class { background-color: yellow; }";
         Map<CSSSelectorGroup, Map<String, String>> rules = CSSParser.parseRules(css);
 
         CSSSelectorGroup group1 = new CSSSelectorGroup();
-        group1.selectors.add(new CSSSelector(
-                List.of(SelectorType.UNIVERSAL, SelectorType.TYPE, SelectorType.ID, SelectorType.CLASS, SelectorType.ATTRIBUTE, SelectorType.PSEUDO),
-                List.of("*", "div", "id", "class", "attr=\"value\"", "hover")));
+        group1.selectors.add(new CSSSelector(List.of(
+                new CSSUnitSelector(SelectorType.UNIVERSAL, "*"),
+                new CSSUnitSelector(SelectorType.TYPE, "div"),
+                new CSSUnitSelector(SelectorType.ID, "id"),
+                new CSSUnitSelector(SelectorType.CLASS, "class"),
+                new CSSUnitAttributeSelector("attr", "value", AttributeSelectorComparisonType.EXACT),
+                new CSSUnitSelector(SelectorType.PSEUDO, "hover")
+        )));
 
         CSSSelectorGroup group2 = new CSSSelectorGroup();
-        group2.selectors.add(new CSSSelector(
-                List.of(SelectorType.TYPE, SelectorType.PSEUDO, SelectorType.ATTRIBUTE, SelectorType.ID, SelectorType.UNIVERSAL, SelectorType.CLASS),
-                List.of("div", "hover", "attr=\"value\"", "id", "*", "class")));
+        group2.selectors.add(new CSSSelector(List.of(
+                new CSSUnitSelector(SelectorType.TYPE, "div"),
+                new CSSUnitSelector(SelectorType.PSEUDO, "hover"),
+                new CSSUnitAttributeSelector("attr2", "value2", AttributeSelectorComparisonType.EXACT),
+                new CSSUnitSelector(SelectorType.ID, "id"),
+                new CSSUnitSelector(SelectorType.UNIVERSAL, "*"),
+                new CSSUnitSelector(SelectorType.CLASS, "class")
+        )));
 
         Map<String, String> expectedDeclarations = Map.of("background-color", "yellow");
 
@@ -86,6 +102,42 @@ public class CSSParserTest {
         assertTrue(rules.containsKey(group2));
         assertEquals(expectedDeclarations, rules.get(group1));
         assertEquals(expectedDeclarations, rules.get(group2));
+    }
+
+    @Test
+    public void attributeSelectors() {
+        String css = "[attr][attr=\"value\" i][attr~=\"value\"][attr|=\"value\"][attr^=\"value\"][attr$=\"value\" i][attr*=\"value\"] { background-color: black; }";
+        Map<CSSSelectorGroup, Map<String, String>> rules = CSSParser.parseRules(css);
+
+        CSSSelectorGroup group = new CSSSelectorGroup();
+        group.selectors.add(new CSSSelector(List.of(
+                new CSSUnitAttributeSelector("attr", null, AttributeSelectorComparisonType.NONE),
+                new CSSUnitAttributeSelector("attr", "value", AttributeSelectorComparisonType.EXACT, true),
+                new CSSUnitAttributeSelector("attr", "value", AttributeSelectorComparisonType.MEMBER_IN_LIST),
+                new CSSUnitAttributeSelector("attr", "value", AttributeSelectorComparisonType.HYPHEN),
+                new CSSUnitAttributeSelector("attr", "value", AttributeSelectorComparisonType.PREFIX),
+                new CSSUnitAttributeSelector("attr", "value", AttributeSelectorComparisonType.SUFFIX, true),
+                new CSSUnitAttributeSelector("attr", "value", AttributeSelectorComparisonType.OCCURRENCE)
+        )));
+        Map<String, String> expectedDeclarations = Map.of("background-color", "black");
+
+        assertEquals(1, rules.size());
+        assertTrue(rules.containsKey(group));
+        assertEquals(expectedDeclarations, rules.get(group));
+    }
+
+    @Test
+    public void missingFinalDeclarationSemicolon() {
+        String css = "div { font-size: 12px }";
+        Map<CSSSelectorGroup, Map<String, String>> rules = CSSParser.parseRules(css);
+
+        CSSSelectorGroup group = new CSSSelectorGroup();
+        group.selectors.add(new CSSSelector(List.of(new CSSUnitSelector(SelectorType.TYPE, "div"))));
+        Map<String, String> expectedDeclarations = Map.of("font-size", "12px");
+
+        assertEquals(1, rules.size());
+        assertTrue(rules.containsKey(group));
+        assertEquals(expectedDeclarations, rules.get(group));
     }
 
     private String rulesToString(Map<CSSSelectorGroup, Map<String, String>> rules) {

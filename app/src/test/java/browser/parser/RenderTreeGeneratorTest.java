@@ -22,7 +22,6 @@ public class RenderTreeGeneratorTest {
     @Before
     public void perTestSetup() {
         renderTreeGenerator = new RenderTreeGenerator();
-        renderTreeGenerator.reset();
     }
 
     @Test

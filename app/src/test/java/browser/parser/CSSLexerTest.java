@@ -30,6 +30,44 @@ public class CSSLexerTest {
         assertTokenListsEqual(expectedTokens, tokens);
     }
 
+    @Test
+    public void attributesValid() {
+        String css = "[a=\"b\"]{ font-size: 12px; }\n[a*=\"c\" i]{ font-size: 14px; }";
+        List<CSSToken> tokens = CSSLexer.getTokens(css);
+        List<CSSToken> expectedTokens = List.of(
+                new CSSToken(CSSLexer.CSSTokenType.SELECTOR, "[a=\"b\"]"),
+                new CSSToken(CSSLexer.CSSTokenType.OPEN_BRACKET, "{"),
+                new CSSToken(CSSLexer.CSSTokenType.PROPERTY_NAME, "font-size"),
+                new CSSToken(CSSLexer.CSSTokenType.COLON, ":"),
+                new CSSToken(CSSLexer.CSSTokenType.PROPERTY_VALUE, "12px"),
+                new CSSToken(CSSLexer.CSSTokenType.SEMI_COLON, ";"),
+                new CSSToken(CSSLexer.CSSTokenType.CLOSE_BRACKET, "}"),
+                new CSSToken(CSSLexer.CSSTokenType.SELECTOR, "[a*=\"c\" i]"),
+                new CSSToken(CSSLexer.CSSTokenType.OPEN_BRACKET, "{"),
+                new CSSToken(CSSLexer.CSSTokenType.PROPERTY_NAME, "font-size"),
+                new CSSToken(CSSLexer.CSSTokenType.COLON, ":"),
+                new CSSToken(CSSLexer.CSSTokenType.PROPERTY_VALUE, "14px"),
+                new CSSToken(CSSLexer.CSSTokenType.SEMI_COLON, ";"),
+                new CSSToken(CSSLexer.CSSTokenType.CLOSE_BRACKET, "}")
+        );
+        assertTokenListsEqual(expectedTokens, tokens);
+    }
+
+    @Test
+    public void missingDeclarationSemicolon() {
+        String css = "div { font-size: 12px }";
+        List<CSSToken> tokens = CSSLexer.getTokens(css);
+        List<CSSToken> expectedTokens = List.of(
+                new CSSToken(CSSLexer.CSSTokenType.SELECTOR, "div"),
+                new CSSToken(CSSLexer.CSSTokenType.OPEN_BRACKET, "{"),
+                new CSSToken(CSSLexer.CSSTokenType.PROPERTY_NAME, "font-size"),
+                new CSSToken(CSSLexer.CSSTokenType.COLON, ":"),
+                new CSSToken(CSSLexer.CSSTokenType.PROPERTY_VALUE, "12px"),
+                new CSSToken(CSSLexer.CSSTokenType.CLOSE_BRACKET, "}")
+        );
+        assertTokenListsEqual(expectedTokens, tokens);
+    }
+
     private void assertTokenListsEqual(List<CSSToken> expected, List<CSSToken> actual) {
         assertEquals(expected.size(), actual.size());
         for (int i = 0; i < expected.size(); i++) {
