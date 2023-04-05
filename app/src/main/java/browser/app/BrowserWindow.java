@@ -146,6 +146,7 @@ public class BrowserWindow extends Application {
                     ScrollPane.ScrollBarPolicy.ALWAYS :
                     ScrollPane.ScrollBarPolicy.NEVER;
             scroll.setVbarPolicy(policy);
+            scene.setCursor(Cursor.DEFAULT);
         };
         canvasRenderer = new CanvasRenderer(canvas, interactionHandler, renderCompleteCallback, controlBar.getHeight());
         canvas.setWidth(stage.getWidth());

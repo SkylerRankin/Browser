@@ -76,7 +76,7 @@ public class CanvasRenderer {
                 pipeline.render(graphicsContext);
             }
             renderCompleteCallback.onRenderCompleted(pipeline.getRootRenderNode(), renderType);
-//            interactionHandler.setRootRenderNode(pipeline.getRootRenderNode());
+            interactionHandler.setRootBoxNode(pipeline.getRootBoxNode());
             redrawWebpageTask = null;
         });
         Thread thread = new Thread(redrawWebpageTask);
