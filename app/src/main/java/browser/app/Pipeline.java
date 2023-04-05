@@ -111,7 +111,7 @@ public class Pipeline {
      * @param gc        An instance of GraphicsContext to render on.
      */
     public void render(GraphicsContext gc) {
-        HTMLRenderer.setBackground(gc, rootRenderNode.style.backgroundColor, width, height);
+        HTMLRenderer.setBackground(gc, rootRenderNode.style.backgroundColor);
         HTMLRenderer.render(gc, rootBoxNode);
     }
 

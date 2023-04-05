@@ -96,7 +96,7 @@ public class TextNodeSplitter {
      * @param availableWidth        The width that the text should fit.
      * @return      A box node with text index ranges containing the remaining text, or null if no split is required.
      */
-    public BoxNode fitNodeToWidth(BoxNode boxNode, float availableWidth) {
+    public BoxNode splitNodeAcrossLines(BoxNode boxNode, float availableWidth) {
         if (!boxNode.isTextNode) {
             return null;
         }
@@ -127,8 +127,11 @@ public class TextNodeSplitter {
         String textWithoutSpace = text.substring(leadingSpaces, text.length() - trailingSpaces);
 
         String[] words = textWithoutSpace.split("\s");
+        boolean containsSpace = words.length > 1;
         words[0] += leadingSpaceText;
-        words[words.length - 1] += trailingSpaceText;
+        if (containsSpace) {
+            words[words.length - 1] += trailingSpaceText;
+        }
 
         for (int i = 0; i < words.length; i++) {
             String word = words[i];
@@ -145,11 +148,16 @@ public class TextNodeSplitter {
             }
         }
 
+
         BoxNode newBoxNode = new BoxNode(boxNode);
-        newBoxNode.textStartIndex = currentEndIndex + 1;
-        newBoxNode.textEndIndex = boxNode.textEndIndex;
+        newBoxNode.textStartIndex = currentEndIndex + (containsSpace ? 1 : 0);
+        String newBoxText = newBoxNode.correspondingRenderNode.text.substring(newBoxNode.textStartIndex, newBoxNode.textEndIndex);
 
         boxNode.textEndIndex = currentEndIndex;
+
+        if (newBoxText.isBlank() || newBoxText.isEmpty()) {
+            return null;
+        }
 
         return newBoxNode;
     }

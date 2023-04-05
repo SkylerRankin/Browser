@@ -98,12 +98,12 @@ public class TextNodeSplitterTest {
     }
 
     @Test
-    public void fitNodeToWidth_notATextNode() {
+    public void splitNodeAcrossLines_notATextNode() {
         BoxNode boxNode = new BoxNode();
         boxNode.isTextNode = false;
         boxNode.textStartIndex = 0;
         boxNode.textEndIndex = 123;
-        BoxNode result = textNodeSplitter.fitNodeToWidth(boxNode, 10);
+        BoxNode result = textNodeSplitter.splitNodeAcrossLines(boxNode, 10);
 
         assertNull(result);
         assertEquals(0, boxNode.textStartIndex);
@@ -111,7 +111,7 @@ public class TextNodeSplitterTest {
     }
 
     @Test
-    public void fitNodeToWidth_textFits() {
+    public void splitNodeAcrossLines_textFits() {
         RenderNode renderNode = new RenderNode(HTMLElements.TEXT);
         renderNode.text = "some text";
         BoxNode boxNode = new BoxNode();
@@ -120,7 +120,7 @@ public class TextNodeSplitterTest {
         boxNode.textStartIndex = 0;
         boxNode.textEndIndex = 9;
         float width = 10;
-        BoxNode result = textNodeSplitter.fitNodeToWidth(boxNode, width);
+        BoxNode result = textNodeSplitter.splitNodeAcrossLines(boxNode, width);
 
         assertNull(result);
         assertEquals(0, boxNode.textStartIndex);
@@ -128,7 +128,7 @@ public class TextNodeSplitterTest {
     }
 
     @Test
-    public void fitNodeToWidth_textTooLarge() {
+    public void splitNodeAcrossLines_textTooLarge() {
         RenderNode renderNode = new RenderNode(HTMLElements.TEXT);
         renderNode.text = "some text that does not fit";
         BoxNode boxNode = new BoxNode();
@@ -137,7 +137,7 @@ public class TextNodeSplitterTest {
         boxNode.textStartIndex = 0;
         boxNode.textEndIndex = 27;
         float width = 10;
-        BoxNode result = textNodeSplitter.fitNodeToWidth(boxNode, width);
+        BoxNode result = textNodeSplitter.splitNodeAcrossLines(boxNode, width);
 
         assertEquals(0, boxNode.textStartIndex);
         assertEquals(9, boxNode.textEndIndex);
@@ -148,7 +148,7 @@ public class TextNodeSplitterTest {
     }
 
     @Test
-    public void fitNodeToWidth_largeWordAtBreak() {
+    public void splitNodeAcrossLines_largeWordAtBreak() {
         RenderNode renderNode = new RenderNode(HTMLElements.TEXT);
         renderNode.text = "this is-a-large-word-that-cant-be broken.";
         BoxNode boxNode = new BoxNode();
@@ -157,7 +157,7 @@ public class TextNodeSplitterTest {
         boxNode.textStartIndex = 0;
         boxNode.textEndIndex = 41;
         float width = 10;
-        BoxNode result = textNodeSplitter.fitNodeToWidth(boxNode, width);
+        BoxNode result = textNodeSplitter.splitNodeAcrossLines(boxNode, width);
 
         assertEquals(0, boxNode.textStartIndex);
         assertEquals(4, boxNode.textEndIndex);
@@ -168,7 +168,7 @@ public class TextNodeSplitterTest {
     }
 
     @Test
-    public void fitNodeToWidth_noSplitAndDoesNotFit() {
+    public void splitNodeAcrossLines_noSplitAndDoesNotFit() {
         RenderNode renderNode = new RenderNode(HTMLElements.TEXT);
         renderNode.text = "this-is-a-large-word-that-cant-be-broken.";
         BoxNode boxNode = new BoxNode();
@@ -177,7 +177,7 @@ public class TextNodeSplitterTest {
         boxNode.textStartIndex = 0;
         boxNode.textEndIndex = 41;
         float width = 10;
-        BoxNode result = textNodeSplitter.fitNodeToWidth(boxNode, width);
+        BoxNode result = textNodeSplitter.splitNodeAcrossLines(boxNode, width);
 
         assertEquals(0, boxNode.textStartIndex);
         assertEquals(41, boxNode.textEndIndex);
@@ -185,7 +185,7 @@ public class TextNodeSplitterTest {
     }
 
     @Test
-    public void fitNodeToWidth_splitWithSpacing() {
+    public void splitNodeAcrossLines_splitWithSpacing() {
         RenderNode renderNode = new RenderNode(HTMLElements.TEXT);
         renderNode.text = " has extra spaces  ";
         BoxNode boxNode = new BoxNode();
@@ -194,7 +194,7 @@ public class TextNodeSplitterTest {
         boxNode.textStartIndex = 0;
         boxNode.textEndIndex = 19;
         float width = 13;
-        BoxNode result = textNodeSplitter.fitNodeToWidth(boxNode, width);
+        BoxNode result = textNodeSplitter.splitNodeAcrossLines(boxNode, width);
 
         assertEquals(0, boxNode.textStartIndex);
         assertEquals(10, boxNode.textEndIndex);
@@ -205,7 +205,25 @@ public class TextNodeSplitterTest {
     }
 
     @Test
-    public void gitNodeToWidth_overlapWithNonZeroStartIndex() {
+    public void splitNodeAcrossLines_trailingSpace() {
+        RenderNode renderNode = new RenderNode(HTMLElements.TEXT);
+        renderNode.text = "a, ";
+        BoxNode boxNode = new BoxNode();
+        boxNode.isTextNode = true;
+        boxNode.correspondingRenderNode = renderNode;
+        boxNode.textStartIndex = 0;
+        boxNode.textEndIndex = 3;
+        float width = 2.5f;
+        BoxNode result = textNodeSplitter.splitNodeAcrossLines(boxNode, width);
+
+        assertEquals(0, boxNode.textStartIndex);
+        assertEquals(2, boxNode.textEndIndex);
+
+        assertNull(result);
+    }
+
+    @Test
+    public void splitNodeAcrossLines_overlapWithNonZeroStartIndex() {
         RenderNode renderNode = new RenderNode(HTMLElements.TEXT);
         renderNode.text = "fifty percent width";
         BoxNode boxNode = new BoxNode();
@@ -214,7 +232,7 @@ public class TextNodeSplitterTest {
         boxNode.textStartIndex = 6;
         boxNode.textEndIndex = 19;
         float width = 1;
-        BoxNode result = textNodeSplitter.fitNodeToWidth(boxNode, width);
+        BoxNode result = textNodeSplitter.splitNodeAcrossLines(boxNode, width);
 
         assertEquals(6, boxNode.textStartIndex);
         assertEquals(13, boxNode.textEndIndex);

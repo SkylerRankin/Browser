@@ -7,6 +7,8 @@ import java.util.List;
 import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
 import javafx.scene.Cursor;
+import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.*;
@@ -44,7 +46,7 @@ public class BrowserWindow extends Application {
         controlBar = new ControlBar();
         canvas = new Canvas();
         ScrollPane scroll = new ScrollPane();
-        scroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        scroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         scroll.setContent(canvas);
         scroll.setFitToWidth(true);
@@ -140,8 +142,12 @@ public class BrowserWindow extends Application {
 
         RenderCompleteCallback renderCompleteCallback = (root, type) -> {
             controlBar.setLoading(false);
+            ScrollPane.ScrollBarPolicy policy = canvasRenderer.getRenderedHeight() > scroll.getHeight() ?
+                    ScrollPane.ScrollBarPolicy.ALWAYS :
+                    ScrollPane.ScrollBarPolicy.NEVER;
+            scroll.setVbarPolicy(policy);
         };
-        canvasRenderer = new CanvasRenderer(canvas, interactionHandler, renderCompleteCallback);
+        canvasRenderer = new CanvasRenderer(canvas, interactionHandler, renderCompleteCallback, controlBar.getHeight());
         canvas.setWidth(stage.getWidth());
 
         // Register width resize callback

@@ -166,23 +166,29 @@ public class InlineLayoutFormatter {
     }
 
     private void placeBoxPartiallyOnCurrentLine(BoxNode boxNode, InlineFormattingContext context, float x, float availableWidth) {
-        BoxNode remainingBox = textNodeSplitter.fitNodeToWidth(boxNode, availableWidth);
-        int indexInParent = boxNode.parent.children.indexOf(boxNode);
-        boxNode.parent.children.add(indexInParent + 1, remainingBox);
-        boxTreePartitioner.partition(remainingBox, context);
+        BoxNode remainingBox = textNodeSplitter.splitNodeAcrossLines(boxNode, availableWidth);
+        // A null remaining box indicates that the split box contained only spaces, and thus is skipped from layout. The
+        // logic skips to placing the box fully on the current line.
+        if (remainingBox == null) {
+            Vector2 preferredSize = getInlineBoxPreferredSize(boxNode);
+            placeBoxFullyOnCurrentLine(boxNode, context, x, preferredSize);
+        } else {
+            int indexInParent = boxNode.parent.children.indexOf(boxNode);
+            boxNode.parent.children.add(indexInParent + 1, remainingBox);
+            boxTreePartitioner.partition(remainingBox, context);
 
-        // The newly generated box will take on whatever right side spacing the original box had.
-        context.setRightSpacingForBox(remainingBox.id, context.getRightSpacingForBox(boxNode.id));
-        context.setRightSpacingForBox(boxNode.id, 0);
+            // The newly generated box will take on whatever right side spacing the original box had.
+            context.setRightSpacingForBox(remainingBox.id, context.getRightSpacingForBox(boxNode.id));
+            context.setRightSpacingForBox(boxNode.id, 0);
 
-        String substring = boxNode.correspondingRenderNode.text.substring(boxNode.textStartIndex, boxNode.textEndIndex);
-        Vector2 newDimensions = textDimensionCalculator.getDimension(substring, boxNode.style);
-        boxNode.x = x;
-        boxNode.y = context.getCurrentLineYStart();
-        boxNode.width = newDimensions.x;
-        boxNode.height = newDimensions.y;
-
-        context.addBoxToCurrentLine(boxNode);
+            String substring = boxNode.correspondingRenderNode.text.substring(boxNode.textStartIndex, boxNode.textEndIndex);
+            Vector2 newDimensions = textDimensionCalculator.getDimension(substring, boxNode.style);
+            boxNode.x = x;
+            boxNode.y = context.getCurrentLineYStart();
+            boxNode.width = newDimensions.x;
+            boxNode.height = newDimensions.y;
+            context.addBoxToCurrentLine(boxNode);
+        }
         context.moveToNextLine();
     }
 

@@ -113,8 +113,8 @@ public class HTMLRenderer {
         gc.fillRect(x, y, w, h);
     }
     
-    public static void setBackground(GraphicsContext gc, CSSColor color, float w, float h) {
-        fillRect(gc, color, 0, 0, w, Math.max(h, (float) gc.getCanvas().getHeight()));
+    public static void setBackground(GraphicsContext gc, CSSColor color) {
+        fillRect(gc, color, 0, 0, (float) gc.getCanvas().getWidth(), (float) gc.getCanvas().getHeight());
     }
     
 }

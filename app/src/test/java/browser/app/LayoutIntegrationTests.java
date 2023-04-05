@@ -86,6 +86,11 @@ public class LayoutIntegrationTests {
         driver.runLayoutTest("displayNone", 1000);
     }
 
+    @Test
+    public void splitInlineTextEndingWithSpace() {
+        driver.runLayoutTest("splitInlineTextEndingWithSpace", 1000);
+    }
+
     // Text alignment
 
     @Test
