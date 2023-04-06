@@ -140,6 +140,33 @@ public class CSSParserTest {
         assertEquals(expectedDeclarations, rules.get(group));
     }
 
+    @Test
+    public void mergeRepeatedSelectors() {
+        String css = "h1, h2 { color: red; }\nh1 { font-size: 10px; }\nh1, h2 { background-color: white; }";
+        Map<CSSSelectorGroup, Map<String, String>> rules = CSSParser.parseRules(css);
+
+        CSSSelectorGroup group1 = new CSSSelectorGroup();
+        group1.selectors.add(new CSSSelector(List.of(new CSSUnitSelector(SelectorType.TYPE, "h1"))));
+        Map<String, String> expectedDeclarations1 = Map.of(
+                "color", "red",
+                "font-size", "10px",
+                "background-color", "white"
+        );
+
+        CSSSelectorGroup group2 = new CSSSelectorGroup();
+        group2.selectors.add(new CSSSelector(List.of(new CSSUnitSelector(SelectorType.TYPE, "h2"))));
+        Map<String, String> expectedDeclarations2 = Map.of(
+                "color", "red",
+                "background-color", "white"
+        );
+
+        assertEquals(2, rules.size());
+        assertTrue(rules.containsKey(group1));
+        assertEquals(expectedDeclarations1, rules.get(group1));
+        assertTrue(rules.containsKey(group2));
+        assertEquals(expectedDeclarations2, rules.get(group2));
+    }
+
     private String rulesToString(Map<CSSSelectorGroup, Map<String, String>> rules) {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(String.format("Rules (%d):\n", rules.size()));

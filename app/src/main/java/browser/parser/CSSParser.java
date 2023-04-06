@@ -41,7 +41,7 @@ public class CSSParser {
                 }
                 case CLOSE_BRACKET -> {
                     for (CSSSelectorGroup selectorGroup : currentSelectorGroups) {
-                        rules.put(selectorGroup, currentRuleSet);
+                        addRuleDeclarationSet(rules, selectorGroup, currentRuleSet);
                     }
                 }
             }
@@ -238,6 +238,17 @@ public class CSSParser {
         }
 
         return string.toString();
+    }
+
+    private static void addRuleDeclarationSet(Map<CSSSelectorGroup, Map<String, String>> rules, CSSSelectorGroup group, Map<String, String> newRules) {
+        if (rules.containsKey(group)) {
+            Map<String, String> currentRules = rules.get(group);
+            for (String key : newRules.keySet()) {
+                currentRules.put(key, newRules.get(key));
+            }
+        } else {
+            rules.put(group, new HashMap<>(newRules));
+        }
     }
 
 }

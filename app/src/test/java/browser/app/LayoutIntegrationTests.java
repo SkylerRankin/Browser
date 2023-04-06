@@ -212,4 +212,9 @@ public class LayoutIntegrationTests {
         driver.runLayoutTest("basicCSSSelectors", 100);
     }
 
+    @Test
+    public void multipleTypeSelectors() {
+        driver.runLayoutTest("multipleTypeSelectors", 1000);
+    }
+
 }
