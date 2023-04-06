@@ -4,17 +4,6 @@ import java.util.List;
 
 public class StringUtils {
 
-    public static int getLengthOfWhitespace(int startIndex, String string) {
-        int endIndex = startIndex;
-        while (Character.isWhitespace(string.charAt(startIndex))) {
-            if (startIndex == string.length() - 1) {
-                return startIndex;
-            }
-            startIndex++;
-        }
-        return endIndex - startIndex + 1;
-    }
-
     public static String substringUntil(String string, int startIndex, String endString) {
         return substringUntil(string, startIndex, List.of(endString));
     }

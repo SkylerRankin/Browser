@@ -68,6 +68,54 @@ public class CSSLexerTest {
         assertTokenListsEqual(expectedTokens, tokens);
     }
 
+    @Test
+    public void repeatedComments() {
+        String css = "/*\ncomment\n*/\n/*second comment*/div {}/**//*\n\n*/";
+        List<CSSToken> tokens = CSSLexer.getTokens(css);
+        List<CSSToken> expectedTokens = List.of(
+                new CSSToken(CSSLexer.CSSTokenType.COMMENT_START, "/*"),
+                new CSSToken(CSSLexer.CSSTokenType.COMMENT, "\ncomment\n"),
+                new CSSToken(CSSLexer.CSSTokenType.COMMENT_END, "*/"),
+                new CSSToken(CSSLexer.CSSTokenType.COMMENT_START, "/*"),
+                new CSSToken(CSSLexer.CSSTokenType.COMMENT, "second comment"),
+                new CSSToken(CSSLexer.CSSTokenType.COMMENT_END, "*/"),
+                new CSSToken(CSSLexer.CSSTokenType.SELECTOR, "div"),
+                new CSSToken(CSSLexer.CSSTokenType.OPEN_BRACKET, "{"),
+                new CSSToken(CSSLexer.CSSTokenType.CLOSE_BRACKET, "}"),
+                new CSSToken(CSSLexer.CSSTokenType.COMMENT_START, "/*"),
+                new CSSToken(CSSLexer.CSSTokenType.COMMENT_END, "*/"),
+                new CSSToken(CSSLexer.CSSTokenType.COMMENT_START, "/*"),
+                new CSSToken(CSSLexer.CSSTokenType.COMMENT, "\n\n"),
+                new CSSToken(CSSLexer.CSSTokenType.COMMENT_END, "*/")
+                );
+        assertTokenListsEqual(expectedTokens, tokens);
+    }
+
+    @Test
+    public void internalComment() {
+        String css = "div {/*a*/ font-size:/*b*/12px;/*c*/}";
+        List<CSSToken> tokens = CSSLexer.getTokens(css);
+        List<CSSToken> expectedTokens = List.of(
+                new CSSToken(CSSLexer.CSSTokenType.SELECTOR, "div"),
+                new CSSToken(CSSLexer.CSSTokenType.OPEN_BRACKET, "{"),
+                new CSSToken(CSSLexer.CSSTokenType.COMMENT_START, "/*"),
+                new CSSToken(CSSLexer.CSSTokenType.COMMENT, "a"),
+                new CSSToken(CSSLexer.CSSTokenType.COMMENT_END, "*/"),
+                new CSSToken(CSSLexer.CSSTokenType.PROPERTY_NAME, "font-size"),
+                new CSSToken(CSSLexer.CSSTokenType.COLON, ":"),
+                new CSSToken(CSSLexer.CSSTokenType.COMMENT_START, "/*"),
+                new CSSToken(CSSLexer.CSSTokenType.COMMENT, "b"),
+                new CSSToken(CSSLexer.CSSTokenType.COMMENT_END, "*/"),
+                new CSSToken(CSSLexer.CSSTokenType.PROPERTY_VALUE, "12px"),
+                new CSSToken(CSSLexer.CSSTokenType.SEMI_COLON, ";"),
+                new CSSToken(CSSLexer.CSSTokenType.COMMENT_START, "/*"),
+                new CSSToken(CSSLexer.CSSTokenType.COMMENT, "c"),
+                new CSSToken(CSSLexer.CSSTokenType.COMMENT_END, "*/"),
+                new CSSToken(CSSLexer.CSSTokenType.CLOSE_BRACKET, "}")
+                );
+        assertTokenListsEqual(expectedTokens, tokens);
+    }
+
     private void assertTokenListsEqual(List<CSSToken> expected, List<CSSToken> actual) {
         assertEquals(expected.size(), actual.size());
         for (int i = 0; i < expected.size(); i++) {
