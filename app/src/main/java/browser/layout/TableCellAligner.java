@@ -61,7 +61,10 @@ public class TableCellAligner {
         for (int y = 0; y < context.height; y++) {
             List<TableCell> row = new ArrayList<>();
             for (int x = 0; x < context.width; x++) {
-                row.add(context.getCell(x, y));
+                TableCell cell = context.getCell(x, y);
+                if (cell != null) {
+                    row.add(cell);
+                }
             }
             tableCells.add(row);
         }
@@ -83,7 +86,10 @@ public class TableCellAligner {
         for (int y = 0; y < context.height; y++) {
             List<TableCell> row = new ArrayList<>();
             for (int x = 0; x < context.width; x++) {
-                row.add(context.getCell(x, y));
+                TableCell cell = context.getCell(x, y);
+                if (cell != null) {
+                    row.add(cell);
+                }
             }
             tableCells.add(row);
         }
@@ -99,6 +105,10 @@ public class TableCellAligner {
 
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
+                if (tableCells.get(y).size() <= x) {
+                    continue;
+                }
+
                 TableCell cell = tableCells.get(y).get(x).deepCopy();
 
                 // Swap the x and y properties of the cell so that column alignment logic will work for row alignment.
@@ -137,6 +147,7 @@ public class TableCellAligner {
         columnWidths = new float[width];
         fixedSize = new boolean[width];
 
+        addEmptyCells();
         setSingleSpanFixedWidths();
         initializeColumnWidths();
 
@@ -176,9 +187,26 @@ public class TableCellAligner {
         }
     }
 
+    private void addEmptyCells() {
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                if (cells.get(y).size() <= x) {
+                    TableCell emptyCell = new TableCell();
+                    emptyCell.minWidth = 0.0f;
+                    emptyCell.minHeight = 0.0f;
+                    emptyCell.maxWidth = 0.0f;
+                    emptyCell.maxHeight = 0.0f;
+                    cells.get(y).add(emptyCell);
+                }
+            }
+        }
+    }
+
     private boolean cellEndsAtColumn(int x, int y) {
         TableCell cell = cells.get(y).get(x);
-        if (cell.isSpannedX) {
+        if (cell == null) {
+            return false;
+        } else if (cell.isSpannedX) {
             IntVector2 origin = cell.spannedCellOrigin;
             TableCell originCell = cells.get(origin.y).get(origin.x);
             return origin.x + originCell.span.x - 1 == x;
@@ -216,8 +244,7 @@ public class TableCellAligner {
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
                 TableCell cell = cells.get(y).get(x);
-                int span = cell.span.x;
-                if (span > 1 || !cell.fixedWidth) {
+                if (cell == null || cell.span.x > 1 || !cell.fixedWidth) {
                     continue;
                 }
                 fixedSize[x] = true;
@@ -231,7 +258,7 @@ public class TableCellAligner {
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
                 TableCell cell = cells.get(y).get(x);
-                if (cell.span.x > 1 || cell.isSpannedX) {
+                if (cell == null || cell.span.x > 1 || cell.isSpannedX) {
                     continue;
                 }
                 float width = mode.equals(Mode.Min) ? cell.minWidth : cell.maxWidth;

@@ -60,7 +60,11 @@ public class TableFormattingContext {
     }
 
     public TableCell getCell(int x, int y) {
-        return rows.get(y).cells.get(x);
+        if (rows.get(y).cells.size() > x) {
+            return rows.get(y).cells.get(x);
+        } else {
+            return null;
+        }
     }
 
     public static class TableRow {

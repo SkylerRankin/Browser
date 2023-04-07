@@ -68,12 +68,13 @@ public class ResourceLoader {
                 ImageCache.loadImage(imgURL);
             }
         }
-        
+
+        externalCSS.clear();
         for (String cssURL : resources.get(resourceType.CSS)) {
             String css = url.startsWith(FILE_PREFIX) ?
                     loadLocalFileAsText(cssURL, url) :
                     HTTPClient.requestResource(cssURL);
-            if (css !=null) {
+            if (css != null && !css.isBlank()) {
                 externalCSS.add(css);
                 System.out.printf("Loaded %d characters of css from %s.\n", css.length(), cssURL);
             }

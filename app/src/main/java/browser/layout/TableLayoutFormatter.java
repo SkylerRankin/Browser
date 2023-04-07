@@ -213,24 +213,24 @@ public class TableLayoutFormatter {
 
         for (int x = 0; x < tableWidth; x++) {
             for (int y = 0; y < tableHeight; y++) {
-                BoxNode cell = context.getCell(x, y).boxNode;
-                if (context.getCell(x, y).isSpannedX || context.getCell(x, y).isSpannedY) {
+                TableCell tableCell = context.getCell(x, y);
+                if (tableCell == null || tableCell.isSpannedX || tableCell.isSpannedY) {
                     continue;
                 }
-                IntVector2 span = context.getCell(x, y).span;
+                IntVector2 span = tableCell.span;
                 if (span.x > 1 && span.y == 1) {
                     for (int i = 0; i < span.x - 1; i++) {
-                        context.addSpannedCell(cell, y, x + i + 1, new IntVector2(x, y));
+                        context.addSpannedCell(tableCell.boxNode, y, x + i + 1, new IntVector2(x, y));
                     }
                 } else if (span.y > 1 && span.x == 1) {
                     for (int i = 0; i < span.y - 1; i++) {
-                        context.addSpannedCell(cell, y + i + 1, x, new IntVector2(x, y));
+                        context.addSpannedCell(tableCell.boxNode, y + i + 1, x, new IntVector2(x, y));
                     }
                 } else if (span.x > 1 && span.y > 1) {
                     for (int i = 0; i < span.x; i++) {
                         for (int j = 0; j < span.y; j++) {
                             if (i == 0 && j == 0) continue;
-                            context.addSpannedCell(cell, y + j, x + i, new IntVector2(x, y));
+                            context.addSpannedCell(tableCell.boxNode, y + j, x + i, new IntVector2(x, y));
                         }
                     }
                 }
@@ -241,7 +241,11 @@ public class TableLayoutFormatter {
         context.fixedColumnWidths.addAll(Collections.nCopies(tableWidth, false));
         for (int x = 0; x < tableWidth; x++) {
             for (int y = 0; y < tableHeight; y++) {
-                BoxNode cell = context.getCell(x, y).boxNode;
+                TableCell tableCell = context.getCell(x, y);
+                if (tableCell == null) {
+                    continue;
+                }
+                BoxNode cell = tableCell.boxNode;
                 if (cell.style.width != null && cell.style.widthType.equals(CSSStyle.DimensionType.PIXEL)) {
                     context.fixedColumnWidths.set(x, true);
                 }
@@ -252,7 +256,11 @@ public class TableLayoutFormatter {
         context.fixedRowHeights.addAll(Collections.nCopies(tableHeight, false));
         for (int y = 0; y < tableHeight; y++) {
             for (int x = 0; x < tableWidth; x++) {
-                BoxNode cell = context.getCell(x, y).boxNode;
+                TableCell tableCell = context.getCell(x, y);
+                if (tableCell == null) {
+                    continue;
+                }
+                BoxNode cell = tableCell.boxNode;
                 if (cell.style.height != null && cell.style.heightType.equals(CSSStyle.DimensionType.PIXEL)) {
                     context.fixedRowHeights.set(y, true);
                 }
@@ -290,7 +298,7 @@ public class TableLayoutFormatter {
         for (int rowIndex = 0; rowIndex < context.height; rowIndex++) {
             for (int colIndex = 0; colIndex < context.width; colIndex++) {
                 TableCell cell = context.getCell(colIndex, rowIndex);
-                if (cell.isSpannedX) {
+                if (cell == null || cell.isSpannedX) {
                     continue;
                 }
 
@@ -311,7 +319,7 @@ public class TableLayoutFormatter {
         for (int rowIndex = 0; rowIndex < context.height; rowIndex++) {
             for (int colIndex = 0; colIndex < context.width; colIndex++) {
                 TableCell cell = context.getCell(colIndex, rowIndex);
-                if (cell.isSpannedY) {
+                if (cell == null || cell.isSpannedY) {
                     continue;
                 }
 
@@ -369,7 +377,7 @@ public class TableLayoutFormatter {
         for (int x = 0; x < context.width; x++) {
             for (int y = 0; y < context.height; y++) {
                 TableCell cell = context.getCell(x, y);
-                if (cell.isSpannedX || cell.isSpannedY) continue;
+                if (cell == null || cell.isSpannedX || cell.isSpannedY) continue;
                 float width = 0;
                 for (int column = x; column < x + cell.span.x; column++) {
                     width += context.columnWidths.get(column);
@@ -420,7 +428,7 @@ public class TableLayoutFormatter {
         for (int x = 0; x < context.width; x++) {
             for (int y = 0; y < context.height; y++) {
                 TableCell cell = context.getCell(x, y);
-                if (cell.isSpannedX || cell.isSpannedY) continue;
+                if (cell == null || cell.isSpannedX || cell.isSpannedY) continue;
                 float height = 0;
                 for (int row = y; row < y + cell.span.y; row++) {
                     height += context.rowHeights.get(row);
@@ -444,7 +452,7 @@ public class TableLayoutFormatter {
         for (int x = 0; x < context.width; x++) {
             for (int y = 0; y < context.height; y++) {
                 TableCell cell = context.getCell(x, y);
-                if (cell.isSpannedX || cell.isSpannedY) continue;
+                if (cell == null || cell.isSpannedX || cell.isSpannedY) continue;
                 float width = 0, height = 0;
                 for (int column = x; column < x + cell.span.x; column++) {
                     width += context.columnWidths.get(column);
@@ -567,6 +575,10 @@ public class TableLayoutFormatter {
         for (int x = context.width - 1; x >= 0; x--) {
             boolean containsNonSpanningCell = false;
             for (int y = 0; y < context.height; y++) {
+                if (context.getCell(x, y) == null) {
+                    continue;
+                }
+
                 if (!context.getCell(x, y).isSpannedX) {
                     containsNonSpanningCell = true;
                     break;
@@ -596,6 +608,9 @@ public class TableLayoutFormatter {
         for (int y = context.height - 1; y >= 0; y--) {
             boolean containsNonSpanningCell = false;
             for (int x = 0; x < context.width; x++) {
+                if (context.getCell(x, y) == null) {
+                    continue;
+                }
                 if (!context.getCell(x, y).isSpannedY) {
                     containsNonSpanningCell = true;
                     break;

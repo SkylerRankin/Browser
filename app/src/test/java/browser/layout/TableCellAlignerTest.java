@@ -223,6 +223,61 @@ public class TableCellAlignerTest {
 
     /**
      * 2x2 table
+     * [10]
+     * [15] [15]
+     * ->
+     * [15] [15]
+     * :
+     * [15]
+     * [15] [15]
+     */
+    @Test
+    public void alignColumns_missingCell() {
+        float[] expectedWiths = {15, 15};
+
+        TableCell cell11 = makeNormalCell(10, X);
+
+        TableCell cell21 = makeNormalCell(15, X);
+        TableCell cell22 = makeNormalCell(15, X);
+
+        List<TableCell> row1 = new ArrayList<>();
+        row1.add(cell11);
+        List<TableCell> row2 = new ArrayList<>();
+        row2.add(cell21);
+        row2.add(cell22);
+        List<List<TableCell>> cells = new ArrayList<>(List.of(row1, row2));
+
+        float[] widths = aligner.alignColumnsMinWidth(2, 2, new IntVector2(0, 0), cells);
+        assertFloatArrayEqual(expectedWiths, widths);
+    }
+
+    /**
+     * 2x2 table
+     * [10] [15]
+     * ->
+     * [10] [15]
+     * :
+     * [10] [15]
+     */
+    @Test
+    public void alignColumns_emptyRow() {
+        float[] expectedWiths = {10, 15};
+
+        TableCell cell21 = makeNormalCell(10, X);
+        TableCell cell22 = makeNormalCell(15, X);
+
+        List<TableCell> row1 = new ArrayList<>();
+        List<TableCell> row2 = new ArrayList<>();
+        row2.add(cell21);
+        row2.add(cell22);
+        List<List<TableCell>> cells = new ArrayList<>(List.of(row1, row2));
+
+        float[] widths = aligner.alignColumnsMinWidth(2, 2, new IntVector2(0, 0), cells);
+        assertFloatArrayEqual(expectedWiths, widths);
+    }
+
+    /**
+     * 2x2 table
      * [10] [15]
      * [15] [12]
      * ->
@@ -269,6 +324,37 @@ public class TableCellAlignerTest {
 
         float[] heights = aligner.alignRowsMinHeight(2, 2, new IntVector2(0, 0), cells);
         assertFloatArrayEqual(heights, expectedHeights);
+    }
+
+    /**
+     * 2x2 table
+     * [10] [15]
+     * [15]
+     * ->
+     * [10]
+     * [15]
+     * :
+     * [15] [15]
+     * [15]
+     */
+    @Test
+    public void alignRows_missingCell() {
+        float[] expectedWiths = {15, 15};
+
+        TableCell cell11 = makeNormalCell(10, Y);
+        TableCell cell12 = makeNormalCell(15, Y);
+
+        TableCell cell21 = makeNormalCell(15, Y);
+
+        List<TableCell> row1 = new ArrayList<>();
+        row1.add(cell11);
+        row1.add(cell12);
+        List<TableCell> row2 = new ArrayList<>();
+        row2.add(cell21);
+        List<List<TableCell>> cells = new ArrayList<>(List.of(row1, row2));
+
+        float[] widths = aligner.alignRowsMinHeight(2, 2, new IntVector2(0, 0), cells);
+        assertFloatArrayEqual(expectedWiths, widths);
     }
 
     private void assertFloatArrayEqual(float[] expected, float[] actual) {

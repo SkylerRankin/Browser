@@ -26,6 +26,7 @@ public class LoadWebpageTask extends Task<Pipeline> {
                 pipeline.calculateLayout(width);
             }
         } catch (Exception e) {
+            e.printStackTrace();
             ErrorPageHandler.previousException = e;
             try {
                 pipeline.loadWebpage(ErrorConstants.ErrorPagePath);

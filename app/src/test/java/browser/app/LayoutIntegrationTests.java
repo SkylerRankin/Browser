@@ -198,6 +198,11 @@ public class LayoutIntegrationTests {
         driver.runLayoutTest("tableInlineBlockCells", 500);
     }
 
+    @Test
+    public void tableCellMismatch() {
+        driver.runLayoutTest("tableCellMismatch", 1000);
+    }
+
     // Inline block tests
 
     @Test
