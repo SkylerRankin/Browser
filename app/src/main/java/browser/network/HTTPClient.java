@@ -72,7 +72,7 @@ public class HTTPClient {
     
     public static String requestResource(String urlString) {
         if (!urlString.startsWith("http")) {
-            urlString = String.format("%s//%s", baseURL, urlString);
+            urlString = String.format("%s/%s", baseURL, urlString);
         }
 
         try {

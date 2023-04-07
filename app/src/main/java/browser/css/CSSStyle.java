@@ -201,7 +201,7 @@ public class CSSStyle {
      * The border property can contain up to 3 values, in any order: line width, line style, and line color.
      * @param value The CSS value string to parse
      */
-    private void parseBorder(String value) {
+    private void parseBorder(String value, String direction) {
         value = value.trim();
         if (value.endsWith(";")) {
             value = value.substring(0, value.length() - 1);
@@ -214,10 +214,18 @@ public class CSSStyle {
                 // Check if the value is a length
                 if (items[i].equals("0")) {
                     // Zero is a special case that does not require a unit.
-                    borderWidthTop = 0;
-                    borderWidthBottom = 0;
-                    borderWidthLeft = 0;
-                    borderWidthRight = 0;
+                    switch (direction) {
+                        case "top" -> borderWidthTop = 0;
+                        case "right" -> borderWidthRight = 0;
+                        case "bottom" -> borderWidthBottom = 0;
+                        case "left" -> borderWidthLeft = 0;
+                        default -> {
+                            borderWidthTop = 0;
+                            borderWidthRight = 0;
+                            borderWidthBottom = 0;
+                            borderWidthLeft = 0;
+                        }
+                    }
                 } else {
                     Matcher lengthMatcher = lengthPattern.matcher(items[i]);
                     if (lengthMatcher.find()) {
@@ -229,10 +237,18 @@ public class CSSStyle {
                                 System.out.printf("Unsupported border width unit %s, defaulting to 1px.\n", unitString);
                                 length = 1;
                             }
-                            borderWidthTop = length;
-                            borderWidthBottom = length;
-                            borderWidthLeft = length;
-                            borderWidthRight = length;
+                            switch (direction) {
+                                case "top" -> borderWidthTop = length;
+                                case "right" -> borderWidthRight = length;
+                                case "bottom" -> borderWidthBottom = length;
+                                case "left" -> borderWidthLeft = length;
+                                default -> {
+                                    borderWidthTop = length;
+                                    borderWidthRight = length;
+                                    borderWidthBottom = length;
+                                    borderWidthLeft = length;
+                                }
+                            }
                             continue;
                         }
                     }
@@ -240,10 +256,18 @@ public class CSSStyle {
                     // Check if the value is a color
                     CSSColor color = CSSColor.getColor(items[i]);
                     if (color != null) {
-                        borderColorTop = color;
-                        borderColorBottom = color;
-                        borderColorLeft = color;
-                        borderColorRight = color;
+                        switch (direction) {
+                            case "top" -> borderColorTop = color;
+                            case "right" -> borderColorRight = color;
+                            case "bottom" -> borderColorBottom = color;
+                            case "left" -> borderColorLeft = color;
+                            default -> {
+                                borderColorTop = color;
+                                borderColorRight = color;
+                                borderColorBottom = color;
+                                borderColorLeft = color;
+                            }
+                        }
                     }
                 }
             }
@@ -410,31 +434,21 @@ public class CSSStyle {
             String value = e.getValue().trim();
             switch (e.getKey()) {
             case "background-color":    backgroundColor = new CSSColor(value); break;
-            case "border":              parseBorder(value); break;
-            case "border-color":        borderColorTop = new CSSColor(value);
-                                        borderColorBottom = new CSSColor(value);
-                                        borderColorLeft = new CSSColor(value);
-                                        borderColorRight = new CSSColor(value);break;
-            case "border-width":        borderWidthTop = Integer.parseInt(value);
-                                        borderWidthBottom = Integer.parseInt(value);
-                                        borderWidthLeft = Integer.parseInt(value);
-                                        borderWidthRight = Integer.parseInt(value); break;
-            case "border-top":          borderColorTop = parseBorderColor(value);
-                                        borderWidthTop = parseBorderWidth(value); break;
-            case "border-bottom":       borderColorBottom = parseBorderColor(value);
-                                        borderWidthBottom = parseBorderWidth(value); break;
-            case "border-left":         borderColorLeft = parseBorderColor(value);
-                                        borderWidthLeft = parseBorderWidth(value); break;
-            case "border-right":        borderColorRight = parseBorderColor(value);
-                                        borderWidthRight = parseBorderWidth(value); break;
-            case "border-top-color":    borderColorTop = new CSSColor(value); break;
-            case "border-bottom-color": borderColorBottom = new CSSColor(value); break;
-            case "border-left-color":   borderColorLeft = new CSSColor(value); break;
-            case "border-right-color":  borderColorRight = new CSSColor(value); break;
-            case "border-top-width":    borderWidthTop = parseDimension(value); break;
-            case "border-bottom-width": borderWidthBottom = parseDimension(value); break;
-            case "border-left-width":   borderWidthLeft = parseDimension(value); break;
-            case "border-right-width":  borderWidthRight = parseDimension(value); break;
+            case "border":
+            case "border-color":
+            case "border-width":        parseBorder(value, "all"); break;
+            case "border-top":
+            case "border-top-color":
+            case "border-top-width":    parseBorder(value, "top"); break;
+            case "border-bottom":
+            case "border-bottom-color":
+            case "border-bottom-width": parseBorder(value, "bottom"); break;
+            case "border-left":
+            case "border-left-color":
+            case "border-left-width":   parseBorder(value, "left"); break;
+            case "border-right":
+            case "border-right-color":
+            case "border-right-width":  parseBorder(value, "right"); break;
             case "box-sizing":          boxSizing = parseBoxSizingType(value); break;
             case "border-spacing":      borderSpacing = parseDimension(value); break;
             case "color":               color = new CSSColor(value); break;
