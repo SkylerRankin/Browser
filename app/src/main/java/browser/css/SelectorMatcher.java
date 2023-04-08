@@ -88,7 +88,8 @@ public class SelectorMatcher {
                     }
                 }
                 case PSEUDO -> {
-                    // TODO how are pseudo elements represented?
+                    // TODO check for pseudo properties
+                    return false;
                 }
                 case TYPE -> {
                     if (!node.type.equals(value)) {

@@ -121,13 +121,16 @@ public class ResourceLoader {
     }
 
     private String loadLocalFileAsText(String filePath, String pageURL) {
-        String separator = pageURL.contains("/") ? "/" : pageURL.contains("\\") ? "\\" : null;
         List<String> paths = new ArrayList<>(List.of(
                 filePath,
                 Path.of(pageURL.substring(FILE_PREFIX.length()), filePath).toString()
         ));
-        if (separator != null) {
-            paths.add(Path.of(pageURL.substring(FILE_PREFIX.length(), pageURL.lastIndexOf(separator)), filePath).toString());
+
+        List<String> separators = List.of("/", "\\");
+        for (String separator : separators) {
+            if (pageURL.substring(FILE_PREFIX.length()).contains(separator)) {
+                paths.add(Path.of(pageURL.substring(FILE_PREFIX.length(), pageURL.lastIndexOf(separator)), filePath).toString());
+            }
         }
 
         for (String pathString : paths) {

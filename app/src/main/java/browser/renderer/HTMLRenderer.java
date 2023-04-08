@@ -7,6 +7,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
 
+import browser.css.CSSStyle;
 import browser.css.CSSStyle.fontStyleType;
 import browser.css.CSSStyle.fontWeightType;
 import browser.layout.BoxUtils;
@@ -39,10 +40,7 @@ public class HTMLRenderer {
             }
         }
 
-        if (root.style.borderWidthTop > 0) fillRect(gc, root.style.borderColorTop, root.x - root.style.borderWidthLeft, root.y - root.style.borderWidthTop, root.width + root.style.borderWidthLeft + root.style.borderWidthRight, root.style.borderWidthTop);
-        if (root.style.borderWidthBottom > 0) fillRect(gc, root.style.borderColorBottom, root.x  - root.style.borderWidthLeft, root.y + root.height, root.width + root.style.borderWidthLeft + root.style.borderWidthRight, root.style.borderWidthTop);
-        if (root.style.borderWidthLeft > 0) fillRect(gc, root.style.borderColorLeft, root.x - root.style.borderWidthLeft, root.y, root.style.borderWidthLeft, root.height);
-        if (root.style.borderWidthRight > 0) fillRect(gc, root.style.borderColorRight, root.x + root.width, root.y, root.style.borderWidthRight, root.height);
+        drawBorder(gc, root);
 
         if (RenderSettings.renderPadding || root.id == RenderSettings.hoveredElementID) {
             CSSColor paddingColor = new CSSColor("rgba(183, 196, 127, 100)");
@@ -105,6 +103,21 @@ public class HTMLRenderer {
         String fullText = node.correspondingRenderNode.text;
         String subText = fullText.substring(node.textStartIndex, node.textEndIndex);
         gc.fillText(subText, node.x, node.y + node.height * textOffsetScale);
+    }
+
+    private static void drawBorder(GraphicsContext gc, BoxNode node) {
+        if (node.style.borderWidthTop > 0 && !node.style.borderStyleTop.equals(CSSStyle.BorderStyle.NONE)) {
+            fillRect(gc, node.style.borderColorTop, node.x - node.style.borderWidthLeft, node.y - node.style.borderWidthTop, node.width + node.style.borderWidthLeft + node.style.borderWidthRight, node.style.borderWidthTop);
+        }
+        if (node.style.borderWidthBottom > 0 && !node.style.borderStyleBottom.equals(CSSStyle.BorderStyle.NONE)) {
+            fillRect(gc, node.style.borderColorBottom, node.x  - node.style.borderWidthLeft, node.y + node.height, node.width + node.style.borderWidthLeft + node.style.borderWidthRight, node.style.borderWidthTop);
+        }
+        if (node.style.borderWidthLeft > 0 && !node.style.borderStyleLeft.equals(CSSStyle.BorderStyle.NONE)) {
+            fillRect(gc, node.style.borderColorLeft, node.x - node.style.borderWidthLeft, node.y, node.style.borderWidthLeft, node.height);
+        }
+        if (node.style.borderWidthRight > 0 && !node.style.borderStyleRight.equals(CSSStyle.BorderStyle.NONE)) {
+            fillRect(gc, node.style.borderColorRight, node.x + node.width, node.y, node.style.borderWidthRight, node.height);
+        }
     }
     
     public static void fillRect(GraphicsContext gc, CSSColor color, float x, float y, float w, float h) {

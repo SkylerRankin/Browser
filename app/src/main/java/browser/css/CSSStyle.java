@@ -68,6 +68,8 @@ public class CSSStyle {
     public static enum wordWrapType {NORMAL, BREAKWORD}
 
     public static enum MarginType {AUTO, LENGTH, PERCENTAGE}
+
+    public enum BorderStyle { NONE, SOLID }
     
     public CSSColor backgroundColor = new CSSColor("White");
     
@@ -80,6 +82,11 @@ public class CSSStyle {
     public int borderWidthRight = 0;
     public int borderWidthBottom = 0;
     public int borderWidthLeft = 0;
+
+    public BorderStyle borderStyleTop = BorderStyle.NONE;
+    public BorderStyle borderStyleRight = BorderStyle.NONE;
+    public BorderStyle borderStyleBottom = BorderStyle.NONE;
+    public BorderStyle borderStyleLeft = BorderStyle.NONE;
 
     public BoxSizingType boxSizing = BoxSizingType.CONTENT_BOX;
 
@@ -209,7 +216,25 @@ public class CSSStyle {
         String[] items = value.split("\s");
         for (int i = 0; i < items.length; i++) {
             if (CSSConstants.borderLineStyles.contains(items[i])) {
-                System.out.printf("Border styles are not supported. Ignored '%s' within '%s'.\n", items[i], value);
+                BorderStyle borderStyle;
+                try {
+                    borderStyle = BorderStyle.valueOf(items[i].toUpperCase());
+                } catch (IllegalArgumentException e) {
+                    System.out.printf("Unsupported border style \"%s\". Reverting to \"solid\".\n", items[i]);
+                    borderStyle = BorderStyle.SOLID;
+                }
+                switch (direction) {
+                    case "top" -> borderStyleTop = borderStyle;
+                    case "right" -> borderStyleRight = borderStyle;
+                    case "bottom" -> borderStyleBottom = borderStyle;
+                    case "left" -> borderStyleLeft = borderStyle;
+                    default -> {
+                        borderStyleTop = borderStyle;
+                        borderStyleRight = borderStyle;
+                        borderStyleBottom = borderStyle;
+                        borderStyleLeft = borderStyle;
+                    }
+                }
             } else {
                 // Check if the value is a length
                 if (items[i].equals("0")) {

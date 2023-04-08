@@ -33,9 +33,10 @@ public class FontLoader {
     
     public static String getValidFont(String[] fonts) {
         for (String font : fonts) {
-            if (font.toLowerCase().equals(defaultFont.toLowerCase())) return font;
+            font = font.trim();
+            if (font.equalsIgnoreCase(defaultFont)) return font;
             String validFont = getValidFont(font.toLowerCase());
-            if (!validFont.toLowerCase().equals(defaultFont.toLowerCase())) return validFont;
+            if (!validFont.equalsIgnoreCase(defaultFont)) return validFont;
         }
         return defaultFont;
     }
