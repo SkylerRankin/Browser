@@ -21,17 +21,21 @@ public class HTMLParser {
 
         DOMNode root = null;
         DOMNode current = null;
+        int preTagDepth = 0;
 
         while (tokenIterator.hasNext()) {
             HTMLToken nextToken = tokenIterator.next();
             switch (nextToken.type) {
                 case TAG_OPEN -> {
-                    DOMNode node = createDOMNode(tokenIterator);
+                    DOMNode node = createDOMNode(tokenIterator, preTagDepth > 0);
+                    if (node.type.equals(HTMLElements.PRE)) {
+                        preTagDepth++;
+                    }
 
                     // The doctype tag is not included in DOM tree, so it is skipped. Any whitespace text tokens
                     // occurring after the tag are also skipped.
                     if (isDocTypeNode(node)) {
-                        handleWhitespaceAfterTag(tokenIterator, node, true);
+                        handleWhitespaceAfterTag(tokenIterator, node, true, false);
                         break;
                     }
 
@@ -44,6 +48,8 @@ public class HTMLParser {
 
                     if (!isSingularTag(node, tokenIterator)) {
                         current = node;
+                    } else if (node.type.equals(HTMLElements.PRE)) {
+                        preTagDepth++;
                     }
                 }
                 case TAG_END_OPEN -> {
@@ -54,7 +60,13 @@ public class HTMLParser {
                     while (!isTagCloseToken(currentToken)) {
                         currentToken = tokenIterator.next();
                     }
-                    handleWhitespaceAfterTag(tokenIterator, current, true);
+
+                    if (current.type.equals(HTMLElements.PRE)) {
+                        preTagDepth--;
+                    }
+
+                    handleWhitespaceAfterTag(tokenIterator, current, true, preTagDepth > 0);
+
                     current = current.parent;
                 }
                 case TEXT -> {
@@ -74,7 +86,7 @@ public class HTMLParser {
         return root;
     }
 
-    private DOMNode createDOMNode(ListIterator<HTMLToken> tokenIterator) {
+    private DOMNode createDOMNode(ListIterator<HTMLToken> tokenIterator, boolean preserveWhitespace) {
         HTMLToken firstToken = tokenIterator.next();
         DOMNode node = null;
         if (isTagCloseToken(firstToken)) {
@@ -89,7 +101,8 @@ public class HTMLParser {
         }
 
         boolean setWhitespaceFlag = isSingularTag(node, tokenIterator);
-        handleWhitespaceAfterTag(tokenIterator, node, setWhitespaceFlag);
+        handleWhitespaceAfterTag(tokenIterator, node, setWhitespaceFlag, preserveWhitespace);
+
         return node;
     }
 
@@ -133,7 +146,7 @@ public class HTMLParser {
         return false;
     }
 
-    private void handleWhitespaceAfterTag(ListIterator<HTMLToken> tokenIterator, DOMNode currentNode, boolean setFlag) {
+    private void handleWhitespaceAfterTag(ListIterator<HTMLToken> tokenIterator, DOMNode currentNode, boolean setFlag, boolean preserveWhitespace) {
         if (!tokenIterator.hasNext()) {
             return;
         }
@@ -155,7 +168,7 @@ public class HTMLParser {
             currentNode.whiteSpaceAfter = whitespaceAfter;
         }
 
-        if (restorePreviousToken) {
+        if (restorePreviousToken || preserveWhitespace) {
             tokenIterator.previous();
         }
     }

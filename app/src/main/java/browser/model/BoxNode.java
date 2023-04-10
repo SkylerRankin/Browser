@@ -94,9 +94,13 @@ public class BoxNode {
         String positionSize = String.format("@(%.0f, %.0f), (%.0f x %.0f)", x, y, width, height);
         String flags = "" + (isAnonymous ? "a" : "") + (isTextNode ? "t" : "");
         if (isPseudo) flags += "p";
+        String type = correspondingRenderNode == null ? "?" : correspondingRenderNode.type;
+        if (isAnonymous) {
+            type = "anon";
+        }
         String textRange = isTextNode ? String.format(", tx:%d-%d", textStartIndex, textEndIndex) : "";
         return String.format("(%s) id=%s, outer=%s, inner=%s, parent=%d, rid=%d, %s, [%s], %s%s",
-                correspondingRenderNode == null ? "?" : correspondingRenderNode.type, id, outerDisplayType,
+                type, id, outerDisplayType,
                 innerDisplayType, parent == null ? -1 : parent.id, renderNodeId, positionSize, flags,
                 children.stream().map(boxNode -> boxNode.id).toList(), textRange);
     }

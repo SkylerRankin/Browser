@@ -11,6 +11,7 @@ import browser.model.BoxNode;
 import browser.model.RenderNode;
 import browser.parser.HTMLElements;
 
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -19,6 +20,12 @@ public class BoxTreeGeneratorTest {
     @BeforeClass
     public static void setup() {
         Pipeline.init();
+    }
+
+    @Before
+    public void setupPerTest() {
+        BoxNode.nextId = 0;
+        RenderNode.nextId = 0;
     }
 
     @Test
@@ -711,6 +718,100 @@ public class BoxTreeGeneratorTest {
         span2Box.parent = div1Box;
 
         assertEquals(div1Box, rootBoxNode);
+    }
+
+    /**
+     * This test covers the situation of a pre element that contains newlines. The text box is split into multiple text
+     * boxes.
+     *
+     * <pre>
+     *     <text>some
+     * pre
+     * text</text>
+     * </pre>
+     * -->
+     * <pre>
+     *     <text>some</text>
+     *     <text>pre</text>
+     *     <text>text</text>
+     * </pre>
+     */
+    @Test
+    public void generatePreLines() {
+        RenderNode pre = new RenderNode(HTMLElements.PRE);
+        pre.id = RenderNode.nextId++;
+        pre.style.outerDisplay = DisplayType.BLOCK;
+        pre.style.innerDisplay = DisplayType.FLOW;
+
+        RenderNode text = new RenderNode(HTMLElements.TEXT);
+        text.id = RenderNode.nextId++;
+        text.style.outerDisplay = DisplayType.INLINE;
+        text.style.innerDisplay = DisplayType.FLOW;
+        text.text = "some\npre\ntext";
+
+        pre.addChild(text);
+
+        BoxTreeGenerator boxTreeGenerator = new BoxTreeGenerator();
+        BoxNode rootBoxNode = boxTreeGenerator.generate(pre);
+
+        BoxNode preBox = new BoxNode();
+        preBox.id = 0;
+        preBox.renderNodeId = pre.id;
+        preBox.outerDisplayType = DisplayType.BLOCK;
+        preBox.innerDisplayType = DisplayType.FLOW;
+
+        BoxNode text1Box = new BoxNode();
+        text1Box.id = 2;
+        text1Box.isAnonymous = true;
+        text1Box.isTextNode = true;
+        text1Box.renderNodeId = text.id;
+        text1Box.outerDisplayType = DisplayType.INLINE;
+        text1Box.innerDisplayType = DisplayType.FLOW;
+        text1Box.textStartIndex = 0;
+        text1Box.textEndIndex = 4;
+        text1Box.parent = preBox;
+
+        BoxNode lineBreak1Box = new BoxNode();
+        lineBreak1Box.id = 3;
+        lineBreak1Box.isAnonymous = true;
+        lineBreak1Box.renderNodeId = 2;
+        lineBreak1Box.outerDisplayType = DisplayType.INLINE;
+        lineBreak1Box.innerDisplayType = DisplayType.FLOW;
+        lineBreak1Box.parent = preBox;
+
+        BoxNode text2Box = new BoxNode();
+        text2Box.id = 4;
+        text2Box.isAnonymous = true;
+        text2Box.isTextNode = true;
+        text2Box.renderNodeId = text.id;
+        text2Box.outerDisplayType = DisplayType.INLINE;
+        text2Box.innerDisplayType = DisplayType.FLOW;
+        text2Box.textStartIndex = 5;
+        text2Box.textEndIndex = 8;
+        text2Box.parent = preBox;
+
+        BoxNode lineBreak2Box = new BoxNode();
+        lineBreak2Box.id = 5;
+        lineBreak2Box.isAnonymous = true;
+        lineBreak2Box.renderNodeId = 3;
+        lineBreak2Box.outerDisplayType = DisplayType.INLINE;
+        lineBreak2Box.innerDisplayType = DisplayType.FLOW;
+        lineBreak2Box.parent = preBox;
+
+        BoxNode text3Box = new BoxNode();
+        text3Box.id = 6;
+        text3Box.isAnonymous = true;
+        text3Box.isTextNode = true;
+        text3Box.renderNodeId = text.id;
+        text3Box.outerDisplayType = DisplayType.INLINE;
+        text3Box.innerDisplayType = DisplayType.FLOW;
+        text3Box.textStartIndex = 9;
+        text3Box.textEndIndex = 13;
+        text3Box.parent = preBox;
+
+        preBox.children.addAll(List.of(text1Box, lineBreak1Box, text2Box, lineBreak2Box, text3Box));
+
+        assertEquals(preBox, rootBoxNode);
     }
 
 }

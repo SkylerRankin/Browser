@@ -5,9 +5,11 @@ import static browser.css.CSSStyle.DisplayType;
 import java.util.*;
 
 import browser.constants.CSSConstants;
+import browser.css.CSSStyle;
 import browser.model.BoxNode;
 import browser.model.RenderNode;
 import browser.parser.HTMLElements;
+import browser.parser.StringUtils;
 
 public class BoxTreeGenerator {
 
@@ -40,6 +42,7 @@ public class BoxTreeGenerator {
             }
         }
 
+        separatePreformattedTextLines(rootBoxNode, false);
         setDisplaysForUnknownElements(rootBoxNode);
         addAnonymousFlowBoxes(rootBoxNode);
         addAnonymousTableBoxes(rootBoxNode);
@@ -72,9 +75,10 @@ public class BoxTreeGenerator {
         boxNode.whiteSpaceAfter = renderNode.whiteSpaceAfter;
 
         if (boxNode.isTextNode) {
+            String text = boxNode.correspondingRenderNode.text;
             boxNode.isAnonymous = true;
             boxNode.textStartIndex = 0;
-            boxNode.textEndIndex = boxNode.correspondingRenderNode.text.length();
+            boxNode.textEndIndex = text == null ? 0 : text.length();
         }
 
         return boxNode;
@@ -174,7 +178,8 @@ public class BoxTreeGenerator {
         containingAnonymousBox.innerDisplayType = DisplayType.FLOW;
         containingAnonymousBox.parent = inlineBox.parent;
         containingAnonymousBox.isAnonymous = true;
-        containingAnonymousBox.style = inlineBox.parent.style.deepCopy();
+        // TODO should this actually be the inline box's style? Is that style lost?
+        containingAnonymousBox.style = inlineBox.parent == null ? new CSSStyle() : inlineBox.parent.style.deepCopy();
 
         // Add the anonymous containing box to the parent's children, and remove the inline box.
         BoxNode parent = inlineBox.parent;
@@ -241,6 +246,61 @@ public class BoxTreeGenerator {
 
         for (BoxNode child : boxNode.children) {
             setDisplaysForUnknownElements(child);
+        }
+    }
+
+    private void separatePreformattedTextLines(BoxNode boxNode, boolean inPre) {
+        if (inPre && boxNode.isTextNode) {
+            List<BoxNode> newTextBoxes = new ArrayList<>();
+            String text = boxNode.correspondingRenderNode.text.substring(boxNode.textStartIndex, boxNode.textEndIndex);
+            String[] lines = text.split("\\r?\\n");
+            if (lines.length > 1) {
+                int index = 0;
+                for (int i = 0; i < lines.length; i++) {
+                    String line = lines[i];
+                    if (!line.isEmpty()) {
+                        BoxNode textLineBox = new BoxNode(boxNode);
+                        textLineBox.isAnonymous = true;
+                        textLineBox.isTextNode = true;
+                        textLineBox.textStartIndex = index;
+                        textLineBox.textEndIndex = index + line.length();
+                        newTextBoxes.add(textLineBox);
+                    }
+
+                    if (i < lines.length - 1) {
+                        RenderNode lineBreakRenderNode = new RenderNode(HTMLElements.BR);
+                        lineBreakRenderNode.id = RenderNode.nextId++;
+
+                        BoxNode lineBreakBox = new BoxNode(boxNode);
+                        lineBreakBox.isAnonymous = true;
+                        lineBreakBox.isTextNode = false;
+                        lineBreakBox.textStartIndex = 0;
+                        lineBreakBox.textEndIndex = 0;
+                        lineBreakBox.correspondingRenderNode = lineBreakRenderNode;
+                        lineBreakBox.renderNodeId = lineBreakRenderNode.id;
+
+                        newTextBoxes.add(lineBreakBox);
+                    }
+
+                    int newlineLength = 1;
+                    if (StringUtils.substringMatch(text, "\r\n", index + line.length())) {
+                        newlineLength = 2;
+                    }
+
+                    index += line.length() + newlineLength;
+                }
+
+                // Remove the previous text box, and insert the new lines instead.
+                int indexInParent = boxNode.parent.children.indexOf(boxNode);
+                boxNode.parent.children.remove(indexInParent);
+                boxNode.parent.children.addAll(indexInParent, newTextBoxes);
+            }
+        } else if (boxNode.correspondingRenderNode.type.equals(HTMLElements.PRE)) {
+            inPre = true;
+        }
+
+        for (int i = 0; i < boxNode.children.size(); i++) {
+            separatePreformattedTextLines(boxNode.children.get(i), inPre);
         }
     }
 }

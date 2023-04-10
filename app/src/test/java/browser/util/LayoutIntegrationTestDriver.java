@@ -101,6 +101,7 @@ public class LayoutIntegrationTestDriver {
         if (element.hasAttr("textStartIndex")) {
             boxNode.textStartIndex = Integer.parseInt(element.attr("textStartIndex"));
             boxNode.textEndIndex = Integer.parseInt(element.attr("textEndIndex"));
+            boxNode.isTextNode = true;
         }
         List<String> layoutAttributes = List.of("x", "y", "width", "height", "textStartIndex", "textEndIndex");
         List<Attribute> styleAttributes = element.attributes().asList().stream().filter(attr -> !layoutAttributes.contains(attr.getKey())).toList();

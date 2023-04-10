@@ -91,6 +91,16 @@ public class LayoutIntegrationTests {
         driver.runLayoutTest("splitInlineTextEndingWithSpace", 1000);
     }
 
+    @Test
+    public void simplePre() {
+        driver.runLayoutTest("simplePre", 1000);
+    }
+
+    @Test
+    public void preWithInternalTags() {
+        driver.runLayoutTest("preWithInternalTags", 1000);
+    }
+
     // Text alignment
 
     @Test

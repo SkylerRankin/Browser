@@ -1,6 +1,5 @@
 package browser.parser;
 
-import java.lang.reflect.Type;
 import java.util.*;
 import java.util.regex.Matcher;
 

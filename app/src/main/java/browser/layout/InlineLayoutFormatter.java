@@ -24,14 +24,15 @@ public class InlineLayoutFormatter {
         Vector2 preferredSize = getInlineBoxPreferredSize(boxNode);
         float rightSideSpacing = context.getRightSpacingForBox(boxNode.id);
         float availableWidth = context.endX - x - rightSideSpacing;
+        BoxNode previousBoxInLine = context.getPreviousBoxInLine();
 
         boolean fitsInCurrentLine = preferredSize.x <= availableWidth;
         boolean canBeSplit = textNodeSplitter.canBeSplit(boxNode);
         boolean canBeSplitToFit = canBeSplit && textNodeSplitter.canSplitNodeToFitWidth(boxNode, availableWidth);
         boolean placeFullyOnCurrentLine = fitsInCurrentLine || (!canBeSplit && !context.currentRowHasTerminalBox());
         boolean placePartiallyOnCurrentLine = !placeFullyOnCurrentLine && (canBeSplitToFit || !context.currentRowHasTerminalBox());
-        boolean isLineBreak = boxNode.correspondingRenderNode != null && boxNode.correspondingRenderNode.type.equals(HTMLElements.BR);
-        boolean placeOnNextLine = (!placeFullyOnCurrentLine && !placePartiallyOnCurrentLine) || isLineBreak;
+        boolean lineBreak = previousBoxInLine != null && previousBoxInLine.correspondingRenderNode != null && previousBoxInLine.correspondingRenderNode.type.equals(HTMLElements.BR);
+        boolean placeOnNextLine = (!placeFullyOnCurrentLine && !placePartiallyOnCurrentLine) || lineBreak;
 
         // The box is too large for the current line, but cannot be split to fit, and is the first terminal box in
         // the row. The layout moves to the next line in the context. In the case where the box is the first child in
@@ -109,7 +110,8 @@ public class InlineLayoutFormatter {
                 CSSStyle previousStyle = siblingBox.style;
                 // Whitespace in the HTML source after a previous sibling inline box will add one space character's worth
                 // of horizontal space here. The line break element is an exception, which should not add space.
-                boolean ignoreWhitespaceAfter = siblingBox.correspondingRenderNode != null && siblingBox.correspondingRenderNode.type.equals(HTMLElements.BR);
+                boolean ignoreWhitespaceAfter = (siblingBox.correspondingRenderNode != null && siblingBox.correspondingRenderNode.type.equals(HTMLElements.BR)) ||
+                        (boxNode.correspondingRenderNode != null && boxNode.correspondingRenderNode.type.equals(HTMLElements.BR));
                 float inlineSpace = (siblingBox.whiteSpaceAfter && !ignoreWhitespaceAfter) ? textDimensionCalculator.getDimension(" ", boxNode.parent.style).x : 0;
                 return siblingBox.x + siblingBox.width + previousStyle.marginRight + boxNode.style.marginLeft + inlineSpace;
             }
@@ -140,6 +142,9 @@ public class InlineLayoutFormatter {
             return new Vector2(size.x + widthDueToSpacing, size.y);
         } else if (boxNode.correspondingRenderNode.type.equals(HTMLElements.IMG)) {
             return new Vector2(boxNode.width, boxNode.height);
+        } else if (boxNode.correspondingRenderNode.type.equals(HTMLElements.BR)) {
+            Vector2 size = textDimensionCalculator.getDimension(" ", boxNode.style);
+            return new Vector2(0, size.y);
         } else if (boxNode.innerDisplayType.equals(CSSStyle.DisplayType.FLOW_ROOT)) {
             float width = boxNode.width == null ? 0 : boxNode.width;
             float height = boxNode.height == null ? 0 : boxNode.height;

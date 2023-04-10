@@ -35,4 +35,14 @@ public class HTMLParserTest {
         testDriver.runParseTest("wikipediaFilePage");
     }
 
+    @Test
+    public void preWhitespace() {
+        testDriver.runParseTest("preWhitespace");
+    }
+
+    @Test
+    public void preWhitespaceNestedTag() {
+        testDriver.runParseTest("preWhitespaceNestedTag");
+    }
+
 }

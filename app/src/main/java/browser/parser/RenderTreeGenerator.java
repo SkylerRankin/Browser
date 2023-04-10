@@ -32,7 +32,7 @@ public class RenderTreeGenerator {
     public void cleanupRenderNodeText(RenderNode renderNode) {
         if (renderNode != null) {
             removeDuplicateWhitespace(renderNode, false);
-            trimTextWhitespace(renderNode);
+            trimTextWhitespace(renderNode, false);
             removeDuplicateWhitespaceAfterSameNode(renderNode);
         }
     }
@@ -91,7 +91,7 @@ public class RenderTreeGenerator {
         }
 
         for (RenderNode child : root.children) {
-            removeDuplicateWhitespace(child, inPre || root.type.equals("pre"));
+            removeDuplicateWhitespace(child, inPre || root.type.equals(HTMLElements.PRE));
         }
     }
 
@@ -128,10 +128,10 @@ public class RenderTreeGenerator {
      * @param node  The node to start on.
      */
     // TODO make this private
-    public void trimTextWhitespace(RenderNode node) {
+    public void trimTextWhitespace(RenderNode node, boolean inPre) {
         if (node == null ) return;
 
-        if (node.parent != null && node.text != null) {
+        if (node.parent != null && node.text != null && !inPre) {
             // Trim the start of the text.
             RenderNode previousTextNode = getPreviousInlineTextNode(node);
             if (previousTextNode == null || previousTextNode.text.endsWith(" ") || previousSiblingHasWhiteSpaceAfter(node)) {
@@ -146,8 +146,19 @@ public class RenderTreeGenerator {
             }
         }
 
+        int indexInParent = node.parent != null ? node.parent.children.indexOf(node) : -1;
+        boolean parentIsPre = node.parent != null && node.parent.type.equals(HTMLElements.PRE);
+        if (node.text != null && indexInParent == 0 && parentIsPre) {
+            // The first newline of a pre block is removed.
+            if (node.text.startsWith("\r\n")) {
+                node.text = node.text.substring(2);
+            } else if (node.text.startsWith("\n")) {
+                node.text = node.text.substring(1);
+            }
+        }
+
         for (RenderNode child : node.children) {
-            trimTextWhitespace(child);
+            trimTextWhitespace(child, inPre || node.type.equals(HTMLElements.PRE));
         }
     }
 

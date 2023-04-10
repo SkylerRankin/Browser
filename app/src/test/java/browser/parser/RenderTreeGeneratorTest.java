@@ -73,7 +73,7 @@ public class RenderTreeGeneratorTest {
         div.addChildren(text1, b, text3);
         b.addChild(text2);
 
-        renderTreeGenerator.trimTextWhitespace(div);
+        renderTreeGenerator.trimTextWhitespace(div, false);
 
         assertEquals("This text is ", text1.text);
         assertEquals("bold", text2.text);
@@ -133,7 +133,7 @@ public class RenderTreeGeneratorTest {
         b2.addChild(text4);
         b3.addChild(text6);
 
-        renderTreeGenerator.trimTextWhitespace(div);
+        renderTreeGenerator.trimTextWhitespace(div, false);
 
         assertEquals("Start ", text1.text);
         assertEquals("b1", text2.text);
@@ -167,7 +167,7 @@ public class RenderTreeGeneratorTest {
         div.addChildren(text1, code);
         code.addChild(text2);
 
-        renderTreeGenerator.trimTextWhitespace(div);
+        renderTreeGenerator.trimTextWhitespace(div, false);
 
         assertEquals("a ", text1.text);
         assertEquals("b", text2.text);
