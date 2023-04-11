@@ -1,12 +1,12 @@
 package browser.app;
 
-import browser.exception.LayoutException;
-import browser.exception.PageLoadException;
 import javafx.scene.canvas.GraphicsContext;
 
 import browser.css.CSSLoader;
 import browser.css.DefaultColors;
 import browser.css.FontLoader;
+import browser.exception.LayoutException;
+import browser.exception.PageLoadException;
 import browser.layout.BoxLayoutGenerator;
 import browser.layout.BoxTreeGenerator;
 import browser.layout.ListMarkerGenerator;

@@ -19,8 +19,7 @@ public class CSSStyle {
     private final Map<String, String> properties = new HashMap<>();
     private final Map<String, CSSSpecificity> propertySpecificity = new HashMap<>();
     private final Set<String> inheritedProperties = new HashSet<>();
-
-    private final Pattern lengthPattern = Pattern.compile("^([0-9]+)([a-zA-Z]{1,5})$");
+    private final Pattern lengthPattern = Pattern.compile("^([0-9.]+)([a-zA-Z]{1,5})$");
 
     public enum DimensionType { PIXEL, PERCENTAGE }
 
@@ -73,7 +72,9 @@ public class CSSStyle {
     public enum PaddingType {LENGTH, PERCENTAGE}
 
     public enum BorderStyle { NONE, SOLID }
-    
+
+    public CSSStyle parentStyle = null;
+
     public CSSColor backgroundColor = new CSSColor("White");
     
     public CSSColor borderColorTop = new CSSColor("Black");
@@ -171,7 +172,7 @@ public class CSSStyle {
         if (text.equalsIgnoreCase("none")) {
             dimension.value = null;
         } else if (text.endsWith("%") && text.length() > 1) {
-            String percentageText = text.substring(text.length() - 1);
+            String percentageText = text.substring(0, text.length() - 1);
             if (percentageText.matches("[0-9]+")) {
                 dimension.value = Float.parseFloat(percentageText);
                 dimension.type = DimensionType.PERCENTAGE;
@@ -182,14 +183,26 @@ public class CSSStyle {
         } else {
             Matcher lengthMatcher = lengthPattern.matcher(text);
             if (lengthMatcher.find()) {
-                int length = Integer.parseInt(lengthMatcher.group(1));
+                float length = Float.parseFloat(lengthMatcher.group(1));
                 String unitString = lengthMatcher.group(2);
                 LengthUnit unitCandidate = parseLengthUnit(unitString);
                 if (unitCandidate != null) {
-                    if (unitCandidate != LengthUnit.PX) {
-                        System.err.printf("Unsupported dimension type %s. Defaulting to pixel.\n", unitCandidate.name());
+                    switch (unitCandidate) {
+                        case PX -> dimension.value = length;
+                        case EM -> {
+                            float parentFontSize = parentStyle == null ? fontSize : parentStyle.fontSize;
+                            dimension.value = length * parentFontSize;
+                        }
+                        case REM -> {
+                            // TODO use the root font size, not the parent's.
+                            float parentFontSize = parentStyle == null ? fontSize : parentStyle.fontSize;
+                            dimension.value = length * parentFontSize;
+                        }
+                        default -> {
+                            System.err.printf("Unsupported dimension type %s. Defaulting to pixel.\n", unitCandidate.name());
+                            dimension.value = length;
+                        }
                     }
-                    dimension.value = (float) length;
                     dimension.type = DimensionType.PIXEL;
                 }
             }
@@ -199,23 +212,17 @@ public class CSSStyle {
     }
     
     private void parseFontSizeValue(String value) {
-        if (value.matches("\\d+")) {
-            fontSize = Integer.parseInt(value);
-        } else if (value.matches("(\\d+)px")) {
-            fontSize = Integer.parseInt(value.substring(0, value.length() - 2));
-        } else if (value.endsWith("rem")) {
-            String remsString = value.substring(0, value.indexOf("rem"));
-            if (remsString.matches("\\d+(\\.\\d+?)?")) {
-                double rems = Double.parseDouble(remsString);
-                fontSize = (int) (rems * 16.0);
+        Dimension dimension = parseSingleDimension(value);
+        if (dimension.type != null) {
+            switch (dimension.type) {
+                case PIXEL -> fontSize = dimension.value.intValue();
+                case PERCENTAGE -> {
+                    if (parentStyle != null) {
+                        fontSize = (int) (parentStyle.fontSize * (dimension.value / 100.0));
+                    }
+                }
             }
-        } else if (value.endsWith("%") && value.substring(0, value.length()-1).matches("\\d+")) {
-            double percent = Double.parseDouble(value.substring(0, value.length()-1));
-            fontSize = (int) (16.0 * percent / 100.0);
-        } else {
-            System.out.printf("CSSStyle.parseFontSizeValue: invalid font property: %s\n", value);
         }
-
     }
 
     /**
@@ -380,31 +387,15 @@ public class CSSStyle {
 
     private void parseIndividualMargin(String text, String direction) {
         int value = 0;
-        MarginType type = MarginType.LENGTH;
+        MarginType type;
         LengthUnit unit = LengthUnit.PX;
 
         if (text.equalsIgnoreCase("auto")) {
             type = MarginType.AUTO;
-        } else if (text.endsWith("%") && text.length() > 1) {
-            String percentageText = text.substring(text.length() - 1);
-            if (percentageText.matches("[0-9]+")) {
-                type = MarginType.PERCENTAGE;
-                value = Integer.parseInt(percentageText);
-            }
-        } else if (text.matches("[0-9]+")) {
-            value = Integer.parseInt(text);
         } else {
-            Matcher lengthMatcher = lengthPattern.matcher(text);
-            if (lengthMatcher.find()) {
-                int length = Integer.parseInt(lengthMatcher.group(1));
-                String unitString = lengthMatcher.group(2);
-                LengthUnit unitCandidate = parseLengthUnit(unitString);
-                if (unitCandidate != null) {
-                    // TODO resolve non-pixel units into pixels.
-                    unit = unitCandidate;
-                    value = length;
-                }
-            }
+            Dimension dimension = parseSingleDimension(text);
+            value = dimension.value.intValue();
+            type = dimension.type.equals(DimensionType.PIXEL) ? MarginType.LENGTH : MarginType.PERCENTAGE;
         }
 
         switch (direction) {
@@ -466,31 +457,13 @@ public class CSSStyle {
     }
 
     private void parseIndividualPadding(String text, String direction) {
-        int value = 0;
-        PaddingType type = PaddingType.LENGTH;
+        int value;
+        PaddingType type;
         LengthUnit unit = LengthUnit.PX;
 
-       if (text.endsWith("%") && text.length() > 1) {
-            String percentageText = text.substring(text.length() - 1);
-            if (percentageText.matches("[0-9]+")) {
-                type = PaddingType.PERCENTAGE;
-                value = Integer.parseInt(percentageText);
-            }
-        } else if (text.matches("[0-9]+")) {
-            value = Integer.parseInt(text);
-        } else {
-            Matcher lengthMatcher = lengthPattern.matcher(text);
-            if (lengthMatcher.find()) {
-                int length = Integer.parseInt(lengthMatcher.group(1));
-                String unitString = lengthMatcher.group(2);
-                LengthUnit unitCandidate = parseLengthUnit(unitString);
-                if (unitCandidate != null) {
-                    // TODO resolve non-pixel units into pixels.
-                    unit = unitCandidate;
-                    value = length;
-                }
-            }
-        }
+        Dimension dimension = parseSingleDimension(text);
+        value = dimension.value.intValue();
+        type =  dimension.type.equals(DimensionType.PIXEL) ? PaddingType.LENGTH : PaddingType.PERCENTAGE;
 
         switch (direction) {
             case "top" -> {
@@ -666,7 +639,7 @@ public class CSSStyle {
         CSSStyle style = new CSSStyle();
 
         // TODO: copy over the properties maps
-
+        style.parentStyle = parentStyle;
         style.backgroundColor = backgroundColor;
         style.borderWidthTop = borderWidthTop;
         style.borderWidthBottom = borderWidthBottom;

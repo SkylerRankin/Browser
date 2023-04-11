@@ -47,7 +47,7 @@ public class HTTPClient {
             }
 
             String contentType = conn.getHeaderField(ResourceConstants.CONTENT_TYPE_KEY);
-            if (!contentType.startsWith("text/html")) {
+            if (!contentType.startsWith(ResourceConstants.HTML_CONTENT_TYPE_PREFIX)) {
                 throw new PageLoadException(ErrorConstants.ErrorType.NETWORK_FILE_NOT_HTML, Map.of(ErrorConstants.CONTENT_TYPE, contentType));
             }
             

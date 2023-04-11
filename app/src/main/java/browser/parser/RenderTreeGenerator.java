@@ -63,6 +63,7 @@ public class RenderTreeGenerator {
         renderNode.attributes = dom.attributes;
         renderNode.parent = parent;
         RenderNode.nextId++;
+        renderNode.style.parentStyle = parent == null ? null : parent.style;
         for (DOMNode child : dom.children) {
             if (!HTMLConstants.elementsExcludedFromRender.contains(child.type)) {
                 renderNode.children.add(copyTree(child, renderNode, depth + 1));

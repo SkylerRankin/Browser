@@ -5,7 +5,6 @@ import java.util.List;
 import browser.constants.PseudoElementConstants;
 import browser.css.CSSStyle;
 import browser.model.BoxNode;
-import browser.model.CSSRulePrecedent;
 import browser.model.RenderNode;
 import browser.model.Vector2;
 import browser.parser.HTMLElements;
@@ -24,6 +23,7 @@ public class ListMarkerGenerator {
     public static void addMarkers(RenderNode renderNode) {
         if (renderNode.style.auxiliaryDisplay != null && renderNode.style.auxiliaryDisplay.equals(CSSStyle.DisplayType.LIST_ITEM)) {
             RenderNode marker = new RenderNode(HTMLElements.PSEUDO_MARKER);
+            marker.id = -1;
             // TODO Set the marker display properties from the user agent CSS.
             marker.style.outerDisplay = CSSStyle.DisplayType.BLOCK;
             marker.style.innerDisplay = CSSStyle.DisplayType.FLOW;

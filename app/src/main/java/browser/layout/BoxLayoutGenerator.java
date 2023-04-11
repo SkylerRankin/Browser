@@ -44,8 +44,8 @@ public class BoxLayoutGenerator {
         setTableFormattingContexts(rootBoxNode);
 
         // Set all fixed heights/widths.
-        setFixedSizes(rootBoxNode);
         setImageSizes(rootBoxNode);
+        setFixedSizes(rootBoxNode);
         setEmptyBoxSizes(rootBoxNode);
 
         // Set the position of the root node.
@@ -599,9 +599,13 @@ public class BoxLayoutGenerator {
      */
     private void applyAutoMargins(BoxNode boxNode) {
           boolean isBlock = boxNode.outerDisplayType.equals(DisplayType.BLOCK);
-          if (isBlock && boxNode.parent != null) {
-              CSSStyle parentStyle = boxNode.parent.style;
-              float availableWidth = boxNode.parent.width - parentStyle.borderWidthLeft - parentStyle.paddingLeft - parentStyle.borderWidthRight - parentStyle.paddingRight;
+          if (isBlock) {
+              float availableWidth = screenWidth;
+              if (boxNode.parent != null) {
+                  CSSStyle parentStyle = boxNode.parent.style;
+                  availableWidth = boxNode.parent.width - parentStyle.borderWidthLeft - parentStyle.paddingLeft - parentStyle.borderWidthRight - parentStyle.paddingRight;
+              }
+
               if (boxNode.style.marginLeftType.equals(CSSStyle.MarginType.AUTO) && boxNode.style.marginRightType.equals(CSSStyle.MarginType.AUTO)) {
                   float diff = availableWidth - boxNode.width;
                   moveBoxAndDescendants(boxNode, new Vector2(diff / 2, 0));
