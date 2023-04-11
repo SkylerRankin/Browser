@@ -150,6 +150,10 @@ public class LayoutIntegrationTests {
         driver.runLayoutTest("inlineListWithInlineItems", 500);
     }
 
+    @Test
+    public void nestedListWithoutItem() {
+        driver.runLayoutTest("nestedListWithoutItem", 1000);
+    }
 
     // Table tests
 

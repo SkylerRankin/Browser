@@ -102,7 +102,7 @@ public class BoxTreeGenerator {
                 // so that the parent is reprocessed.
                 if (boxNode.parent != null) {
                     List<BoxNode> newQueueContent = queue.stream()
-                            .filter(b -> b.isDescendantOf(boxNode.parent.id)).toList();
+                            .filter(b -> !b.isDescendantOf(boxNode.parent.id)).toList();
                     queue.clear();
                     queue.add(0, boxNode.parent);
                     queue.addAll(newQueueContent);

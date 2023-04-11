@@ -500,12 +500,6 @@ public class BoxLayoutGenerator {
         if (parentBox.outerDisplayType.equals(DisplayType.INLINE) || parentBox.height == null) {
             parentBox.height = getHeightFromChildren(parentBox);
         }
-
-        for (BoxNode child : parentBox.children) {
-            if (child.auxiliaryDisplayType == null || !child.auxiliaryDisplayType.equals(DisplayType.LIST_ITEM)) {
-                setBoxLayout(child);
-            }
-        }
     }
 
     private void layoutTableBoxes(BoxNode parentBox) {

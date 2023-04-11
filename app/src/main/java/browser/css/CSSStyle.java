@@ -7,6 +7,7 @@ import java.util.regex.Pattern;
 
 import browser.constants.CSSConstants;
 import browser.model.CSSColor;
+import browser.model.Dimension;
 
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -67,7 +68,9 @@ public class CSSStyle {
 
     public static enum wordWrapType {NORMAL, BREAKWORD}
 
-    public static enum MarginType {AUTO, LENGTH, PERCENTAGE}
+    public enum MarginType {AUTO, LENGTH, PERCENTAGE}
+
+    public enum PaddingType {LENGTH, PERCENTAGE}
 
     public enum BorderStyle { NONE, SOLID }
     
@@ -126,12 +129,22 @@ public class CSSStyle {
     public int marginLeft = 0;
     public MarginType marginLeftType = MarginType.LENGTH;
     public LengthUnit marginLeftUnit = LengthUnit.PX;
-    
-    public int padding = 0;
+
     public int paddingTop = 0;
+    public PaddingType paddingTopType = PaddingType.LENGTH;
+    public LengthUnit paddingTopUnit = LengthUnit.PX;
+
     public int paddingRight = 0;
+    public PaddingType paddingRightType = PaddingType.LENGTH;
+    public LengthUnit paddingRightUnit = LengthUnit.PX;
+
     public int paddingBottom = 0;
+    public PaddingType paddingBottomType = PaddingType.LENGTH;
+    public LengthUnit paddingBottomUnit = LengthUnit.PX;
+
     public int paddingLeft = 0;
+    public PaddingType paddingLeftType = PaddingType.LENGTH;
+    public LengthUnit paddingLeftUnit = LengthUnit.PX;
     
     public textAlignType textAlign = textAlignType.LEFT;
     
@@ -152,26 +165,37 @@ public class CSSStyle {
     public Map<String, String> getAllProperties() {
         return properties;
     }
-    
-    private int parseDimension(String value) {
-        value = value.trim();
 
-        if (value.endsWith("em")) {
-            return (int) (16 * Double.parseDouble(value.substring(0, value.length() - 2)));
-        } else if (value.equals("auto")) {
-            return 0;
+    private Dimension parseSingleDimension(String text) {
+        Dimension dimension = new Dimension();
+        if (text.equalsIgnoreCase("none")) {
+            dimension.value = null;
+        } else if (text.endsWith("%") && text.length() > 1) {
+            String percentageText = text.substring(text.length() - 1);
+            if (percentageText.matches("[0-9]+")) {
+                dimension.value = Float.parseFloat(percentageText);
+                dimension.type = DimensionType.PERCENTAGE;
+            }
+        } else if (text.matches("[0-9]+")) {
+            dimension.value = Float.parseFloat(text);
+            dimension.type = DimensionType.PIXEL;
+        } else {
+            Matcher lengthMatcher = lengthPattern.matcher(text);
+            if (lengthMatcher.find()) {
+                int length = Integer.parseInt(lengthMatcher.group(1));
+                String unitString = lengthMatcher.group(2);
+                LengthUnit unitCandidate = parseLengthUnit(unitString);
+                if (unitCandidate != null) {
+                    if (unitCandidate != LengthUnit.PX) {
+                        System.err.printf("Unsupported dimension type %s. Defaulting to pixel.\n", unitCandidate.name());
+                    }
+                    dimension.value = (float) length;
+                    dimension.type = DimensionType.PIXEL;
+                }
+            }
         }
 
-        String[] values = value.split(" ");
-        if (values.length > 1) {
-            System.out.printf("CSSStyle: ignoring multiple dimension values, %s\n", value);
-            value = values[0];
-        }
-
-        int offset = 0;
-        if (value.endsWith("px")) offset = 2;
-        if (value.endsWith("%")) offset = 1;
-        return Integer.parseInt(value.substring(0, value.length() - offset));
+        return dimension;
     }
     
     private void parseFontSizeValue(String value) {
@@ -192,16 +216,6 @@ public class CSSStyle {
             System.out.printf("CSSStyle.parseFontSizeValue: invalid font property: %s\n", value);
         }
 
-    }
-    
-    private int parseBorderWidth(String value) {
-        String[] values = value.split("\\s");
-        return parseDimension(values[0]);
-    }
-    
-    private CSSColor parseBorderColor(String value) {
-        String[] values = value.split("\\s");
-        return new CSSColor(values[2]);
     }
 
     /**
@@ -450,7 +464,117 @@ public class CSSStyle {
             }
         }
     }
-    
+
+    private void parseIndividualPadding(String text, String direction) {
+        int value = 0;
+        PaddingType type = PaddingType.LENGTH;
+        LengthUnit unit = LengthUnit.PX;
+
+       if (text.endsWith("%") && text.length() > 1) {
+            String percentageText = text.substring(text.length() - 1);
+            if (percentageText.matches("[0-9]+")) {
+                type = PaddingType.PERCENTAGE;
+                value = Integer.parseInt(percentageText);
+            }
+        } else if (text.matches("[0-9]+")) {
+            value = Integer.parseInt(text);
+        } else {
+            Matcher lengthMatcher = lengthPattern.matcher(text);
+            if (lengthMatcher.find()) {
+                int length = Integer.parseInt(lengthMatcher.group(1));
+                String unitString = lengthMatcher.group(2);
+                LengthUnit unitCandidate = parseLengthUnit(unitString);
+                if (unitCandidate != null) {
+                    // TODO resolve non-pixel units into pixels.
+                    unit = unitCandidate;
+                    value = length;
+                }
+            }
+        }
+
+        switch (direction) {
+            case "top" -> {
+                paddingTop = value;
+                paddingTopType = type;
+                paddingTopUnit = unit;
+            }
+            case "right" -> {
+                paddingRight = value;
+                paddingRightType = type;
+                paddingRightUnit = unit;
+            }
+            case "bottom" -> {
+                paddingBottom = value;
+                paddingBottomType = type;
+                paddingBottomUnit = unit;
+            }
+            case "left" -> {
+                paddingLeft = value;
+                paddingLeftType = type;
+                paddingLeftUnit = unit;
+            }
+        }
+    }
+
+    private void parsePadding(String text, String direction) {
+        if (direction != null) {
+            parseIndividualPadding(text, direction);
+        } else {
+            String[] items = text.split("\\s");
+            switch (items.length) {
+                case 1 -> {
+                    parseIndividualPadding(text, "top");
+                    parseIndividualPadding(text, "bottom");
+                    parseIndividualPadding(text, "left");
+                    parseIndividualPadding(text, "right");
+                }
+                case 2 -> {
+                    parseIndividualPadding(items[0], "top");
+                    parseIndividualPadding(items[0], "bottom");
+                    parseIndividualPadding(items[1], "left");
+                    parseIndividualPadding(items[1], "right");
+                }
+                case 3 -> {
+                    parseIndividualPadding(items[0], "top");
+                    parseIndividualPadding(items[2], "bottom");
+                    parseIndividualPadding(items[1], "left");
+                    parseIndividualPadding(items[1], "right");
+                }
+                case 4 -> {
+                    parseIndividualPadding(items[0], "top");
+                    parseIndividualPadding(items[2], "bottom");
+                    parseIndividualPadding(items[3], "left");
+                    parseIndividualPadding(items[1], "right");
+                }
+            }
+        }
+    }
+
+    private void parsePosition(String text) {
+        try {
+            position = PositionType.valueOf(text.trim().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            System.err.printf("Invalid position %s, defaulting to relative.\n", text);
+            position = PositionType.RELATIVE;
+        }
+    }
+
+    private void parseBorderSpacing(String text) {
+        if (text == null || text.isBlank()) {
+            return;
+        }
+
+        String[] items = text.split("\\s");
+        Dimension dimension = parseSingleDimension(items[0]);
+        if (dimension.value != null) {
+            borderSpacing = dimension.value.intValue();
+        }
+
+        if (items.length > 1) {
+            System.err.printf("Ignoring multiple border spacing values in \"%s\".\n", text);
+        }
+    }
+
     /**
      * Convert the string properties and values to actual properties on this class
      */
@@ -475,44 +599,37 @@ public class CSSStyle {
             case "border-right-color":
             case "border-right-width":  parseBorder(value, "right"); break;
             case "box-sizing":          boxSizing = parseBoxSizingType(value); break;
-            case "border-spacing":      borderSpacing = parseDimension(value); break;
+            case "border-spacing":      parseBorderSpacing(value); break;
             case "color":               color = new CSSColor(value); break;
             case "display":             parseDisplayType(value); break;
             case "font-family":         fontFamily = FontLoader.getValidFont(value.split(",")); break;
             case "font-size":           parseFontSizeValue(value.toLowerCase()); break;
             case "font-style":          fontStyle = fontStyleType.valueOf(value.toUpperCase()); break;
             case "font-weight":         fontWeight = fontWeightType.valueOf(value.toUpperCase()); break;
-            case "height":              height = (float) parseDimension(value);
-                                        heightType = value.contains("%") ?
-                                                DimensionType.PERCENTAGE :
-                                                DimensionType.PIXEL; break;
+            case "height":              Dimension heightDimension = parseSingleDimension(value);
+                                        height = heightDimension.value;
+                                        heightType = heightDimension.type; break;
             case "margin":              parseMargin(value, null); break;
             case "margin-top":          parseMargin(value, "top");  break;
             case "margin-right":        parseMargin(value, "right");  break;
             case "margin-bottom":       parseMargin(value, "bottom");  break;
             case "margin-left":         parseMargin(value, "left");  break;
-            case "max-width":           maxWidth = (float) parseDimension(value);
-                                        maxWidthType = value.contains("%") ?
-                                            DimensionType.PERCENTAGE :
-                                            DimensionType.PIXEL; break;
-            case "max-height":          maxHeight = (float) parseDimension(value);
-                                        maxHeightType = value.contains("%") ?
-                                            DimensionType.PERCENTAGE :
-                                            DimensionType.PIXEL; break;
-            case "padding":             paddingTop = parseDimension(value);
-                                        paddingRight = parseDimension(value);
-                                        paddingBottom = parseDimension(value);
-                                        paddingLeft = parseDimension(value); break;
-            case "padding-top":         paddingTop = parseDimension(value);  break;
-            case "padding-right":       paddingRight = parseDimension(value);  break;
-            case "padding-bottom":      paddingBottom = parseDimension(value);  break;
-            case "padding-left":        paddingLeft = parseDimension(value);  break;
-            case "position":            position = PositionType.valueOf(value.toLowerCase()); break;
+            case "max-width":           Dimension maxWidthDimension = parseSingleDimension(value);
+                                        maxWidth = maxWidthDimension.value;
+                                        maxWidthType = maxWidthDimension.type; break;
+            case "max-height":          Dimension maxHeightDimension = parseSingleDimension(value);
+                                        maxHeight = maxHeightDimension.value;
+                                        maxHeightType = maxHeightDimension.type; break;
+            case "padding":             parsePadding(value, null); break;
+            case "padding-top":         parsePadding(value, "top"); break;
+            case "padding-right":       parsePadding(value, "right"); break;
+            case "padding-bottom":      parsePadding(value, "bottom"); break;
+            case "padding-left":        parsePadding(value, "left"); break;
+            case "position":            parsePosition(value); break;
             case "text-align":          textAlign = textAlignType.valueOf(value.toUpperCase()); break;
-            case "width":               width = (float) parseDimension(value);
-                                        widthType = value.contains("%") ?
-                                                DimensionType.PERCENTAGE :
-                                                DimensionType.PIXEL; break;
+            case "width":               Dimension widthDimension = parseSingleDimension(value);
+                                        width = widthDimension.value;
+                                        widthType = widthDimension.type; break;
             }
         }
     }
@@ -585,11 +702,18 @@ public class CSSStyle {
         style.marginLeft = marginLeft;
         style.marginLeftType = marginLeftType;
         style.marginLeftUnit = marginLeftUnit;
-        style.padding = padding;
         style.paddingTop = paddingTop;
+        style.paddingTopType = paddingTopType;
+        style.paddingTopUnit = paddingTopUnit;
         style.paddingRight = paddingRight;
+        style.paddingRightType = paddingRightType;
+        style.paddingRightUnit = paddingRightUnit;
         style.paddingBottom = paddingBottom;
+        style.paddingBottomType = paddingBottomType;
+        style.paddingBottomUnit = paddingBottomUnit;
         style.paddingLeft = paddingLeft;
+        style.paddingLeftType = paddingLeftType;
+        style.paddingLeftUnit = paddingLeftUnit;
         style.textAlign = textAlign;
         style.widthType = widthType;
         style.width = width;
