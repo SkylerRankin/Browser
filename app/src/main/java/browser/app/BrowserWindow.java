@@ -17,13 +17,13 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
 import browser.app.ui.*;
+import browser.constants.ResourceConstants;
 import browser.interaction.InteractionHandler;
 import browser.model.Vector2;
 import browser.tasks.RenderCompleteCallback;
 
 public class BrowserWindow extends Application {
 
-    private final String startupPageURL = "file://src/main/resources/html/startup_page.html";
     private final float scrollMultiple = 0.001f;
 
     private Scene scene;
@@ -77,8 +77,8 @@ public class BrowserWindow extends Application {
 
         // Register home button callback
         controlBar.getHomeButton().setOnMouseClicked(event -> {
-            controlBar.getInput().setText(startupPageURL);
-            renderPage(startupPageURL, true);
+            controlBar.setURL(ResourceConstants.START_PAGE_URL);
+            renderPage(ResourceConstants.START_PAGE_URL, true);
         });
 
         // Register back button callback
@@ -159,6 +159,7 @@ public class BrowserWindow extends Application {
     }
 
     private void renderPage(String url, boolean addToHistory) {
+        controlBar.setURL(url);
         if (addToHistory) {
             if (indexInHistory != history.size() - 1) {
                 history = history.subList(0, indexInHistory + 1);
@@ -175,6 +176,6 @@ public class BrowserWindow extends Application {
     public void start(Stage stage) throws Exception {
         Pipeline.init();
         setupUI(stage);
-        renderPage(startupPageURL, true);
+        renderPage(ResourceConstants.START_PAGE_URL, true);
     }
 }

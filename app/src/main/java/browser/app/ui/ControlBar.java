@@ -16,6 +16,8 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.text.Font;
 
+import browser.constants.ResourceConstants;
+
 import lombok.Getter;
 
 public class ControlBar extends HBox {
@@ -92,6 +94,13 @@ public class ControlBar extends HBox {
             refreshButton.setGraphic(defaultRefreshImage);
             refreshButton.setDisable(false);
         }
+    }
+
+    public void setURL(String url) {
+        if (url.equals(ResourceConstants.START_PAGE_URL)) {
+            url = "";
+        }
+        input.setText(url);
     }
 
     private void setLoadingImages() {
