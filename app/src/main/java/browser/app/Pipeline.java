@@ -79,11 +79,11 @@ public class Pipeline {
      * Step 2 in the pipeline. Calculates the size and position of each render nodes.
      * @param screenWidth        Width in pixels of the screen.
      */
-    public void calculateLayout(float screenWidth) throws LayoutException {
+    public void calculateLayout(float screenWidth, float screenHeight) throws LayoutException {
         try {
             RenderTreeGenerator renderTreeGenerator = new RenderTreeGenerator();
             rootRenderNode = renderTreeGenerator.generateRenderTree(domRoot);
-            CSSLoader cssLoader = new CSSLoader(domRoot, resourceLoader.getExternalCSS());
+            CSSLoader cssLoader = new CSSLoader(domRoot, resourceLoader.getExternalCSS(), screenWidth, screenHeight);
             cssLoader.applyAllCSS(rootRenderNode);
 
             renderTreeGenerator.removeDisplayNoneNodes(rootRenderNode);

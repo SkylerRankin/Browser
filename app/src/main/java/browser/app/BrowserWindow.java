@@ -152,7 +152,7 @@ public class BrowserWindow extends Application {
         // Register width resize callback
         ChangeListener<Number> stageWidthChangeListener = (obs, oldValue, newValue) -> {
             canvas.setWidth(stage.getWidth());
-            canvasRenderer.updateScreenWidth((float) scene.getWidth());
+            canvasRenderer.updateScreenSize((float) scene.getWidth(), (float) scene.getHeight());
             canvasRenderer.refresh();
         };
         stage.widthProperty().addListener(stageWidthChangeListener);
@@ -167,7 +167,7 @@ public class BrowserWindow extends Application {
             indexInHistory++;
             history.add(url);
         }
-        canvasRenderer.updateScreenWidth((float) canvas.getWidth());
+        canvasRenderer.updateScreenSize((float) scene.getWidth(), (float) scene.getHeight());
         controlBar.setLoading(true);
         canvasRenderer.renderPage(url);
     }

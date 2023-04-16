@@ -31,4 +31,8 @@ public class CSSSelector {
         return stringBuilder.toString();
     }
 
+    public CSSSelector deepCopy() {
+        return new CSSSelector(unitSelectors == null ? null : unitSelectors.stream().map(CSSUnitSelector::deepCopy).toList());
+    }
+
 }

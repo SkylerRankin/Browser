@@ -36,10 +36,14 @@ public class LayoutIntegrationTestDriver {
     }
 
     public void runLayoutTest(String filename, int screenWidth, boolean log) {
+        runLayoutTest(filename, screenWidth, 0, log);
+    }
+
+    public void runLayoutTest(String filename, int screenWidth, int screenHeight, boolean log) {
         try {
             String inputFilePath = String.format("file://%s/html/%s.html", testDataDirectory, filename);
             pipeline.loadWebpage(inputFilePath);
-            pipeline.calculateLayout(screenWidth);
+            pipeline.calculateLayout(screenWidth, screenHeight);
             BoxNode rootBoxNode = pipeline.getRootRenderNode().boxNode;
             BoxNode expectedRootBoxNode = createExpectedBoxTree(filename);
             if (log) {

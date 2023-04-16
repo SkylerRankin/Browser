@@ -6,13 +6,11 @@ import static org.junit.Assert.assertTrue;
 import java.util.List;
 import java.util.Map;
 
+import browser.constants.CSSConstants;
 import browser.constants.CSSConstants.AttributeSelectorComparisonType;
 import browser.constants.CSSConstants.SelectorCombinator;
 import browser.constants.CSSConstants.SelectorType;
-import browser.model.CSSSelector;
-import browser.model.CSSSelectorGroup;
-import browser.model.CSSUnitAttributeSelector;
-import browser.model.CSSUnitSelector;
+import browser.model.*;
 
 import org.junit.Test;
 
@@ -165,6 +163,141 @@ public class CSSParserTest {
         assertEquals(expectedDeclarations1, rules.get(group1));
         assertTrue(rules.containsKey(group2));
         assertEquals(expectedDeclarations2, rules.get(group2));
+    }
+
+    @Test
+    public void singleMediaQuery() {
+        String css = "@media screen and (min-width: 400px) { h1 { font-size: 40px; } }";
+        Map<CSSSelectorGroup, Map<String, String>> rules = CSSParser.parseRules(css);
+
+        for (CSSSelectorGroup group : rules.keySet()) {
+            System.out.print(group.mediaExpression);
+        }
+
+        CSSSelectorGroup group = new CSSSelectorGroup();
+        group.selectors.add(new CSSSelector(List.of(new CSSUnitSelector(SelectorType.TYPE, "h1"))));
+
+        // screen
+        CSSMediaExpression expression1 = new CSSMediaExpression();
+        expression1.mediaType = CSSConstants.MediaType.SCREEN;
+
+        // (min-width: 400px)
+        CSSMediaExpression expression2 = new CSSMediaExpression();
+        expression2.feature = CSSConstants.MediaFeature.MIN_WIDTH;
+        expression2.featureValue = "400px";
+
+        // screen and (min-width: 400px)
+        CSSMediaExpression rootExpression = new CSSMediaExpression();
+        rootExpression.leftHandExpression = expression1;
+        rootExpression.operator = CSSConstants.MediaQueryOperator.AND;
+        rootExpression.rightHandExpression = expression2;
+
+        group.mediaExpression = rootExpression;
+
+        Map<String, String> expectedDeclarations = Map.of(
+                "font-size", "40px"
+        );
+
+        assertEquals(1, rules.size());
+        assertTrue(rules.containsKey(group));
+        assertEquals(expectedDeclarations, rules.get(group));
+    }
+
+    @Test
+    public void singleNestedMediaQuery() {
+        String css = "@media (orientation: portrait) and (not (max-width: 500px) or (min-width: 200px)) { h1 { font-size: 20px; } }";
+        Map<CSSSelectorGroup, Map<String, String>> rules = CSSParser.parseRules(css);
+
+        CSSSelectorGroup group = new CSSSelectorGroup();
+        group.selectors.add(new CSSSelector(List.of(new CSSUnitSelector(SelectorType.TYPE, "h1"))));
+
+        // (orientation: portrait)
+        CSSMediaExpression subExpression1 = new CSSMediaExpression();
+        subExpression1.feature = CSSConstants.MediaFeature.ORIENTATION;
+        subExpression1.featureValue = "portrait";
+
+        // (max-width: 500px)
+        CSSMediaExpression subExpression2 = new CSSMediaExpression();
+        subExpression2.feature = CSSConstants.MediaFeature.MAX_WIDTH;
+        subExpression2.featureValue = "500px";
+
+        // (min-width: 200px)
+        CSSMediaExpression subExpression3 = new CSSMediaExpression();
+        subExpression3.feature = CSSConstants.MediaFeature.MIN_WIDTH;
+        subExpression3.featureValue = "200px";
+
+        // (max-width: 500px) or (min-width: 200px)
+        CSSMediaExpression subExpression4 = new CSSMediaExpression();
+        subExpression4.leftHandExpression = subExpression2;
+        subExpression4.operator = CSSConstants.MediaQueryOperator.OR;
+        subExpression4.rightHandExpression = subExpression3;
+
+        // not (max-width: 500px) or (min-width: 200px)
+        CSSMediaExpression subExpression5 = new CSSMediaExpression();
+        subExpression5.operator = CSSConstants.MediaQueryOperator.NOT;
+        subExpression5.rightHandExpression = subExpression4;
+
+        // (orientation: portrait) and (not (max-width: 500px) or (min-width: 200px))
+        CSSMediaExpression subExpression6 = new CSSMediaExpression();
+        subExpression6.leftHandExpression = subExpression1;
+        subExpression6.operator = CSSConstants.MediaQueryOperator.AND;
+        subExpression6.rightHandExpression = subExpression5;
+
+        group.mediaExpression = subExpression6;
+
+        Map<String, String> expectedDeclarations = Map.of(
+                "font-size", "20px"
+        );
+
+        assertEquals(1, rules.size());
+        assertTrue(rules.containsKey(group));
+        assertEquals(expectedDeclarations, rules.get(group));
+    }
+
+    @Test
+    public void multipleBasicQueries() {
+        String css = "@media (orientation: portrait), (max-width: 500px) or (min-width: 200px) { h1 { font-size: 15px; } }";
+        Map<CSSSelectorGroup, Map<String, String>> rules = CSSParser.parseRules(css);
+
+        CSSSelectorGroup group = new CSSSelectorGroup();
+        group.selectors.add(new CSSSelector(List.of(new CSSUnitSelector(SelectorType.TYPE, "h1"))));
+
+        // (orientation: portrait)
+        CSSMediaExpression subExpression1 = new CSSMediaExpression();
+        subExpression1.feature = CSSConstants.MediaFeature.ORIENTATION;
+        subExpression1.featureValue = "portrait";
+
+        // (max-width: 500px)
+        CSSMediaExpression subExpression2 = new CSSMediaExpression();
+        subExpression2.feature = CSSConstants.MediaFeature.MAX_WIDTH;
+        subExpression2.featureValue = "500px";
+
+        // (min-width: 200px)
+        CSSMediaExpression subExpression3 = new CSSMediaExpression();
+        subExpression3.feature = CSSConstants.MediaFeature.MIN_WIDTH;
+        subExpression3.featureValue = "200px";
+
+        // (max-width: 500px) or (min-width: 200px)
+        CSSMediaExpression subExpression4 = new CSSMediaExpression();
+        subExpression4.leftHandExpression = subExpression2;
+        subExpression4.operator = CSSConstants.MediaQueryOperator.OR;
+        subExpression4.rightHandExpression = subExpression3;
+
+        // (orientation: portrait) or ((max-width: 500px) or (min-width: 200px))
+        CSSMediaExpression subExpression6 = new CSSMediaExpression();
+        subExpression6.leftHandExpression = subExpression1;
+        subExpression6.operator = CSSConstants.MediaQueryOperator.OR;
+        subExpression6.rightHandExpression = subExpression4;
+
+        group.mediaExpression = subExpression6;
+
+        Map<String, String> expectedDeclarations = Map.of(
+                "font-size", "15px"
+        );
+
+        assertEquals(1, rules.size());
+        assertTrue(rules.containsKey(group));
+        assertEquals(expectedDeclarations, rules.get(group));
     }
 
     private String rulesToString(Map<CSSSelectorGroup, Map<String, String>> rules) {

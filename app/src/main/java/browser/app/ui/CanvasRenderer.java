@@ -19,20 +19,23 @@ public class CanvasRenderer {
     private final double heightOffset;
 
     private float width;
+    private float height;
     private RedrawWebpageTask redrawWebpageTask;
 
     public CanvasRenderer(Canvas canvas, InteractionHandler interactionHandler, RenderCompleteCallback renderCompleteCallback, double heightOffset) {
         pipeline = new Pipeline();
         this.canvas = canvas;
         this.width = (float) canvas.getWidth();
+        this.height = (float) canvas.getHeight();
         this.graphicsContext = canvas.getGraphicsContext2D();
         this.interactionHandler = interactionHandler;
         this.renderCompleteCallback = renderCompleteCallback;
         this.heightOffset = heightOffset;
     }
 
-    public void updateScreenWidth(float width) {
+    public void updateScreenSize(float width, float height) {
         this.width = width;
+        this.height = height;
     }
 
     public float getRenderedHeight() {
@@ -46,7 +49,7 @@ public class CanvasRenderer {
     }
 
     public void renderPage(String url) {
-        LoadWebpageTask lwt = new LoadWebpageTask(url, width, pipeline);
+        LoadWebpageTask lwt = new LoadWebpageTask(url, width, height, pipeline);
         lwt.setOnSucceeded(event -> {
             canvas.setHeight(Math.max(pipeline.getHeight(), canvas.getScene().getHeight() - heightOffset));
 //            tab.setText(pipeline.getTitle() == null ? url : pipeline.getTitle());
@@ -69,7 +72,7 @@ public class CanvasRenderer {
         if (redrawWebpageTask != null) {
             redrawWebpageTask.cancel(true);
         }
-        redrawWebpageTask = new RedrawWebpageTask(width, pipeline);
+        redrawWebpageTask = new RedrawWebpageTask(width, height, pipeline);
         redrawWebpageTask.setOnSucceeded(event -> {
             canvas.setHeight(Math.max(pipeline.getHeight(), canvas.getScene().getHeight() - heightOffset));
             synchronized (pipeline) {

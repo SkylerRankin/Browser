@@ -18,6 +18,7 @@ public class SearchTabPipeline {
     private final InteractionHandler interactionHandler;
     private final RenderCompleteCallback renderCompleteCallback;
     private float width;
+    private float height;
     private final Canvas canvas;
     private final GraphicsContext gc;
     private RedrawWebpageTask currentRedrawTask;
@@ -32,9 +33,10 @@ public class SearchTabPipeline {
         this.interactionHandler = interactionHandler;
         this.renderCompleteCallback = renderCompleteCallback;
     }
-    
-    public void updateScreenWidth(float width) {
+
+    public void updateScreenDimensions(float width, float height) {
         this.width = width;
+        this.height = height;
     }
     
     public boolean loadedWebpage() {
@@ -42,7 +44,7 @@ public class SearchTabPipeline {
     }
     
     public void loadWebpage(String url) {
-        LoadWebpageTask lwt = new LoadWebpageTask(url, width, pipeline);
+        LoadWebpageTask lwt = new LoadWebpageTask(url, width, height, pipeline);
         lwt.setOnSucceeded(event -> {
             System.out.printf("Setting canvas height to %.2f\n", Math.max(pipeline.getHeight(), (float) gc.getCanvas().getHeight()));
             canvas.setHeight(Math.max(pipeline.getHeight(), (float) gc.getCanvas().getHeight()));
@@ -63,7 +65,7 @@ public class SearchTabPipeline {
     }
     
     public void redrawWebpage(RenderCompleteCallback.RenderType renderType) {
-        RedrawWebpageTask crt = new RedrawWebpageTask(width, pipeline);
+        RedrawWebpageTask crt = new RedrawWebpageTask(width, height, pipeline);
         if (currentRedrawTask != null) {
             currentRedrawTask.cancel(true);
         }

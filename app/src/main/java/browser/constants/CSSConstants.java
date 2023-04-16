@@ -1,5 +1,6 @@
 package browser.constants;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -35,7 +36,45 @@ public class CSSConstants {
         OCCURRENCE // [attr*=value], matches when value occurs somewhere in the attribute value
     }
 
+    public enum MediaType {
+        ALL,
+        PRINT,
+        SCREEN
+    }
+
+    public enum MediaFeature {
+        HEIGHT,
+        MAX_WIDTH,
+        MIN_WIDTH,
+        ORIENTATION,
+        WIDTH
+    }
+
+    public enum MediaQueryOperator {
+        NOT,
+        AND,
+        ONLY,
+        OR
+    }
+
+    public enum LengthUnit {
+        // Font relative units
+        CH, EM, EX, IC, REM,
+        // Viewport relative units
+        VH, VW, VMAX, VMIN, VB, VI,
+        // Container query units
+        CQW, CQH, CQI, CQB, CQMIN, CQMAX,
+        // Absolute units
+        PX, CM, MM, Q, IN, PC, PT
+    }
+
+    public static final List<String> MEDIA_QUERY_OPERATOR_STRINGS = Arrays.stream(MediaQueryOperator.values()).map(Enum::name).toList();
+
+    public static final Pattern CSS_MEDIA_KEY_VALUE_PATTERN = Pattern.compile("^\\(([^\s]+):\s*([^\s]+)\\)$");
+
     public static final Pattern CSS_IDENTIFIER_PATTERN = Pattern.compile("[0-9a-zA-Z\\-_]+");
+
+    public static final Pattern CSS_LENGTH_PATTERN = Pattern.compile("^([0-9.]+)([a-zA-Z]{1,5})$");
 
     public static final Set<Character> CSS_COMBINATOR_CHARACTERS = Set.of('>', '~', '+');
 

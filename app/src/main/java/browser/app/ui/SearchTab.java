@@ -91,7 +91,7 @@ public class SearchTab extends BrowserTab {
             double usedHeight = urlInput.getHeight() + 50;
             scroll.setPrefSize(scene.getWidth(), scene.getHeight() - usedHeight);
             canvas.setWidth(scene.getWidth());
-            pipeline.updateScreenWidth((float) canvas.getWidth());
+            pipeline.updateScreenDimensions((float) canvas.getWidth(), (float) canvas.getHeight());
             canvas.setHeight(scene.getHeight() - usedHeight);
             loadURL(url);
         }
@@ -104,7 +104,7 @@ public class SearchTab extends BrowserTab {
         if (scene != null) {
             scroll.setPrefSize(scene.getWidth(), scene.getHeight() - urlInput.getHeight());
             canvas.setWidth(scene.getWidth());
-            pipeline.updateScreenWidth((float) canvas.getWidth());
+            pipeline.updateScreenDimensions((float) canvas.getWidth(), (float) canvas.getHeight());
             canvas.setHeight(scene.getHeight() - urlInput.getHeight());
 
             if (pipeline.loadedWebpage()) pipeline.redrawWebpage();
@@ -131,7 +131,7 @@ public class SearchTab extends BrowserTab {
                 splitPaneDividerPosition = clampSplitPanePosition(newVal.doubleValue());
                 double canvasWidth = getCanvasWidth();
                 canvas.setWidth(canvasWidth);
-                pipeline.updateScreenWidth((float) canvasWidth);
+                pipeline.updateScreenDimensions((float) canvas.getWidth(), (float) canvas.getHeight());
                 if (pipeline.loadedWebpage()) {
                     pipeline.redrawWebpage();
                 }
@@ -146,7 +146,7 @@ public class SearchTab extends BrowserTab {
         }
 
         canvas.setWidth(newCanvasWidth);
-        pipeline.updateScreenWidth((float) newCanvasWidth);
+        pipeline.updateScreenDimensions((float) canvas.getWidth(), (float) canvas.getHeight());
         if (pipeline.loadedWebpage()) {
             pipeline.redrawWebpage();
         }

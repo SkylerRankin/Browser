@@ -1,9 +1,11 @@
 package browser.css;
 
+import static browser.constants.CSSConstants.CSS_LENGTH_PATTERN;
+import static browser.constants.CSSConstants.LengthUnit;
+
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import browser.constants.CSSConstants;
 import browser.model.CSSColor;
@@ -19,7 +21,6 @@ public class CSSStyle {
     private final Map<String, String> properties = new HashMap<>();
     private final Map<String, CSSSpecificity> propertySpecificity = new HashMap<>();
     private final Set<String> inheritedProperties = new HashSet<>();
-    private final Pattern lengthPattern = Pattern.compile("^([0-9.]+)([a-zA-Z]{1,5})$");
 
     public enum DimensionType { PIXEL, PERCENTAGE }
 
@@ -40,17 +41,6 @@ public class CSSStyle {
         CONTENTS, NONE,
         // display-legacy values
         INLINE_BLOCK, INLINE_TABLE, INLINE_FLEX, INLINE_GRID;
-    }
-
-    public enum LengthUnit {
-        // Font relative units
-        CH, EM, EX, IC, REM,
-        // Viewport relative units
-        VH, VW, VMAX, VMIN, VB, VI,
-        // Container query units
-        CQW, CQH, CQI, CQB, CQMIN, CQMAX,
-        // Absolute units
-        PX, CM, MM, Q, IN, PC, PT
     }
 
     public enum PositionType { STATIC, RELATIVE, ABSOLUTE, FIXED, STICKY }
@@ -181,7 +171,7 @@ public class CSSStyle {
             dimension.value = Float.parseFloat(text);
             dimension.type = DimensionType.PIXEL;
         } else {
-            Matcher lengthMatcher = lengthPattern.matcher(text);
+            Matcher lengthMatcher = CSS_LENGTH_PATTERN.matcher(text);
             if (lengthMatcher.find()) {
                 float length = Float.parseFloat(lengthMatcher.group(1));
                 String unitString = lengthMatcher.group(2);
@@ -273,7 +263,7 @@ public class CSSStyle {
                         }
                     }
                 } else {
-                    Matcher lengthMatcher = lengthPattern.matcher(items[i]);
+                    Matcher lengthMatcher = CSS_LENGTH_PATTERN.matcher(items[i]);
                     if (lengthMatcher.find()) {
                         int length = Integer.parseInt(lengthMatcher.group(1));
                         String unitString = lengthMatcher.group(2);

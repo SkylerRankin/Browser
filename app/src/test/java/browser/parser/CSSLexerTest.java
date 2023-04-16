@@ -16,7 +16,7 @@ public class CSSLexerTest {
         List<CSSToken> tokens = CSSLexer.getTokens(css);
         List<CSSToken> expectedTokens = List.of(
                 new CSSToken(CSSLexer.CSSTokenType.SELECTOR, "div"),
-                new CSSToken(CSSLexer.CSSTokenType.OPEN_BRACKET, "{"),
+                new CSSToken(CSSLexer.CSSTokenType.SELECTOR_OPEN_BRACKET, "{"),
                 new CSSToken(CSSLexer.CSSTokenType.PROPERTY_NAME, "background-color"),
                 new CSSToken(CSSLexer.CSSTokenType.COLON, ":"),
                 new CSSToken(CSSLexer.CSSTokenType.PROPERTY_VALUE, "green"),
@@ -25,7 +25,7 @@ public class CSSLexerTest {
                 new CSSToken(CSSLexer.CSSTokenType.COLON, ":"),
                 new CSSToken(CSSLexer.CSSTokenType.PROPERTY_VALUE, "50%"),
                 new CSSToken(CSSLexer.CSSTokenType.SEMI_COLON, ";"),
-                new CSSToken(CSSLexer.CSSTokenType.CLOSE_BRACKET, "}")
+                new CSSToken(CSSLexer.CSSTokenType.SELECTOR_CLOSE_BRACKET, "}")
         );
         assertTokenListsEqual(expectedTokens, tokens);
     }
@@ -36,19 +36,19 @@ public class CSSLexerTest {
         List<CSSToken> tokens = CSSLexer.getTokens(css);
         List<CSSToken> expectedTokens = List.of(
                 new CSSToken(CSSLexer.CSSTokenType.SELECTOR, "[a=\"b\"]"),
-                new CSSToken(CSSLexer.CSSTokenType.OPEN_BRACKET, "{"),
+                new CSSToken(CSSLexer.CSSTokenType.SELECTOR_OPEN_BRACKET, "{"),
                 new CSSToken(CSSLexer.CSSTokenType.PROPERTY_NAME, "font-size"),
                 new CSSToken(CSSLexer.CSSTokenType.COLON, ":"),
                 new CSSToken(CSSLexer.CSSTokenType.PROPERTY_VALUE, "12px"),
                 new CSSToken(CSSLexer.CSSTokenType.SEMI_COLON, ";"),
-                new CSSToken(CSSLexer.CSSTokenType.CLOSE_BRACKET, "}"),
+                new CSSToken(CSSLexer.CSSTokenType.SELECTOR_CLOSE_BRACKET, "}"),
                 new CSSToken(CSSLexer.CSSTokenType.SELECTOR, "[a*=\"c\" i]"),
-                new CSSToken(CSSLexer.CSSTokenType.OPEN_BRACKET, "{"),
+                new CSSToken(CSSLexer.CSSTokenType.SELECTOR_OPEN_BRACKET, "{"),
                 new CSSToken(CSSLexer.CSSTokenType.PROPERTY_NAME, "font-size"),
                 new CSSToken(CSSLexer.CSSTokenType.COLON, ":"),
                 new CSSToken(CSSLexer.CSSTokenType.PROPERTY_VALUE, "14px"),
                 new CSSToken(CSSLexer.CSSTokenType.SEMI_COLON, ";"),
-                new CSSToken(CSSLexer.CSSTokenType.CLOSE_BRACKET, "}")
+                new CSSToken(CSSLexer.CSSTokenType.SELECTOR_CLOSE_BRACKET, "}")
         );
         assertTokenListsEqual(expectedTokens, tokens);
     }
@@ -59,11 +59,11 @@ public class CSSLexerTest {
         List<CSSToken> tokens = CSSLexer.getTokens(css);
         List<CSSToken> expectedTokens = List.of(
                 new CSSToken(CSSLexer.CSSTokenType.SELECTOR, "div"),
-                new CSSToken(CSSLexer.CSSTokenType.OPEN_BRACKET, "{"),
+                new CSSToken(CSSLexer.CSSTokenType.SELECTOR_OPEN_BRACKET, "{"),
                 new CSSToken(CSSLexer.CSSTokenType.PROPERTY_NAME, "font-size"),
                 new CSSToken(CSSLexer.CSSTokenType.COLON, ":"),
                 new CSSToken(CSSLexer.CSSTokenType.PROPERTY_VALUE, "12px"),
-                new CSSToken(CSSLexer.CSSTokenType.CLOSE_BRACKET, "}")
+                new CSSToken(CSSLexer.CSSTokenType.SELECTOR_CLOSE_BRACKET, "}")
         );
         assertTokenListsEqual(expectedTokens, tokens);
     }
@@ -80,8 +80,8 @@ public class CSSLexerTest {
                 new CSSToken(CSSLexer.CSSTokenType.COMMENT, "second comment"),
                 new CSSToken(CSSLexer.CSSTokenType.COMMENT_END, "*/"),
                 new CSSToken(CSSLexer.CSSTokenType.SELECTOR, "div"),
-                new CSSToken(CSSLexer.CSSTokenType.OPEN_BRACKET, "{"),
-                new CSSToken(CSSLexer.CSSTokenType.CLOSE_BRACKET, "}"),
+                new CSSToken(CSSLexer.CSSTokenType.SELECTOR_OPEN_BRACKET, "{"),
+                new CSSToken(CSSLexer.CSSTokenType.SELECTOR_CLOSE_BRACKET, "}"),
                 new CSSToken(CSSLexer.CSSTokenType.COMMENT_START, "/*"),
                 new CSSToken(CSSLexer.CSSTokenType.COMMENT_END, "*/"),
                 new CSSToken(CSSLexer.CSSTokenType.COMMENT_START, "/*"),
@@ -97,7 +97,7 @@ public class CSSLexerTest {
         List<CSSToken> tokens = CSSLexer.getTokens(css);
         List<CSSToken> expectedTokens = List.of(
                 new CSSToken(CSSLexer.CSSTokenType.SELECTOR, "div"),
-                new CSSToken(CSSLexer.CSSTokenType.OPEN_BRACKET, "{"),
+                new CSSToken(CSSLexer.CSSTokenType.SELECTOR_OPEN_BRACKET, "{"),
                 new CSSToken(CSSLexer.CSSTokenType.COMMENT_START, "/*"),
                 new CSSToken(CSSLexer.CSSTokenType.COMMENT, "a"),
                 new CSSToken(CSSLexer.CSSTokenType.COMMENT_END, "*/"),
@@ -111,8 +111,28 @@ public class CSSLexerTest {
                 new CSSToken(CSSLexer.CSSTokenType.COMMENT_START, "/*"),
                 new CSSToken(CSSLexer.CSSTokenType.COMMENT, "c"),
                 new CSSToken(CSSLexer.CSSTokenType.COMMENT_END, "*/"),
-                new CSSToken(CSSLexer.CSSTokenType.CLOSE_BRACKET, "}")
+                new CSSToken(CSSLexer.CSSTokenType.SELECTOR_CLOSE_BRACKET, "}")
                 );
+        assertTokenListsEqual(expectedTokens, tokens);
+    }
+
+    @Test
+    public void mediaQuery() {
+        String css = "@media all and (max-width:1000px) {\n.label { font-size: 2em; } \n}";
+        List<CSSToken> tokens = CSSLexer.getTokens(css);
+        List<CSSToken> expectedTokens = List.of(
+                new CSSToken(CSSLexer.CSSTokenType.AT_RULE, "@media all and (max-width:1000px)"),
+                new CSSToken(CSSLexer.CSSTokenType.AT_RULE_OPEN_BRACKET, "{"),
+                new CSSToken(CSSLexer.CSSTokenType.SELECTOR, ".label"),
+                new CSSToken(CSSLexer.CSSTokenType.SELECTOR_OPEN_BRACKET, "{"),
+                new CSSToken(CSSLexer.CSSTokenType.PROPERTY_NAME, "font-size"),
+                new CSSToken(CSSLexer.CSSTokenType.COLON, ":"),
+                new CSSToken(CSSLexer.CSSTokenType.PROPERTY_VALUE, "2em"),
+                new CSSToken(CSSLexer.CSSTokenType.SEMI_COLON, ";"),
+                new CSSToken(CSSLexer.CSSTokenType.SELECTOR_CLOSE_BRACKET, "}"),
+                new CSSToken(CSSLexer.CSSTokenType.AT_RULE_CLOSE_BRACKET, "}")
+        );
+        logTokenLists(expectedTokens, tokens);
         assertTokenListsEqual(expectedTokens, tokens);
     }
 

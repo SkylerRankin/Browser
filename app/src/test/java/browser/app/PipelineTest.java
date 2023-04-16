@@ -38,7 +38,7 @@ public class PipelineTest {
 
         Pipeline pipeline = new Pipeline();
         pipeline.setDomRoot(domRoot);
-        pipeline.calculateLayout(screenWidth);
+        pipeline.calculateLayout(screenWidth, 0);
 
         RenderNode body = pipeline.getRootRenderNode();
 
@@ -86,7 +86,7 @@ public class PipelineTest {
 
         Pipeline pipeline = new Pipeline();
         pipeline.setDomRoot(domRoot);
-        pipeline.calculateLayout(screenWidth);
+        pipeline.calculateLayout(screenWidth, 0);
 
         RenderNode body = pipeline.getRootRenderNode();
 
@@ -146,7 +146,7 @@ public class PipelineTest {
 
         Pipeline pipeline = new Pipeline();
         pipeline.setDomRoot(domRoot);
-        pipeline.calculateLayout(screenWidth);
+        pipeline.calculateLayout(screenWidth, 0);
 
         RenderNode body = pipeline.getRootRenderNode();
 

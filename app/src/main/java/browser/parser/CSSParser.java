@@ -1,5 +1,7 @@
 package browser.parser;
 
+import static browser.constants.CSSConstants.MediaQueryOperator;
+
 import java.util.*;
 import java.util.regex.Matcher;
 
@@ -15,6 +17,7 @@ public class CSSParser {
         ListIterator<CSSToken> tokenIterator = tokens.listIterator();
 
         Map<CSSSelectorGroup, Map<String, String>> rules = new HashMap<>();
+        CSSMediaExpression currentMediaExpression = null;
         List<CSSSelectorGroup> currentSelectorGroups = new ArrayList<>();
         Map<String, String> currentRuleSet = new HashMap<>();
         String currentPropertyName = null;
@@ -23,8 +26,15 @@ public class CSSParser {
             CSSToken nextToken = tokenIterator.next();
 
             switch (nextToken.type) {
+                case AT_RULE -> {
+                    switch (parseAtRuleType(nextToken.value.trim())) {
+                        case "@media" -> {
+                            currentMediaExpression = MediaQueryParser.getExpression(nextToken.value.trim());
+                        }
+                    }
+                }
                 case SELECTOR -> {
-                    currentSelectorGroups = parseSelectorsGroups(nextToken.value.trim());
+                    currentSelectorGroups = parseSelectorsGroups(nextToken.value.trim(), currentMediaExpression);
                     currentRuleSet = new HashMap<>();
                     currentPropertyName = null;
                 }
@@ -38,10 +48,13 @@ public class CSSParser {
                         currentPropertyName = null;
                     }
                 }
-                case CLOSE_BRACKET -> {
+                case SELECTOR_CLOSE_BRACKET -> {
                     for (CSSSelectorGroup selectorGroup : currentSelectorGroups) {
                         addRuleDeclarationSet(rules, selectorGroup, currentRuleSet);
                     }
+                }
+                case AT_RULE_CLOSE_BRACKET -> {
+                    currentMediaExpression = null;
                 }
             }
         }
@@ -63,7 +76,7 @@ public class CSSParser {
         }
     }
 
-    private static List<CSSSelectorGroup> parseSelectorsGroups(String text) {
+    private static List<CSSSelectorGroup> parseSelectorsGroups(String text, CSSMediaExpression mediaExpression) {
         String[] items = text.split(",");
         List<CSSSelectorGroup> selectors = new ArrayList<>();
         for (String item : items) {
@@ -103,6 +116,12 @@ public class CSSParser {
                 }
             }
             selectors.add(selector);
+        }
+
+        if (mediaExpression != null) {
+            for (CSSSelectorGroup group : selectors) {
+                group.mediaExpression = mediaExpression;
+            }
         }
         return selectors;
     }
@@ -247,6 +266,21 @@ public class CSSParser {
             }
         } else {
             rules.put(group, new HashMap<>(newRules));
+        }
+    }
+
+    private static String parseAtRuleType(String text) {
+        String invalidType = "invalid";
+        if (text == null || text.isBlank()) {
+            return invalidType;
+        }
+
+        text = text.trim();
+        if (text.startsWith("@media")) {
+            return "@media";
+        } else {
+            System.err.printf("Unsupported at-rule \"%s\". Ignoring.\n", text);
+            return invalidType;
         }
     }
 

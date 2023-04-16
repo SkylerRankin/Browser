@@ -19,4 +19,7 @@ public class CSSUnitSelector {
         return String.format("%s: %s", type.name(), value);
     }
 
+    public CSSUnitSelector deepCopy() {
+        return new CSSUnitSelector(type, value);
+    }
 }

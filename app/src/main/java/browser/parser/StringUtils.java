@@ -117,4 +117,13 @@ public class StringUtils {
         return true;
     }
 
+    public static <T extends Enum<T>> T toEnum(Class<T> enumClass, String string) {
+        if (enumClass != null && string != null) {
+            try {
+                return Enum.valueOf(enumClass, string);
+            } catch (IllegalArgumentException ignored) {}
+        }
+        return null;
+    }
+
 }

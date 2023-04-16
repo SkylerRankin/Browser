@@ -17,11 +17,15 @@ public class CSSLoader {
 
     private final List<String> externalCSS;
     private final List<String> styleTagCSS;
+    private final float screenWidth;
+    private final float screenHeight;
 
-    public CSSLoader(DOMNode dom, List<String> externalCSS) {
+    public CSSLoader(DOMNode dom, List<String> externalCSS, float screenWidth, float screenHeight) {
         this.externalCSS = externalCSS;
         styleTagCSS = new ArrayList<>();
         extractStyleTagsCSS(dom);
+        this.screenWidth = screenWidth;
+        this.screenHeight = screenHeight;
     }
 
     // Public methods
@@ -61,7 +65,9 @@ public class CSSLoader {
     private void loadDefaults(RenderNode root) {
         try {
             String cssString = new String(Files.readAllBytes(Paths.get("./src/main/resources/css/default.css")));
-            applyRules(root, CSSParser.parseRules(cssString), true, false);
+            Map<CSSSelectorGroup, Map<String, String>> rules = CSSParser.parseRules(cssString);
+            filterSelectorsByMediaQuery(rules);
+            applyRules(root, rules, true, false);
         } catch (IOException e) {
             System.err.println("CSSLoader: failed to load default.css, " + e.getLocalizedMessage());
         }
@@ -69,13 +75,17 @@ public class CSSLoader {
 
     private void loadExternalCSS(RenderNode root) {
         for (String cssString : externalCSS) {
-            applyRules(root, CSSParser.parseRules(cssString), true, false);
+            Map<CSSSelectorGroup, Map<String, String>> rules = CSSParser.parseRules(cssString);
+            filterSelectorsByMediaQuery(rules);
+            applyRules(root, rules, true, false);
         }
     }
 
     private void loadStyleTags(RenderNode root) {
         for (String cssString : styleTagCSS) {
-            applyRules(root, CSSParser.parseRules(cssString), true, false);
+            Map<CSSSelectorGroup, Map<String, String>> rules = CSSParser.parseRules(cssString);
+            filterSelectorsByMediaQuery(rules);
+            applyRules(root, rules, true, false);
         }
     }
 
@@ -88,13 +98,17 @@ public class CSSLoader {
             String style = root.attributes.get("style");
             if (style != null && !style.isBlank()) {
                 String cssString = String.format("%s { %s }", root.type, style);
-                applyRules(root, CSSParser.parseRules(cssString), false, true);
+                Map<CSSSelectorGroup, Map<String, String>> rules = CSSParser.parseRules(cssString);
+                filterSelectorsByMediaQuery(rules);
+                applyRules(root, rules, false, true);
             }
         }
 
         String legacyAttributesCSS = LegacyCSSLoader.getCSSFromAttributes(root);
         if (legacyAttributesCSS != null) {
-            applyRules(root, CSSParser.parseRules(legacyAttributesCSS), false, true);
+            Map<CSSSelectorGroup, Map<String, String>> rules = CSSParser.parseRules(legacyAttributesCSS);
+            filterSelectorsByMediaQuery(rules);
+            applyRules(root, rules, false, true);
         }
 
         for (RenderNode child : root.children) {
@@ -124,6 +138,19 @@ public class CSSLoader {
             for (RenderNode child : node.children) {
                 applyRules(child, rules, true, false);
             }
+        }
+    }
+
+    private void filterSelectorsByMediaQuery(Map<CSSSelectorGroup, Map<String, String>> rules) {
+        List<CSSSelectorGroup> toRemove = new ArrayList<>();
+        for (CSSSelectorGroup selectorGroup : rules.keySet()) {
+            if (!MediaQueryMatcher.matches(selectorGroup.mediaExpression, screenWidth, screenHeight)) {
+                toRemove.add(selectorGroup);
+            }
+        }
+
+        for (CSSSelectorGroup group : toRemove) {
+            rules.remove(group);
         }
     }
 
