@@ -10,6 +10,8 @@ import browser.css.CSSStyle;
 
 public class CSSConstants {
 
+    public static final String IMPORTANT = "!important";
+
     public enum SelectorType {
         UNIVERSAL,
         TYPE,

@@ -1,6 +1,7 @@
 package browser.css;
 
 import static browser.constants.CSSConstants.CSS_LENGTH_PATTERN;
+import static browser.constants.CSSConstants.IMPORTANT;
 import static browser.constants.CSSConstants.LengthUnit;
 
 import java.util.*;
@@ -10,6 +11,7 @@ import java.util.regex.Matcher;
 import browser.constants.CSSConstants;
 import browser.model.CSSColor;
 import browser.model.Dimension;
+import browser.parser.StringUtils;
 
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -20,6 +22,7 @@ public class CSSStyle {
 
     private final Map<String, String> properties = new HashMap<>();
     private final Map<String, CSSSpecificity> propertySpecificity = new HashMap<>();
+    private final Map<String, Boolean> propertyImportant = new HashMap<>();
     private final Set<String> inheritedProperties = new HashSet<>();
 
     public enum DimensionType { PIXEL, PERCENTAGE }
@@ -384,6 +387,9 @@ public class CSSStyle {
             type = MarginType.AUTO;
         } else {
             Dimension dimension = parseSingleDimension(text);
+            if (dimension.value == null) {
+                return;
+            }
             value = dimension.value.intValue();
             type = dimension.type.equals(DimensionType.PIXEL) ? MarginType.LENGTH : MarginType.PERCENTAGE;
         }
@@ -452,6 +458,9 @@ public class CSSStyle {
         LengthUnit unit = LengthUnit.PX;
 
         Dimension dimension = parseSingleDimension(text);
+        if (dimension.value == null) {
+            return;
+        }
         value = dimension.value.intValue();
         type =  dimension.type.equals(DimensionType.PIXEL) ? PaddingType.LENGTH : PaddingType.PERCENTAGE;
 
@@ -567,8 +576,16 @@ public class CSSStyle {
             case "display":             parseDisplayType(value); break;
             case "font-family":         fontFamily = FontLoader.getValidFont(value.split(",")); break;
             case "font-size":           parseFontSizeValue(value.toLowerCase()); break;
-            case "font-style":          fontStyle = fontStyleType.valueOf(value.toUpperCase()); break;
-            case "font-weight":         fontWeight = fontWeightType.valueOf(value.toUpperCase()); break;
+            case "font-style":          fontStyleType fontStyleTypeCandidate = StringUtils.toEnum(fontStyleType.class, value.toUpperCase());
+                                        if (fontStyleTypeCandidate != null) {
+                                            fontStyle = fontStyleTypeCandidate;
+                                        }
+                                        break;
+            case "font-weight":         fontWeightType fontWeightTypeCandidate = StringUtils.toEnum(fontWeightType.class, value.toUpperCase());
+                                        if (fontWeightTypeCandidate != null) {
+                                            fontWeight = fontWeightTypeCandidate;
+                                        }
+                                        break;
             case "height":              Dimension heightDimension = parseSingleDimension(value);
                                         height = heightDimension.value;
                                         heightType = heightDimension.type; break;
@@ -589,7 +606,11 @@ public class CSSStyle {
             case "padding-bottom":      parsePadding(value, "bottom"); break;
             case "padding-left":        parsePadding(value, "left"); break;
             case "position":            parsePosition(value); break;
-            case "text-align":          textAlign = textAlignType.valueOf(value.toUpperCase()); break;
+            case "text-align":          textAlignType textAlignTypeCandidate = StringUtils.toEnum(textAlignType.class, value.toUpperCase());
+                                        if (textAlignTypeCandidate != null) {
+                                            textAlign = textAlignTypeCandidate;
+                                        }
+                                        break;
             case "width":               Dimension widthDimension = parseSingleDimension(value);
                                         width = widthDimension.value;
                                         widthType = widthDimension.type; break;
@@ -602,10 +623,23 @@ public class CSSStyle {
     }
     
     public void apply(String property, String value, CSSSpecificity specificity) {
-        if (!propertySpecificity.containsKey(property) ||
+        boolean existingImportance = propertyImportant.containsKey(property) && propertyImportant.get(property);
+        boolean important = false;
+        if (property.endsWith(IMPORTANT)) {
+            important = true;
+            property = property.substring(0, property.length() - IMPORTANT.length()).trim();
+        }
+
+        boolean specificityOverride = !propertySpecificity.containsKey(property) ||
                 specificity.hasEqualOrGreaterSpecificityThan(propertySpecificity.get(property)) ||
-                inheritedProperties.contains(property)) {
+                inheritedProperties.contains(property);
+        boolean inheritedOverride = inheritedProperties.contains(property);
+
+        boolean applyRule = (existingImportance && important) || (!existingImportance && (specificityOverride || inheritedOverride || important));
+
+        if (applyRule) {
             propertySpecificity.put(property, specificity);
+            propertyImportant.put(property, important);
             properties.put(property, value);
             inheritedProperties.remove(property);
         }

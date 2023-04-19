@@ -102,6 +102,7 @@ public class TableAnonymousBoxAdder {
             boxNode.parent = anonymousBox;
             newChildren.add(boxNode);
         } else {
+            anonymousBox.style = boxNode.parent.style.deepCopy();
             int indexInParent = boxNode.parent.children.indexOf(boxNode);
             for (int i = indexInParent; i < boxNode.parent.children.size(); i++) {
                 BoxNode sibling = boxNode.parent.children.get(i);
