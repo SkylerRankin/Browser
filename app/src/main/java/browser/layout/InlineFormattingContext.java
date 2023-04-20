@@ -17,6 +17,8 @@ public class InlineFormattingContext {
     public float endX;
     public BoxNode rootBox;
     public final List<LineBox> lineBoxes;
+    public boolean skipNewlyPartitionedBox = false;
+    public int topLevelPartitionedBoxId = -1;
 
     private final List<BoxNode> tentativeBoxesForLine;
     private final List<Float> maxHeightPerLine;

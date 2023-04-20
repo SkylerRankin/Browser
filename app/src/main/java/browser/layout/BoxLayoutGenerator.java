@@ -442,13 +442,27 @@ public class BoxLayoutGenerator {
             if (earlyExit) {
                 // This child box (and its subsequent siblings) have been moved to a new branch, so the loop can stop
                 // early. If there were previous children, then the width/height calculations on the parent still need
-                // to happen.
+                // to happen, so the loop is broken but the function does not return early.
                 if (i == 0) {
                     return;
                 }
                 break;
             }
             setBoxLayout(parentBox.children.get(i));
+
+            // Layout on child boxes may have partitioned the box tree in order to ensure inline boxes are grouped
+            // by line box. Therefore, the current parentBox node may have been moved to a later branch in the tree.
+            // In this case, it should not continue layout, but rather wait until its new parent is laid out later on.
+            if (context.skipNewlyPartitionedBox) {
+                if (parentBox.id == context.topLevelPartitionedBoxId) {
+                    // The final partitioned box within this inline context has been reached, so no more skips need to
+                    // happen.
+                    context.skipNewlyPartitionedBox = false;
+                    context.topLevelPartitionedBoxId = -1;
+                } else {
+                    return;
+                }
+            }
         }
 
         // If this is an inline element without a predefined width, its width is the necessary size to contain its

@@ -172,3 +172,56 @@ blockquote {
     margin-left: 40px;
     margin-right: 40px;
 }
+
+noscript {
+    display: inline;
+}
+
+sup {
+    display: inline;
+    font-size: 10px;
+}
+
+small {
+    display: inline;
+}
+
+input {
+    display: none;
+}
+
+label {
+    display: inline;
+}
+
+button {
+    display: inline;
+}
+
+form {
+    display: none;
+}
+
+nav {
+    display: block;
+}
+
+main {
+    display: block;
+}
+
+meta {
+    display: none;
+}
+
+cite {
+    display: inline;
+}
+
+abbr {
+    display: inline;
+}
+
+footer {
+    display: block;
+}

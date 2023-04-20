@@ -101,6 +101,11 @@ public class LayoutIntegrationTests {
         driver.runLayoutTest("preWithInternalTags", 1000);
     }
 
+    @Test
+    public void multiLevelInlinePartition() {
+        driver.runLayoutTest("multiLevelInlinePartition", 1000);
+    }
+
     // Text alignment
 
     @Test

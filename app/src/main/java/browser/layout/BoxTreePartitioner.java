@@ -23,6 +23,11 @@ public class BoxTreePartitioner {
             int indexInParent = currentBox.parent.children.indexOf(currentBox);
             boolean previousSiblings = indexInParent > 0;
             if (previousSiblings && currentBox.parent.id != context.contextRootId) {
+                // Since a new branch is being added within this formatting context, set the newly partitioned box flag.
+                // The top level box is updated to the latest parent that has its children partitioned.
+                context.skipNewlyPartitionedBox = true;
+                context.topLevelPartitionedBoxId = currentBox.parent.id;
+
                 // If there are sibling boxes before the current box, separate them from the boxes that will be split.
                 List<List<BoxNode>> partitions = partitionChildren(currentBox.parent, indexInParent);
                 currentBox.parent.children = partitions.get(0);
