@@ -95,6 +95,7 @@ public class TableAnonymousBoxAdder {
         anonymousBox.isAnonymous = true;
         anonymousBox.outerDisplayType = DisplayType.BLOCK;
         anonymousBox.innerDisplayType = type;
+        anonymousBox.id = BoxNode.nextId++;
         BoxNode originalParent = boxNode.parent;
         int originalIndexInParent = boxNode.parent == null ? 0 : boxNode.parent.children.indexOf(boxNode);
         List<BoxNode> newChildren = new ArrayList<>();

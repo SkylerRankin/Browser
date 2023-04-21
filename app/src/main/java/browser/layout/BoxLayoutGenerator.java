@@ -454,7 +454,7 @@ public class BoxLayoutGenerator {
             // by line box. Therefore, the current parentBox node may have been moved to a later branch in the tree.
             // In this case, it should not continue layout, but rather wait until its new parent is laid out later on.
             if (context.skipNewlyPartitionedBox) {
-                if (parentBox.id == context.topLevelPartitionedBoxId) {
+                if (parentBox.id == context.topLevelPartitionedBoxId || parentBox.id == context.contextRootId) {
                     // The final partitioned box within this inline context has been reached, so no more skips need to
                     // happen.
                     context.skipNewlyPartitionedBox = false;
