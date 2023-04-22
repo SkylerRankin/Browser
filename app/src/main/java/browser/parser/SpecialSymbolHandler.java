@@ -38,9 +38,6 @@ public class SpecialSymbolHandler {
         for (Entry<String, String> e : symbols.entrySet()) {
             s = s.replace(e.getKey(), e.getValue());
         }
-        s = s.replace("\\\\t", " ")
-                .replace("\\\\s", " ")
-                .replace("\\\\r", " ");
         return s;
     }
 

@@ -85,6 +85,9 @@ public class RenderTreeGenerator {
         if (root.text != null && !inPre) {
             root.text = root.text.replaceAll("[\n\r]", " ");
             root.text = root.text.replaceAll("\\s+", " ");
+            root.text = root.text.replace("\\\\t", " ")
+                    .replace("\\\\s", " ")
+                    .replace("\\\\r", " ");
         }
 
         if (root.text != null) {

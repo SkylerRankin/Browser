@@ -7,6 +7,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -15,28 +18,29 @@ import javafx.scene.image.Image;
 import browser.constants.ErrorConstants;
 import browser.constants.ResourceConstants;
 import browser.exception.PageLoadException;
+import browser.parser.SpecialSymbolHandler;
 
 public class HTTPClient {
 
     // Save a reference to the site so we can build up the URLs for other local resources
     // TODO: have a better system than this
     private static String baseURL;
-    private static String baseHost;
+    private static URL pageURL;
     
     public static String requestPage(String urlString) throws PageLoadException {
         urlString = HTTPClient.formatURL(urlString);
         
         try {
             URL url = new URL(urlString);
-            baseHost = url.getHost();
+            pageURL = url;
             baseURL = urlString;
             if (urlString.endsWith("html")) {
                 baseURL = urlString.substring(0, baseURL.lastIndexOf("/"));
             }
 
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestProperty("Content-Type", "application/json");
             conn.setRequestMethod("GET");
+            conn.setRequestProperty("Host", pageURL.getHost());
             conn.setConnectTimeout(5000);
             conn.setReadTimeout(5000);
             conn.setInstanceFollowRedirects(false);
@@ -70,35 +74,36 @@ public class HTTPClient {
         }
     }
     
-    public static String requestResource(String urlString) {
-        if (!urlString.startsWith("http")) {
-            urlString = String.format("%s/%s", baseURL, urlString);
-        }
+    public static String requestResource(String rawURL) {
+        for (String urlString : getURLCandidateList(rawURL)) {
+            HttpURLConnection conn = null;
+            try {
+                URL url = new URL(formatURL(urlString));
+                conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("GET");
+                conn.setRequestProperty("Host", pageURL.getHost());
+                conn.setConnectTimeout(5000);
+                conn.setReadTimeout(5000);
+                conn.setInstanceFollowRedirects(true);
 
-        try {
-            URL url = new URL(urlString);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestProperty("Content-Type", "application/json");
-            conn.setRequestMethod("GET");
-            conn.setConnectTimeout(5000);
-            conn.setReadTimeout(5000);
-            conn.setInstanceFollowRedirects(false);
+                BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                String inputLine;
+                StringBuilder response = new StringBuilder();
 
-            BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-            String inputLine;
-            StringBuilder response = new StringBuilder();
-
-            while ((inputLine = in.readLine()) != null) {
-                response.append(inputLine).append("\n");
+                while ((inputLine = in.readLine()) != null) {
+                    response.append(inputLine).append("\n");
+                }
+                in.close();
+                conn.disconnect();
+                return response.toString();
+            } catch (Exception e) {
+                System.err.printf("Failed to load resource from %s\n", formatURL(urlString));
+                if (conn != null) {
+                    conn.disconnect();
+                }
             }
-            in.close();
-
-            return response.toString();
-        } catch (Exception e) {
-            System.err.printf("Failed to load resource %s: %s\n", urlString, e.getMessage());
-            e.printStackTrace();
-            return null;
         }
+        return null;
     }
     
     public static Image downloadImage(String rawURL) {
@@ -106,19 +111,13 @@ public class HTTPClient {
             return null;
         }
 
-        List<String> urls = List.of(
-                rawURL,
-                formatURL(String.format("%s//%s", baseURL, rawURL)),
-                formatURL(String.format("%s//%s", baseHost, rawURL))
-        );
-
-        for (String urlString : urls) {
+        for (String urlString : getURLCandidateList(rawURL)) {
             try {
                 URL url = new URL(formatURL(urlString));
                 InputStream in = new BufferedInputStream(url.openStream());
                 return new Image(in);
             } catch (IOException e) {
-                System.err.printf("HTTPClient: IO error downloading image from %s\n", urlString);
+                System.err.printf("HTTPClient: IO error downloading image from %s\n", formatURL(urlString));
             }
         }
 
@@ -126,11 +125,25 @@ public class HTTPClient {
     }
     
     private static String formatURL(String url) {
-        if (!url.startsWith("http")) {
-            return "http://"+url;
-        } else {
-            return url;
+        url = SpecialSymbolHandler.insertSymbols(url);
+        url = URLDecoder.decode(url, StandardCharsets.UTF_8);
+        String protocol = pageURL == null ? "https" : pageURL.getProtocol();
+        if (url.startsWith("//")) {
+            url = String.format("%s:%s", protocol, url);
+        } else if (!url.startsWith("http")) {
+            url = String.format("%s://%s", protocol, url);
         }
+        return url;
+    }
+
+    private static List<String> getURLCandidateList(String rawURL) {
+        List<String> urls = new ArrayList<>();
+        if (!rawURL.startsWith("/")) {
+            urls.add(rawURL);
+        }
+        urls.add(formatURL(String.format("%s%s%s", baseURL, !(baseURL.endsWith("/") || rawURL.startsWith("/")) ? "/" : "", rawURL)));
+        urls.add(formatURL(String.format("%s%s%s", pageURL.getHost(), !(pageURL.getHost().endsWith("/") || rawURL.startsWith("/")) ? "/" : "", rawURL)));
+        return urls;
     }
 
 }

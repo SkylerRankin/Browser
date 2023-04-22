@@ -90,7 +90,8 @@ public class ResourceLoader {
             }
         } else if (domNode.type.equals(HTMLElements.LINK)) {
             String href = domNode.attributes.get("href");
-            if (href != null && href.endsWith("css")) {
+            String rel = domNode.attributes.get("rel");
+            if (href != null && rel.equals("stylesheet")) {
                 resources.get(resourceType.CSS).add(href);
             }
         }

@@ -18,7 +18,11 @@ public class CSSColor {
 
     public CSSColor(String color) {
         color = color.toLowerCase();
-        if (color.matches("[A-Za-z]+") && DefaultColors.getHex(color) != null) {
+        if (color.equals("transparent")) {
+            opacity = 0.0;
+            hex = "FFFFFF";
+            setRGB(hex);
+        } else if (color.matches("[A-Za-z]+") && DefaultColors.getHex(color) != null) {
             hex = DefaultColors.getHex(color);
             if (hex != null) {
                 setRGB(hex);
