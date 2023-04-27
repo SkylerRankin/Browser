@@ -1,11 +1,13 @@
 package browser.css;
 
+import static browser.constants.MathConstants.DELTA;
 import static browser.css.CSSStyle.DisplayType;
 import static org.junit.Assert.assertEquals;
 
 import java.util.List;
 
 import browser.app.Pipeline;
+import browser.constants.CSSConstants;
 import browser.model.CSSColor;
 
 import org.junit.BeforeClass;
@@ -102,6 +104,97 @@ public class CSSStyleTest {
             assertEquals(new CSSColor("#121212"), style.borderColorTop);
             assertEquals(new CSSColor("#121212"), style.borderColorBottom);
         }
+    }
+
+    @Test
+    public void parseFlexShorthandOneValue() {
+        // Single unit-less number sets flex-grow
+        CSSStyle style = new CSSStyle();
+        style.setProperty("flex", "2");
+        style.finalizeCSS();
+        assertEquals(2, style.flexGrow, DELTA);
+        assertEquals(1, style.flexShrink, DELTA);
+        assertEquals(CSSStyle.FlexBasis.LENGTH, style.flexBasis);
+        assertEquals(0, style.flexBasisValue, DELTA);
+        assertEquals(CSSConstants.LengthUnit.PX, style.flexBasisUnit);
+
+        style = new CSSStyle();
+        style.setProperty("flex", "0");
+        style.finalizeCSS();
+        assertEquals(0, style.flexGrow, DELTA);
+        assertEquals(1, style.flexShrink, DELTA);
+        assertEquals(CSSStyle.FlexBasis.LENGTH, style.flexBasis);
+        assertEquals(0, style.flexBasisValue, DELTA);
+        assertEquals(CSSConstants.LengthUnit.PX, style.flexBasisUnit);
+
+        // Single value with unit sets flex-basis
+        style = new CSSStyle();
+        style.setProperty("flex", "10em");
+        style.finalizeCSS();
+        assertEquals(1, style.flexGrow, DELTA);
+        assertEquals(1, style.flexShrink, DELTA);
+        assertEquals(CSSStyle.FlexBasis.LENGTH, style.flexBasis);
+        assertEquals(10, style.flexBasisValue, DELTA);
+        assertEquals(CSSConstants.LengthUnit.EM, style.flexBasisUnit);
+
+        // Single flex-basis keyword
+        style = new CSSStyle();
+        style.setProperty("flex", "min-content");
+        style.finalizeCSS();
+        assertEquals(1, style.flexGrow, DELTA);
+        assertEquals(1, style.flexShrink, DELTA);
+        assertEquals(CSSStyle.FlexBasis.MIN_CONTENT, style.flexBasis);
+    }
+
+    @Test
+    public void parseFlexShorthandTwoValues() {
+        // Flex grow and flex shrink
+        CSSStyle style = new CSSStyle();
+        style.setProperty("flex", "2 3");
+        style.finalizeCSS();
+        assertEquals(2, style.flexGrow, DELTA);
+        assertEquals(3, style.flexShrink, DELTA);
+        assertEquals(CSSStyle.FlexBasis.LENGTH, style.flexBasis);
+        assertEquals(0, style.flexBasisValue, DELTA);
+        assertEquals(CSSConstants.LengthUnit.PX, style.flexBasisUnit);
+
+        // Flex grow and flex basis
+        style = new CSSStyle();
+        style.setProperty("flex", "2 30px");
+        style.finalizeCSS();
+        assertEquals(2, style.flexGrow, DELTA);
+        assertEquals(1, style.flexShrink, DELTA);
+        assertEquals(CSSStyle.FlexBasis.LENGTH, style.flexBasis);
+        assertEquals(30, style.flexBasisValue, DELTA);
+        assertEquals(CSSConstants.LengthUnit.PX, style.flexBasisUnit);
+    }
+
+    @Test
+    public void parseFlexShorthandThreeValues() {
+        // Flex grow, flex shrink, flex basis
+        CSSStyle style = new CSSStyle();
+        style.setProperty("flex", "2 3 10%");
+        style.finalizeCSS();
+        assertEquals(2, style.flexGrow, DELTA);
+        assertEquals(3, style.flexShrink, DELTA);
+        assertEquals(CSSStyle.FlexBasis.PERCENTAGE, style.flexBasis);
+        assertEquals(10, style.flexBasisValue, DELTA);
+
+        // Flex grow, flex shrink, flex basis keyword
+        style = new CSSStyle();
+        style.setProperty("flex", "1 0 max-content");
+        style.finalizeCSS();
+        assertEquals(1, style.flexGrow, DELTA);
+        assertEquals(0, style.flexShrink, DELTA);
+        assertEquals(CSSStyle.FlexBasis.MAX_CONTENT, style.flexBasis);
+
+        // Extra space
+        style = new CSSStyle();
+        style.setProperty("flex", " 1   0   max-content ");
+        style.finalizeCSS();
+        assertEquals(1, style.flexGrow, DELTA);
+        assertEquals(0, style.flexShrink, DELTA);
+        assertEquals(CSSStyle.FlexBasis.MAX_CONTENT, style.flexBasis);
     }
 
 }

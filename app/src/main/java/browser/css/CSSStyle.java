@@ -1,8 +1,6 @@
 package browser.css;
 
-import static browser.constants.CSSConstants.CSS_LENGTH_PATTERN;
-import static browser.constants.CSSConstants.IMPORTANT;
-import static browser.constants.CSSConstants.LengthUnit;
+import static browser.constants.CSSConstants.*;
 
 import java.util.*;
 import java.util.Map.Entry;
@@ -66,7 +64,48 @@ public class CSSStyle {
 
     public enum BorderStyle { NONE, SOLID }
 
+    public enum FlexBasis {
+        LENGTH,
+        PERCENTAGE,
+        AUTO,
+        MAX_CONTENT,
+        MIN_CONTENT,
+        FIT_CONTENT,
+        CONTENT
+    }
+
+    public enum FlexDirection {
+        ROW,
+        ROW_REVERSE,
+        COLUMN,
+        COLUMN_REVERSE
+    }
+
+    public enum FlexWrap {
+        WRAP,
+        NO_WRAP,
+        WRAP_REVERSE
+    }
+
+    public enum AlignItems {
+        NORMAL, STRETCH, CENTER, START, END, FLEX_START, FLEX_END, SELF_START, SELF_END, BASELINE, FIRST_BASELINE,
+        LAST_BASELINE, SAFE_CENTER, UNSAFE_CENTER
+    }
+
+    public enum JustifyContent {
+        CENTER, START, END, FLEX_START, FLEX_END, LEFT, RIGHT, NORMAL, SPACE_BETWEEN, SPACE_AROUND, SPACE_EVENLY,
+        STRETCH, SAFE_CENTER, UNSAFE_CENTER
+    }
+
+    public enum AlignSelf {
+        AUTO, NORMAL, CENTER, START, END, SELF_START, SELF_END, FLEX_START, FLEX_END, BASELINE, FIRST_BASELINE,
+        LAST_BASELINE, STRETCH, SAFE_CENTER, UNSAFE_CENTER
+    }
+
     public CSSStyle parentStyle = null;
+
+    public AlignItems alignItems;
+    public AlignSelf alignSelf;
 
     public CSSColor backgroundColor = new CSSColor("White");
     
@@ -104,9 +143,24 @@ public class CSSStyle {
     public int fontSize = 16;
     public fontStyleType fontStyle = fontStyleType.NORMAL;
     public fontWeightType fontWeight = fontWeightType.NORMAL;
+
+    public float flexGrow = 0;
+    public float flexShrink = 1;
+    public FlexBasis flexBasis = FlexBasis.AUTO;
+    public LengthUnit flexBasisUnit = null;
+    public float flexBasisValue = 0;
+    public FlexDirection flexDirection = FlexDirection.ROW;
+    public FlexWrap flexWrap = FlexWrap.NO_WRAP;
+
+    public float gapColumnValue;
+    public LengthUnit gapColumnUnit;
+    public float gapRowValue;
+    public LengthUnit gapRowUnit;
     
     public DimensionType heightType = DimensionType.PIXEL;
     public Float height = null;
+
+    public JustifyContent justifyContent;
     
     public int marginTop = 0;
     public MarginType marginTopType = MarginType.LENGTH;
@@ -547,6 +601,122 @@ public class CSSStyle {
         }
     }
 
+    private boolean parseFlexShrinkGrow(String text, String type) {
+        if (text.matches("[\\d.]+")) {
+            if (type.equalsIgnoreCase("grow")) {
+                flexGrow = Float.parseFloat(text);
+            } else {
+                flexShrink = Float.parseFloat(text);
+            }
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private boolean parseFlexBasis(String text) {
+        // Intrinsic sizing keywords
+        if (CSSConstants.flexBasisStrings.containsKey(text.toLowerCase())) {
+            flexBasis = flexBasisStrings.get(text.toLowerCase());
+            return true;
+        }
+
+        // Length value without unit
+        if (text.matches("[\\d.]+")) {
+            flexBasisUnit = LengthUnit.PX;
+            flexBasisValue = Float.parseFloat(text);
+            flexBasis = FlexBasis.LENGTH;
+            return true;
+        }
+
+        // Percentage length
+        if (text.matches("[\\d.]+%")) {
+            flexBasis = FlexBasis.PERCENTAGE;
+            flexBasisValue = Float.parseFloat(text.substring(0, text.length() - 1));
+        }
+
+        // Length value with unit
+        Matcher lengthMatcher = CSS_LENGTH_PATTERN.matcher(text);
+        if (lengthMatcher.find()) {
+            float length = Float.parseFloat(lengthMatcher.group(1));
+            String unitString = lengthMatcher.group(2);
+            LengthUnit unitCandidate = parseLengthUnit(unitString);
+            if (unitCandidate != null) {
+                flexBasis = FlexBasis.LENGTH;
+                flexBasisValue = length;
+                flexBasisUnit = unitCandidate;
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private void parseFlex(String text) {
+        String[] items = text.split("\\s+");
+
+        if (items.length == 0) {
+            return;
+        } else if (items.length > 3) {
+            items = new String[]{items[0], items[1], items[2]};
+        }
+
+        if (items.length == 1) {
+            // Value must be either valid flex-grow or valid flex-basis.
+            if (parseFlexShrinkGrow(items[0], "grow")) {
+                flexShrink = 1;
+                flexBasisValue = 0;
+                flexBasisUnit = LengthUnit.PX;
+                flexBasis = FlexBasis.LENGTH;
+            } else if (parseFlexBasis(items[0])) {
+                flexGrow = 1;
+                flexShrink = 1;
+            } else {
+                System.err.printf("Ignoring invalid flex option \"%s\".\n", text);
+            }
+        } else if (items.length == 2) {
+            // First value must be valid flex-grow.
+            if (!parseFlexShrinkGrow(items[0], "grow")) {
+                System.err.printf("Ignoring invalid flex option \"%s\".\n", text);
+                return;
+            }
+
+            // Second value is either valid flex-shrink, or valid flex-basis.
+            if (parseFlexShrinkGrow(items[1], "shrink")) {
+                flexBasisValue = 0;
+                flexBasisUnit = LengthUnit.PX;
+                flexBasis = FlexBasis.LENGTH;
+            } else if (parseFlexBasis(items[1])) {
+                flexShrink = 1;
+            } else {
+                System.err.printf("Ignoring invalid flex option \"%s\".\n", text);
+            }
+        } else {
+            // Three values are grow, shrink, and basis.
+            boolean growValid = parseFlexShrinkGrow(items[0], "grow");
+            boolean shrinkValid = parseFlexShrinkGrow(items[1], "shrink");
+            boolean basisValid = parseFlexBasis(items[2]);
+            if (!growValid || !shrinkValid || !basisValid) {
+                System.err.printf("Invalid flex option \"%s\".\n", text);
+            }
+        }
+    }
+
+    private void parseFlexFlow(String text) {
+        String[] items = text.split("\\s+");
+        for (String item : items) {
+            FlexDirection flexDirectionCandidate = StringUtils.toEnum(FlexDirection.class, item.toUpperCase());
+            if (flexDirectionCandidate != null) {
+                flexDirection = flexDirectionCandidate;
+                continue;
+            }
+            FlexWrap flexWrapCandidate = StringUtils.toEnum(FlexWrap.class, item.toUpperCase());
+            if (flexWrapCandidate != null) {
+                flexWrap = flexWrapCandidate;
+            }
+        }
+    }
+
     /**
      * Convert the string properties and values to actual properties on this class
      */
@@ -573,7 +743,23 @@ public class CSSStyle {
             case "box-sizing":          boxSizing = parseBoxSizingType(value); break;
             case "border-spacing":      parseBorderSpacing(value); break;
             case "color":               color = new CSSColor(value); break;
+            case "column-gap":          System.err.println("column-gap parsing not implemented"); break;
             case "display":             parseDisplayType(value); break;
+            case "flex":                parseFlex(value); break;
+            case "flex-basis":          parseFlexBasis(value); break;
+            case "flex-direction":      FlexDirection flexDirectionCandidate = StringUtils.toEnum(FlexDirection.class, value.toUpperCase());
+                                        if (flexDirectionCandidate != null) {
+                                            flexDirection = flexDirectionCandidate;
+                                        };
+                                        break;
+            case "flex-flow":           parseFlexFlow(value); break;
+            case "flex-grow":           parseFlexShrinkGrow(value, "grow"); break;
+            case "flex-shrink":         parseFlexShrinkGrow(value, "shrink"); break;
+            case "flex-wrap":           FlexWrap flexWrapCandidate = StringUtils.toEnum(FlexWrap.class, value.toUpperCase());
+                                        if (flexWrapCandidate != null) {
+                                            flexWrap = flexWrapCandidate;
+                                        }
+                                        break;
             case "font-family":         fontFamily = FontLoader.getValidFont(value.split(",")); break;
             case "font-size":           parseFontSizeValue(value.toLowerCase()); break;
             case "font-style":          fontStyleType fontStyleTypeCandidate = StringUtils.toEnum(fontStyleType.class, value.toUpperCase());
@@ -586,6 +772,7 @@ public class CSSStyle {
                                             fontWeight = fontWeightTypeCandidate;
                                         }
                                         break;
+            case "gap":                 System.err.println("gap parsing not implemented"); break;
             case "height":              Dimension heightDimension = parseSingleDimension(value);
                                         height = heightDimension.value;
                                         heightType = heightDimension.type; break;
@@ -606,6 +793,7 @@ public class CSSStyle {
             case "padding-bottom":      parsePadding(value, "bottom"); break;
             case "padding-left":        parsePadding(value, "left"); break;
             case "position":            parsePosition(value); break;
+            case "row-gap":             System.err.println("row-gap parsing not implemented"); break;
             case "text-align":          textAlignType textAlignTypeCandidate = StringUtils.toEnum(textAlignType.class, value.toUpperCase());
                                         if (textAlignTypeCandidate != null) {
                                             textAlign = textAlignTypeCandidate;
@@ -664,6 +852,8 @@ public class CSSStyle {
 
         // TODO: copy over the properties maps
         style.parentStyle = parentStyle;
+        style.alignItems = alignItems;
+        style.alignSelf = alignSelf;
         style.backgroundColor = backgroundColor;
         style.borderWidthTop = borderWidthTop;
         style.borderWidthBottom = borderWidthBottom;
@@ -681,12 +871,24 @@ public class CSSStyle {
         style.outerDisplay = outerDisplay;
         style.auxiliaryDisplay = auxiliaryDisplay;
         style.position = position;
+        style.flexBasis = flexBasis;
+        style.flexBasisValue = flexBasisValue;
+        style.flexBasisUnit = flexBasisUnit;
+        style.flexDirection = flexDirection;
+        style.flexGrow = flexGrow;
+        style.flexShrink = flexShrink;
+        style.flexWrap = flexWrap;
         style.fontFamily = fontFamily;
         style.fontSize = fontSize;
         style.fontStyle = fontStyle;
         style.fontWeight = fontWeight;
+        style.gapColumnUnit = gapColumnUnit;
+        style.gapColumnValue = gapColumnValue;
+        style.gapRowUnit = gapRowUnit;
+        style.gapRowValue = gapRowValue;
         style.heightType = heightType;
         style.height = height;
+        style.justifyContent = justifyContent;
         style.marginTop = marginTop;
         style.marginTopType = marginTopType;
         style.marginTopUnit = marginTopUnit;

@@ -814,4 +814,124 @@ public class BoxTreeGeneratorTest {
         assertEquals(preBox, rootBoxNode);
     }
 
+    /**
+     * This tests adding anonymous boxes around contiguous text within a flex formatting context.
+     *
+     * <div style="display: flex">
+     *      <span></span>
+     *      a
+     *      b
+     *      <div></div>
+     *      c
+     * </div>
+     * -->
+     * <div>
+     *     <span></span>
+     *     <anon>
+     *         a
+     *         b
+     *     </anon>
+     *     <div></div>
+     *     <anon>c</anon>
+     * </div>
+     */
+    @Test
+    public void generateAnonymousFlexTextBoxes() {
+        RenderNode div = new RenderNode(HTMLElements.DIV);
+        div.id = RenderNode.nextId++;
+        div.style.outerDisplay = DisplayType.BLOCK;
+        div.style.innerDisplay = DisplayType.FLEX;
+
+        RenderNode span1 = new RenderNode(HTMLElements.SPAN);
+        span1.id = RenderNode.nextId++;
+        span1.style.outerDisplay = DisplayType.INLINE;
+        span1.style.innerDisplay = DisplayType.FLOW;
+
+        RenderNode text1 = new RenderNode(HTMLElements.TEXT);
+        text1.id = RenderNode.nextId++;
+        text1.style.outerDisplay = DisplayType.INLINE;
+        text1.style.innerDisplay = DisplayType.FLOW;
+        text1.text = "a b";
+
+        RenderNode div2 = new RenderNode(HTMLElements.DIV);
+        div2.id = RenderNode.nextId++;
+        div2.style.outerDisplay = DisplayType.BLOCK;
+        div2.style.innerDisplay = DisplayType.FLOW;
+
+        RenderNode text2 = new RenderNode(HTMLElements.TEXT);
+        text2.id = RenderNode.nextId++;
+        text2.style.outerDisplay = DisplayType.INLINE;
+        text2.style.innerDisplay = DisplayType.FLOW;
+        text2.text = "c";
+
+        div.addChildren(span1, text1, div2, text2);
+
+        BoxTreeGenerator boxTreeGenerator = new BoxTreeGenerator();
+        BoxNode rootBoxNode = boxTreeGenerator.generate(div);
+
+        BoxNode divBox = new BoxNode();
+        divBox.id = 0;
+        divBox.renderNodeId = div.id;
+        divBox.outerDisplayType = DisplayType.BLOCK;
+        divBox.innerDisplayType = DisplayType.FLEX;
+
+        BoxNode span1Box = new BoxNode();
+        span1Box.id = 1;
+        span1Box.renderNodeId = span1.id;
+        span1Box.outerDisplayType = DisplayType.INLINE;
+        span1Box.innerDisplayType = DisplayType.FLOW;
+        span1Box.parent = divBox;
+
+        BoxNode anonBox1 = new BoxNode();
+        anonBox1.id = 5;
+        anonBox1.isAnonymous = true;
+        anonBox1.outerDisplayType = DisplayType.BLOCK;
+        anonBox1.innerDisplayType = DisplayType.FLOW;
+        anonBox1.parent = divBox;
+
+        BoxNode textBox1 = new BoxNode();
+        textBox1.id = 2;
+        textBox1.renderNodeId = text1.id;
+        textBox1.isAnonymous = true;
+        textBox1.isTextNode = true;
+        textBox1.outerDisplayType = DisplayType.INLINE;
+        textBox1.innerDisplayType = DisplayType.FLOW;
+        textBox1.textStartIndex = 0;
+        textBox1.textEndIndex = 3;
+        textBox1.parent = anonBox1;
+
+        anonBox1.children.add(textBox1);
+
+        BoxNode div2Box = new BoxNode();
+        div2Box.id = 3;
+        div2Box.renderNodeId = div2.id;
+        div2Box.outerDisplayType = DisplayType.BLOCK;
+        div2Box.innerDisplayType = DisplayType.FLOW;
+        div2Box.parent = divBox;
+
+        BoxNode anonBox2 = new BoxNode();
+        anonBox2.id = 6;
+        anonBox2.isAnonymous = true;
+        anonBox2.outerDisplayType = DisplayType.BLOCK;
+        anonBox2.innerDisplayType = DisplayType.FLOW;
+        anonBox2.parent = divBox;
+
+        BoxNode textBox2 = new BoxNode();
+        textBox2.id = 4;
+        textBox2.renderNodeId = text2.id;
+        textBox2.isAnonymous = true;
+        textBox2.isTextNode = true;
+        textBox2.outerDisplayType = DisplayType.INLINE;
+        textBox2.innerDisplayType = DisplayType.FLOW;
+        textBox2.textStartIndex = 0;
+        textBox2.textEndIndex = 1;
+        textBox2.parent = anonBox2;
+
+        anonBox2.children.add(textBox2);
+
+        divBox.children.addAll(List.of(span1Box, anonBox1, div2Box, anonBox2));
+
+        assertEquals(divBox, rootBoxNode);
+    }
+
 }

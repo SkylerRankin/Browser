@@ -19,6 +19,7 @@ public class BoxNode {
     public int inlineFormattingContextId = -1;
     public int blockFormattingContextId = -1;
     public int tableFormattingContextId = -1;
+    public int flexFormattingContextId = -1;
     public RenderNode correspondingRenderNode = null;
     public CSSStyle style = new CSSStyle();
     public DisplayType outerDisplayType;

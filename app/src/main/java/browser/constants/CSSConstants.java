@@ -171,6 +171,14 @@ public class CSSConstants {
             "text-align"
     );
 
+    public static Map<String, CSSStyle.FlexBasis> flexBasisStrings = Map.ofEntries(
+            Map.entry("max-content", CSSStyle.FlexBasis.MAX_CONTENT),
+            Map.entry("min-content", CSSStyle.FlexBasis.MIN_CONTENT),
+            Map.entry("content", CSSStyle.FlexBasis.CONTENT),
+            Map.entry("fit-content", CSSStyle.FlexBasis.FIT_CONTENT),
+            Map.entry("auto", CSSStyle.FlexBasis.AUTO)
+    );
+
     /**
      * Convert a CSS display type string into the matching display type enum value.
      * @param text      A CSS display type string.

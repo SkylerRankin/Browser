@@ -46,6 +46,7 @@ public class BoxTreeGenerator {
         setDisplaysForUnknownElements(rootBoxNode);
         addAnonymousFlowBoxes(rootBoxNode);
         addAnonymousTableBoxes(rootBoxNode);
+        addAnonymousFlexBoxes(rootBoxNode);
 
         return rootBoxNode;
     }
@@ -94,18 +95,20 @@ public class BoxTreeGenerator {
 
         while (!queue.isEmpty()) {
             BoxNode boxNode = queue.remove(0);
-            boolean validDisplayConfiguration = boxHasValidDisplayConfiguration(boxNode);
-            if (!validDisplayConfiguration) {
-                addAnonymousBlockBoxes(boxNode);
+            if (boxNode.innerDisplayType.equals(DisplayType.FLOW) || boxNode.innerDisplayType.equals(DisplayType.FLOW_ROOT)) {
+                boolean validDisplayConfiguration = boxHasValidDisplayConfiguration(boxNode);
+                if (!validDisplayConfiguration) {
+                    addAnonymousBlockBoxes(boxNode);
 
-                // Adding anonymous boxes may have invalidated the box consistency in the parent box. Reset the queue
-                // so that the parent is reprocessed.
-                if (boxNode.parent != null) {
-                    List<BoxNode> newQueueContent = queue.stream()
-                            .filter(b -> !b.isDescendantOf(boxNode.parent.id)).toList();
-                    queue.clear();
-                    queue.add(0, boxNode.parent);
-                    queue.addAll(newQueueContent);
+                    // Adding anonymous boxes may have invalidated the box consistency in the parent box. Reset the queue
+                    // so that the parent is reprocessed.
+                    if (boxNode.parent != null) {
+                        List<BoxNode> newQueueContent = queue.stream()
+                                .filter(b -> !b.isDescendantOf(boxNode.parent.id)).toList();
+                        queue.clear();
+                        queue.add(0, boxNode.parent);
+                        queue.addAll(newQueueContent);
+                    }
                 }
             }
             queue.addAll(boxNode.children);
@@ -169,6 +172,38 @@ public class BoxTreeGenerator {
             child.parent = baseBoxNode;
         }
         baseBoxNode.children = newChildren;
+    }
+
+    private void addAnonymousFlexBoxes(BoxNode rootBoxNode) {
+        if (rootBoxNode.children.size() == 0) {
+            return;
+        }
+
+        List<BoxNode> queue = new ArrayList<>();
+        queue.add(rootBoxNode);
+
+        while (!queue.isEmpty()) {
+            BoxNode boxNode = queue.remove(0);
+            boolean flexParent = boxNode.parent != null && boxNode.parent.innerDisplayType.equals(DisplayType.FLEX);
+            if (flexParent && boxNode.isTextNode) {
+                // Wrap text children of flex containers with an anonymous box.
+                BoxNode anonymousBox = new BoxNode();
+                anonymousBox.id = BoxNode.nextId++;
+                anonymousBox.isAnonymous = true;
+                anonymousBox.outerDisplayType = DisplayType.BLOCK;
+                anonymousBox.innerDisplayType = DisplayType.FLOW;
+                anonymousBox.children.add(boxNode);
+
+                int indexInParent = boxNode.parent.children.indexOf(boxNode);
+                boxNode.parent.children.remove(indexInParent);
+                boxNode.parent.children.add(indexInParent, anonymousBox);
+
+                BoxNode previousParent = boxNode.parent;
+                boxNode.parent = anonymousBox;
+                anonymousBox.parent = previousParent;
+            }
+            queue.addAll(boxNode.children);
+        }
     }
 
     private BoxNode wrapInlineElementWithAnonymousBlockBox(BoxNode inlineBox) {

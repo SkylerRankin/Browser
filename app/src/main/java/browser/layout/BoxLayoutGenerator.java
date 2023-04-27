@@ -21,16 +21,19 @@ public class BoxLayoutGenerator {
     private final Map<Integer, InlineFormattingContext> inlineFormattingContexts = new HashMap<>();
     private final Map<Integer, BlockFormattingContext> blockFormattingContexts = new HashMap<>();
     private final Map<Integer, TableFormattingContext> tableFormattingContexts = new HashMap<>();
+    private final Map<Integer, FlexFormattingContext> flexFormattingContexts = new HashMap<>();
     private final InlineLayoutFormatter inlineLayoutFormatter;
     private final InlineBlockWidthCalculator inlineBlockWidthCalculator;
     private final TableLayoutFormatter tableLayoutFormatter;
+    private final FlexLayoutFormatter flexLayoutFormatter;
 
-    private enum LayoutAlgorithmType { Block, Inline, List, Table, Invalid }
+    private enum LayoutAlgorithmType { Block, Inline, List, Table, Flex, Invalid }
 
     public BoxLayoutGenerator(final TextDimensionCalculator textDimensionCalculator) {
         inlineLayoutFormatter = new InlineLayoutFormatter(textDimensionCalculator);
         inlineBlockWidthCalculator = new InlineBlockWidthCalculator(this);
         tableLayoutFormatter = new TableLayoutFormatter(this);
+        flexLayoutFormatter = new FlexLayoutFormatter(this);
     }
 
     // Public methods
@@ -42,6 +45,7 @@ public class BoxLayoutGenerator {
         setInlineFormattingContexts(rootBoxNode);
         setBlockFormattingContexts(rootBoxNode);
         setTableFormattingContexts(rootBoxNode);
+        setFlexFormattingContexts(rootBoxNode);
 
         // Set all fixed heights/widths.
         setImageSizes(rootBoxNode);
@@ -55,6 +59,7 @@ public class BoxLayoutGenerator {
         // Layout all box nodes within the root.
         setBoxLayout(rootBoxNode);
 
+        // Apply box position modifications.
         applyTextJustifications(rootBoxNode);
         applyAutoMargins(rootBoxNode);
     }
@@ -358,6 +363,19 @@ public class BoxLayoutGenerator {
         }
     }
 
+    private void setFlexFormattingContexts(BoxNode boxNode) {
+        if (boxNode.innerDisplayType.equals(DisplayType.FLEX)) {
+            boxNode.flexFormattingContextId = flexFormattingContexts.size();
+            FlexFormattingContext context = new FlexFormattingContext();
+            context.rootBoxNode = boxNode;
+            flexFormattingContexts.put(boxNode.flexFormattingContextId, context);
+        }
+
+        for (BoxNode child : boxNode.children) {
+            setFlexFormattingContexts(child);
+        }
+    }
+
     /**
      * Sets the position and size of the given box node's children.
      * @param boxNode       The box node to layout.
@@ -373,6 +391,7 @@ public class BoxLayoutGenerator {
             case Inline -> layoutInlineBoxes(boxNode);
             case List -> layoutListBoxes(boxNode);
             case Table -> layoutTableBoxes(boxNode);
+            case Flex -> layoutFlexBoxes(boxNode);
             case Invalid -> System.err.printf("BoxLayoutGenerator.setBoxLayout: no supported layout algorithm for box: %s\n", boxNode);
         }
     }
@@ -382,7 +401,9 @@ public class BoxLayoutGenerator {
         boolean hasBlockChildren = boxNode.children.stream().anyMatch(child -> child.outerDisplayType != null && child.outerDisplayType.equals(DisplayType.BLOCK));
         boolean hasInlineChildren = boxNode.children.stream().anyMatch(child -> child.outerDisplayType != null && child.outerDisplayType.equals(DisplayType.INLINE));
 
-        if (boxNode.innerDisplayType.equals(CSSStyle.DisplayType.FLOW) || boxNode.innerDisplayType.equals(DisplayType.FLOW_ROOT)) {
+        if (boxNode.innerDisplayType.equals(DisplayType.FLEX)) {
+            return LayoutAlgorithmType.Flex;
+        } else if (boxNode.innerDisplayType.equals(CSSStyle.DisplayType.FLOW) || boxNode.innerDisplayType.equals(DisplayType.FLOW_ROOT)) {
             if (hasListChildren) {
                 return LayoutAlgorithmType.List;
             } else if (hasBlockChildren) {
@@ -524,6 +545,19 @@ public class BoxLayoutGenerator {
         }
 
         parentBox.height = tableLayoutFormatter.getHeightFromChildren(parentBox, context);
+    }
+
+    private void layoutFlexBoxes(BoxNode parentBox) {
+        FlexFormattingContext context = flexFormattingContexts.get(parentBox.flexFormattingContextId);
+
+        for (int i = 0; i < parentBox.children.size(); i++) {
+            BoxNode child = parentBox.children.get(i);
+            flexLayoutFormatter.placeBox(child);
+            setBoxLayout(child);
+        }
+
+        // TODO set box width
+        // TODO set box height
     }
 
     private float getHeightFromChildren(BoxNode boxNode) {
