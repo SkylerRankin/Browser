@@ -589,14 +589,16 @@ public class BoxLayoutGenerator {
                 float availableWidth = boxNode.width - boxNode.style.borderWidthLeft - boxNode.style.paddingLeft -
                         boxNode.style.paddingRight - boxNode.style.borderWidthRight;
                 float diff = availableWidth - usedLineWidth;
-                float xOffset = boxNode.style.textAlign.equals(CSSStyle.textAlignType.RIGHT) ?
-                        diff :
-                        diff / 2;
+                if (diff > 0) {
+                    float xOffset = boxNode.style.textAlign.equals(CSSStyle.textAlignType.RIGHT) ?
+                            diff :
+                            diff / 2;
 
-                // Move each top level box in this line by the x offset.
-                for (BoxNode child : context.lineBoxes.get(lineBoxIndex).boxes) {
-                    if (child.parent.id == context.contextRootId) {
-                        moveBoxAndDescendants(child, new Vector2(xOffset, 0));
+                    // Move each top level box in this line by the x offset.
+                    for (BoxNode child : context.lineBoxes.get(lineBoxIndex).boxes) {
+                        if (child.parent.id == context.contextRootId) {
+                            moveBoxAndDescendants(child, new Vector2(xOffset, 0));
+                        }
                     }
                 }
             }

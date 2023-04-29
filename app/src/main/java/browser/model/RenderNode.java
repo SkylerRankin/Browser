@@ -191,7 +191,8 @@ public class RenderNode {
     }
 
     public String toString() {
-        return String.format("%s, depth=%d, id=%d, %d children, text = %s", type, depth, id, children.size(), text);
+        String textString = text == null ? "" : String.format(", text = \"%s\"", text);
+        return String.format("%s, depth=%d, id=%d, %d children%s", type, depth, id, children.size(), textString);
     }
 
 }

@@ -1,0 +1,751 @@
+
+<!-- saved from url=(0014)about:internet -->
+<html lang="en" op="item"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><meta name="referrer" content="origin"><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" type="text/css" href="./Beautiful branchless binary search _ Hacker News_files/news.css">
+        <link rel="shortcut icon" href="https://news.ycombinator.com/favicon.ico">
+        <title>Beautiful branchless binary search | Hacker News</title></head><body><center><table id="hnmain" border="0" cellpadding="0" cellspacing="0" width="85%" bgcolor="#f6f6ef">
+        <tbody><tr><td bgcolor="#ff6600"><table border="0" cellpadding="0" cellspacing="0" width="100%" style="padding:2px"><tbody><tr><td style="width:18px;padding-right:4px"><a href="https://news.ycombinator.com/"><img src="./Beautiful branchless binary search _ Hacker News_files/y18.gif" width="18" height="18" style="border:1px white solid;"></a></td>
+                  <td style="line-height:12pt; height:10px;"><span class="pagetop"><b class="hnname"><a href="https://news.ycombinator.com/news">Hacker News</a></b>
+                            <a href="https://news.ycombinator.com/newest">new</a> | <a href="https://news.ycombinator.com/front">past</a> | <a href="https://news.ycombinator.com/newcomments">comments</a> | <a href="https://news.ycombinator.com/ask">ask</a> | <a href="https://news.ycombinator.com/show">show</a> | <a href="https://news.ycombinator.com/jobs">jobs</a> | <a href="https://news.ycombinator.com/submit">submit</a>            </span></td><td style="text-align:right;padding-right:4px;"><span class="pagetop">
+                              <a href="https://news.ycombinator.com/login?goto=item%3Fid%3D35737862">login</a>
+                          </span></td>
+              </tr></tbody></table></td></tr>
+<tr id="pagespace" title="Beautiful branchless binary search" style="height:10px"></tr><tr><td><table class="fatitem" border="0">
+        <tbody><tr class="athing" id="35737862">
+      <td align="right" valign="top" class="title"><span class="rank"></span></td>      <td valign="top" class="votelinks"><center><a id="up_35737862" href="https://news.ycombinator.com/vote?id=35737862&amp;how=up&amp;goto=item%3Fid%3D35737862"><div class="votearrow" title="upvote"></div></a></center></td><td class="title"><span class="titleline"><a href="https://probablydance.com/2023/04/27/beautiful-branchless-binary-search/">Beautiful branchless binary search</a><span class="sitebit comhead"> (<a href="https://news.ycombinator.com/from?site=probablydance.com"><span class="sitestr">probablydance.com</span></a>)</span></span></td></tr><tr><td colspan="2"></td><td class="subtext"><span class="subline">
+          <span class="score" id="score_35737862">140 points</span> by <a href="https://news.ycombinator.com/user?id=ingve" class="hnuser">ingve</a> <span class="age" title="2023-04-28T05:46:40"><a href="https://news.ycombinator.com/item?id=35737862">3 hours ago</a></span> <span id="unv_35737862"></span> | <a href="https://news.ycombinator.com/hide?id=35737862&amp;goto=item%3Fid%3D35737862">hide</a> | <a href="https://hn.algolia.com/?query=Beautiful%20branchless%20binary%20search&amp;type=story&amp;dateRange=all&amp;sort=byDate&amp;storyText=false&amp;prefix&amp;page=0" class="hnpast">past</a> | <a href="https://news.ycombinator.com/fave?id=35737862&amp;auth=4b14788a18b7594b75cbe154353595a775daa9b9">favorite</a> | <a href="https://news.ycombinator.com/item?id=35737862">63&nbsp;comments</a>        </span>
+              </td></tr>
+            <tr style="height:10px"></tr><tr><td colspan="2"></td><td><form action="https://news.ycombinator.com/comment" method="post"><input type="hidden" name="parent" value="35737862"><input type="hidden" name="goto" value="item?id=35737862"><input type="hidden" name="hmac" value="af5c9ad9384f32cbe2fe003263a18b3b34e4214a"><textarea name="text" rows="8" cols="80" wrap="virtual"></textarea><br><br>
+<input type="submit" value="add comment"></form></td></tr>  </tbody></table><br><br><table border="0" class="comment-tree">
+            <tbody><tr class="athing comtr" id="35738775"><td><table border="0">  <tbody><tr>    <td class="ind" indent="0"><img src="./Beautiful branchless binary search _ Hacker News_files/s.gif" height="1" width="0"></td><td valign="top" class="votelinks">
+      <center><a id="up_35738775" href="https://news.ycombinator.com/vote?id=35738775&amp;how=up&amp;goto=item%3Fid%3D35737862"><div class="votearrow" title="upvote"></div></a></center>    </td><td class="default"><div style="margin-top:2px; margin-bottom:-10px;"><span class="comhead">
+          <a href="https://news.ycombinator.com/user?id=buybackoff" class="hnuser">buybackoff</a> <span class="age" title="2023-04-28T08:11:24"><a href="https://news.ycombinator.com/item?id=35738775">49 minutes ago</a></span> <span id="unv_35738775"></span>          <span class="navs">
+             | <a href="https://news.ycombinator.com/item?id=35737862#35738100" class="clicky" aria-hidden="true">next</a> <a class="togg clicky" id="35738775" n="1" href="javascript:void(0)">[–]</a><span class="onstory"></span>          </span>
+                  </span></div><br><div class="comment">
+                  <span class="commtext c00">Branchless or not in this case, it still touches memory in not so good pattern. I found that a significant speedup of a classic BS could be achieved by switching to vectorized search when the remaining range has a width of 3-4 SIMD lines (or maybe even a little more). The bounds of that range are likely already touched and in cache, then prefetching helps. It has high likelihood of finding the target on a single SIMD compare, then switch to linear search on small data that is already in L1. It gives 30-50% gain on 1K items array of integers, 10-25% on 1M items, depending on data distribution. Here is an example in C#: <a href="https://github.com/Spreads/Spreads/blob/main/src/Spreads.Core/Algorithms/VectorSearch.Specialized.tt#L69">https://github.com/Spreads/Spreads/blob/main/src/Spreads.Cor...</a></span>
+              <div class="reply">        <p><font size="1">
+                      <u><a href="https://news.ycombinator.com/reply?id=35738775&amp;goto=item%3Fid%3D35737862%2335738775">reply</a></u>
+                  </font>
+      </p></div></div></td></tr>
+        </tbody></table></td></tr>
+            <tr class="athing comtr" id="35738100"><td><table border="0">  <tbody><tr>    <td class="ind" indent="0"><img src="./Beautiful branchless binary search _ Hacker News_files/s.gif" height="1" width="0"></td><td valign="top" class="votelinks">
+      <center><a id="up_35738100" href="https://news.ycombinator.com/vote?id=35738100&amp;how=up&amp;goto=item%3Fid%3D35737862"><div class="votearrow" title="upvote"></div></a></center>    </td><td class="default"><div style="margin-top:2px; margin-bottom:-10px;"><span class="comhead">
+          <a href="https://news.ycombinator.com/user?id=2102922286" class="hnuser">2102922286</a> <span class="age" title="2023-04-28T06:24:45"><a href="https://news.ycombinator.com/item?id=35738100">2 hours ago</a></span> <span id="unv_35738100"></span>          <span class="navs">
+             | <a href="https://news.ycombinator.com/item?id=35737862#35738775" class="clicky" aria-hidden="true">prev</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738299" class="clicky" aria-hidden="true">next</a> <a class="togg clicky" id="35738100" n="9" href="javascript:void(0)">[–]</a><span class="onstory"></span>          </span>
+                  </span></div><br><div class="comment">
+                  <span class="commtext c00">A cool related algorithm is <a href="https://algorithmica.org/en/eytzinger" rel="nofollow">https://algorithmica.org/en/eytzinger</a><p>In addition to being branchless, it also has better cache properties than a standard binary search tree.</p><p>If you're doing a binary search in an array, you start in the middle, and then jump all the way to the midway point of one half, and so on. As a result, there's a lot of distance between each read that you do in the array. Thus, each read is putting extra strain on the cache (or the reads won't be cached).</p><p>The CPU cache performs much better if the values you want to read are close to each other. Enter the Eytzinger Binary Search. The idea is that, if you're always going to be accessing the root of the tree, and then one of its two children--you should just put those children physically close to the root, so they'll all be on the same cache line!
+              </p><div class="reply">        <p><font size="1">
+                      <u><a href="https://news.ycombinator.com/reply?id=35738100&amp;goto=item%3Fid%3D35737862%2335738100">reply</a></u>
+                  </font>
+      </p></div></span></div></td></tr>
+        </tbody></table></td></tr>
+                <tr class="athing comtr" id="35738451"><td><table border="0">  <tbody><tr>    <td class="ind" indent="1"><img src="./Beautiful branchless binary search _ Hacker News_files/s.gif" height="1" width="40"></td><td valign="top" class="votelinks">
+      <center><a id="up_35738451" href="https://news.ycombinator.com/vote?id=35738451&amp;how=up&amp;goto=item%3Fid%3D35737862"><div class="votearrow" title="upvote"></div></a></center>    </td><td class="default"><div style="margin-top:2px; margin-bottom:-10px;"><span class="comhead">
+          <a href="https://news.ycombinator.com/user?id=srcreigh" class="hnuser">srcreigh</a> <span class="age" title="2023-04-28T07:17:25"><a href="https://news.ycombinator.com/item?id=35738451">1 hour ago</a></span> <span id="unv_35738451"></span>          <span class="navs">
+             | <a href="https://news.ycombinator.com/item?id=35737862#35738100" class="clicky" aria-hidden="true">parent</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738287" class="clicky" aria-hidden="true">next</a> <a class="togg clicky" id="35738451" n="6" href="javascript:void(0)">[–]</a><span class="onstory"></span>          </span>
+                  </span></div><br><div class="comment">
+                  <span class="commtext c00">Trying to figure this out myself. So cache line is 64 bytes. Ignoring pointers you can fit eight 8bit data/key values, or sixteen 4bit data/key values. Pointers are entirely implicit (thx user below)<p>This would save you 3 or 4 memory reads respectively.</p><p>The odds of this strategy helping past the first few layers seems unlikely. So for 100k elements binary tree, this should be a 21% or 31% performance improvement respectively. That’s 17 vs 14 and 17 vs 13 reads.</p><p>And this would not help much for string data values unless the strings are at most 8 characters long :-)</p><p>This same thinking can be used to optimize database queries. Given several table and index layouts how many 8kb disk reads will be needed in each case. Wish I could get a job doing that kind of design work!
+              </p><div class="reply">        <p><font size="1">
+                      <u><a href="https://news.ycombinator.com/reply?id=35738451&amp;goto=item%3Fid%3D35737862%2335738451">reply</a></u>
+                  </font>
+      </p></div></span></div></td></tr>
+        </tbody></table></td></tr>
+                <tr class="athing comtr" id="35738646"><td><table border="0">  <tbody><tr>    <td class="ind" indent="2"><img src="./Beautiful branchless binary search _ Hacker News_files/s.gif" height="1" width="80"></td><td valign="top" class="votelinks">
+      <center><a id="up_35738646" href="https://news.ycombinator.com/vote?id=35738646&amp;how=up&amp;goto=item%3Fid%3D35737862"><div class="votearrow" title="upvote"></div></a></center>    </td><td class="default"><div style="margin-top:2px; margin-bottom:-10px;"><span class="comhead">
+          <a href="https://news.ycombinator.com/user?id=vidarh" class="hnuser">vidarh</a> <span class="age" title="2023-04-28T07:48:59"><a href="https://news.ycombinator.com/item?id=35738646">1 hour ago</a></span> <span id="unv_35738646"></span>          <span class="navs">
+             | <a href="https://news.ycombinator.com/item?id=35737862#35738100" class="clicky" aria-hidden="true">root</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738451" class="clicky" aria-hidden="true">parent</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738474" class="clicky" aria-hidden="true">next</a> <a class="togg clicky" id="35738646" n="3" href="javascript:void(0)">[–]</a><span class="onstory"></span>          </span>
+                  </span></div><br><div class="comment">
+                  <span class="commtext c00">You don't store data nodes, or pointers. You store the keys. If you need to store data, just store them at the same index in another array.<p>The pointers are <i>wholly implicit</i>. E.g. assuming you let the index 0 be empty, the left pointer for a node k is at 2k and the right node is at 2k+1.</p><p>In terms of benefit here, the main benefit appears to be that since you always know where the children will be, you can trade bandwidth for latency and trigger pre-fetching of the next step down before you've even decided if you're going left or right.
+              </p><div class="reply">        <p><font size="1">
+                      <u><a href="https://news.ycombinator.com/reply?id=35738646&amp;goto=item%3Fid%3D35737862%2335738646">reply</a></u>
+                  </font>
+      </p></div></span></div></td></tr>
+        </tbody></table></td></tr>
+                <tr class="athing comtr" id="35738793"><td><table border="0">  <tbody><tr>    <td class="ind" indent="3"><img src="./Beautiful branchless binary search _ Hacker News_files/s.gif" height="1" width="120"></td><td valign="top" class="votelinks">
+      <center><a id="up_35738793" href="https://news.ycombinator.com/vote?id=35738793&amp;how=up&amp;goto=item%3Fid%3D35737862"><div class="votearrow" title="upvote"></div></a></center>    </td><td class="default"><div style="margin-top:2px; margin-bottom:-10px;"><span class="comhead">
+          <a href="https://news.ycombinator.com/user?id=srcreigh" class="hnuser">srcreigh</a> <span class="age" title="2023-04-28T08:13:53"><a href="https://news.ycombinator.com/item?id=35738793">47 minutes ago</a></span> <span id="unv_35738793"></span>          <span class="navs">
+             | <a href="https://news.ycombinator.com/item?id=35737862#35738100" class="clicky" aria-hidden="true">root</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738646" class="clicky" aria-hidden="true">parent</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738949" class="clicky" aria-hidden="true">next</a> <a class="togg clicky" id="35738793" n="1" href="javascript:void(0)">[–]</a><span class="onstory"></span>          </span>
+                  </span></div><br><div class="comment">
+                  <span class="commtext c00">That’s what I meant re keys, but ya nice point about pointers. Forgetting details of my data structures classes. updated my post (used to count 1 bit per node for pointers)<p>Ya I agree re latency. In fact there’s no other option afaict. CPU always loads 64 bytes, just like Postgres always loads data in 8kb chunks (unless you compile Postgres to use different size)
+              </p><div class="reply">        <p><font size="1">
+                      <u><a href="https://news.ycombinator.com/reply?id=35738793&amp;goto=item%3Fid%3D35737862%2335738793">reply</a></u>
+                  </font>
+      </p></div></span></div></td></tr>
+        </tbody></table></td></tr>
+            <tr class="athing comtr" id="35738949"><td><table border="0">  <tbody><tr>    <td class="ind" indent="3"><img src="./Beautiful branchless binary search _ Hacker News_files/s.gif" height="1" width="120"></td><td valign="top" class="votelinks">
+      <center><a id="up_35738949" href="https://news.ycombinator.com/vote?id=35738949&amp;how=up&amp;goto=item%3Fid%3D35737862"><div class="votearrow" title="upvote"></div></a></center>    </td><td class="default"><div style="margin-top:2px; margin-bottom:-10px;"><span class="comhead">
+          <a href="https://news.ycombinator.com/user?id=WithinReason" class="hnuser">WithinReason</a> <span class="age" title="2023-04-28T08:41:36"><a href="https://news.ycombinator.com/item?id=35738949">19 minutes ago</a></span> <span id="unv_35738949"></span>          <span class="navs">
+             | <a href="https://news.ycombinator.com/item?id=35737862#35738100" class="clicky" aria-hidden="true">root</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738646" class="clicky" aria-hidden="true">parent</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738793" class="clicky" aria-hidden="true">prev</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738474" class="clicky" aria-hidden="true">next</a> <a class="togg clicky" id="35738949" n="1" href="javascript:void(0)">[–]</a><span class="onstory"></span>          </span>
+                  </span></div><br><div class="comment">
+                  <span class="commtext c00">So binary search should actually not be binary but... octary?</span>
+              <div class="reply">        <p><font size="1">
+                      <u><a href="https://news.ycombinator.com/reply?id=35738949&amp;goto=item%3Fid%3D35737862%2335738949">reply</a></u>
+                  </font>
+      </p></div></div></td></tr>
+        </tbody></table></td></tr>
+                  <tr class="athing comtr" id="35738474"><td><table border="0">  <tbody><tr>    <td class="ind" indent="2"><img src="./Beautiful branchless binary search _ Hacker News_files/s.gif" height="1" width="80"></td><td valign="top" class="votelinks">
+      <center><a id="up_35738474" href="https://news.ycombinator.com/vote?id=35738474&amp;how=up&amp;goto=item%3Fid%3D35737862"><div class="votearrow" title="upvote"></div></a></center>    </td><td class="default"><div style="margin-top:2px; margin-bottom:-10px;"><span class="comhead">
+          <a href="https://news.ycombinator.com/user?id=atq2119" class="hnuser">atq2119</a> <span class="age" title="2023-04-28T07:21:21"><a href="https://news.ycombinator.com/item?id=35738474">1 hour ago</a></span> <span id="unv_35738474"></span>          <span class="navs">
+             | <a href="https://news.ycombinator.com/item?id=35737862#35738100" class="clicky" aria-hidden="true">root</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738451" class="clicky" aria-hidden="true">parent</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738646" class="clicky" aria-hidden="true">prev</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738287" class="clicky" aria-hidden="true">next</a> <a class="togg clicky" id="35738474" n="2" href="javascript:void(0)">[–]</a><span class="onstory"></span>          </span>
+                  </span></div><br><div class="comment">
+                  <span class="commtext c00">The big advantage of the Eytzinger layout actually comes into play when your binary search <i>isn't</i> branch-free.<p>In that case, the CPU will speculate loads reasonably far ahead, and because both choices tend to be in the same cacheline, this prefetch is rarely wasted.</p><p>In other words, the big win isn't about reducing the number of cacheline fetched, it's about reducing the effective latency of those fetches.</p><p>That said, using a similar layout with higher fan-out and SIMD ops doesn't benefit from this effect and is probably still better.
+              </p><div class="reply">        <p><font size="1">
+                      <u><a href="https://news.ycombinator.com/reply?id=35738474&amp;goto=item%3Fid%3D35737862%2335738474">reply</a></u>
+                  </font>
+      </p></div></span></div></td></tr>
+        </tbody></table></td></tr>
+                <tr class="athing comtr" id="35738840"><td><table border="0">  <tbody><tr>    <td class="ind" indent="3"><img src="./Beautiful branchless binary search _ Hacker News_files/s.gif" height="1" width="120"></td><td valign="top" class="votelinks">
+      <center><a id="up_35738840" href="https://news.ycombinator.com/vote?id=35738840&amp;how=up&amp;goto=item%3Fid%3D35737862"><div class="votearrow" title="upvote"></div></a></center>    </td><td class="default"><div style="margin-top:2px; margin-bottom:-10px;"><span class="comhead">
+          <a href="https://news.ycombinator.com/user?id=srcreigh" class="hnuser">srcreigh</a> <span class="age" title="2023-04-28T08:21:43"><a href="https://news.ycombinator.com/item?id=35738840">39 minutes ago</a></span> <span id="unv_35738840"></span>          <span class="navs">
+             | <a href="https://news.ycombinator.com/item?id=35737862#35738100" class="clicky" aria-hidden="true">root</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738474" class="clicky" aria-hidden="true">parent</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738287" class="clicky" aria-hidden="true">next</a> <a class="togg clicky" id="35738840" n="1" href="javascript:void(0)">[–]</a><span class="onstory"></span>          </span>
+                  </span></div><br><div class="comment">
+                  <span class="commtext c00">I think effective latency and reducing the number of cache lines is probably the exact same thing. The point is instead of fetching 5 cache lines to get to the 5th layer of the tree from memory, you fetch just 2 and access the mega root node via cache.</span>
+              <div class="reply">        <p><font size="1">
+                      <u><a href="https://news.ycombinator.com/reply?id=35738840&amp;goto=item%3Fid%3D35737862%2335738840">reply</a></u>
+                  </font>
+      </p></div></div></td></tr>
+        </tbody></table></td></tr>
+                        <tr class="athing comtr" id="35738287"><td><table border="0">  <tbody><tr>    <td class="ind" indent="1"><img src="./Beautiful branchless binary search _ Hacker News_files/s.gif" height="1" width="40"></td><td valign="top" class="votelinks">
+      <center><a id="up_35738287" href="https://news.ycombinator.com/vote?id=35738287&amp;how=up&amp;goto=item%3Fid%3D35737862"><div class="votearrow" title="upvote"></div></a></center>    </td><td class="default"><div style="margin-top:2px; margin-bottom:-10px;"><span class="comhead">
+          <a href="https://news.ycombinator.com/user?id=jeffreygoesto" class="hnuser">jeffreygoesto</a> <span class="age" title="2023-04-28T06:52:17"><a href="https://news.ycombinator.com/item?id=35738287">2 hours ago</a></span> <span id="unv_35738287"></span>          <span class="navs">
+             | <a href="https://news.ycombinator.com/item?id=35737862#35738100" class="clicky" aria-hidden="true">parent</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738451" class="clicky" aria-hidden="true">prev</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738561" class="clicky" aria-hidden="true">next</a> <a class="togg clicky" id="35738287" n="1" href="javascript:void(0)">[–]</a><span class="onstory"></span>          </span>
+                  </span></div><br><div class="comment">
+                  <span class="commtext c00">Do they publish if getting the tree/array in shape initially or inserting an element is significantly different in speed to the plain sorted layout? The method is a nice read optimization and you'd need to check if it amortizes when sun together with the tree creation.</span>
+              <div class="reply">        <p><font size="1">
+                      <u><a href="https://news.ycombinator.com/reply?id=35738287&amp;goto=item%3Fid%3D35737862%2335738287">reply</a></u>
+                  </font>
+      </p></div></div></td></tr>
+        </tbody></table></td></tr>
+            <tr class="athing comtr" id="35738561"><td><table border="0">  <tbody><tr>    <td class="ind" indent="1"><img src="./Beautiful branchless binary search _ Hacker News_files/s.gif" height="1" width="40"></td><td valign="top" class="votelinks">
+      <center><a id="up_35738561" href="https://news.ycombinator.com/vote?id=35738561&amp;how=up&amp;goto=item%3Fid%3D35737862"><div class="votearrow" title="upvote"></div></a></center>    </td><td class="default"><div style="margin-top:2px; margin-bottom:-10px;"><span class="comhead">
+          <a href="https://news.ycombinator.com/user?id=zelphirkalt" class="hnuser">zelphirkalt</a> <span class="age" title="2023-04-28T07:35:31"><a href="https://news.ycombinator.com/item?id=35738561">1 hour ago</a></span> <span id="unv_35738561"></span>          <span class="navs">
+             | <a href="https://news.ycombinator.com/item?id=35737862#35738100" class="clicky" aria-hidden="true">parent</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738287" class="clicky" aria-hidden="true">prev</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738299" class="clicky" aria-hidden="true">next</a> <a class="togg clicky" id="35738561" n="1" href="javascript:void(0)">[–]</a><span class="onstory"></span>          </span>
+                  </span></div><br><div class="comment">
+                  <span class="commtext c00">Isn't that like storing a heap inside an array, with indices and values like this:<p></p><pre><code>    0: top of heap,
+    1: left of top,
+    2: right of top,
+    3: left of left of top
+    ...
+
+?</code></pre></span>
+              <div class="reply">        <p><font size="1">
+                      <u><a href="https://news.ycombinator.com/reply?id=35738561&amp;goto=item%3Fid%3D35737862%2335738561">reply</a></u>
+                  </font>
+      </p></div></div></td></tr>
+        </tbody></table></td></tr>
+                  <tr class="athing comtr" id="35738299"><td><table border="0">  <tbody><tr>    <td class="ind" indent="0"><img src="./Beautiful branchless binary search _ Hacker News_files/s.gif" height="1" width="0"></td><td valign="top" class="votelinks">
+      <center><a id="up_35738299" href="https://news.ycombinator.com/vote?id=35738299&amp;how=up&amp;goto=item%3Fid%3D35737862"><div class="votearrow" title="upvote"></div></a></center>    </td><td class="default"><div style="margin-top:2px; margin-bottom:-10px;"><span class="comhead">
+          <a href="https://news.ycombinator.com/user?id=pizza234" class="hnuser">pizza234</a> <span class="age" title="2023-04-28T06:53:57"><a href="https://news.ycombinator.com/item?id=35738299">2 hours ago</a></span> <span id="unv_35738299"></span>          <span class="navs">
+             | <a href="https://news.ycombinator.com/item?id=35737862#35738100" class="clicky" aria-hidden="true">prev</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738147" class="clicky" aria-hidden="true">next</a> <a class="togg clicky" id="35738299" n="5" href="javascript:void(0)">[–]</a><span class="onstory"></span>          </span>
+                  </span></div><br><div class="comment">
+                  <span class="commtext c00">Some information on the CMOV can be found on the Intel Optimization Reference Manual (<a href="https://cdrdv2-public.intel.com/671488/248966-046A-software-optimization-manual.pdf" rel="nofollow">https://cdrdv2-public.intel.com/671488/248966-046A-software-...</a>).<p>Torvalds was famously critical of it (<a href="https://yarchive.net/comp/linux/cmov.html);" rel="nofollow">https://yarchive.net/comp/linux/cmov.html);</a> part of the criticism is now moot though, due to low latencies on modern processors (it seems 1 cycle or less, although the instruction consumes internal flags).</p><p>His idea seems to be still applicable and consistent with Intel's recommendation: make branches predictable, and only after, use CMOV for the remaining ones. His fundametnal assumption is that "even if you were to know that something is unpredictable, it's going to be very rare.".
+              </p><div class="reply">        <p><font size="1">
+                      <u><a href="https://news.ycombinator.com/reply?id=35738299&amp;goto=item%3Fid%3D35737862%2335738299">reply</a></u>
+                  </font>
+      </p></div></span></div></td></tr>
+        </tbody></table></td></tr>
+                <tr class="athing comtr" id="35738345"><td><table border="0">  <tbody><tr>    <td class="ind" indent="1"><img src="./Beautiful branchless binary search _ Hacker News_files/s.gif" height="1" width="40"></td><td valign="top" class="votelinks">
+      <center><a id="up_35738345" href="https://news.ycombinator.com/vote?id=35738345&amp;how=up&amp;goto=item%3Fid%3D35737862"><div class="votearrow" title="upvote"></div></a></center>    </td><td class="default"><div style="margin-top:2px; margin-bottom:-10px;"><span class="comhead">
+          <a href="https://news.ycombinator.com/user?id=2102922286" class="hnuser">2102922286</a> <span class="age" title="2023-04-28T07:02:40"><a href="https://news.ycombinator.com/item?id=35738345">1 hour ago</a></span> <span id="unv_35738345"></span>          <span class="navs">
+             | <a href="https://news.ycombinator.com/item?id=35737862#35738299" class="clicky" aria-hidden="true">parent</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738147" class="clicky" aria-hidden="true">next</a> <a class="togg clicky" id="35738345" n="4" href="javascript:void(0)">[–]</a><span class="onstory"></span>          </span>
+                  </span></div><br><div class="comment">
+                  <span class="commtext c00">This is one area where Profile-Guided Optimization (PGO) can help a lot! With PGO, you run your program on some sample input and it logs info like how many times each side of a branch was taken. From there, you can recompile your code. If the compiler sees that one side of the branch dominates, it can emit code to prioritize that branch. However if the branch counts are approximately even and the branch is hard to predict (n.b. this is technically distinct from having even branch counts), then the compiler can know that the CPU would have trouble predicting the branch, and can emit a cmov instruction instead.</span>
+              <div class="reply">        <p><font size="1">
+                      <u><a href="https://news.ycombinator.com/reply?id=35738345&amp;goto=item%3Fid%3D35737862%2335738345">reply</a></u>
+                  </font>
+      </p></div></div></td></tr>
+        </tbody></table></td></tr>
+                <tr class="athing comtr" id="35738413"><td><table border="0">  <tbody><tr>    <td class="ind" indent="2"><img src="./Beautiful branchless binary search _ Hacker News_files/s.gif" height="1" width="80"></td><td valign="top" class="votelinks">
+      <center><a id="up_35738413" href="https://news.ycombinator.com/vote?id=35738413&amp;how=up&amp;goto=item%3Fid%3D35737862"><div class="votearrow" title="upvote"></div></a></center>    </td><td class="default"><div style="margin-top:2px; margin-bottom:-10px;"><span class="comhead">
+          <a href="https://news.ycombinator.com/user?id=berkut" class="hnuser">berkut</a> <span class="age" title="2023-04-28T07:12:26"><a href="https://news.ycombinator.com/item?id=35738413">1 hour ago</a></span> <span id="unv_35738413"></span>          <span class="navs">
+             | <a href="https://news.ycombinator.com/item?id=35737862#35738299" class="clicky" aria-hidden="true">root</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738345" class="clicky" aria-hidden="true">parent</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738147" class="clicky" aria-hidden="true">next</a> <a class="togg clicky" id="35738413" n="3" href="javascript:void(0)">[–]</a><span class="onstory"></span>          </span>
+                  </span></div><br><div class="comment">
+                  <span class="commtext c00">Yeah, it's mildly annoying there's no (at least to my knowledge?) compiler hint like the '__builtin_expect' ones to tell compilers that the values are very unlikely going to be predictable with enough accuracy to allow the branch predictors to be useful in general, and to use a cmov instead of the traditional branching instructions because of this.</span>
+              <div class="reply">        <p><font size="1">
+                      <u><a href="https://news.ycombinator.com/reply?id=35738413&amp;goto=item%3Fid%3D35737862%2335738413">reply</a></u>
+                  </font>
+      </p></div></div></td></tr>
+        </tbody></table></td></tr>
+                <tr class="athing comtr" id="35738478"><td><table border="0">  <tbody><tr>    <td class="ind" indent="3"><img src="./Beautiful branchless binary search _ Hacker News_files/s.gif" height="1" width="120"></td><td valign="top" class="votelinks">
+      <center><a id="up_35738478" href="https://news.ycombinator.com/vote?id=35738478&amp;how=up&amp;goto=item%3Fid%3D35737862"><div class="votearrow" title="upvote"></div></a></center>    </td><td class="default"><div style="margin-top:2px; margin-bottom:-10px;"><span class="comhead">
+          <a href="https://news.ycombinator.com/user?id=dist1ll" class="hnuser">dist1ll</a> <span class="age" title="2023-04-28T07:21:41"><a href="https://news.ycombinator.com/item?id=35738478">1 hour ago</a></span> <span id="unv_35738478"></span>          <span class="navs">
+             | <a href="https://news.ycombinator.com/item?id=35737862#35738299" class="clicky" aria-hidden="true">root</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738413" class="clicky" aria-hidden="true">parent</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738147" class="clicky" aria-hidden="true">next</a> <a class="togg clicky" id="35738478" n="2" href="javascript:void(0)">[–]</a><span class="onstory"></span>          </span>
+                  </span></div><br><div class="comment">
+                  <span class="commtext c00">clang has __builtin_unpredictable [0]<p>[0] <a href="https://clang.llvm.org/docs/LanguageExtensions.html#builtin-unpredictable" rel="nofollow">https://clang.llvm.org/docs/LanguageExtensions.html#builtin-...</a>
+              </p><div class="reply">        <p><font size="1">
+                      <u><a href="https://news.ycombinator.com/reply?id=35738478&amp;goto=item%3Fid%3D35737862%2335738478">reply</a></u>
+                  </font>
+      </p></div></span></div></td></tr>
+        </tbody></table></td></tr>
+                <tr class="athing comtr" id="35738484"><td><table border="0">  <tbody><tr>    <td class="ind" indent="4"><img src="./Beautiful branchless binary search _ Hacker News_files/s.gif" height="1" width="160"></td><td valign="top" class="votelinks">
+      <center><a id="up_35738484" href="https://news.ycombinator.com/vote?id=35738484&amp;how=up&amp;goto=item%3Fid%3D35737862"><div class="votearrow" title="upvote"></div></a></center>    </td><td class="default"><div style="margin-top:2px; margin-bottom:-10px;"><span class="comhead">
+          <a href="https://news.ycombinator.com/user?id=berkut" class="hnuser">berkut</a> <span class="age" title="2023-04-28T07:22:53"><a href="https://news.ycombinator.com/item?id=35738484">1 hour ago</a></span> <span id="unv_35738484"></span>          <span class="navs">
+             | <a href="https://news.ycombinator.com/item?id=35737862#35738299" class="clicky" aria-hidden="true">root</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738478" class="clicky" aria-hidden="true">parent</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738147" class="clicky" aria-hidden="true">next</a> <a class="togg clicky" id="35738484" n="1" href="javascript:void(0)">[–]</a><span class="onstory"></span>          </span>
+                  </span></div><br><div class="comment">
+                  <span class="commtext c00">Oooooh :)<p>Thanks!
+              </p><div class="reply">        <p><font size="1">
+                      <u><a href="https://news.ycombinator.com/reply?id=35738484&amp;goto=item%3Fid%3D35737862%2335738484">reply</a></u>
+                  </font>
+      </p></div></span></div></td></tr>
+        </tbody></table></td></tr>
+                                    <tr class="athing comtr" id="35738147"><td><table border="0">  <tbody><tr>    <td class="ind" indent="0"><img src="./Beautiful branchless binary search _ Hacker News_files/s.gif" height="1" width="0"></td><td valign="top" class="votelinks">
+      <center><a id="up_35738147" href="https://news.ycombinator.com/vote?id=35738147&amp;how=up&amp;goto=item%3Fid%3D35737862"><div class="votearrow" title="upvote"></div></a></center>    </td><td class="default"><div style="margin-top:2px; margin-bottom:-10px;"><span class="comhead">
+          <a href="https://news.ycombinator.com/user?id=cmovq" class="hnuser">cmovq</a> <span class="age" title="2023-04-28T06:31:52"><a href="https://news.ycombinator.com/item?id=35738147">2 hours ago</a></span> <span id="unv_35738147"></span>          <span class="navs">
+             | <a href="https://news.ycombinator.com/item?id=35737862#35738299" class="clicky" aria-hidden="true">prev</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738997" class="clicky" aria-hidden="true">next</a> <a class="togg clicky" id="35738147" n="3" href="javascript:void(0)">[–]</a><span class="onstory"></span>          </span>
+                  </span></div><br><div class="comment">
+                  <span class="commtext c00">&gt; Those spikes for std::lower_bound are on powers of two, where it is somehow much slower. I looked into it a little bit but can’t come up with an easy explanation<p>It’s been a long time since I looked into this, if I recall correctly binary search with close to power of 2 sized data is slower because of some interaction with the caches which causes the data to constantly have to be reloaded from memory.
+              </p><div class="reply">        <p><font size="1">
+                      <u><a href="https://news.ycombinator.com/reply?id=35738147&amp;goto=item%3Fid%3D35737862%2335738147">reply</a></u>
+                  </font>
+      </p></div></span></div></td></tr>
+        </tbody></table></td></tr>
+                <tr class="athing comtr" id="35738297"><td><table border="0">  <tbody><tr>    <td class="ind" indent="1"><img src="./Beautiful branchless binary search _ Hacker News_files/s.gif" height="1" width="40"></td><td valign="top" class="votelinks">
+      <center><a id="up_35738297" href="https://news.ycombinator.com/vote?id=35738297&amp;how=up&amp;goto=item%3Fid%3D35737862"><div class="votearrow" title="upvote"></div></a></center>    </td><td class="default"><div style="margin-top:2px; margin-bottom:-10px;"><span class="comhead">
+          <a href="https://news.ycombinator.com/user?id=coppsilgold" class="hnuser">coppsilgold</a> <span class="age" title="2023-04-28T06:53:36"><a href="https://news.ycombinator.com/item?id=35738297">2 hours ago</a></span> <span id="unv_35738297"></span>          <span class="navs">
+             | <a href="https://news.ycombinator.com/item?id=35737862#35738147" class="clicky" aria-hidden="true">parent</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738577" class="clicky" aria-hidden="true">next</a> <a class="togg clicky" id="35738297" n="1" href="javascript:void(0)">[–]</a><span class="onstory"></span>          </span>
+                  </span></div><br><div class="comment">
+                  <span class="commtext c00">Cache associativity, conflict miss. When too many memory addresses 
+ which are far apart map to the same cache lines while being used and reused in quick succession, causing cache evictions.<p>Scott Meyers had a very good talk which contained this information: &lt;<a href="https://youtu.be/WDIkqP4JbkE?t=3614" rel="nofollow">https://youtu.be/WDIkqP4JbkE?t=3614</a>&gt;</p><p>This is an effect of access pattern rather than size, but some access patterns are dictated by size.
+              </p><div class="reply">        <p><font size="1">
+                      <u><a href="https://news.ycombinator.com/reply?id=35738297&amp;goto=item%3Fid%3D35737862%2335738297">reply</a></u>
+                  </font>
+      </p></div></span></div></td></tr>
+        </tbody></table></td></tr>
+            <tr class="athing comtr" id="35738577"><td><table border="0">  <tbody><tr>    <td class="ind" indent="1"><img src="./Beautiful branchless binary search _ Hacker News_files/s.gif" height="1" width="40"></td><td valign="top" class="votelinks">
+      <center><a id="up_35738577" href="https://news.ycombinator.com/vote?id=35738577&amp;how=up&amp;goto=item%3Fid%3D35737862"><div class="votearrow" title="upvote"></div></a></center>    </td><td class="default"><div style="margin-top:2px; margin-bottom:-10px;"><span class="comhead">
+          <a href="https://news.ycombinator.com/user?id=cocoflunchy" class="hnuser">cocoflunchy</a> <span class="age" title="2023-04-28T07:38:06"><a href="https://news.ycombinator.com/item?id=35738577">1 hour ago</a></span> <span id="unv_35738577"></span>          <span class="navs">
+             | <a href="https://news.ycombinator.com/item?id=35737862#35738147" class="clicky" aria-hidden="true">parent</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738297" class="clicky" aria-hidden="true">prev</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738997" class="clicky" aria-hidden="true">next</a> <a class="togg clicky" id="35738577" n="1" href="javascript:void(0)">[–]</a><span class="onstory"></span>          </span>
+                  </span></div><br><div class="comment">
+                  <span class="commtext c00">I vaguely remembered reading something about this too. I think it's a great use case for ChatGPT, I copy-pasted the blog post and asked: "why could there be spikes for powers of 2?"<p>&gt; The spikes in the performance for std::lower_bound at powers of 2 might be due to the nature of how binary search works and the specific implementation of std::lower_bound in the standard library.</p><p>&gt; Binary search works by continually halving the search space. When the size of the array is a power of 2, every subdivision during the binary search is a clean halving of the array. This could result in an idealized number of comparisons in theory.</p><p>&gt; However, in practice, modern CPU performance is heavily influenced by memory access patterns due to caching effects. When an array size is a power of 2, elements that are frequently compared may end up located at memory addresses that conflict in the CPU cache (a phenomenon known as "cache aliasing" or "cache line collisions"). The CPU cache works by storing data that is spatially and temporally close together, and it uses certain bits of the memory address to determine where in the cache to place that data.</p><p>&gt; When the size of the array is a power of 2, it's more likely that two distinct memory locations will map to the same cache line, leading to cache eviction where one piece of data pushes out the other, causing a cache miss the next time that evicted location is accessed. This results in extra memory latency, slowing down the execution of the algorithm.</p><p>&gt; The performance spikes you see are likely a combination of these factors. While the algorithm is doing an optimal number of comparisons, the cache line collisions might be causing additional memory latency that slows down the overall performance.</p><p>&gt; This would also explain why the branchless binary search algorithm does not show the same performance spikes at powers of 2 - its memory access pattern is different and may not result in the same level of cache line collisions.
+              </p><div class="reply">        <p><font size="1">
+                      <u><a href="https://news.ycombinator.com/reply?id=35738577&amp;goto=item%3Fid%3D35737862%2335738577">reply</a></u>
+                  </font>
+      </p></div></span></div></td></tr>
+        </tbody></table></td></tr>
+                  <tr class="athing comtr" id="35738997"><td><table border="0">  <tbody><tr>    <td class="ind" indent="0"><img src="./Beautiful branchless binary search _ Hacker News_files/s.gif" height="1" width="0"></td><td valign="top" class="votelinks">
+      <center><a id="up_35738997" href="https://news.ycombinator.com/vote?id=35738997&amp;how=up&amp;goto=item%3Fid%3D35737862"><div class="votearrow" title="upvote"></div></a></center>    </td><td class="default"><div style="margin-top:2px; margin-bottom:-10px;"><span class="comhead">
+          <a href="https://news.ycombinator.com/user?id=Culonavirus" class="hnuser">Culonavirus</a> <span class="age" title="2023-04-28T08:51:13"><a href="https://news.ycombinator.com/item?id=35738997">9 minutes ago</a></span> <span id="unv_35738997"></span>          <span class="navs">
+             | <a href="https://news.ycombinator.com/item?id=35737862#35738147" class="clicky" aria-hidden="true">prev</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738737" class="clicky" aria-hidden="true">next</a> <a class="togg clicky" id="35738997" n="1" href="javascript:void(0)">[–]</a><span class="onstory"></span>          </span>
+                  </span></div><br><div class="comment">
+                  <span class="commtext c00">&gt; Luckily that book is available to borrow online from the Internet Archive<p>Awesome. And sad that corpos want to ruin it.
+              </p><div class="reply">        <p><font size="1">
+                      <u><a href="https://news.ycombinator.com/reply?id=35738997&amp;goto=item%3Fid%3D35737862%2335738997">reply</a></u>
+                  </font>
+      </p></div></span></div></td></tr>
+        </tbody></table></td></tr>
+            <tr class="athing comtr" id="35738737"><td><table border="0">  <tbody><tr>    <td class="ind" indent="0"><img src="./Beautiful branchless binary search _ Hacker News_files/s.gif" height="1" width="0"></td><td valign="top" class="votelinks">
+      <center><a id="up_35738737" href="https://news.ycombinator.com/vote?id=35738737&amp;how=up&amp;goto=item%3Fid%3D35737862"><div class="votearrow" title="upvote"></div></a></center>    </td><td class="default"><div style="margin-top:2px; margin-bottom:-10px;"><span class="comhead">
+          <a href="https://news.ycombinator.com/user?id=tromp" class="hnuser">tromp</a> <span class="age" title="2023-04-28T08:06:05"><a href="https://news.ycombinator.com/item?id=35738737">54 minutes ago</a></span> <span id="unv_35738737"></span>          <span class="navs">
+             | <a href="https://news.ycombinator.com/item?id=35737862#35738997" class="clicky" aria-hidden="true">prev</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738552" class="clicky" aria-hidden="true">next</a> <a class="togg clicky" id="35738737" n="1" href="javascript:void(0)">[–]</a><span class="onstory"></span>          </span>
+                  </span></div><br><div class="comment">
+                  <span class="commtext c00">The setup code to reduce the length to a 2-power can be avoided.
+I'm curious how well the following code performs in comparison:<p></p><pre><code>    for (size_t length = end - begin; length != 0; length = (length + 1) / 2)
+    {
+        size_t step = length / 2;
+        if (compare(begin[step], value))
+            begin += step;
+    }   
+    return begin;
+</code></pre>
+For odd lengths like 5, this splits the array in an even part of length 2, and an odd part of length 3, and then searches either part with length 3. So again there is some redundancy for non-2-powers.<p>While this code is simpler, it does require an extra division and increment in each loop iteration, so presumably it performs a little worse.
+              </p><div class="reply">        <p><font size="1">
+                      <u><a href="https://news.ycombinator.com/reply?id=35738737&amp;goto=item%3Fid%3D35737862%2335738737">reply</a></u>
+                  </font>
+      </p></div></span></div></td></tr>
+        </tbody></table></td></tr>
+            <tr class="athing comtr" id="35738552"><td><table border="0">  <tbody><tr>    <td class="ind" indent="0"><img src="./Beautiful branchless binary search _ Hacker News_files/s.gif" height="1" width="0"></td><td valign="top" class="votelinks">
+      <center><a id="up_35738552" href="https://news.ycombinator.com/vote?id=35738552&amp;how=up&amp;goto=item%3Fid%3D35737862"><div class="votearrow" title="upvote"></div></a></center>    </td><td class="default"><div style="margin-top:2px; margin-bottom:-10px;"><span class="comhead">
+          <a href="https://news.ycombinator.com/user?id=SleepyMyroslav" class="hnuser">SleepyMyroslav</a> <span class="age" title="2023-04-28T07:34:12"><a href="https://news.ycombinator.com/item?id=35738552">1 hour ago</a></span> <span id="unv_35738552"></span>          <span class="navs">
+             | <a href="https://news.ycombinator.com/item?id=35737862#35738737" class="clicky" aria-hidden="true">prev</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738823" class="clicky" aria-hidden="true">next</a> <a class="togg clicky" id="35738552" n="9" href="javascript:void(0)">[–]</a><span class="onstory"></span>          </span>
+                  </span></div><br><div class="comment">
+                  <span class="commtext c00">If being branchless is important property of the algorithm then it is better to enforce it. Or at least test for it. If his GCC version will get an update and it will stop producing assembly that he wants no-one will ever know.<p>Which brings us back to regular discussion: C ( and C++ ) does not match hardware anymore. There is no real control over important properties of generated code. Programmers need tools to control what they write. Plug and pray compilation is not a solid engineering approach.
+              </p><div class="reply">        <p><font size="1">
+                      <u><a href="https://news.ycombinator.com/reply?id=35738552&amp;goto=item%3Fid%3D35737862%2335738552">reply</a></u>
+                  </font>
+      </p></div></span></div></td></tr>
+        </tbody></table></td></tr>
+                <tr class="athing comtr" id="35738943"><td><table border="0">  <tbody><tr>    <td class="ind" indent="1"><img src="./Beautiful branchless binary search _ Hacker News_files/s.gif" height="1" width="40"></td><td valign="top" class="votelinks">
+      <center><a id="up_35738943" href="https://news.ycombinator.com/vote?id=35738943&amp;how=up&amp;goto=item%3Fid%3D35737862"><div class="votearrow" title="upvote"></div></a></center>    </td><td class="default"><div style="margin-top:2px; margin-bottom:-10px;"><span class="comhead">
+          <a href="https://news.ycombinator.com/user?id=Arnt" class="hnuser">Arnt</a> <span class="age" title="2023-04-28T08:40:43"><a href="https://news.ycombinator.com/item?id=35738943">20 minutes ago</a></span> <span id="unv_35738943"></span>          <span class="navs">
+             | <a href="https://news.ycombinator.com/item?id=35737862#35738552" class="clicky" aria-hidden="true">parent</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738677" class="clicky" aria-hidden="true">next</a> <a class="togg clicky" id="35738943" n="1" href="javascript:void(0)">[–]</a><span class="onstory"></span>          </span>
+                  </span></div><br><div class="comment">
+                  <span class="commtext c00">We lost that control when CPUs became increasingly multilayered and complicated, with 20-step pipelines, enough parallelism to run a hundred instructions at the same time, with micro-ops and microcode, with branch predictors good enough to unroll some loops completely. What programmer today understands the branch prediction logic used on production system? Well enough to understand what difference branchlessness makes?<p>And it doesn't seem to hurt. I at least have both worked on systems where I can read and write assembly and on one where I can't, and my "need to control" isn't such that the lack of assembly knowledge makes a significant impact on my effectiveness on the latter platform.
+              </p><div class="reply">        <p><font size="1">
+                      <u><a href="https://news.ycombinator.com/reply?id=35738943&amp;goto=item%3Fid%3D35737862%2335738943">reply</a></u>
+                  </font>
+      </p></div></span></div></td></tr>
+        </tbody></table></td></tr>
+            <tr class="athing comtr" id="35738677"><td><table border="0">  <tbody><tr>    <td class="ind" indent="1"><img src="./Beautiful branchless binary search _ Hacker News_files/s.gif" height="1" width="40"></td><td valign="top" class="votelinks">
+      <center><a id="up_35738677" href="https://news.ycombinator.com/vote?id=35738677&amp;how=up&amp;goto=item%3Fid%3D35737862"><div class="votearrow" title="upvote"></div></a></center>    </td><td class="default"><div style="margin-top:2px; margin-bottom:-10px;"><span class="comhead">
+          <a href="https://news.ycombinator.com/user?id=TuringTest" class="hnuser">TuringTest</a> <span class="age" title="2023-04-28T07:54:59"><a href="https://news.ycombinator.com/item?id=35738677">1 hour ago</a></span> <span id="unv_35738677"></span>          <span class="navs">
+             | <a href="https://news.ycombinator.com/item?id=35737862#35738552" class="clicky" aria-hidden="true">parent</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738943" class="clicky" aria-hidden="true">prev</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738633" class="clicky" aria-hidden="true">next</a> <a class="togg clicky" id="35738677" n="2" href="javascript:void(0)">[–]</a><span class="onstory"></span>          </span>
+                  </span></div><br><div class="comment">
+                  <span class="commtext c00">Wasn't C created to <i>avoid</i> matching hardware? I.e. not caring about word size, number of registers, instruction set, etc.<p>I thought the whole point of writing programs in C was originally being able to write portable software (and a portable OS) that could be executed at different machines? It only became specialized in giving machine-specific instructions when other languages took over.
+              </p><div class="reply">        <p><font size="1">
+                      <u><a href="https://news.ycombinator.com/reply?id=35738677&amp;goto=item%3Fid%3D35737862%2335738677">reply</a></u>
+                  </font>
+      </p></div></span></div></td></tr>
+        </tbody></table></td></tr>
+                <tr class="athing comtr" id="35739004"><td><table border="0">  <tbody><tr>    <td class="ind" indent="2"><img src="./Beautiful branchless binary search _ Hacker News_files/s.gif" height="1" width="80"></td><td valign="top" class="votelinks">
+      <center><a id="up_35739004" href="https://news.ycombinator.com/vote?id=35739004&amp;how=up&amp;goto=item%3Fid%3D35737862"><div class="votearrow" title="upvote"></div></a></center>    </td><td class="default"><div style="margin-top:2px; margin-bottom:-10px;"><span class="comhead">
+          <a href="https://news.ycombinator.com/user?id=mcv" class="hnuser">mcv</a> <span class="age" title="2023-04-28T08:53:18"><a href="https://news.ycombinator.com/item?id=35739004">7 minutes ago</a></span> <span id="unv_35739004"></span>          <span class="navs">
+             | <a href="https://news.ycombinator.com/item?id=35737862#35738552" class="clicky" aria-hidden="true">root</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738677" class="clicky" aria-hidden="true">parent</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738633" class="clicky" aria-hidden="true">next</a> <a class="togg clicky" id="35739004" n="1" href="javascript:void(0)">[–]</a><span class="onstory"></span>          </span>
+                  </span></div><br><div class="comment">
+                  <span class="commtext c00">Exactly. I'd rather have a way that guarantees this algorithm to be branchless regardless of the compiler <i>and underlying hardware</i>. Although I suppose it depends on the underlying hardware whether or not being branchless offers any advantage at all.<p>Of course compilers should be optimising for the hardware they're compiling for, but this article shows that can be very hit-and-miss.
+              </p><div class="reply">        <p><font size="1">
+                      <u><a href="https://news.ycombinator.com/reply?id=35739004&amp;goto=item%3Fid%3D35737862%2335739004">reply</a></u>
+                  </font>
+      </p></div></span></div></td></tr>
+        </tbody></table></td></tr>
+                  <tr class="athing comtr" id="35738633"><td><table border="0">  <tbody><tr>    <td class="ind" indent="1"><img src="./Beautiful branchless binary search _ Hacker News_files/s.gif" height="1" width="40"></td><td valign="top" class="votelinks">
+      <center><a id="up_35738633" href="https://news.ycombinator.com/vote?id=35738633&amp;how=up&amp;goto=item%3Fid%3D35737862"><div class="votearrow" title="upvote"></div></a></center>    </td><td class="default"><div style="margin-top:2px; margin-bottom:-10px;"><span class="comhead">
+          <a href="https://news.ycombinator.com/user?id=pjmlp" class="hnuser">pjmlp</a> <span class="age" title="2023-04-28T07:47:17"><a href="https://news.ycombinator.com/item?id=35738633">1 hour ago</a></span> <span id="unv_35738633"></span>          <span class="navs">
+             | <a href="https://news.ycombinator.com/item?id=35737862#35738552" class="clicky" aria-hidden="true">parent</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738677" class="clicky" aria-hidden="true">prev</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738629" class="clicky" aria-hidden="true">next</a> <a class="togg clicky" id="35738633" n="4" href="javascript:void(0)">[–]</a><span class="onstory"></span>          </span>
+                  </span></div><br><div class="comment">
+                  <span class="commtext c00">The myth that they match has been busted since at very least Pentium came to be.<p>A good read of Michael Abrash books explains that quite well, as does playing around Intel's VTune.
+              </p><div class="reply">        <p><font size="1">
+                      <u><a href="https://news.ycombinator.com/reply?id=35738633&amp;goto=item%3Fid%3D35737862%2335738633">reply</a></u>
+                  </font>
+      </p></div></span></div></td></tr>
+        </tbody></table></td></tr>
+                <tr class="athing comtr" id="35738794"><td><table border="0">  <tbody><tr>    <td class="ind" indent="2"><img src="./Beautiful branchless binary search _ Hacker News_files/s.gif" height="1" width="80"></td><td valign="top" class="votelinks">
+      <center><a id="up_35738794" href="https://news.ycombinator.com/vote?id=35738794&amp;how=up&amp;goto=item%3Fid%3D35737862"><div class="votearrow" title="upvote"></div></a></center>    </td><td class="default"><div style="margin-top:2px; margin-bottom:-10px;"><span class="comhead">
+          <a href="https://news.ycombinator.com/user?id=SleepyMyroslav" class="hnuser">SleepyMyroslav</a> <span class="age" title="2023-04-28T08:14:00"><a href="https://news.ycombinator.com/item?id=35738794">46 minutes ago</a></span> <span id="unv_35738794"></span>          <span class="navs">
+             | <a href="https://news.ycombinator.com/item?id=35737862#35738552" class="clicky" aria-hidden="true">root</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738633" class="clicky" aria-hidden="true">parent</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738709" class="clicky" aria-hidden="true">next</a> <a class="togg clicky" id="35738794" n="2" href="javascript:void(0)">[–]</a><span class="onstory"></span>          </span>
+                  </span></div><br><div class="comment">
+                  <span class="commtext c00">If that myth has been busted 20 years ago when I have started working close in time with Pentiums then HN crowd never got the memo.<p>Even right now i have two replies above yours that completely ignore the point of discussed article. Which is that algorithm is 'branchless'.</p><p>PS. I agree with comment in this topic from 'mgaunard' that algorithm should have been written as branchless explicitly.
+              </p><div class="reply">        <p><font size="1">
+                      <u><a href="https://news.ycombinator.com/reply?id=35738794&amp;goto=item%3Fid%3D35737862%2335738794">reply</a></u>
+                  </font>
+      </p></div></span></div></td></tr>
+        </tbody></table></td></tr>
+                <tr class="athing comtr" id="35738885"><td><table border="0">  <tbody><tr>    <td class="ind" indent="3"><img src="./Beautiful branchless binary search _ Hacker News_files/s.gif" height="1" width="120"></td><td valign="top" class="votelinks">
+      <center><a id="up_35738885" href="https://news.ycombinator.com/vote?id=35738885&amp;how=up&amp;goto=item%3Fid%3D35737862"><div class="votearrow" title="upvote"></div></a></center>    </td><td class="default"><div style="margin-top:2px; margin-bottom:-10px;"><span class="comhead">
+          <a href="https://news.ycombinator.com/user?id=pjmlp" class="hnuser">pjmlp</a> <span class="age" title="2023-04-28T08:28:27"><a href="https://news.ycombinator.com/item?id=35738885">32 minutes ago</a></span> <span id="unv_35738885"></span>          <span class="navs">
+             | <a href="https://news.ycombinator.com/item?id=35737862#35738552" class="clicky" aria-hidden="true">root</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738794" class="clicky" aria-hidden="true">parent</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738709" class="clicky" aria-hidden="true">next</a> <a class="togg clicky" id="35738885" n="1" href="javascript:void(0)">[–]</a><span class="onstory"></span>          </span>
+                  </span></div><br><div class="comment">
+                  <span class="commtext c00">HN crowd has never got the memo in many subjects, another one is how the game development culture differs from FOSS.</span>
+              <div class="reply">        <p><font size="1">
+                      <u><a href="https://news.ycombinator.com/reply?id=35738885&amp;goto=item%3Fid%3D35737862%2335738885">reply</a></u>
+                  </font>
+      </p></div></div></td></tr>
+        </tbody></table></td></tr>
+                  <tr class="athing comtr" id="35738709"><td><table border="0">  <tbody><tr>    <td class="ind" indent="2"><img src="./Beautiful branchless binary search _ Hacker News_files/s.gif" height="1" width="80"></td><td valign="top" class="votelinks">
+      <center><a id="up_35738709" href="https://news.ycombinator.com/vote?id=35738709&amp;how=up&amp;goto=item%3Fid%3D35737862"><div class="votearrow" title="upvote"></div></a></center>    </td><td class="default"><div style="margin-top:2px; margin-bottom:-10px;"><span class="comhead">
+          <a href="https://news.ycombinator.com/user?id=touisteur" class="hnuser">touisteur</a> <span class="age" title="2023-04-28T08:00:12"><a href="https://news.ycombinator.com/item?id=35738709">1 hour ago</a></span> <span id="unv_35738709"></span>          <span class="navs">
+             | <a href="https://news.ycombinator.com/item?id=35737862#35738552" class="clicky" aria-hidden="true">root</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738633" class="clicky" aria-hidden="true">parent</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738794" class="clicky" aria-hidden="true">prev</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738629" class="clicky" aria-hidden="true">next</a> <a class="togg clicky" id="35738709" n="1" href="javascript:void(0)">[–]</a><span class="onstory"></span>          </span>
+                  </span></div><br><div class="comment">
+                  <span class="commtext c00">For those looking for it <a href="https://www.jagregory.com/abrash-black-book" rel="nofollow">https://www.jagregory.com/abrash-black-book</a><p>If some/most of the actual tricks are not up to date (ahem) the whole book is filled with techniques, stories, concepts... It's more than ever a Zen of optimization opus.</p><p>Can someone on HN close to him tell Michael Abrash, should he write again, whatever he wants, even gardening or vulkanstuff wrangling, he has guaranteed readers.
+              </p><div class="reply">        <p><font size="1">
+                      <u><a href="https://news.ycombinator.com/reply?id=35738709&amp;goto=item%3Fid%3D35737862%2335738709">reply</a></u>
+                  </font>
+      </p></div></span></div></td></tr>
+        </tbody></table></td></tr>
+                  <tr class="athing comtr" id="35738629"><td><table border="0">  <tbody><tr>    <td class="ind" indent="1"><img src="./Beautiful branchless binary search _ Hacker News_files/s.gif" height="1" width="40"></td><td valign="top" class="votelinks">
+      <center><a id="up_35738629" href="https://news.ycombinator.com/vote?id=35738629&amp;how=up&amp;goto=item%3Fid%3D35737862"><div class="votearrow" title="upvote"></div></a></center>    </td><td class="default"><div style="margin-top:2px; margin-bottom:-10px;"><span class="comhead">
+          <a href="https://news.ycombinator.com/user?id=gsliepen" class="hnuser">gsliepen</a> <span class="age" title="2023-04-28T07:46:47"><a href="https://news.ycombinator.com/item?id=35738629">1 hour ago</a></span> <span id="unv_35738629"></span>          <span class="navs">
+             | <a href="https://news.ycombinator.com/item?id=35737862#35738552" class="clicky" aria-hidden="true">parent</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738633" class="clicky" aria-hidden="true">prev</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738823" class="clicky" aria-hidden="true">next</a> <a class="togg clicky" id="35738629" n="1" href="javascript:void(0)">[–]</a><span class="onstory"></span>          </span>
+                  </span></div><br><div class="comment">
+                  <span class="commtext c00">What you gain is hardware independence. There is a lot of variation in CPUs, even if you stick with one vendor they will have in-order efficiency cores and out-of-order performance cores, and an algorithm optimized for one might not work as great on the other. I think it's better if time is spent by compiler engineers to produce good assembly on all CPUs, instead of giving tools to programmers to optimize their code for one particular CPU.</span>
+              <div class="reply">        <p><font size="1">
+                      <u><a href="https://news.ycombinator.com/reply?id=35738629&amp;goto=item%3Fid%3D35737862%2335738629">reply</a></u>
+                  </font>
+      </p></div></div></td></tr>
+        </tbody></table></td></tr>
+                  <tr class="athing comtr" id="35738823"><td><table border="0">  <tbody><tr>    <td class="ind" indent="0"><img src="./Beautiful branchless binary search _ Hacker News_files/s.gif" height="1" width="0"></td><td valign="top" class="votelinks">
+      <center><a id="up_35738823" href="https://news.ycombinator.com/vote?id=35738823&amp;how=up&amp;goto=item%3Fid%3D35737862"><div class="votearrow" title="upvote"></div></a></center>    </td><td class="default"><div style="margin-top:2px; margin-bottom:-10px;"><span class="comhead">
+          <a href="https://news.ycombinator.com/user?id=dehrmann" class="hnuser">dehrmann</a> <span class="age" title="2023-04-28T08:18:59"><a href="https://news.ycombinator.com/item?id=35738823">42 minutes ago</a></span> <span id="unv_35738823"></span>          <span class="navs">
+             | <a href="https://news.ycombinator.com/item?id=35737862#35738552" class="clicky" aria-hidden="true">prev</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738082" class="clicky" aria-hidden="true">next</a> <a class="togg clicky" id="35738823" n="1" href="javascript:void(0)">[–]</a><span class="onstory"></span>          </span>
+                  </span></div><br><div class="comment">
+                  <span class="commtext c00">Shameless plug of my attempt at this: <a href="https://github.com/ehrmann/branchless-binary-search">https://github.com/ehrmann/branchless-binary-search</a></span>
+              <div class="reply">        <p><font size="1">
+                      <u><a href="https://news.ycombinator.com/reply?id=35738823&amp;goto=item%3Fid%3D35737862%2335738823">reply</a></u>
+                  </font>
+      </p></div></div></td></tr>
+        </tbody></table></td></tr>
+            <tr class="athing comtr" id="35738082"><td><table border="0">  <tbody><tr>    <td class="ind" indent="0"><img src="./Beautiful branchless binary search _ Hacker News_files/s.gif" height="1" width="0"></td><td valign="top" class="votelinks">
+      <center><a id="up_35738082" href="https://news.ycombinator.com/vote?id=35738082&amp;how=up&amp;goto=item%3Fid%3D35737862"><div class="votearrow" title="upvote"></div></a></center>    </td><td class="default"><div style="margin-top:2px; margin-bottom:-10px;"><span class="comhead">
+          <a href="https://news.ycombinator.com/user?id=tuukkah" class="hnuser">tuukkah</a> <span class="age" title="2023-04-28T06:22:14"><a href="https://news.ycombinator.com/item?id=35738082">2 hours ago</a></span> <span id="unv_35738082"></span>          <span class="navs">
+             | <a href="https://news.ycombinator.com/item?id=35737862#35738823" class="clicky" aria-hidden="true">prev</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738715" class="clicky" aria-hidden="true">next</a> <a class="togg clicky" id="35738082" n="1" href="javascript:void(0)">[–]</a><span class="onstory"></span>          </span>
+                  </span></div><br><div class="comment">
+                  <span class="commtext c00">Another binary search called branchless: <a href="https://news.ycombinator.com/item?id=23893366" rel="nofollow">https://news.ycombinator.com/item?id=23893366</a></span>
+              <div class="reply">        <p><font size="1">
+                      <u><a href="https://news.ycombinator.com/reply?id=35738082&amp;goto=item%3Fid%3D35737862%2335738082">reply</a></u>
+                  </font>
+      </p></div></div></td></tr>
+        </tbody></table></td></tr>
+            <tr class="athing comtr" id="35738715"><td><table border="0">  <tbody><tr>    <td class="ind" indent="0"><img src="./Beautiful branchless binary search _ Hacker News_files/s.gif" height="1" width="0"></td><td valign="top" class="votelinks">
+      <center><a id="up_35738715" href="https://news.ycombinator.com/vote?id=35738715&amp;how=up&amp;goto=item%3Fid%3D35737862"><div class="votearrow" title="upvote"></div></a></center>    </td><td class="default"><div style="margin-top:2px; margin-bottom:-10px;"><span class="comhead">
+          <a href="https://news.ycombinator.com/user?id=andreidd" class="hnuser">andreidd</a> <span class="age" title="2023-04-28T08:01:16"><a href="https://news.ycombinator.com/item?id=35738715">59 minutes ago</a></span> <span id="unv_35738715"></span>          <span class="navs">
+             | <a href="https://news.ycombinator.com/item?id=35737862#35738082" class="clicky" aria-hidden="true">prev</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738041" class="clicky" aria-hidden="true">next</a> <a class="togg clicky" id="35738715" n="1" href="javascript:void(0)">[–]</a><span class="onstory"></span>          </span>
+                  </span></div><br><div class="comment">
+                  <span class="commtext c5a">Nice, but good luck debugging if cmp returns -1. This is C++ after all and there is no constraint/concept to enforce the function to return bool. If you're lucky you get a sign mismatch warning.</span>
+              <div class="reply">        <p><font size="1">
+                      <u><a href="https://news.ycombinator.com/reply?id=35738715&amp;goto=item%3Fid%3D35737862%2335738715">reply</a></u>
+                  </font>
+      </p></div></div></td></tr>
+        </tbody></table></td></tr>
+            <tr class="athing comtr" id="35738041"><td><table border="0">  <tbody><tr>    <td class="ind" indent="0"><img src="./Beautiful branchless binary search _ Hacker News_files/s.gif" height="1" width="0"></td><td valign="top" class="votelinks">
+      <center><a id="up_35738041" href="https://news.ycombinator.com/vote?id=35738041&amp;how=up&amp;goto=item%3Fid%3D35737862"><div class="votearrow" title="upvote"></div></a></center>    </td><td class="default"><div style="margin-top:2px; margin-bottom:-10px;"><span class="comhead">
+          <a href="https://news.ycombinator.com/user?id=kookamamie" class="hnuser">kookamamie</a> <span class="age" title="2023-04-28T06:13:54"><a href="https://news.ycombinator.com/item?id=35738041">2 hours ago</a></span> <span id="unv_35738041"></span>          <span class="navs">
+             | <a href="https://news.ycombinator.com/item?id=35737862#35738715" class="clicky" aria-hidden="true">prev</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738170" class="clicky" aria-hidden="true">next</a> <a class="togg clicky" id="35738041" n="12" href="javascript:void(0)">[–]</a><span class="onstory"></span>          </span>
+                  </span></div><br><div class="comment">
+                  <span class="commtext c00">Trusting the C++ compiler to emit a specific instruction for guaranteed performance - cute, but not realistic.</span>
+              <div class="reply">        <p><font size="1">
+                      <u><a href="https://news.ycombinator.com/reply?id=35738041&amp;goto=item%3Fid%3D35737862%2335738041">reply</a></u>
+                  </font>
+      </p></div></div></td></tr>
+        </tbody></table></td></tr>
+                <tr class="athing comtr" id="35738060"><td><table border="0">  <tbody><tr>    <td class="ind" indent="1"><img src="./Beautiful branchless binary search _ Hacker News_files/s.gif" height="1" width="40"></td><td valign="top" class="votelinks">
+      <center><a id="up_35738060" href="https://news.ycombinator.com/vote?id=35738060&amp;how=up&amp;goto=item%3Fid%3D35737862"><div class="votearrow" title="upvote"></div></a></center>    </td><td class="default"><div style="margin-top:2px; margin-bottom:-10px;"><span class="comhead">
+          <a href="https://news.ycombinator.com/user?id=vkazanov" class="hnuser">vkazanov</a> <span class="age" title="2023-04-28T06:19:07"><a href="https://news.ycombinator.com/item?id=35738060">2 hours ago</a></span> <span id="unv_35738060"></span>          <span class="navs">
+             | <a href="https://news.ycombinator.com/item?id=35737862#35738041" class="clicky" aria-hidden="true">parent</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738170" class="clicky" aria-hidden="true">next</a> <a class="togg clicky" id="35738060" n="11" href="javascript:void(0)">[–]</a><span class="onstory"></span>          </span>
+                  </span></div><br><div class="comment">
+                  <span class="commtext c5a">I don't think it is the instruction that makes the difference. Cmov is a branch either way.<p>Branches can be unpredictable and slow, no matter what instructions, (or tables, or whatever) are used to introduce the branch at question.</p><p>It is predictable nature of branching in this algo that makes the difference. Which makes me wonder...</p><p>EDIT: the cmov vs explicit branching story is a bit more complicated than just branch vs no branch.
+              </p><div class="reply">        <p><font size="1">
+                      <u><a href="https://news.ycombinator.com/reply?id=35738060&amp;goto=item%3Fid%3D35737862%2335738060">reply</a></u>
+                  </font>
+      </p></div></span></div></td></tr>
+        </tbody></table></td></tr>
+                <tr class="athing comtr" id="35738115"><td><table border="0">  <tbody><tr>    <td class="ind" indent="2"><img src="./Beautiful branchless binary search _ Hacker News_files/s.gif" height="1" width="80"></td><td valign="top" class="votelinks">
+      <center><a id="up_35738115" href="https://news.ycombinator.com/vote?id=35738115&amp;how=up&amp;goto=item%3Fid%3D35737862"><div class="votearrow" title="upvote"></div></a></center>    </td><td class="default"><div style="margin-top:2px; margin-bottom:-10px;"><span class="comhead">
+          <a href="https://news.ycombinator.com/user?id=2102922286" class="hnuser">2102922286</a> <span class="age" title="2023-04-28T06:26:41"><a href="https://news.ycombinator.com/item?id=35738115">2 hours ago</a></span> <span id="unv_35738115"></span>          <span class="navs">
+             | <a href="https://news.ycombinator.com/item?id=35737862#35738041" class="clicky" aria-hidden="true">root</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738060" class="clicky" aria-hidden="true">parent</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738170" class="clicky" aria-hidden="true">next</a> <a class="togg clicky" id="35738115" n="10" href="javascript:void(0)">[–]</a><span class="onstory"></span>          </span>
+                  </span></div><br><div class="comment">
+                  <span class="commtext c00">Cmov doesn't branch. A branch refers specifically to the program counter ending up in more than one possible place after an instruction has executed. It is this behavior that mucks with the CPU state and slows everything down.<p>It's true that the cmov instruction uses the CPU flags register (which I'm sure the CPU designers at Intel hate), but that doesn't mean that it branches.</p><p>You can achieve the same effect as cmov by using bitwise operations and a subtraction, though it'd just be a few cycles slower--but it would be even more clear that it doesn't branch.
+              </p><div class="reply">        <p><font size="1">
+                      <u><a href="https://news.ycombinator.com/reply?id=35738115&amp;goto=item%3Fid%3D35737862%2335738115">reply</a></u>
+                  </font>
+      </p></div></span></div></td></tr>
+        </tbody></table></td></tr>
+                <tr class="athing comtr" id="35738285"><td><table border="0">  <tbody><tr>    <td class="ind" indent="3"><img src="./Beautiful branchless binary search _ Hacker News_files/s.gif" height="1" width="120"></td><td valign="top" class="votelinks">
+      <center><a id="up_35738285" href="https://news.ycombinator.com/vote?id=35738285&amp;how=up&amp;goto=item%3Fid%3D35737862"><div class="votearrow" title="upvote"></div></a></center>    </td><td class="default"><div style="margin-top:2px; margin-bottom:-10px;"><span class="comhead">
+          <a href="https://news.ycombinator.com/user?id=Dwedit" class="hnuser">Dwedit</a> <span class="age" title="2023-04-28T06:51:49"><a href="https://news.ycombinator.com/item?id=35738285">2 hours ago</a></span> <span id="unv_35738285"></span>          <span class="navs">
+             | <a href="https://news.ycombinator.com/item?id=35737862#35738041" class="clicky" aria-hidden="true">root</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738115" class="clicky" aria-hidden="true">parent</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738178" class="clicky" aria-hidden="true">next</a> <a class="togg clicky" id="35738285" n="1" href="javascript:void(0)">[–]</a><span class="onstory"></span>          </span>
+                  </span></div><br><div class="comment">
+                  <span class="commtext c00">For the case of comparing integers, and you want to know if A - B &gt;= 0, you can take A - B, Arithmetic Shift Right 31 bits, then you have 0 if Greater Than or Equal and -1 if Less Than.  From there you can just AND that with your displacement.<p>Note that it's not a comparison on A and B, it's a comparison on A - B, which must not overflow.
+              </p><div class="reply">        <p><font size="1">
+                      <u><a href="https://news.ycombinator.com/reply?id=35738285&amp;goto=item%3Fid%3D35737862%2335738285">reply</a></u>
+                  </font>
+      </p></div></span></div></td></tr>
+        </tbody></table></td></tr>
+            <tr class="athing comtr" id="35738178"><td><table border="0">  <tbody><tr>    <td class="ind" indent="3"><img src="./Beautiful branchless binary search _ Hacker News_files/s.gif" height="1" width="120"></td><td valign="top" class="votelinks">
+      <center><a id="up_35738178" href="https://news.ycombinator.com/vote?id=35738178&amp;how=up&amp;goto=item%3Fid%3D35737862"><div class="votearrow" title="upvote"></div></a></center>    </td><td class="default"><div style="margin-top:2px; margin-bottom:-10px;"><span class="comhead">
+          <a href="https://news.ycombinator.com/user?id=vkazanov" class="hnuser">vkazanov</a> <span class="age" title="2023-04-28T06:38:00"><a href="https://news.ycombinator.com/item?id=35738178">2 hours ago</a></span> <span id="unv_35738178"></span>          <span class="navs">
+             | <a href="https://news.ycombinator.com/item?id=35737862#35738041" class="clicky" aria-hidden="true">root</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738115" class="clicky" aria-hidden="true">parent</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738285" class="clicky" aria-hidden="true">prev</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738206" class="clicky" aria-hidden="true">next</a> <a class="togg clicky" id="35738178" n="2" href="javascript:void(0)">[–]</a><span class="onstory"></span>          </span>
+                  </span></div><br><div class="comment">
+                  <span class="commtext c00">Sure, it doesn't change the PC. But it can introduce a branch indirectly, I.e. when there is a jump to an address MOVed by cmov.<p>Either way, it seems that the wisdom has change since the last time I wrote and read  assembly. Cmov used to be slow. It seems that the current answer is "it depends".
+              </p><div class="reply">        <p><font size="1">
+                      <u><a href="https://news.ycombinator.com/reply?id=35738178&amp;goto=item%3Fid%3D35737862%2335738178">reply</a></u>
+                  </font>
+      </p></div></span></div></td></tr>
+        </tbody></table></td></tr>
+                <tr class="athing comtr" id="35738226"><td><table border="0">  <tbody><tr>    <td class="ind" indent="4"><img src="./Beautiful branchless binary search _ Hacker News_files/s.gif" height="1" width="160"></td><td valign="top" class="votelinks">
+      <center><a id="up_35738226" href="https://news.ycombinator.com/vote?id=35738226&amp;how=up&amp;goto=item%3Fid%3D35737862"><div class="votearrow" title="upvote"></div></a></center>    </td><td class="default"><div style="margin-top:2px; margin-bottom:-10px;"><span class="comhead">
+          <a href="https://news.ycombinator.com/user?id=2102922286" class="hnuser">2102922286</a> <span class="age" title="2023-04-28T06:44:04"><a href="https://news.ycombinator.com/item?id=35738226">2 hours ago</a></span> <span id="unv_35738226"></span>          <span class="navs">
+             | <a href="https://news.ycombinator.com/item?id=35737862#35738041" class="clicky" aria-hidden="true">root</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738178" class="clicky" aria-hidden="true">parent</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738206" class="clicky" aria-hidden="true">next</a> <a class="togg clicky" id="35738226" n="1" href="javascript:void(0)">[–]</a><span class="onstory"></span>          </span>
+                  </span></div><br><div class="comment">
+                  <span class="commtext c00">If what you're saying is (roughly)<p></p><pre><code>        cmovne  rax, rdx
+        jmp     rax
+</code></pre>
+that is, a cmov followed by an indirect jump to the address contained in rax, "jmp rax" is _always_ an indirect jump. It doesn't matter whether rax was set via a conditional move instruction or not.</span>
+              <div class="reply">        <p><font size="1">
+                      <u><a href="https://news.ycombinator.com/reply?id=35738226&amp;goto=item%3Fid%3D35737862%2335738226">reply</a></u>
+                  </font>
+      </p></div></div></td></tr>
+        </tbody></table></td></tr>
+                  <tr class="athing comtr" id="35738206"><td><table border="0">  <tbody><tr>    <td class="ind" indent="3"><img src="./Beautiful branchless binary search _ Hacker News_files/s.gif" height="1" width="120"></td><td valign="top" class="votelinks">
+      <center><a id="up_35738206" href="https://news.ycombinator.com/vote?id=35738206&amp;how=up&amp;goto=item%3Fid%3D35737862"><div class="votearrow" title="upvote"></div></a></center>    </td><td class="default"><div style="margin-top:2px; margin-bottom:-10px;"><span class="comhead">
+          <a href="https://news.ycombinator.com/user?id=kevingadd" class="hnuser">kevingadd</a> <span class="age" title="2023-04-28T06:41:27"><a href="https://news.ycombinator.com/item?id=35738206">2 hours ago</a></span> <span id="unv_35738206"></span>          <span class="navs">
+             | <a href="https://news.ycombinator.com/item?id=35737862#35738041" class="clicky" aria-hidden="true">root</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738115" class="clicky" aria-hidden="true">parent</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738178" class="clicky" aria-hidden="true">prev</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738170" class="clicky" aria-hidden="true">next</a> <a class="togg clicky" id="35738206" n="6" href="javascript:void(0)">[–]</a><span class="onstory"></span>          </span>
+                  </span></div><br><div class="comment">
+                  <span class="commtext c00">The main problem with branches in an algorithm like this is that they create a dependency, where not only do the future instructions depend on the possibly-mispredicted outcome of the previous instruction and need to get thrown out, but you may have started executing the wrong instructions.<p>A cmov doesn't affect the instruction pointer, so that 'executing the wrong instructions' condition is gone, but it still affects the output of all following instructions if they depend on the register it modifies. So you still have to worry about pipelined work being thrown away on a mispredict.</p><p>IMO, cmov was far more valuable back when it was new, because branches were more expensive then. IIRC it was added to x86 in something like the MMX or SSE1 era, so a very long time ago for very different processor architectures. It's still a useful instruction category to have, if only because it lets you produce smaller code (and smaller code is usually faster), but I expect the value is less significant than it used to be.</p><p>Incidentally I am curious whether Linus's position on cmov back in 2007 is one he still holds today, and whether his assertions hold up on a modern Intel or AMD CPU. <a href="https://yarchive.net/comp/linux/cmov.html" rel="nofollow">https://yarchive.net/comp/linux/cmov.html</a></p><p>I think the branchless search in this blog post is faster simply because the inner loop is much smaller. The observation that it sometimes does extra comparisons explains why it is slower for an expensive comparison operator, because the advantage of the smaller loop is gone. I don't think it being "branchless" is terribly important in comparison. You could try to fudge an experiment to prove this by inserting extra instructions, but they would need to be ones that decode into actual executed uops, and you'd need to decide whether they should have dependencies or not.</p><p>In the bad old days when I got promoted to the programming team at a job they had me take a test, and one of the tasks was to write a transparent blit routine. The one I wrote was "branchless", but because cmov intrinsics weren't widely available I achieved this by using an array of pointers and selecting the array index based on the result of a comparison, something like:</p><p></p><pre><code>  unsigned char* src_dest[] = { src, dest };
+  for (...; ...; src_dest[0]++, src_dest[1]++)
+    *src_dest[1] = *src_dest[*src_dest[0] == transparent_value];
+</code></pre>
+the lead who reviewed the test had to come by and ask me to explain how it worked. Certainly, this was "branchless", even without the presence of cmov, since it was just doing movs based on a 0/1 produced by the comparison. But the actual source of the dependency here is the comparison, not a jmp or a cmov. The loop was faster than a branch on the CPUs of that era but these days it would probably be much slower.</span>
+              <div class="reply">        <p><font size="1">
+                      <u><a href="https://news.ycombinator.com/reply?id=35738206&amp;goto=item%3Fid%3D35737862%2335738206">reply</a></u>
+                  </font>
+      </p></div></div></td></tr>
+        </tbody></table></td></tr>
+                <tr class="athing comtr" id="35738559"><td><table border="0">  <tbody><tr>    <td class="ind" indent="4"><img src="./Beautiful branchless binary search _ Hacker News_files/s.gif" height="1" width="160"></td><td valign="top" class="votelinks">
+      <center><a id="up_35738559" href="https://news.ycombinator.com/vote?id=35738559&amp;how=up&amp;goto=item%3Fid%3D35737862"><div class="votearrow" title="upvote"></div></a></center>    </td><td class="default"><div style="margin-top:2px; margin-bottom:-10px;"><span class="comhead">
+          <a href="https://news.ycombinator.com/user?id=Sesse__" class="hnuser">Sesse__</a> <span class="age" title="2023-04-28T07:35:10"><a href="https://news.ycombinator.com/item?id=35738559">1 hour ago</a></span> <span id="unv_35738559"></span>          <span class="navs">
+             | <a href="https://news.ycombinator.com/item?id=35737862#35738041" class="clicky" aria-hidden="true">root</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738206" class="clicky" aria-hidden="true">parent</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738262" class="clicky" aria-hidden="true">next</a> <a class="togg clicky" id="35738559" n="1" href="javascript:void(0)">[–]</a><span class="onstory"></span>          </span>
+                  </span></div><br><div class="comment">
+                  <span class="commtext c00">&gt; IMO, cmov was far more valuable back when it was new, because branches were more expensive then.<p>Branches in general are cheaper now (since they are generally predicted better), but mispredicted branches are more expensive. They are similar in terms of cycles (IIRC Pentium 4 and Skylake are both typically around 20 cycles if you don't get second-order effects tacked on), but you generally get a lot more done in those cycles on a newer CPU, so they are much more important than they used to be. And a binary search will, almost by definition, tend to have 50% mispredicted branches on the compare (i.e., entirely unpredictable, so no better than random chance).
+              </p><div class="reply">        <p><font size="1">
+                      <u><a href="https://news.ycombinator.com/reply?id=35738559&amp;goto=item%3Fid%3D35737862%2335738559">reply</a></u>
+                  </font>
+      </p></div></span></div></td></tr>
+        </tbody></table></td></tr>
+            <tr class="athing comtr" id="35738262"><td><table border="0">  <tbody><tr>    <td class="ind" indent="4"><img src="./Beautiful branchless binary search _ Hacker News_files/s.gif" height="1" width="160"></td><td valign="top" class="votelinks">
+      <center><a id="up_35738262" href="https://news.ycombinator.com/vote?id=35738262&amp;how=up&amp;goto=item%3Fid%3D35737862"><div class="votearrow" title="upvote"></div></a></center>    </td><td class="default"><div style="margin-top:2px; margin-bottom:-10px;"><span class="comhead">
+          <a href="https://news.ycombinator.com/user?id=2102922286" class="hnuser">2102922286</a> <span class="age" title="2023-04-28T06:48:44"><a href="https://news.ycombinator.com/item?id=35738262">2 hours ago</a></span> <span id="unv_35738262"></span>          <span class="navs">
+             | <a href="https://news.ycombinator.com/item?id=35737862#35738041" class="clicky" aria-hidden="true">root</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738206" class="clicky" aria-hidden="true">parent</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738559" class="clicky" aria-hidden="true">prev</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738170" class="clicky" aria-hidden="true">next</a> <a class="togg clicky" id="35738262" n="4" href="javascript:void(0)">[–]</a><span class="onstory"></span>          </span>
+                  </span></div><br><div class="comment">
+                  <span class="commtext c00">For the given assembly from the blog post<p></p><pre><code>    loop:
+        lea (%rdx,%rax,4),%rcx
+        cmp (%rcx),%esi
+        cmovg %rcx,%rdx
+        shr %rax
+        jne loop
+</code></pre>
+Here's a simulated CPU trace on Intel skylake: <a href="https://uica.uops.info/tmp/2de9d862d05d482ebed576d7e3923b93_trace.html" rel="nofollow">https://uica.uops.info/tmp/2de9d862d05d482ebed576d7e3923b93_...</a><p>Note that this tracer makes the assumption that all memory loads are in cache (otherwise the memory lookup will dominate). So bear that in mind for this code, especially since memory reads will likely dominate the cost of a binary search.</p><p>Regardless, it appears that the cost of conditional move is not the source of bottleneck.
+              </p><div class="reply">        <p><font size="1">
+                      <u><a href="https://news.ycombinator.com/reply?id=35738262&amp;goto=item%3Fid%3D35737862%2335738262">reply</a></u>
+                  </font>
+      </p></div></span></div></td></tr>
+        </tbody></table></td></tr>
+                <tr class="athing comtr" id="35738304"><td><table border="0">  <tbody><tr>    <td class="ind" indent="5"><img src="./Beautiful branchless binary search _ Hacker News_files/s.gif" height="1" width="200"></td><td valign="top" class="votelinks">
+      <center><a id="up_35738304" href="https://news.ycombinator.com/vote?id=35738304&amp;how=up&amp;goto=item%3Fid%3D35737862"><div class="votearrow" title="upvote"></div></a></center>    </td><td class="default"><div style="margin-top:2px; margin-bottom:-10px;"><span class="comhead">
+          <a href="https://news.ycombinator.com/user?id=jeffreygoesto" class="hnuser">jeffreygoesto</a> <span class="age" title="2023-04-28T06:54:50"><a href="https://news.ycombinator.com/item?id=35738304">2 hours ago</a></span> <span id="unv_35738304"></span>          <span class="navs">
+             | <a href="https://news.ycombinator.com/item?id=35737862#35738041" class="clicky" aria-hidden="true">root</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738262" class="clicky" aria-hidden="true">parent</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738355" class="clicky" aria-hidden="true">next</a> <a class="togg clicky" id="35738304" n="2" href="javascript:void(0)">[–]</a><span class="onstory"></span>          </span>
+                  </span></div><br><div class="comment">
+                  <span class="commtext c00">How do you get such am image please?</span>
+              <div class="reply">        <p><font size="1">
+                      <u><a href="https://news.ycombinator.com/reply?id=35738304&amp;goto=item%3Fid%3D35737862%2335738304">reply</a></u>
+                  </font>
+      </p></div></div></td></tr>
+        </tbody></table></td></tr>
+                <tr class="athing comtr" id="35738352"><td><table border="0">  <tbody><tr>    <td class="ind" indent="6"><img src="./Beautiful branchless binary search _ Hacker News_files/s.gif" height="1" width="240"></td><td valign="top" class="votelinks">
+      <center><a id="up_35738352" href="https://news.ycombinator.com/vote?id=35738352&amp;how=up&amp;goto=item%3Fid%3D35737862"><div class="votearrow" title="upvote"></div></a></center>    </td><td class="default"><div style="margin-top:2px; margin-bottom:-10px;"><span class="comhead">
+          <a href="https://news.ycombinator.com/user?id=2102922286" class="hnuser">2102922286</a> <span class="age" title="2023-04-28T07:03:16"><a href="https://news.ycombinator.com/item?id=35738352">1 hour ago</a></span> <span id="unv_35738352"></span>          <span class="navs">
+             | <a href="https://news.ycombinator.com/item?id=35737862#35738041" class="clicky" aria-hidden="true">root</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738304" class="clicky" aria-hidden="true">parent</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738355" class="clicky" aria-hidden="true">next</a> <a class="togg clicky" id="35738352" n="1" href="javascript:void(0)">[–]</a><span class="onstory"></span>          </span>
+                  </span></div><br><div class="comment">
+                  <span class="commtext c00"><a href="https://uops.info/uiCA.html" rel="nofollow">https://uops.info/uiCA.html</a> it's really cool!!</span>
+              <div class="reply">        <p><font size="1">
+                      <u><a href="https://news.ycombinator.com/reply?id=35738352&amp;goto=item%3Fid%3D35737862%2335738352">reply</a></u>
+                  </font>
+      </p></div></div></td></tr>
+        </tbody></table></td></tr>
+                  <tr class="athing comtr" id="35738355"><td><table border="0">  <tbody><tr>    <td class="ind" indent="5"><img src="./Beautiful branchless binary search _ Hacker News_files/s.gif" height="1" width="200"></td><td valign="top" class="votelinks">
+      <center><a id="up_35738355" href="https://news.ycombinator.com/vote?id=35738355&amp;how=up&amp;goto=item%3Fid%3D35737862"><div class="votearrow" title="upvote"></div></a></center>    </td><td class="default"><div style="margin-top:2px; margin-bottom:-10px;"><span class="comhead">
+          <a href="https://news.ycombinator.com/user?id=kevingadd" class="hnuser">kevingadd</a> <span class="age" title="2023-04-28T07:03:24"><a href="https://news.ycombinator.com/item?id=35738355">1 hour ago</a></span> <span id="unv_35738355"></span>          <span class="navs">
+             | <a href="https://news.ycombinator.com/item?id=35737862#35738041" class="clicky" aria-hidden="true">root</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738262" class="clicky" aria-hidden="true">parent</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738304" class="clicky" aria-hidden="true">prev</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738170" class="clicky" aria-hidden="true">next</a> <a class="togg clicky" id="35738355" n="1" href="javascript:void(0)">[–]</a><span class="onstory"></span>          </span>
+                  </span></div><br><div class="comment">
+                  <span class="commtext c00">Wow, the dispatch queue is so deep! The trace makes a lot of sense, thanks for sharing it. I must have been unclear if it sounded like I was saying cmov was a bottleneck - my argument is just that it's not going to be especially faster than a branch in the general case.<p>Great point that memory reads are going to dominate a binary search - at that point the CPU will be spending a lot more time waiting for memory than it is spending executing your branches or cmovs.
+              </p><div class="reply">        <p><font size="1">
+                      <u><a href="https://news.ycombinator.com/reply?id=35738355&amp;goto=item%3Fid%3D35737862%2335738355">reply</a></u>
+                  </font>
+      </p></div></span></div></td></tr>
+        </tbody></table></td></tr>
+                                          <tr class="athing comtr" id="35738170"><td><table border="0">  <tbody><tr>    <td class="ind" indent="0"><img src="./Beautiful branchless binary search _ Hacker News_files/s.gif" height="1" width="0"></td><td valign="top" class="votelinks">
+      <center><a id="up_35738170" href="https://news.ycombinator.com/vote?id=35738170&amp;how=up&amp;goto=item%3Fid%3D35737862"><div class="votearrow" title="upvote"></div></a></center>    </td><td class="default"><div style="margin-top:2px; margin-bottom:-10px;"><span class="comhead">
+          <a href="https://news.ycombinator.com/user?id=heywhatupboys" class="hnuser">heywhatupboys</a> <span class="age" title="2023-04-28T06:35:46"><a href="https://news.ycombinator.com/item?id=35738170">2 hours ago</a></span> <span id="unv_35738170"></span>          <span class="navs">
+             | <a href="https://news.ycombinator.com/item?id=35737862#35738041" class="clicky" aria-hidden="true">prev</a> | <a href="https://news.ycombinator.com/item?id=35737862#35737974" class="clicky" aria-hidden="true">next</a> <a class="togg clicky" id="35738170" n="2" href="javascript:void(0)">[–]</a><span class="onstory"></span>          </span>
+                  </span></div><br><div class="comment">
+                  <span class="commtext c73">I'm all for supporting OSS, but the author having a tip button with "recommended" tips of 20 $ and 1,000 $ for people and business respectively is so laughable it took away from an otherwise good blog posts. Commercialisation of OSS 2.0 should be discouraged to this extend</span>
+              <div class="reply">        <p><font size="1">
+                      <u><a href="https://news.ycombinator.com/reply?id=35738170&amp;goto=item%3Fid%3D35737862%2335738170">reply</a></u>
+                  </font>
+      </p></div></div></td></tr>
+        </tbody></table></td></tr>
+                <tr class="athing comtr" id="35738247"><td><table border="0">  <tbody><tr>    <td class="ind" indent="1"><img src="./Beautiful branchless binary search _ Hacker News_files/s.gif" height="1" width="40"></td><td valign="top" class="votelinks">
+      <center><a id="up_35738247" href="https://news.ycombinator.com/vote?id=35738247&amp;how=up&amp;goto=item%3Fid%3D35737862"><div class="votearrow" title="upvote"></div></a></center>    </td><td class="default"><div style="margin-top:2px; margin-bottom:-10px;"><span class="comhead">
+          <a href="https://news.ycombinator.com/user?id=skrebbel" class="hnuser">skrebbel</a> <span class="age" title="2023-04-28T06:46:56"><a href="https://news.ycombinator.com/item?id=35738247">2 hours ago</a></span> <span id="unv_35738247"></span>          <span class="navs">
+             | <a href="https://news.ycombinator.com/item?id=35737862#35738170" class="clicky" aria-hidden="true">parent</a> | <a href="https://news.ycombinator.com/item?id=35737862#35737974" class="clicky" aria-hidden="true">next</a> <a class="togg clicky" id="35738247" n="1" href="javascript:void(0)">[–]</a><span class="onstory"></span>          </span>
+                  </span></div><br><div class="comment">
+                  <span class="commtext c00">I bet it’s just for kicks, you’re reading way too much into this. This is just someone’s personal website and they’re experimenting with a donate button.</span>
+              <div class="reply">        <p><font size="1">
+                      <u><a href="https://news.ycombinator.com/reply?id=35738247&amp;goto=item%3Fid%3D35737862%2335738247">reply</a></u>
+                  </font>
+      </p></div></div></td></tr>
+        </tbody></table></td></tr>
+                  <tr class="athing comtr" id="35737974"><td><table border="0">  <tbody><tr>    <td class="ind" indent="0"><img src="./Beautiful branchless binary search _ Hacker News_files/s.gif" height="1" width="0"></td><td valign="top" class="votelinks">
+      <center><a id="up_35737974" href="https://news.ycombinator.com/vote?id=35737974&amp;how=up&amp;goto=item%3Fid%3D35737862"><div class="votearrow" title="upvote"></div></a></center>    </td><td class="default"><div style="margin-top:2px; margin-bottom:-10px;"><span class="comhead">
+          <a href="https://news.ycombinator.com/user?id=rowanG077" class="hnuser">rowanG077</a> <span class="age" title="2023-04-28T06:02:35"><a href="https://news.ycombinator.com/item?id=35737974">2 hours ago</a></span> <span id="unv_35737974"></span>          <span class="navs">
+             | <a href="https://news.ycombinator.com/item?id=35737862#35738170" class="clicky" aria-hidden="true">prev</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738305" class="clicky" aria-hidden="true">next</a> <a class="togg clicky" id="35737974" n="16" href="javascript:void(0)">[–]</a><span class="onstory"></span>          </span>
+                  </span></div><br><div class="comment">
+                  <span class="commtext c9c">Nice algorithm. I don't agree that it is branchless however. Cmov is a branching instruction for sure. And it doesn't really matter whether a branch can be well predicted. The reason you mainly want branchless code is for security reasons where a timing sidechannel could reveal information. Calling this algorithm branchless devalues the term into something meaningless.<p>Edit: Everybody in the comments is focusing on performance. For performance sensitive code the point is not that it's branchless, the point is that it is fast, that some branchless code is faster than branching code is an implementation detail. During encryption the point is that it certain codepaths MUST be branchless.
+              </p><div class="reply">        <p><font size="1">
+                      <u><a href="https://news.ycombinator.com/reply?id=35737974&amp;goto=item%3Fid%3D35737862%2335737974">reply</a></u>
+                  </font>
+      </p></div></span></div></td></tr>
+        </tbody></table></td></tr>
+                <tr class="athing comtr" id="35738013"><td><table border="0">  <tbody><tr>    <td class="ind" indent="1"><img src="./Beautiful branchless binary search _ Hacker News_files/s.gif" height="1" width="40"></td><td valign="top" class="votelinks">
+      <center><a id="up_35738013" href="https://news.ycombinator.com/vote?id=35738013&amp;how=up&amp;goto=item%3Fid%3D35737862"><div class="votearrow" title="upvote"></div></a></center>    </td><td class="default"><div style="margin-top:2px; margin-bottom:-10px;"><span class="comhead">
+          <a href="https://news.ycombinator.com/user?id=berkut" class="hnuser">berkut</a> <span class="age" title="2023-04-28T06:08:01"><a href="https://news.ycombinator.com/item?id=35738013">2 hours ago</a></span> <span id="unv_35738013"></span>          <span class="navs">
+             | <a href="https://news.ycombinator.com/item?id=35737862#35737974" class="clicky" aria-hidden="true">parent</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738547" class="clicky" aria-hidden="true">next</a> <a class="togg clicky" id="35738013" n="3" href="javascript:void(0)">[–]</a><span class="onstory"></span>          </span>
+                  </span></div><br><div class="comment">
+                  <span class="commtext c00">&gt; "The reason you mainly want branchless code is for security reasons where a timing sidechannel could reveal information."<p>Erm, that likely depends on the industry you're in?</p><p>In HPC, branchless algorithms are often needed to use wide architectures (SIMD / GPUs) to their full capacity...
+              </p><div class="reply">        <p><font size="1">
+                      <u><a href="https://news.ycombinator.com/reply?id=35738013&amp;goto=item%3Fid%3D35737862%2335738013">reply</a></u>
+                  </font>
+      </p></div></span></div></td></tr>
+        </tbody></table></td></tr>
+                <tr class="athing comtr" id="35738370"><td><table border="0">  <tbody><tr>    <td class="ind" indent="2"><img src="./Beautiful branchless binary search _ Hacker News_files/s.gif" height="1" width="80"></td><td valign="top" class="votelinks">
+      <center><a id="up_35738370" href="https://news.ycombinator.com/vote?id=35738370&amp;how=up&amp;goto=item%3Fid%3D35737862"><div class="votearrow" title="upvote"></div></a></center>    </td><td class="default"><div style="margin-top:2px; margin-bottom:-10px;"><span class="comhead">
+          <a href="https://news.ycombinator.com/user?id=rowanG077" class="hnuser">rowanG077</a> <span class="age" title="2023-04-28T07:05:07"><a href="https://news.ycombinator.com/item?id=35738370">1 hour ago</a></span> <span id="unv_35738370"></span>          <span class="navs">
+             | <a href="https://news.ycombinator.com/item?id=35737862#35737974" class="clicky" aria-hidden="true">root</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738013" class="clicky" aria-hidden="true">parent</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738547" class="clicky" aria-hidden="true">next</a> <a class="togg clicky" id="35738370" n="2" href="javascript:void(0)">[–]</a><span class="onstory"></span>          </span>
+                  </span></div><br><div class="comment">
+                  <span class="commtext c00">It's a requirement thing. For security the requirement is code needs to be branchless. In HPC the requirement is high performance, the branchless algorithm is an implementation detail. In fact branchless code is often much slower then the branching version.</span>
+              <div class="reply">        <p><font size="1">
+                      <u><a href="https://news.ycombinator.com/reply?id=35738370&amp;goto=item%3Fid%3D35737862%2335738370">reply</a></u>
+                  </font>
+      </p></div></div></td></tr>
+        </tbody></table></td></tr>
+                <tr class="athing comtr" id="35739012"><td><table border="0">  <tbody><tr>    <td class="ind" indent="3"><img src="./Beautiful branchless binary search _ Hacker News_files/s.gif" height="1" width="120"></td><td valign="top" class="votelinks">
+      <center><a id="up_35739012" href="https://news.ycombinator.com/vote?id=35739012&amp;how=up&amp;goto=item%3Fid%3D35737862"><div class="votearrow" title="upvote"></div></a></center>    </td><td class="default"><div style="margin-top:2px; margin-bottom:-10px;"><span class="comhead">
+          <a href="https://news.ycombinator.com/user?id=Aissen" class="hnuser">Aissen</a> <span class="age" title="2023-04-28T08:55:04"><a href="https://news.ycombinator.com/item?id=35739012">5 minutes ago</a></span> <span id="unv_35739012"></span>          <span class="navs">
+             | <a href="https://news.ycombinator.com/item?id=35737862#35737974" class="clicky" aria-hidden="true">root</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738370" class="clicky" aria-hidden="true">parent</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738547" class="clicky" aria-hidden="true">next</a> <a class="togg clicky" id="35739012" n="1" href="javascript:void(0)">[–]</a><span class="onstory"></span>          </span>
+                  </span></div><br><div class="comment">
+                  <span class="commtext c00">You don't really want branchless in security. The requirement is constant-time and side-channel resistance. The branchless algorithm is an implementation detail.</span>
+              <div class="reply">        <p><font size="1">
+                      <u><a href="https://news.ycombinator.com/reply?id=35739012&amp;goto=item%3Fid%3D35737862%2335739012">reply</a></u>
+                  </font>
+      </p></div></div></td></tr>
+        </tbody></table></td></tr>
+                        <tr class="athing comtr" id="35738547"><td><table border="0">  <tbody><tr>    <td class="ind" indent="1"><img src="./Beautiful branchless binary search _ Hacker News_files/s.gif" height="1" width="40"></td><td valign="top" class="votelinks">
+      <center><a id="up_35738547" href="https://news.ycombinator.com/vote?id=35738547&amp;how=up&amp;goto=item%3Fid%3D35737862"><div class="votearrow" title="upvote"></div></a></center>    </td><td class="default"><div style="margin-top:2px; margin-bottom:-10px;"><span class="comhead">
+          <a href="https://news.ycombinator.com/user?id=Dwedit" class="hnuser">Dwedit</a> <span class="age" title="2023-04-28T07:33:43"><a href="https://news.ycombinator.com/item?id=35738547">1 hour ago</a></span> <span id="unv_35738547"></span>          <span class="navs">
+             | <a href="https://news.ycombinator.com/item?id=35737862#35737974" class="clicky" aria-hidden="true">parent</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738013" class="clicky" aria-hidden="true">prev</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738026" class="clicky" aria-hidden="true">next</a> <a class="togg clicky" id="35738547" n="2" href="javascript:void(0)">[–]</a><span class="onstory"></span>          </span>
+                  </span></div><br><div class="comment">
+                  <span class="commtext c00">I just had it pointed out to me that CMOV can be simulated with subtraction and bitwise operators.<p>Specifically, subtraction, arithmetic shift right, and AND.  `((A-B) ASR 31) AND C`.  Your result is C if `A - B &lt; 0`, and your result is 0 if `A - B &gt;= 0`.
+              </p><div class="reply">        <p><font size="1">
+                      <u><a href="https://news.ycombinator.com/reply?id=35738547&amp;goto=item%3Fid%3D35737862%2335738547">reply</a></u>
+                  </font>
+      </p></div></span></div></td></tr>
+        </tbody></table></td></tr>
+                <tr class="athing comtr" id="35738958"><td><table border="0">  <tbody><tr>    <td class="ind" indent="2"><img src="./Beautiful branchless binary search _ Hacker News_files/s.gif" height="1" width="80"></td><td valign="top" class="votelinks">
+      <center><a id="up_35738958" href="https://news.ycombinator.com/vote?id=35738958&amp;how=up&amp;goto=item%3Fid%3D35737862"><div class="votearrow" title="upvote"></div></a></center>    </td><td class="default"><div style="margin-top:2px; margin-bottom:-10px;"><span class="comhead">
+          <a href="https://news.ycombinator.com/user?id=spc476" class="hnuser">spc476</a> <span class="age" title="2023-04-28T08:44:04"><a href="https://news.ycombinator.com/item?id=35738958">16 minutes ago</a></span> <span id="unv_35738958"></span>          <span class="navs">
+             | <a href="https://news.ycombinator.com/item?id=35737862#35737974" class="clicky" aria-hidden="true">root</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738547" class="clicky" aria-hidden="true">parent</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738026" class="clicky" aria-hidden="true">next</a> <a class="togg clicky" id="35738958" n="1" href="javascript:void(0)">[–]</a><span class="onstory"></span>          </span>
+                  </span></div><br><div class="comment">
+                  <span class="commtext c00">In C, shifting signed integers is undefined behavior.</span>
+              <div class="reply">        <p><font size="1">
+                      <u><a href="https://news.ycombinator.com/reply?id=35738958&amp;goto=item%3Fid%3D35737862%2335738958">reply</a></u>
+                  </font>
+      </p></div></div></td></tr>
+        </tbody></table></td></tr>
+                  <tr class="athing comtr" id="35738026"><td><table border="0">  <tbody><tr>    <td class="ind" indent="1"><img src="./Beautiful branchless binary search _ Hacker News_files/s.gif" height="1" width="40"></td><td valign="top" class="votelinks">
+      <center><a id="up_35738026" href="https://news.ycombinator.com/vote?id=35738026&amp;how=up&amp;goto=item%3Fid%3D35737862"><div class="votearrow" title="upvote"></div></a></center>    </td><td class="default"><div style="margin-top:2px; margin-bottom:-10px;"><span class="comhead">
+          <a href="https://news.ycombinator.com/user?id=vkazanov" class="hnuser">vkazanov</a> <span class="age" title="2023-04-28T06:10:10"><a href="https://news.ycombinator.com/item?id=35738026">2 hours ago</a></span> <span id="unv_35738026"></span>          <span class="navs">
+             | <a href="https://news.ycombinator.com/item?id=35737862#35737974" class="clicky" aria-hidden="true">parent</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738547" class="clicky" aria-hidden="true">prev</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738063" class="clicky" aria-hidden="true">next</a> <a class="togg clicky" id="35738026" n="1" href="javascript:void(0)">[–]</a><span class="onstory"></span>          </span>
+                  </span></div><br><div class="comment">
+                  <span class="commtext c00">Branchless algos (especially in the case where there truly are no explicit or implicit branches) is just as useful for performance purposes as it is for security. Having a branchless algo at hand is like being halfway to data-level parallelism either through SIMD or GPU.</span>
+              <div class="reply">        <p><font size="1">
+                      <u><a href="https://news.ycombinator.com/reply?id=35738026&amp;goto=item%3Fid%3D35737862%2335738026">reply</a></u>
+                  </font>
+      </p></div></div></td></tr>
+        </tbody></table></td></tr>
+            <tr class="athing comtr" id="35738063"><td><table border="0">  <tbody><tr>    <td class="ind" indent="1"><img src="./Beautiful branchless binary search _ Hacker News_files/s.gif" height="1" width="40"></td><td valign="top" class="votelinks">
+      <center><a id="up_35738063" href="https://news.ycombinator.com/vote?id=35738063&amp;how=up&amp;goto=item%3Fid%3D35737862"><div class="votearrow" title="upvote"></div></a></center>    </td><td class="default"><div style="margin-top:2px; margin-bottom:-10px;"><span class="comhead">
+          <a href="https://news.ycombinator.com/user?id=2102922286" class="hnuser">2102922286</a> <span class="age" title="2023-04-28T06:19:51"><a href="https://news.ycombinator.com/item?id=35738063">2 hours ago</a></span> <span id="unv_35738063"></span>          <span class="navs">
+             | <a href="https://news.ycombinator.com/item?id=35737862#35737974" class="clicky" aria-hidden="true">parent</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738026" class="clicky" aria-hidden="true">prev</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738216" class="clicky" aria-hidden="true">next</a> <a class="togg clicky" id="35738063" n="1" href="javascript:void(0)">[–]</a><span class="onstory"></span>          </span>
+                  </span></div><br><div class="comment">
+                  <span class="commtext c00">cmov (i.e. conditional move) doesn't branch. By branch here, we mean "at point at which the successor program counter value might be one of two locations." It's true that this _does_ have security implications, however this is frequently used as a term of art by performance engineers (see <a href="https://www.youtube.com/watch?v=g-WPhYREFjk">https://www.youtube.com/watch?v=g-WPhYREFjk</a> for example).<p>&gt; And it doesn't really matter whether a branch can be well predicted.</p><p>I'm not so sure this is true. See <a href="https://lemire.me/blog/2019/10/15/mispredicted-branches-can-multiply-your-running-times/" rel="nofollow">https://lemire.me/blog/2019/10/15/mispredicted-branches-can-...</a> as an example.</p><p>A properly predicted branch can be _faster_ than a cmov instruction, however the important point is avoiding the branch mispredict. The fact that we're using cmov is beside the point. We could achieve a similar effect by performing a subtraction and doing bitwise arithmetic to extract the sign bit (which, in effect, performs a comparison).
+              </p><div class="reply">        <p><font size="1">
+                      <u><a href="https://news.ycombinator.com/reply?id=35738063&amp;goto=item%3Fid%3D35737862%2335738063">reply</a></u>
+                  </font>
+      </p></div></span></div></td></tr>
+        </tbody></table></td></tr>
+            <tr class="athing comtr" id="35738216"><td><table border="0">  <tbody><tr>    <td class="ind" indent="1"><img src="./Beautiful branchless binary search _ Hacker News_files/s.gif" height="1" width="40"></td><td valign="top" class="votelinks">
+      <center><a id="up_35738216" href="https://news.ycombinator.com/vote?id=35738216&amp;how=up&amp;goto=item%3Fid%3D35737862"><div class="votearrow" title="upvote"></div></a></center>    </td><td class="default"><div style="margin-top:2px; margin-bottom:-10px;"><span class="comhead">
+          <a href="https://news.ycombinator.com/user?id=cmovq" class="hnuser">cmovq</a> <span class="age" title="2023-04-28T06:42:42"><a href="https://news.ycombinator.com/item?id=35738216">2 hours ago</a></span> <span id="unv_35738216"></span>          <span class="navs">
+             | <a href="https://news.ycombinator.com/item?id=35737862#35737974" class="clicky" aria-hidden="true">parent</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738063" class="clicky" aria-hidden="true">prev</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738591" class="clicky" aria-hidden="true">next</a> <a class="togg clicky" id="35738216" n="1" href="javascript:void(0)">[–]</a><span class="onstory"></span>          </span>
+                  </span></div><br><div class="comment">
+                  <span class="commtext c00">&gt; And it doesn't really matter whether a branch can be well predicted<p>I guess we build branch predictors on our CPUs for fun?
+              </p><div class="reply">        <p><font size="1">
+                      <u><a href="https://news.ycombinator.com/reply?id=35738216&amp;goto=item%3Fid%3D35737862%2335738216">reply</a></u>
+                  </font>
+      </p></div></span></div></td></tr>
+        </tbody></table></td></tr>
+            <tr class="athing comtr" id="35738591"><td><table border="0">  <tbody><tr>    <td class="ind" indent="1"><img src="./Beautiful branchless binary search _ Hacker News_files/s.gif" height="1" width="40"></td><td valign="top" class="votelinks">
+      <center><a id="up_35738591" href="https://news.ycombinator.com/vote?id=35738591&amp;how=up&amp;goto=item%3Fid%3D35737862"><div class="votearrow" title="upvote"></div></a></center>    </td><td class="default"><div style="margin-top:2px; margin-bottom:-10px;"><span class="comhead">
+          <a href="https://news.ycombinator.com/user?id=frankreyes" class="hnuser">frankreyes</a> <span class="age" title="2023-04-28T07:40:00"><a href="https://news.ycombinator.com/item?id=35738591">1 hour ago</a></span> <span id="unv_35738591"></span>          <span class="navs">
+             | <a href="https://news.ycombinator.com/item?id=35737862#35737974" class="clicky" aria-hidden="true">parent</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738216" class="clicky" aria-hidden="true">prev</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738051" class="clicky" aria-hidden="true">next</a> <a class="togg clicky" id="35738591" n="1" href="javascript:void(0)">[–]</a><span class="onstory"></span>          </span>
+                  </span></div><br><div class="comment">
+                  <span class="commtext c00">Because in the context of security you associate "branchless" with the time it takes is always the same regardless of the data/values, in order to mitigate a timing attack.<p>In this context, branchless means something different: the performance of the CPU is maximized for the given hardware, by not flushing the speculative execution of the CPU.
+              </p><div class="reply">        <p><font size="1">
+                      <u><a href="https://news.ycombinator.com/reply?id=35738591&amp;goto=item%3Fid%3D35737862%2335738591">reply</a></u>
+                  </font>
+      </p></div></span></div></td></tr>
+        </tbody></table></td></tr>
+            <tr class="athing comtr" id="35738051"><td><table border="0">  <tbody><tr>    <td class="ind" indent="1"><img src="./Beautiful branchless binary search _ Hacker News_files/s.gif" height="1" width="40"></td><td valign="top" class="votelinks">
+      <center><a id="up_35738051" href="https://news.ycombinator.com/vote?id=35738051&amp;how=up&amp;goto=item%3Fid%3D35737862"><div class="votearrow" title="upvote"></div></a></center>    </td><td class="default"><div style="margin-top:2px; margin-bottom:-10px;"><span class="comhead">
+          <a href="https://news.ycombinator.com/user?id=hmry" class="hnuser">hmry</a> <span class="age" title="2023-04-28T06:16:10"><a href="https://news.ycombinator.com/item?id=35738051">2 hours ago</a></span> <span id="unv_35738051"></span>          <span class="navs">
+             | <a href="https://news.ycombinator.com/item?id=35737862#35737974" class="clicky" aria-hidden="true">parent</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738591" class="clicky" aria-hidden="true">prev</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738053" class="clicky" aria-hidden="true">next</a> <a class="togg clicky" id="35738051" n="1" href="javascript:void(0)">[–]</a><span class="onstory"></span>          </span>
+                  </span></div><br><div class="comment">
+                  <span class="commtext c00">cmov doesn't go through the branch predictor, and AFAIK it even loads both operands unconditionally every time before checking the condition. I see no reason to consider it a branch, and have never heard anybody else categorize it as one.</span>
+              <div class="reply">        <p><font size="1">
+                      <u><a href="https://news.ycombinator.com/reply?id=35738051&amp;goto=item%3Fid%3D35737862%2335738051">reply</a></u>
+                  </font>
+      </p></div></div></td></tr>
+        </tbody></table></td></tr>
+            <tr class="athing comtr" id="35738053"><td><table border="0">  <tbody><tr>    <td class="ind" indent="1"><img src="./Beautiful branchless binary search _ Hacker News_files/s.gif" height="1" width="40"></td><td valign="top" class="votelinks">
+      <center><a id="up_35738053" href="https://news.ycombinator.com/vote?id=35738053&amp;how=up&amp;goto=item%3Fid%3D35737862"><div class="votearrow" title="upvote"></div></a></center>    </td><td class="default"><div style="margin-top:2px; margin-bottom:-10px;"><span class="comhead">
+          <a href="https://news.ycombinator.com/user?id=secondcoming" class="hnuser">secondcoming</a> <span class="age" title="2023-04-28T06:17:05"><a href="https://news.ycombinator.com/item?id=35738053">2 hours ago</a></span> <span id="unv_35738053"></span>          <span class="navs">
+             | <a href="https://news.ycombinator.com/item?id=35737862#35737974" class="clicky" aria-hidden="true">parent</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738051" class="clicky" aria-hidden="true">prev</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738305" class="clicky" aria-hidden="true">next</a> <a class="togg clicky" id="35738053" n="5" href="javascript:void(0)">[–]</a><span class="onstory"></span>          </span>
+                  </span></div><br><div class="comment">
+                  <span class="commtext c00">&gt; The reason you mainly want branchless code is for security reasons<p>That just isn’t true.
+              </p><div class="reply">        <p><font size="1">
+                      <u><a href="https://news.ycombinator.com/reply?id=35738053&amp;goto=item%3Fid%3D35737862%2335738053">reply</a></u>
+                  </font>
+      </p></div></span></div></td></tr>
+        </tbody></table></td></tr>
+                <tr class="athing comtr" id="35738128"><td><table border="0">  <tbody><tr>    <td class="ind" indent="2"><img src="./Beautiful branchless binary search _ Hacker News_files/s.gif" height="1" width="80"></td><td valign="top" class="votelinks">
+      <center><a id="up_35738128" href="https://news.ycombinator.com/vote?id=35738128&amp;how=up&amp;goto=item%3Fid%3D35737862"><div class="votearrow" title="upvote"></div></a></center>    </td><td class="default"><div style="margin-top:2px; margin-bottom:-10px;"><span class="comhead">
+          <a href="https://news.ycombinator.com/user?id=latency-guy2" class="hnuser">latency-guy2</a> <span class="age" title="2023-04-28T06:29:03"><a href="https://news.ycombinator.com/item?id=35738128">2 hours ago</a></span> <span id="unv_35738128"></span>          <span class="navs">
+             | <a href="https://news.ycombinator.com/item?id=35737862#35737974" class="clicky" aria-hidden="true">root</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738053" class="clicky" aria-hidden="true">parent</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738305" class="clicky" aria-hidden="true">next</a> <a class="togg clicky" id="35738128" n="4" href="javascript:void(0)">[–]</a><span class="onstory"></span>          </span>
+                  </span></div><br><div class="comment">
+                  <span class="commtext c5a">Which part isn't true? I think the qualifier 'mainly' definitely weakens the statement, but I'm struggling to think of how it could certainly be false statement.<p>This is certainly true for at minimum DDoS attacks, and I would absolutely consider that a security risk.
+              </p><div class="reply">        <p><font size="1">
+                      <u><a href="https://news.ycombinator.com/reply?id=35738128&amp;goto=item%3Fid%3D35737862%2335738128">reply</a></u>
+                  </font>
+      </p></div></span></div></td></tr>
+        </tbody></table></td></tr>
+                <tr class="athing comtr" id="35738144"><td><table border="0">  <tbody><tr>    <td class="ind" indent="3"><img src="./Beautiful branchless binary search _ Hacker News_files/s.gif" height="1" width="120"></td><td valign="top" class="votelinks">
+      <center><a id="up_35738144" href="https://news.ycombinator.com/vote?id=35738144&amp;how=up&amp;goto=item%3Fid%3D35737862"><div class="votearrow" title="upvote"></div></a></center>    </td><td class="default"><div style="margin-top:2px; margin-bottom:-10px;"><span class="comhead">
+          <a href="https://news.ycombinator.com/user?id=2102922286" class="hnuser">2102922286</a> <span class="age" title="2023-04-28T06:31:43"><a href="https://news.ycombinator.com/item?id=35738144">2 hours ago</a></span> <span id="unv_35738144"></span>          <span class="navs">
+             | <a href="https://news.ycombinator.com/item?id=35737862#35737974" class="clicky" aria-hidden="true">root</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738128" class="clicky" aria-hidden="true">parent</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738371" class="clicky" aria-hidden="true">next</a> <a class="togg clicky" id="35738144" n="1" href="javascript:void(0)">[–]</a><span class="onstory"></span>          </span>
+                  </span></div><br><div class="comment">
+                  <span class="commtext c00">When implementing cryptographic primitives, you want to avoid branching on secret values. The reason why is that the CPU's branch predictor will attempt to predict the value that you're branching on, and thus something about the values that you're branching on gets revealed if you can see how long a CPU takes to run a task/perform a function.<p>This is more than just a theoretical issue. These channel attacks have been demonstrated in practice, even if the victim CPU is running across the internet.
+              </p><div class="reply">        <p><font size="1">
+                      <u><a href="https://news.ycombinator.com/reply?id=35738144&amp;goto=item%3Fid%3D35737862%2335738144">reply</a></u>
+                  </font>
+      </p></div></span></div></td></tr>
+        </tbody></table></td></tr>
+            <tr class="athing comtr" id="35738371"><td><table border="0">  <tbody><tr>    <td class="ind" indent="3"><img src="./Beautiful branchless binary search _ Hacker News_files/s.gif" height="1" width="120"></td><td valign="top" class="votelinks">
+      <center><a id="up_35738371" href="https://news.ycombinator.com/vote?id=35738371&amp;how=up&amp;goto=item%3Fid%3D35737862"><div class="votearrow" title="upvote"></div></a></center>    </td><td class="default"><div style="margin-top:2px; margin-bottom:-10px;"><span class="comhead">
+          <a href="https://news.ycombinator.com/user?id=secondcoming" class="hnuser">secondcoming</a> <span class="age" title="2023-04-28T07:05:23"><a href="https://news.ycombinator.com/item?id=35738371">1 hour ago</a></span> <span id="unv_35738371"></span>          <span class="navs">
+             | <a href="https://news.ycombinator.com/item?id=35737862#35737974" class="clicky" aria-hidden="true">root</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738128" class="clicky" aria-hidden="true">parent</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738144" class="clicky" aria-hidden="true">prev</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738305" class="clicky" aria-hidden="true">next</a> <a class="togg clicky" id="35738371" n="2" href="javascript:void(0)">[–]</a><span class="onstory"></span>          </span>
+                  </span></div><br><div class="comment">
+                  <span class="commtext c00">Branchless algos are all over the place outside of security.</span>
+              <div class="reply">        <p><font size="1">
+                      <u><a href="https://news.ycombinator.com/reply?id=35738371&amp;goto=item%3Fid%3D35737862%2335738371">reply</a></u>
+                  </font>
+      </p></div></div></td></tr>
+        </tbody></table></td></tr>
+                <tr class="athing comtr" id="35738392"><td><table border="0">  <tbody><tr>    <td class="ind" indent="4"><img src="./Beautiful branchless binary search _ Hacker News_files/s.gif" height="1" width="160"></td><td valign="top" class="votelinks">
+      <center><a id="up_35738392" href="https://news.ycombinator.com/vote?id=35738392&amp;how=up&amp;goto=item%3Fid%3D35737862"><div class="votearrow" title="upvote"></div></a></center>    </td><td class="default"><div style="margin-top:2px; margin-bottom:-10px;"><span class="comhead">
+          <a href="https://news.ycombinator.com/user?id=latency-guy2" class="hnuser">latency-guy2</a> <span class="age" title="2023-04-28T07:08:37"><a href="https://news.ycombinator.com/item?id=35738392">1 hour ago</a></span> <span id="unv_35738392"></span>          <span class="navs">
+             | <a href="https://news.ycombinator.com/item?id=35737862#35737974" class="clicky" aria-hidden="true">root</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738371" class="clicky" aria-hidden="true">parent</a> | <a href="https://news.ycombinator.com/item?id=35737862#35738305" class="clicky" aria-hidden="true">next</a> <a class="togg clicky" id="35738392" n="1" href="javascript:void(0)">[–]</a><span class="onstory"></span>          </span>
+                  </span></div><br><div class="comment">
+                  <span class="commtext c73">Don't care, there's a quote in the OP that this discussion is being limited to.</span>
+              <div class="reply">        <p><font size="1">
+                      <u><a href="https://news.ycombinator.com/reply?id=35738392&amp;goto=item%3Fid%3D35737862%2335738392">reply</a></u>
+                  </font>
+      </p></div></div></td></tr>
+        </tbody></table></td></tr>
+                                    <tr class="athing comtr" id="35738305"><td><table border="0">  <tbody><tr>    <td class="ind" indent="0"><img src="./Beautiful branchless binary search _ Hacker News_files/s.gif" height="1" width="0"></td><td valign="top" class="votelinks">
+      <center><a id="up_35738305" href="https://news.ycombinator.com/vote?id=35738305&amp;how=up&amp;goto=item%3Fid%3D35737862"><div class="votearrow" title="upvote"></div></a></center>    </td><td class="default"><div style="margin-top:2px; margin-bottom:-10px;"><span class="comhead">
+          <a href="https://news.ycombinator.com/user?id=mgaunard" class="hnuser">mgaunard</a> <span class="age" title="2023-04-28T06:55:08"><a href="https://news.ycombinator.com/item?id=35738305">2 hours ago</a></span> <span id="unv_35738305"></span>          <span class="navs">
+             | <a href="https://news.ycombinator.com/item?id=35737862#35737974" class="clicky" aria-hidden="true">prev</a> <a class="togg clicky" id="35738305" n="1" href="javascript:void(0)">[–]</a><span class="onstory"></span>          </span>
+                  </span></div><br><div class="comment">
+                  <span class="commtext c9c">It's funny how people struggle so much to write branchless code.<p>The code is clearly not branchless as written, and relies on non-trivial optimizations for it to happen.</p><p>Just write it correctly to begin with.
+              </p><div class="reply">        <p><font size="1">
+                      <u><a href="https://news.ycombinator.com/reply?id=35738305&amp;goto=item%3Fid%3D35737862%2335738305">reply</a></u>
+                  </font>
+      </p></div></span></div></td></tr>
+        </tbody></table></td></tr>
+            </tbody></table>
+  <br><br>
+</td></tr>
+<tr><td><img src="./Beautiful branchless binary search _ Hacker News_files/s.gif" height="10" width="0"><table width="100%" cellspacing="0" cellpadding="1"><tbody><tr><td bgcolor="#ff6600"></td></tr></tbody></table><br>
+<center><a href="https://www.ycombinator.com/apply/">Applications are open for YC Summer 2023</a></center><br>
+<center><span class="yclinks"><a href="https://news.ycombinator.com/newsguidelines.html">Guidelines</a> | <a href="https://news.ycombinator.com/newsfaq.html">FAQ</a> | <a href="https://news.ycombinator.com/lists">Lists</a> | <a href="https://github.com/HackerNews/API">API</a> | <a href="https://news.ycombinator.com/security.html">Security</a> | <a href="https://www.ycombinator.com/legal/">Legal</a> | <a href="https://www.ycombinator.com/apply/">Apply to YC</a> | <a href="mailto:hn@ycombinator.com">Contact</a></span><br><br>
+<form method="get" action="https://hn.algolia.com/">Search: <input type="text" name="q" size="17" autocorrect="off" spellcheck="false" autocapitalize="off" autocomplete="false"></form></center></td></tr>      </tbody></table></center>
+      <script type="text/javascript" src="./Beautiful branchless binary search _ Hacker News_files/hn.js.download"></script>
+  
+</body></html>

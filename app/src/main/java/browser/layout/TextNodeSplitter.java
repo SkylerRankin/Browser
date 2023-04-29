@@ -126,7 +126,7 @@ public class TextNodeSplitter {
         String trailingSpaceText = trailingSpaces > 0 ? text.substring(text.length() - trailingSpaces) : "";
         String textWithoutSpace = text.substring(leadingSpaces, text.length() - trailingSpaces);
 
-        String[] words = textWithoutSpace.split("\s");
+        String[] words = textWithoutSpace.split("\s+");
         boolean containsSpace = words.length > 1;
         words[0] += leadingSpaceText;
         if (containsSpace) {
@@ -151,8 +151,8 @@ public class TextNodeSplitter {
 
         BoxNode newBoxNode = new BoxNode(boxNode);
         newBoxNode.textStartIndex = currentEndIndex + (containsSpace ? 1 : 0);
+        newBoxNode.whiteSpaceAfter = containsSpace;
         String newBoxText = newBoxNode.correspondingRenderNode.text.substring(newBoxNode.textStartIndex, newBoxNode.textEndIndex);
-
         boxNode.textEndIndex = currentEndIndex;
 
         if (newBoxText.isBlank() || newBoxText.isEmpty()) {

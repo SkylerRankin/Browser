@@ -128,6 +128,11 @@ public class LayoutIntegrationTests {
         driver.runLayoutTest("alignmentAnonymousBlockBox", 100);
     }
 
+    @Test
+    public void alignSplitText() {
+        driver.runLayoutTest("alignSplitText", 1000);
+    }
+
     // List tests
 
     @Test

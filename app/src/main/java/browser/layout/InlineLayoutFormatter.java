@@ -1,5 +1,7 @@
 package browser.layout;
 
+import java.util.List;
+
 import browser.css.CSSStyle;
 import browser.model.BoxNode;
 import browser.model.Vector2;
@@ -41,6 +43,7 @@ public class InlineLayoutFormatter {
         // the box is partitioned out fully.
         if (placeOnNextLine) {
             context.moveToNextLine();
+            trimFinalTextInPreviousLine(context);
             if (boxTreePartitioner.partitionAltersTree(boxNode, context)) {
                 context.clearTentativeBoxes();
                 boxTreePartitioner.partition(boxNode, context);
@@ -194,7 +197,28 @@ public class InlineLayoutFormatter {
             boxNode.height = newDimensions.y;
             context.addBoxToCurrentLine(boxNode);
         }
-        context.moveToNextLine();
+    }
+
+    private void trimFinalTextInPreviousLine(InlineFormattingContext context) {
+        if (context.lineBoxes.size() <= 1) {
+            return;
+        }
+
+        List<BoxNode> previousLineBoxes = context.lineBoxes.get(context.lineBoxes.size() - 1).boxes;
+        if (previousLineBoxes.size() <= 1) {
+            return;
+        }
+
+        BoxNode finalBox = previousLineBoxes.get(previousLineBoxes.size() - 1);
+        if (finalBox.isTextNode) {
+            String text = finalBox.correspondingRenderNode == null ? null : finalBox.correspondingRenderNode.text.substring(finalBox.textStartIndex, finalBox.textEndIndex);
+            if (text != null && Character.isWhitespace(text.charAt(text.length() - 1))) {
+                text = text.stripTrailing();
+                finalBox.textEndIndex = text.length();
+                finalBox.width = textDimensionCalculator.getDimension(text, finalBox.style).x;
+            }
+        }
+
     }
 
 }
