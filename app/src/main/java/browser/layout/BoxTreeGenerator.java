@@ -204,8 +204,8 @@ public class BoxTreeGenerator {
     }
 
     private boolean boxHasValidDisplayConfiguration(BoxNode boxNode) {
-        if (CSSConstants.tableInnerDisplayTypes.contains(boxNode.innerDisplayType)) {
-            // Table boxes do not abide by the flow display types. Inline vs block children are not relevant.
+        if (CSSConstants.tableInnerDisplayTypes.contains(boxNode.innerDisplayType) && !boxNode.innerDisplayType.equals(DisplayType.TABLE_CELL)) {
+            // Table boxes do not abide by the flow display types. Only table cells may use flow layout children.
             return true;
         }
 
