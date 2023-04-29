@@ -17,25 +17,28 @@ public class MediaQueryMatcher {
     public static boolean matches(CSSMediaExpression expression, float screenWidth, float screenHeight) {
         if (expression == null) {
             return true;
-        } else if (expression.mediaType != null) {
+        }
+
+        if (expression.mediaType != null) {
             return acceptedMediaTypes.contains(expression.mediaType);
         } else if (expression.feature != null) {
             return matchFeature(expression.feature, expression.featureValue, screenWidth, screenHeight);
         } else {
+            boolean negated = expression.unaryOperator == CSSConstants.MediaQueryOperator.NOT;
             boolean left = matches(expression.leftHandExpression, screenWidth, screenHeight);
             boolean right = matches(expression.rightHandExpression, screenWidth, screenHeight);
-            if (expression.operator == null) {
-                return left && right;
+            boolean result = false;
+            if (expression.binaryOperator == null) {
+                result = left && right;
             } else {
-                switch (expression.operator) {
-                    case AND, ONLY -> { return left && right; }
-                    case OR -> { return left || right; }
-                    case NOT -> { return !right; }
+                switch (expression.binaryOperator) {
+                    case AND, ONLY -> { result = left && right; }
+                    case OR -> { result = left || right; }
+                    case NOT -> { result = !right; }
                 }
             }
+            return result ^ negated;
         }
-
-        return false;
     }
 
     private static boolean matchFeature(CSSConstants.MediaFeature feature, String value, float screenWidth, float screenHeight) {

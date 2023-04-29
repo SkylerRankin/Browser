@@ -232,6 +232,11 @@ public class LayoutIntegrationTests {
         driver.runLayoutTest("tableBlockDisplay", 1000);
     }
 
+    @Test
+    public void tableEmptyRow() {
+        driver.runLayoutTest("tableEmptyRow", 1000);
+    }
+
     // Inline block tests
 
     @Test
@@ -249,6 +254,11 @@ public class LayoutIntegrationTests {
     @Test
     public void multipleTypeSelectors() {
         driver.runLayoutTest("multipleTypeSelectors", 1000);
+    }
+
+    @Test
+    public void mediaQueryWidthRange() {
+        driver.runLayoutTest("mediaQueryWidthRange", 500);
     }
 
 }

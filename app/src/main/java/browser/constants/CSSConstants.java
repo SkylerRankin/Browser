@@ -72,7 +72,7 @@ public class CSSConstants {
 
     public static final List<String> MEDIA_QUERY_OPERATOR_STRINGS = Arrays.stream(MediaQueryOperator.values()).map(Enum::name).toList();
 
-    public static final Pattern CSS_MEDIA_KEY_VALUE_PATTERN = Pattern.compile("^\\(([^\s]+):\s*([^\s]+)\\)$");
+    public static final Pattern CSS_MEDIA_KEY_VALUE_PATTERN = Pattern.compile("^\\(([^\s]+)\s*:\s*([^\s]+)\\)$");
 
     public static final Pattern CSS_IDENTIFIER_PATTERN = Pattern.compile("[0-9a-zA-Z\\-_]+");
 

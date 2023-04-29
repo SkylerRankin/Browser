@@ -29,7 +29,7 @@ public class MediaQueryParser {
             CSSMediaExpression currentExpression = rootExpression;
             for (int i = 0; i < expressions.size(); i++) {
                 currentExpression.leftHandExpression = expressions.get(i);
-                currentExpression.operator = CSSConstants.MediaQueryOperator.OR;
+                currentExpression.binaryOperator = CSSConstants.MediaQueryOperator.OR;
                 if (i == expressions.size() - 2) {
                     currentExpression.rightHandExpression = expressions.get(i + 1);
                     break;
@@ -81,24 +81,32 @@ public class MediaQueryParser {
 
                 if (subExpression != null) {
                     expression.leftHandExpression = subExpression;
-                    i += nextWord.length();
                 } else if (operator != null) {
-                    expression.operator = operator;
-                    String remainingText = text.substring(i + nextWord.length()).trim();
-                    CSSMediaExpression remainingExpression = getSingleExpression(remainingText);
-                    if (remainingExpression != null) {
-                        expression.rightHandExpression = remainingExpression;
+                    if (expression.leftHandExpression == null) {
+                        // No left hand expression, treat this operator as a unary operator.
+                        expression.unaryOperator = operator;
                     } else {
-                        if (remainingText.startsWith("(") && stringIsFullyWithinParentheses(remainingText)) {
-                            remainingText = remainingText.substring(1, remainingText.length() - 1);
+                        // There is a left hand expression, treat this operator as a binary operator.
+                        String remainingText = text.substring(i + nextWord.length()).trim();
+                        CSSMediaExpression remainingExpression = getSingleExpression(remainingText);
+                        CSSMediaExpression parsedExpression = null;
+                        if (remainingExpression != null) {
+                            parsedExpression = remainingExpression;
+                        } else {
+                            if (remainingText.startsWith("(") && stringIsFullyWithinParentheses(remainingText)) {
+                                remainingText = remainingText.substring(1, remainingText.length() - 1);
+                            }
+                            parsedExpression = parseMediaExpression(remainingText);
                         }
-                        expression.rightHandExpression = parseMediaExpression(remainingText);
+                        expression.binaryOperator = operator;
+                        expression.rightHandExpression = parsedExpression;
+                        return expression;
                     }
-                    return expression;
                 } else {
                     System.err.printf("Unknown expression \"%s\" in \"%s\". Ignoring.\n", nextWord, text);
                     return null;
                 }
+                i += nextWord.length();
             }
         }
 
@@ -122,12 +130,24 @@ public class MediaQueryParser {
             }
         }
 
-        // Check if text is a media type
-        CSSConstants.MediaType mediaType;
-        if ((mediaType = StringUtils.toEnum(CSSConstants.MediaType.class, text.toUpperCase())) != null) {
-            CSSMediaExpression expression = new CSSMediaExpression();
-            expression.mediaType = mediaType;
-            return expression;
+        String[] items = text.split("\\s+");
+
+        if (items.length == 1) {
+            CSSConstants.MediaType mediaType = StringUtils.toEnum(CSSConstants.MediaType.class, items[0].toUpperCase());
+            if (mediaType != null) {
+                CSSMediaExpression expression = new CSSMediaExpression();
+                expression.mediaType = mediaType;
+                return expression;
+            }
+        } else if (items.length == 2) {
+            CSSConstants.MediaQueryOperator operator = StringUtils.toEnum(CSSConstants.MediaQueryOperator.class, items[0].toUpperCase());
+            CSSConstants.MediaType mediaType = StringUtils.toEnum(CSSConstants.MediaType.class, items[1].toUpperCase());
+            if (operator != null && mediaType != null) {
+                CSSMediaExpression expression = new CSSMediaExpression();
+                expression.unaryOperator = operator;
+                expression.mediaType = mediaType;
+                return expression;
+            }
         }
 
         return null;

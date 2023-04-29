@@ -165,7 +165,7 @@ public class TableCellAligner {
                             columnWidths[x] = minWidth;
                         }
                     } else {
-                        // get the width of all spanned columns and compare to this spanning cell
+                        // Get the width of all spanned columns and compare to this spanning cell
                         TableCell originCell = cells.get(cell.spannedCellOrigin.y).get(cell.spannedCellOrigin.x);
                         int origin = cells.get(y).get(x).spannedCellOrigin.x;
                         float totalSize = getSpanTotalSize(origin, span);

@@ -7,10 +7,13 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode
 public class CSSMediaExpression {
 
+    // Full expression data
+    public CSSConstants.MediaQueryOperator unaryOperator;
+
     // Compound expression data
     public CSSMediaExpression leftHandExpression = null;
     public CSSMediaExpression rightHandExpression = null;
-    public CSSConstants.MediaQueryOperator operator;
+    public CSSConstants.MediaQueryOperator binaryOperator;
 
     // Terminal data
     public CSSConstants.MediaType mediaType = null;
@@ -24,12 +27,13 @@ public class CSSMediaExpression {
             stringBuilder.append(mediaType.name().toLowerCase());
         } else if (feature != null) {
             stringBuilder.append(String.format("%s: %s", feature.name().toLowerCase(), featureValue));
-        } else if (leftHandExpression == null && operator == null && rightHandExpression == null) {
+        } else if (leftHandExpression == null && binaryOperator == null && rightHandExpression == null) {
             stringBuilder.append("Empty");
         } else {
-            stringBuilder.append(String.format("(%s) %s (%s)",
+            stringBuilder.append(String.format("%s(%s) %s (%s)",
+                    unaryOperator == null ? "" : String.format("(u=%s) ", unaryOperator.name()),
                     leftHandExpression == null ? "" : leftHandExpression.toString(),
-                    operator == null ? "NONE" : operator.name(),
+                    binaryOperator == null ? "NONE" : binaryOperator.name(),
                     rightHandExpression == null ? "" : rightHandExpression.toString()));
         }
 

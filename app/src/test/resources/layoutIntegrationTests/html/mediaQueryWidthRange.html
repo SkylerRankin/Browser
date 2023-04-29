@@ -1,0 +1,56 @@
+<html>
+<head>
+    <meta name="viewport" content="width=device-width">
+    <style>
+            * {
+                font-family: Consolas;
+                font-size: 12px;
+            }
+
+            body {
+                padding: 0;
+                margin: 0;
+            }
+
+            div { height: 10px; }
+
+            @media only screen
+            and (min-width: 300px)
+            and (max-width: 750px) {
+                #div1 { height: 20px; }
+            }
+
+            @media only screen
+            and (min-width : 700px)
+            and (max-width : 1000px) {
+                #div1 { height: 30px; }
+                #div3 { height: 30px; }
+            }
+
+            @media only screen
+            and (min-width : 400px) {
+                #div2 { height: 25px; }
+            }
+
+            @media only screen
+            and (min-width : 560px) {
+                #div2 { height: 75px; }
+            }
+
+            @media only screen
+            and (max-width : 700px) {
+                #div3 { height: 35px; }
+            }
+
+            @media only screen
+            and (max-width : 450px) {
+                #div3 { height: 55px; }
+            }
+        </style>
+</head>
+<body>
+    <div id="div1" style="background-color: aquamarine;"></div>
+    <div id="div2" style="background-color: coral;"></div>
+    <div id="div3" style="background-color: aquamarine;"></div>
+</body>
+</html>

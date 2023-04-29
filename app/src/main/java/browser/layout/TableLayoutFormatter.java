@@ -401,7 +401,15 @@ public class TableLayoutFormatter {
         TableCellAligner aligner = new TableCellAligner();
         List<Float> rowMinimumHeights = new ArrayList<>();
         float totalMinHeight = (context.height - 1) * context.borderSpacing.y;
-        for (float height : aligner.alignRowsMinHeight(context)) {
+        float[] alignedRowHeights = aligner.alignRowsMinHeight(context);
+        for (int rowIndex = 0; rowIndex < context.height; rowIndex++) {
+            float height;
+            BoxNode rowBoxNode = context.rows.get(rowIndex).rowBoxNode;
+            if (rowBoxNode.style.height != null && rowBoxNode.style.heightType.equals(CSSStyle.DimensionType.PIXEL)) {
+                height = rowBoxNode.style.height;
+            } else {
+                height = alignedRowHeights[rowIndex];
+            }
             rowMinimumHeights.add(height);
             totalMinHeight += height;
         }
@@ -607,22 +615,24 @@ public class TableLayoutFormatter {
     private void removeFullySpannedRows(TableFormattingContext context) {
         for (int y = context.height - 1; y >= 0; y--) {
             boolean containsNonSpanningCell = false;
+            boolean containsNonNullCell = false;
             for (int x = 0; x < context.width; x++) {
                 if (context.getCell(x, y) == null) {
                     continue;
                 }
+                containsNonNullCell = true;
                 if (!context.getCell(x, y).isSpannedY) {
                     containsNonSpanningCell = true;
                     break;
                 }
             }
 
-            if (!containsNonSpanningCell) {
+            if (containsNonNullCell && !containsNonSpanningCell) {
                 // Entire row is y-spanning cells, so it can be removed.
                 Set<IntVector2> reducedCells = new HashSet<>();
                 for (int x = 0; x < context.width; x++) {
                     TableCell spannedCell = context.getCell(x, y);
-                    if (!reducedCells.contains(spannedCell.spannedCellOrigin)) {
+                    if (spannedCell != null && !reducedCells.contains(spannedCell.spannedCellOrigin)) {
                         TableCell originalCell = context.getCell(spannedCell.spannedCellOrigin.x, spannedCell.spannedCellOrigin.y);
                         originalCell.span.y--;
                         reducedCells.add(spannedCell.spannedCellOrigin);

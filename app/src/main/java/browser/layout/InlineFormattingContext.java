@@ -104,7 +104,7 @@ public class InlineFormattingContext {
         }
 
         LineBox lastLineBox = lastLineBox();
-        if (lastLineBox.boxes.size() == 0) {
+        if (lastLineBox == null || lastLineBox.boxes.size() == 0) {
             return null;
         } else {
             return lastLineBox.boxes.get(lastLineBox.boxes.size() - 1);
@@ -177,7 +177,7 @@ public class InlineFormattingContext {
     // Private methods
 
     private LineBox lastLineBox() {
-        return lineBoxes.get(lineBoxes.size() - 1);
+        return lineBoxes.size() == 0 ? null : lineBoxes.get(lineBoxes.size() - 1);
     }
 
     /**

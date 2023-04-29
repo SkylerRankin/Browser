@@ -8,7 +8,8 @@ import browser.model.RenderNode;
 public class LegacyCSSLoader {
 
     private static Map<String, String> styleAttributes = Map.ofEntries(
-            Map.entry("bgcolor", "background-color")
+            Map.entry("bgcolor", "background-color"),
+            Map.entry("width", "width")
     );
 
     /**
