@@ -101,7 +101,7 @@ public class CSSStyle {
     public PositionType position = PositionType.STATIC;
     
     public String fontFamily = "Times New Roman";
-    public int fontSize = 16;
+    public float fontSize = 16;
     public fontStyleType fontStyle = fontStyleType.NORMAL;
     public fontWeightType fontWeight = fontWeightType.NORMAL;
     
@@ -205,16 +205,35 @@ public class CSSStyle {
     }
     
     private void parseFontSizeValue(String value) {
-        Dimension dimension = parseSingleDimension(value);
-        if (dimension.type != null) {
-            switch (dimension.type) {
-                case PIXEL -> fontSize = dimension.value.intValue();
-                case PERCENTAGE -> {
-                    if (parentStyle != null) {
-                        fontSize = (int) (parentStyle.fontSize * (dimension.value / 100.0));
-                    }
+        Float length = null;
+        LengthUnit unit = null;
+        if (value.endsWith("%")) {
+            String lengthString = value.substring(0, value.length() - 1);
+            if (lengthString.matches("[\\d.]+")) {
+                length = Float.parseFloat(lengthString);
+                unit = LengthUnit.PX;
+            }
+        } else {
+            Matcher lengthMatcher = CSS_LENGTH_PATTERN.matcher(value);
+            if (lengthMatcher.find()) {
+                length = Float.parseFloat(lengthMatcher.group(1));
+                String unitString = lengthMatcher.group(2);
+                unit = parseLengthUnit(unitString);
+                if (unit == null) {
+                    unit = LengthUnit.PX;
                 }
             }
+        }
+
+        if (length == null) {
+            return;
+        }
+
+        switch (unit) {
+            case PX -> fontSize = length;
+            case PT -> fontSize = length * (1 + 1.0f / 3.0f);
+            case EM -> fontSize = (parentStyle == null ? fontSize : parentStyle.fontSize) * length;
+            case REM -> fontSize = 16 * length;
         }
     }
 

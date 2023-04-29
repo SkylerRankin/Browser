@@ -46,7 +46,7 @@ public class TextDimensionCalculator {
     private static class TextCacheKey {
         private final String text;
         private final String fontFamily;
-        private final int fontSize;
+        private final float fontSize;
         private final int fontWeight;
     }
 }
