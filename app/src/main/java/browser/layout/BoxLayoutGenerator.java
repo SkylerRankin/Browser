@@ -576,7 +576,7 @@ public class BoxLayoutGenerator {
         }
 
         // Only apply an offset for inline boxes that are not left aligned.
-        if (isRootInlineBox && !boxNode.style.textAlign.equals(CSSStyle.textAlignType.LEFT)) {
+        if (isRootInlineBox && !(boxNode.style.textAlign.equals(CSSStyle.TextAlign.LEFT) || boxNode.style.textAlign.equals(CSSStyle.TextAlign.WEBKIT_LEFT))) {
             for (int lineBoxIndex = 0; lineBoxIndex < context.lineBoxes.size(); lineBoxIndex++) {
                 // Find the actual width used by boxes in the line.
                 BoxNode firstBoxInLine = context.getFirstTopLevelBoxInLine(lineBoxIndex);
@@ -590,7 +590,7 @@ public class BoxLayoutGenerator {
                         boxNode.style.paddingRight - boxNode.style.borderWidthRight;
                 float diff = availableWidth - usedLineWidth;
                 if (diff > 0) {
-                    float xOffset = boxNode.style.textAlign.equals(CSSStyle.textAlignType.RIGHT) ?
+                    float xOffset = boxNode.style.textAlign.equals(CSSStyle.TextAlign.RIGHT) ?
                             diff :
                             diff / 2;
 
@@ -600,6 +600,21 @@ public class BoxLayoutGenerator {
                             moveBoxAndDescendants(child, new Vector2(xOffset, 0));
                         }
                     }
+                }
+            }
+        }
+
+        // HTML4 style text alignment applies to block boxes as well, whereas normal text align left/right/center only
+        // applies to inline content.
+        boolean hasBlockChildren = boxNode.children.size() > 0 && boxNode.children.get(0).outerDisplayType.equals(DisplayType.BLOCK);
+        if (hasBlockChildren && (boxNode.style.textAlign.equals(CSSStyle.TextAlign.WEBKIT_CENTER) || boxNode.style.textAlign.equals(CSSStyle.TextAlign.WEBKIT_RIGHT))) {
+            float availableWidth = boxNode.width - boxNode.style.borderWidthLeft - boxNode.style.paddingLeft -
+                    boxNode.style.paddingRight - boxNode.style.borderWidthRight;
+            for (BoxNode child : boxNode.children) {
+                float diff = availableWidth - child.width;
+                if (diff > 0) {
+                    float xOffset = boxNode.style.textAlign.equals(CSSStyle.TextAlign.WEBKIT_RIGHT) ? diff : diff / 2;
+                    moveBoxAndDescendants(child, new Vector2(xOffset, 0));
                 }
             }
         }

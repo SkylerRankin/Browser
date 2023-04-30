@@ -171,6 +171,12 @@ public class CSSConstants {
             "text-align"
     );
 
+    public static Map<String, CSSStyle.TextAlign> stringToNonStandardTextAlign = Map.ofEntries(
+            Map.entry("-webkit-left", CSSStyle.TextAlign.WEBKIT_LEFT),
+            Map.entry("-webkit-center", CSSStyle.TextAlign.WEBKIT_CENTER),
+            Map.entry("-webkit-right", CSSStyle.TextAlign.WEBKIT_RIGHT)
+    );
+
     /**
      * Convert a CSS display type string into the matching display type enum value.
      * @param text      A CSS display type string.

@@ -4,6 +4,7 @@ import java.util.*;
 
 import browser.constants.CSSConstants.SelectorCombinator;
 import browser.model.*;
+import browser.parser.HTMLElements;
 
 public class SelectorMatcher {
 
@@ -88,8 +89,10 @@ public class SelectorMatcher {
                     }
                 }
                 case PSEUDO -> {
-                    // TODO check for pseudo properties
-                    return false;
+                    switch (unitSelector.value.toLowerCase()) {
+                        case "link": return node.type.equals(HTMLElements.A);
+                        default: return false;
+                    }
                 }
                 case TYPE -> {
                     if (!node.type.equals(value)) {

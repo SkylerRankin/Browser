@@ -54,7 +54,10 @@ public class CSSStyle {
 
     public static enum fontWeightType {NORMAL, BOLD, OTHER}
 
-    public static enum textAlignType {LEFT, CENTER, RIGHT}
+    public enum TextAlign {
+        LEFT, CENTER, RIGHT,
+        WEBKIT_LEFT, WEBKIT_CENTER, WEBKIT_RIGHT
+    }
 
 //    public static enum textDecorationType {NONE, OVERLINE, LINETHROUGH, UNDERLINE}
 
@@ -140,7 +143,7 @@ public class CSSStyle {
     public PaddingType paddingLeftType = PaddingType.LENGTH;
     public LengthUnit paddingLeftUnit = LengthUnit.PX;
     
-    public textAlignType textAlign = textAlignType.LEFT;
+    public TextAlign textAlign = TextAlign.LEFT;
     
     public DimensionType widthType = DimensionType.PIXEL;
     public Float width = null;
@@ -566,6 +569,15 @@ public class CSSStyle {
         }
     }
 
+    private void parseTextAlign(String text) {
+        TextAlign textAlignCandidate = StringUtils.toEnum(TextAlign.class, text.toUpperCase());
+        if (textAlignCandidate != null) {
+            textAlign = textAlignCandidate;
+        } else if (CSSConstants.stringToNonStandardTextAlign.containsKey(text.toLowerCase())) {
+            textAlign = CSSConstants.stringToNonStandardTextAlign.get(text.toLowerCase());
+        }
+    }
+
     /**
      * Convert the string properties and values to actual properties on this class
      */
@@ -625,11 +637,7 @@ public class CSSStyle {
             case "padding-bottom":      parsePadding(value, "bottom"); break;
             case "padding-left":        parsePadding(value, "left"); break;
             case "position":            parsePosition(value); break;
-            case "text-align":          textAlignType textAlignTypeCandidate = StringUtils.toEnum(textAlignType.class, value.toUpperCase());
-                                        if (textAlignTypeCandidate != null) {
-                                            textAlign = textAlignTypeCandidate;
-                                        }
-                                        break;
+            case "text-align":          parseTextAlign(value); break;
             case "width":               Dimension widthDimension = parseSingleDimension(value);
                                         width = widthDimension.value;
                                         widthType = widthDimension.type; break;

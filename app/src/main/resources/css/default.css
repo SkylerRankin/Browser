@@ -103,7 +103,7 @@ td {
 
 center {
     display: block;
-	text-align: center;
+	text-align: -webkit-center;
 }
 
 ul, ol {
@@ -119,6 +119,7 @@ li {
 
 table {
     display: table;
+    text-align: left;
 }
 
 tr {
