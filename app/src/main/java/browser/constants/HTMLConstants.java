@@ -28,7 +28,9 @@ public class HTMLConstants {
             HTMLElements.HEAD,
             HTMLElements.LINK,
             HTMLElements.SCRIPT,
-            HTMLElements.STYLE
+            HTMLElements.STYLE,
+            // MathJax rendering is not supported
+            HTMLElements.MJX_CONTAINER
     );
 
     public static int LIST_MARKER_GAP = 10;

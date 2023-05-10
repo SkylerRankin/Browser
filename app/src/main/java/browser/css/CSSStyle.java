@@ -1,9 +1,5 @@
 package browser.css;
 
-import static browser.constants.CSSConstants.CSS_LENGTH_PATTERN;
-import static browser.constants.CSSConstants.IMPORTANT;
-import static browser.constants.CSSConstants.LengthUnit;
-
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
@@ -15,6 +11,8 @@ import browser.parser.StringUtils;
 
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
+
+import static browser.constants.CSSConstants.*;
 
 @EqualsAndHashCode
 @ToString
@@ -71,17 +69,17 @@ public class CSSStyle {
 
     public CSSStyle parentStyle = null;
 
-    public CSSColor backgroundColor = new CSSColor("White");
+    public CSSColor backgroundColor = new CSSColor("rgba(0, 0, 0, 0)");
     
     public CSSColor borderColorTop = new CSSColor("Black");
     public CSSColor borderColorBottom = new CSSColor("Black");
     public CSSColor borderColorLeft = new CSSColor("Black");
     public CSSColor borderColorRight = new CSSColor("Black");
 
-    public int borderWidthTop = 0;
-    public int borderWidthRight = 0;
-    public int borderWidthBottom = 0;
-    public int borderWidthLeft = 0;
+    public float borderWidthTop = 0;
+    public float borderWidthRight = 0;
+    public float borderWidthBottom = 0;
+    public float borderWidthLeft = 0;
 
     public BorderStyle borderStyleTop = BorderStyle.NONE;
     public BorderStyle borderStyleRight = BorderStyle.NONE;
@@ -104,7 +102,7 @@ public class CSSStyle {
     public PositionType position = PositionType.STATIC;
     
     public String fontFamily = "Times New Roman";
-    public float fontSize = 16;
+    public float fontSize = BASE_FONT_SIZE;
     public fontStyleType fontStyle = fontStyleType.NORMAL;
     public fontWeightType fontWeight = fontWeightType.NORMAL;
     
@@ -213,7 +211,7 @@ public class CSSStyle {
         if (value.endsWith("%")) {
             String lengthString = value.substring(0, value.length() - 1);
             if (lengthString.matches("[\\d.]+")) {
-                length = Float.parseFloat(lengthString);
+                length = Float.parseFloat(lengthString) / 100 * BASE_FONT_SIZE;
                 unit = LengthUnit.PX;
             }
         } else {
@@ -236,7 +234,7 @@ public class CSSStyle {
             case PX -> fontSize = length;
             case PT -> fontSize = length * (1 + 1.0f / 3.0f);
             case EM -> fontSize = (parentStyle == null ? fontSize : parentStyle.fontSize) * length;
-            case REM -> fontSize = 16 * length;
+            case REM -> fontSize = BASE_FONT_SIZE * length;
         }
     }
 
@@ -290,7 +288,7 @@ public class CSSStyle {
                 } else {
                     Matcher lengthMatcher = CSS_LENGTH_PATTERN.matcher(items[i]);
                     if (lengthMatcher.find()) {
-                        int length = Integer.parseInt(lengthMatcher.group(1));
+                        float length = Float.parseFloat(lengthMatcher.group(1));
                         String unitString = lengthMatcher.group(2);
                         LengthUnit unit = parseLengthUnit(unitString);
                         if (unit != null) {
@@ -578,6 +576,16 @@ public class CSSStyle {
         }
     }
 
+    private void parseBackground(String text) {
+        text = text.trim();
+        CSSColor color = CSSColor.getColor(text);
+        if (color != null) {
+            backgroundColor = color;
+        } else {
+            System.err.printf("Unsupported background type \"%s\".\n", text);
+        }
+    }
+
     /**
      * Convert the string properties and values to actual properties on this class
      */
@@ -585,7 +593,8 @@ public class CSSStyle {
         for (Entry<String, String> e : properties.entrySet()) {
             String value = e.getValue().trim();
             switch (e.getKey()) {
-            case "background-color":    backgroundColor = new CSSColor(value); break;
+            case "background":
+            case "background-color":    parseBackground(value); break;
             case "border":
             case "border-color":
             case "border-width":        parseBorder(value, "all"); break;
@@ -692,6 +701,10 @@ public class CSSStyle {
         // TODO: copy over the properties maps
         style.parentStyle = parentStyle;
         style.backgroundColor = backgroundColor;
+        style.borderStyleTop = borderStyleTop;
+        style.borderStyleLeft = borderStyleLeft;
+        style.borderStyleRight = borderStyleRight;
+        style.borderStyleBottom = borderStyleBottom;
         style.borderWidthTop = borderWidthTop;
         style.borderWidthBottom = borderWidthBottom;
         style.borderWidthLeft = borderWidthLeft;
@@ -749,5 +762,18 @@ public class CSSStyle {
 
         return style;
     }
-    
+
+    public CSSStyle inheritedOnlyDeepCopy() {
+        CSSStyle style = new CSSStyle();
+
+        style.color = color;
+        style.fontFamily = fontFamily;
+        style.fontSize = fontSize;
+        style.fontStyle = fontStyle;
+        style.fontWeight = fontWeight;
+        style.textAlign = textAlign;
+
+        return style;
+    }
+
 }

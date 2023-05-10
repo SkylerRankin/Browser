@@ -106,6 +106,16 @@ public class LayoutIntegrationTests {
         driver.runLayoutTest("multiLevelInlinePartition", 1000);
     }
 
+    @Test
+    public void textWithinBorderedDiv() {
+        driver.runLayoutTest("textWithinBorderedDiv", 500);
+    }
+
+    @Test
+    public void anonymousBlockWithinBorder() {
+        driver.runLayoutTest("anonymousBlockWithinBorder", 500);
+    }
+
     // Text alignment
 
     @Test

@@ -83,9 +83,14 @@ public class CSSLoader {
 
     private void loadStyleTags(RenderNode root) {
         for (String cssString : styleTagCSS) {
-            Map<CSSSelectorGroup, Map<String, String>> rules = CSSParser.parseRules(cssString);
-            filterSelectorsByMediaQuery(rules);
-            applyRules(root, rules, true, false);
+            try {
+                Map<CSSSelectorGroup, Map<String, String>> rules = CSSParser.parseRules(cssString);
+                filterSelectorsByMediaQuery(rules);
+                applyRules(root, rules, true, false);
+            } catch (Exception e) {
+                System.out.printf("Failed to parse and apply css:\n\"%s\"\n", cssString);
+                e.printStackTrace();
+            }
         }
     }
 

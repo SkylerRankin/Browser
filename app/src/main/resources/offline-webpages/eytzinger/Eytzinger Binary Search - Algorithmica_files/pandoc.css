@@ -1,0 +1,558 @@
+/*
+ * Forked from https://gist.github.com/killercup/5917178
+ */
+
+@font-face {
+    font-family: 'CMU';
+    src: url(fonts/cmu.woff2);
+}
+
+@font-face {
+    font-family: 'Lora';
+    src: url(fonts/lora.ttf);
+}
+
+@font-face {
+    font-family: 'Inconsolata';
+    src: url(fonts/inconsolata.woff2);
+}
+
+@font-face {
+    font-family: 'Garamond';
+    src: url(fonts/garamond.woff2);
+}
+
+@font-face {
+    font-family: "Open Sans";
+    src: url(fonts/opensans.woff2);
+}
+
+.migration {
+  background: rgb(219, 245, 227);
+  border: 1px solid green;
+  margin: 20px 0px;
+  padding: 6px 12px;
+  font-family: "Garamond";
+}
+
+.migration a {
+  display: block;
+  font-size: 1.25em;
+}
+
+html {
+  font-size: 100%;
+  overflow-y: scroll;
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+}
+
+a {
+    white-space: pre; /* for some weird reason this affects pre blocks */
+}
+
+body {
+  /* color: #444; */
+  font-family: "Times New Roman", Times, "Tinos", serif;
+  font-size: 16px;
+  line-height: 1.7;
+  padding: 8px;
+  margin: auto;
+  width: 750px;
+  background: #fefefe;
+  text-align: justify;
+  padding-bottom: 25px;
+}
+
+.credits {
+    font-size: 14px;
+    margin: 25px 10px -40px 15px;
+    padding: 16px 50px 0 50px;
+    /* text-align: left; */
+    border-top: 1px solid #666;
+    color: black;
+}
+
+.credits table {
+    border: none;
+    margin-left: 46px;
+    margin-bottom: 10px;
+}
+
+.credits table td{
+    border: none;
+    padding: 0;
+    padding-left: 1.5em;
+}
+
+#header {
+    height: 55px;
+    margin-top: -8px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #666;
+}
+
+#links {
+    display: inline-block;
+    text-align: right;
+    font-size: 16px;
+    float: right;
+    margin-top: 17px;
+    margin-right: 12px;
+}
+
+#links a {
+     margin-left: 20px;
+}
+
+#header a:hover {
+    color: #0645ad!important;
+}
+
+#header a {
+    color: #111 !important;
+    display: inline-block;
+}
+
+#logo {
+    margin-top: 10px;
+    font-size: 22px;
+    height: 0;
+    font-family: 'Garamond', serif;
+}
+
+.contents {
+    position: inline-block;
+    float: left;
+    position: relative;
+    left: 12px;
+    width: 285px;
+    text-align: left;
+}
+
+.contents ul {
+    padding-left: 22px;
+    margin-top: 10px;
+    list-style-type: none;
+}
+
+.contents li {
+    font-size: 8px;
+    color: lightgrey;
+    font-family: 'Open Sans', sans;
+    height: 30px;
+    line-height: 8px;
+    list-style-type: none;
+    white-space: pre-line;
+}
+
+.contents li:hover {
+    color: black;
+}
+
+.contents li:first-letter {
+    font-size: 13px;
+    height: 0;
+}
+
+.contents a {
+    font-family: "Times New Roman", Times, "Tinos", serif;
+    font-size: 16px;
+    line-height: 1em;
+    display: inline-block;
+    width: 252px;
+}
+
+.contents a:first-letter {
+    font-size: 16px; /* the only way to fix */
+}
+
+.contents a:after {
+    content: "\A";
+    white-space: pre;
+}
+
+.contents li:before {
+    content: '•';
+    display: inline-block;
+    position: absolute;
+    left: 11px;
+    margin-top: 5px;
+    color: black !important;
+    font-size: 18px;
+}
+
+a {
+  color: #0645ad;
+  text-decoration: none;
+}
+
+a:visited {
+  color: #0b0080;
+}
+
+a:hover {
+  color: #06e;
+}
+
+a:active {
+  color: #faa700;
+}
+
+a:focus {
+  outline: thin dotted;
+}
+
+p {
+  margin: 0.5em 0;
+}
+
+img {
+  max-width: 100%;
+}
+
+.title {
+    display: none;
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 0.8em !important;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Garamond', serif;
+  color: #111;
+  line-height: 125%;
+  margin-top: 1em;
+  margin-bottom: 0em;
+  font-weight: normal;
+}
+
+h2, h3 {
+  padding-bottom: 5px;
+  border-bottom: 1px solid #eaecef;
+}
+
+.contents h2, .contents h3 {
+  padding-bottom: 0;
+  border-bottom: none;
+  margin-top: 5px;
+}
+
+h4, h5, h6 {
+  font-weight: bold;
+}
+
+h1 {
+  font-size: 2.5em;
+  margin-top: 0.8em;
+}
+
+h2 {
+  font-size: 2em;
+}
+
+h3 {
+  font-size: 1.5em;
+}
+
+h4 {
+  font-size: 1.2em;
+}
+
+h5 {
+  font-size: 1em;
+}
+
+h6 {
+  font-size: 0.9em;
+}
+
+blockquote {
+  color: #666666;
+  margin: 0;
+  padding-left: 1em;
+  border-left: 0.5em #EEE solid;
+}
+
+hr {
+  display: block;
+  width: 100%;
+  height: 0px;
+  border: 0;
+  margin: 0;
+  padding: 0;
+  clear: both;
+}
+
+pre, code, kbd, samp {
+  color: #000;
+  font-family: 'Inconsolata', monospace;
+}
+
+pre {
+  white-space: pre;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+b, strong {
+  font-weight: bold;
+}
+
+dfn {
+  font-style: italic;
+}
+
+ins {
+  background: #ff9;
+  color: #000;
+  text-decoration: none;
+}
+
+mark {
+  background: #ff0;
+  color: #000;
+  font-style: italic;
+  font-weight: bold;
+}
+
+sub, sup {
+  font-size: 75%;
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline;
+}
+
+sup {
+  top: -0.5em;
+}
+
+sub {
+  bottom: -0.25em;
+}
+
+ul, ol {
+  margin: 1em 0;
+  padding: 0 0 0 2em;
+}
+
+li p:last-child {
+  margin-bottom: 0;
+}
+
+li ul {
+  padding-left: 18px;
+  padding-top: 1px;
+}
+
+ul ul, ol ol {
+  margin: .3em 0;
+}
+
+dl {
+  margin-bottom: 1em;
+}
+
+dt {
+  font-weight: bold;
+  margin-bottom: .8em;
+}
+
+dd {
+  margin: 0 0 .8em 2em;
+}
+
+dd:last-child {
+  margin-bottom: 0;
+}
+
+img {
+  border: 0;
+  -ms-interpolation-mode: bicubic;
+  vertical-align: middle;
+}
+
+figure {
+  display: block;
+  text-align: center;
+  margin: 1em 0;
+}
+
+img {
+  border: none;
+  margin: auto;
+  display: block;
+  max-width: 85%;
+  max-height: 320px;
+}
+
+figcaption {
+  font-size: 0.8em;
+  font-style: italic;
+  margin: 0 0 .8em;
+}
+
+table {
+  margin-bottom: 2em;
+  border-bottom: 1px solid #ddd;
+  border-right: 1px solid #ddd;
+  border-spacing: 0;
+  border-collapse: collapse;
+}
+
+table th {
+  padding: .2em 1em;
+  background-color: #eee;
+  border-top: 1px solid #ddd;
+  border-left: 1px solid #ddd;
+}
+
+table td {
+  padding: .2em 1em;
+  border-top: 1px solid #ddd;
+  border-left: 1px solid #ddd;
+  vertical-align: top;
+}
+
+.author {
+  display: block;
+  width: 100%;
+  text-align: right;
+  margin-top: -30px;
+  margin-bottom: 40px;
+  padding-right: 20px;
+  /* position: absolute; */
+  color: #444;
+  font-size: 0.8em;
+}
+
+code:not([class]) {
+    border: 1px solid #ddd !important;
+    background-color: #f8f8f8 !important;
+    border-radius: 3px !important;
+    padding-left: 2px !important;
+    padding-right: 2px !important;
+    font-size: 0.85em;
+}
+
+pre {
+    border: 1px solid #ddd !important;
+    background-color: #f8f8f8 !important;
+    border-radius: 3px !important;
+    padding: 2px !important;
+    padding-left: 8px !important;
+    font-size: 0.9em;
+}
+
+@media print {
+  body {
+    font-size: 12pt;
+    width: 190mm;
+    margin: 0;
+    /*margin-left 10mm;*/
+  }
+
+  @page { margin: 15mm; }
+
+  #header {
+    display: none;
+  }
+  
+  pre, ul, ol {
+    page-break-inside: avoid;
+  }
+
+  h1::after, h2::after, h3::after {
+    /* page-break-after: avoid; */
+    content: "";
+    display: block;
+    height: 100px;
+    margin-bottom: -100px;
+  }
+
+  /*
+  h1::before, h2::before, h3::before {
+    content: "";
+    display: block;
+    height: 100px;
+    margin-top: 100px;
+  }
+  */
+
+  a, a:visited {
+    text-decoration: underline;
+  }
+
+  /*
+  abbr[title]:after {
+    content: " (" attr(title) ")";
+  }
+  */
+
+  p, h2, h3 {
+    orphans: 3;
+    widows: 3;
+  }
+}
+
+/*
+a[href^='http://sereja.me']:before {
+    content: url('http://sereja.me/favicon.ico');
+    margin-right: 4px;
+}
+*/
+
+a[href^='http://e-maxx.ru']:before {
+    content: "";
+    display: inline-block;
+    position: relative;
+    top: 4px;
+    width: 20px;
+    height: 20px;
+    background: url('http://e-maxx.ru/favicon.ico') no-repeat;
+    background-size: 18px;
+}
+
+/*
+a[href^='https://algorithmica.org']:before {
+    content: "";
+    display: inline-block;
+    position: relative;
+    top: 4px;
+    width: 20px;
+    height: 20px;
+    background: url('https://algorithmica.org/favicon.ico') no-repeat;
+    background-size: 18px;
+}
+*/
+
+/* https://habrahabr.ru/favicon.ico */
+
+a[href^='https://neerc.ifmo.ru']:before {
+    content: url('https://neerc.ifmo.ru/favicon.ico');
+    margin-right: 4px;
+    position: relative;
+    top: 4px;
+}
+
+a[href^='https://www.youtube.com']:before {
+    content: url('https://www.youtube.com/favicon.ico');
+    margin-right: 4px;
+}
+
+a[href^='https://codeforces.com']:before {
+    content: url('http://codeforces.com/favicon.ico');
+    margin-right: 4px;
+}
+
+a[href^='https://www.topcoder.com/']:before {
+    content: url('https://s3.amazonaws.com/app.topcoder.com/favicon.ico');
+    margin-right: 4px;
+}
+
+a[href=''] {
+    color: black;
+    cursor: default;
+}

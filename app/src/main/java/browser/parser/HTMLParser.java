@@ -118,7 +118,12 @@ public class HTMLParser {
             } else if (nextToken.type.equals(HTMLTokenType.ATTRIBUTE_END_QUOTES)) {
                 node.attributes.putIfAbsent(currentAttributeName, "");
             }
-            nextToken = tokenIterator.next();
+
+            if (!tokenIterator.hasNext()) {
+                break;
+            } else {
+                nextToken = tokenIterator.next();
+            }
         }
     }
 

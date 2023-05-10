@@ -25,16 +25,23 @@ public class CSSLexer {
         SKIP
     }
 
-    private static Set<CSSTokenType> commentTokenTypes = Set.of(CSSTokenType.COMMENT_START, CSSTokenType.COMMENT, CSSTokenType.COMMENT_END);
+    public enum BlockContext {
+        Selector,
+        SingularAtRule,
+        NestedAtRule
+    }
+
+    private static final Set<CSSTokenType> commentTokenTypes = Set.of(CSSTokenType.COMMENT_START, CSSTokenType.COMMENT, CSSTokenType.COMMENT_END);
 
     public static List<CSSToken> getTokens(String css) {
+        List<BlockContext> contextStack = new ArrayList<>();
         css = css.trim();
         List<CSSToken> tokens = new ArrayList<>();
         CSSTokenType lastToken = CSSTokenType.AT_RULE_CLOSE_BRACKET;
         CSSTokenType lastNonCommentToken = CSSTokenType.AT_RULE_CLOSE_BRACKET;
         int index = 0;
         while (index < css.length()) {
-            CSSToken token = getToken(css, index, lastToken, lastNonCommentToken);
+            CSSToken token = getToken(css, index, lastToken, lastNonCommentToken, contextStack);
             if (token == null) {
                 System.err.printf("Lexing failure: given last token %s, failed to find token at \"%s...\".\n", lastToken.name(), css.substring(index, Math.min(css.length(), index + 10)));
                 index++;
@@ -56,25 +63,25 @@ public class CSSLexer {
         return tokens;
     }
 
-    private static CSSToken getToken(String css, int index, CSSTokenType lastToken, CSSTokenType lastNonCommentToken) {
+    private static CSSToken getToken(String css, int index, CSSTokenType lastToken, CSSTokenType lastNonCommentToken, List<BlockContext> contextStack) {
         if (StringUtils.substringMatch(css, "/*", index)) {
             return new CSSToken(CSSTokenType.COMMENT_START, "/*");
         }
 
         switch (lastToken) {
-            case SELECTOR -> { return handleSelector(css, index); }
-            case AT_RULE -> { return handleAtRule(css, index); }
-            case AT_RULE_OPEN_BRACKET -> { return handleAtRuleOpenBracket(css, index); }
+            case SELECTOR -> { return handleSelector(css, index, contextStack); }
+            case AT_RULE -> { return handleAtRule(css, index, contextStack); }
+            case AT_RULE_OPEN_BRACKET -> { return handleAtRuleOpenBracket(css, index, contextStack); }
             case AT_RULE_CLOSE_BRACKET -> { return handleAtRuleCloseBracket(css, index); }
-            case SELECTOR_OPEN_BRACKET -> { return handleSelectorOpenBracket(css, index); }
+            case SELECTOR_OPEN_BRACKET -> { return handleSelectorOpenBracket(css, index, contextStack); }
             case PROPERTY_NAME -> { return handlePropertyName(css, index); }
             case COLON -> { return handleColon(css, index); }
-            case PROPERTY_VALUE -> { return handlePropertyValue(css, index); }
-            case SEMI_COLON -> { return handleSemiColon(css, index); }
-            case SELECTOR_CLOSE_BRACKET -> { return handleSelectorCloseBracket(css, index); }
+            case PROPERTY_VALUE -> { return handlePropertyValue(css, index, contextStack); }
+            case SEMI_COLON -> { return handleSemiColon(css, index, contextStack); }
+            case SELECTOR_CLOSE_BRACKET -> { return handleSelectorCloseBracket(css, index, contextStack); }
             case COMMENT_START -> { return handleCommentStart(css, index); }
             case COMMENT -> { return handleComment(css, index); }
-            case COMMENT_END -> { return handleCommentEnd(css, index, lastNonCommentToken); }
+            case COMMENT_END -> { return handleCommentEnd(css, index, lastNonCommentToken, contextStack); }
         }
 
         return null;
@@ -83,8 +90,9 @@ public class CSSLexer {
     // Handling for each token type
 
     // SELECTOR: Handles characters after a selector: "div, span?"
-    private static CSSToken handleSelector(String css, int index) {
+    private static CSSToken handleSelector(String css, int index, List<BlockContext> contextStack) {
         if (css.charAt(index) == '{') {
+            contextStack.add(BlockContext.Selector);
             return new CSSToken(CSSTokenType.SELECTOR_OPEN_BRACKET, "{");
         }
 
@@ -92,25 +100,44 @@ public class CSSLexer {
     }
 
     // AT_RULE: Handles characters after an at rule: "@media?"
-    private static CSSToken handleAtRule(String css, int index) {
+    private static CSSToken handleAtRule(String css, int index, List<BlockContext> contextStack) {
         char c = css.charAt(index);
         if (Character.isWhitespace(c)) {
             return new CSSToken(CSSTokenType.SKIP, StringUtils.whitespaceSubstring(css, index));
         } else if (css.charAt(index) == '{') {
-            return new CSSToken(CSSTokenType.AT_RULE_OPEN_BRACKET, "{");
+            // Check if previous token started with @media, in that case use nested at rule
+            int atIndex = StringUtils.prevIndexOf(css, "@", index);
+            if (atIndex == -1) {
+                return null;
+            } else if (StringUtils.substringMatch(css, "@media", atIndex)) {
+                contextStack.add(BlockContext.NestedAtRule);
+                return new CSSToken(CSSTokenType.AT_RULE_OPEN_BRACKET, "{");
+            } else {
+                contextStack.add(BlockContext.SingularAtRule);
+                return new CSSToken(CSSTokenType.AT_RULE_OPEN_BRACKET, "{");
+            }
         }
         return null;
     }
 
-    private static CSSToken handleAtRuleOpenBracket(String css, int index) {
+    private static CSSToken handleAtRuleOpenBracket(String css, int index, List<BlockContext> contextStack) {
         char c = css.charAt(index);
         if (Character.isWhitespace(c)) {
             return new CSSToken(CSSTokenType.SKIP, StringUtils.whitespaceSubstring(css, index));
         } else if (c == '}') {
+            contextStack.remove(contextStack.size() - 1);
             return new CSSToken(CSSTokenType.AT_RULE_CLOSE_BRACKET, '}');
         } else {
-            String selector = StringUtils.substringUntil(css, index, "{");
-            return new CSSToken(CSSTokenType.SELECTOR, selector);
+            int openIndex = css.indexOf("{", index);
+            int closeIndex = css.indexOf("}", index);
+            if (openIndex != -1 && openIndex < closeIndex) {
+                // If a new open bracket occurs before a close, assume this is a nested @rule.
+                String selector = StringUtils.substringUntil(css, index, "{");
+                return new CSSToken(CSSTokenType.SELECTOR, selector);
+            } else {
+                // Assume this is not a nested @rule.
+                return handleSelectorOpenBracket(css, index, contextStack);
+            }
         }
     }
 
@@ -128,11 +155,14 @@ public class CSSLexer {
     }
 
     // OPEN_BRACKET: Handles characters after an opening bracket: "div, span {?"
-    private static CSSToken handleSelectorOpenBracket(String css, int index) {
-        String whitespace = StringUtils.whitespaceSubstring(css, index);
-        if (StringUtils.substringMatch(css, "}", index + whitespace.length())) {
+    private static CSSToken handleSelectorOpenBracket(String css, int index, List<BlockContext> contextStack) {
+        char c = css.charAt(index);
+        if (Character.isWhitespace(c)) {
+            return new CSSToken(CSSTokenType.SKIP, StringUtils.whitespaceSubstring(css, index));
+        } else if (c == '}') {
+            contextStack.remove(contextStack.size() - 1);
             return new CSSToken(CSSTokenType.SELECTOR_CLOSE_BRACKET, "}");
-        } else if (StringUtils.substringMatch(css, "/*", index + whitespace.length())) {
+        } else if (StringUtils.substringMatch(css, "/*", index)) {
             return new CSSToken(CSSTokenType.COMMENT_START, "/*");
         }
         String propertyName = StringUtils.substringUntil(css, index, ":");
@@ -154,24 +184,30 @@ public class CSSLexer {
     }
 
     // PROPERTY_VALUE: Handles characters after a property value: "div, span { font-size: 10px?"
-    private static CSSToken handlePropertyValue(String css, int index) {
+    private static CSSToken handlePropertyValue(String css, int index, List<BlockContext> contextStack) {
         if (css.charAt(index) == ';') {
             return new CSSToken(CSSTokenType.SEMI_COLON, ";");
         } else if (css.charAt(index) == '}') {
+            contextStack.remove(contextStack.size() - 1);
             return new CSSToken(CSSTokenType.SELECTOR_CLOSE_BRACKET, '}');
         }
         return null;
     }
 
     // SEMI_COLON: Handles characters after a property semicolon: "div, span { font-size: 10px;?"
-    private static CSSToken handleSemiColon(String css, int index) {
+    private static CSSToken handleSemiColon(String css, int index, List<BlockContext> contextStack) {
         char c = css.charAt(index);
         if (Character.isWhitespace(c)) {
             return new CSSToken(CSSTokenType.SKIP, StringUtils.whitespaceSubstring(css, index));
         }
 
         if (c == '}') {
-            return new CSSToken(CSSTokenType.SELECTOR_CLOSE_BRACKET, '}');
+            BlockContext currentContext = contextStack.remove(contextStack.size() - 1);
+            if (currentContext.equals(BlockContext.SingularAtRule)) {
+                return new CSSToken(CSSTokenType.AT_RULE_CLOSE_BRACKET, '}');
+            } else {
+                return new CSSToken(CSSTokenType.SELECTOR_CLOSE_BRACKET, '}');
+            }
         }
 
         // TODO check for next char being : or ;
@@ -181,14 +217,15 @@ public class CSSLexer {
     }
 
     // CLOSE_BRACKET: Handles characters after a close bracket: "div, span { font-size: 10px; }?"
-    private static CSSToken handleSelectorCloseBracket(String css, int index) {
+    private static CSSToken handleSelectorCloseBracket(String css, int index, List<BlockContext> contextStack) {
         char c = css.charAt(index);
         if (Character.isWhitespace(c)) {
             return new CSSToken(CSSTokenType.SKIP, StringUtils.whitespaceSubstring(css, index));
         } else if (c == '@') {
-            String mediaQuery = StringUtils.substringUntil(css, index, "{");
-            return new CSSToken(CSSTokenType.AT_RULE, mediaQuery);
+            String atRule = StringUtils.substringUntil(css, index, "{");
+            return new CSSToken(CSSTokenType.AT_RULE, atRule.trim());
         } else if (c == '}') {
+            contextStack.remove(contextStack.size() - 1);
             return new CSSToken(CSSTokenType.AT_RULE_CLOSE_BRACKET, '}');
         } else {
             String selector = StringUtils.substringUntil(css, index, "{");
@@ -212,13 +249,13 @@ public class CSSLexer {
     }
 
     // COMMENT_END Handles characters after a comment end: "/*comment*/?"
-    private static CSSToken handleCommentEnd(String css, int index, CSSTokenType lastNonCommentToken) {
+    private static CSSToken handleCommentEnd(String css, int index, CSSTokenType lastNonCommentToken, List<BlockContext> contextStack) {
         char c = css.charAt(index);
         if (Character.isWhitespace(c)) {
             String whitespace = StringUtils.whitespaceSubstring(css, index);
             return new CSSToken(CSSTokenType.SKIP, whitespace);
         } else {
-            return getToken(css, index, lastNonCommentToken, null);
+            return getToken(css, index, lastNonCommentToken, null, contextStack);
         }
     }
 

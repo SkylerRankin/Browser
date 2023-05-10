@@ -11,6 +11,7 @@ import browser.css.CSSStyle;
 public class CSSConstants {
 
     public static final String IMPORTANT = "!important";
+    public static final float BASE_FONT_SIZE = 16;
 
     public enum SelectorType {
         UNIVERSAL,
@@ -162,7 +163,6 @@ public class CSSConstants {
     );
 
     public static Set<String> inheritedProperties = Set.of(
-            "background-color",
             "color",
             "font-family",
             "font-size",

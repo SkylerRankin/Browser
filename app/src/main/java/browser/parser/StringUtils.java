@@ -108,8 +108,6 @@ public class StringUtils {
             return false;
         }
         for (int i = startIndex; i < Math.min(string.length(), startIndex + match.length()); i++) {
-            char c = string.charAt(i);
-            char c2 = match.charAt(i - startIndex);
             if (string.charAt(i) != match.charAt(i - startIndex)) {
                 return false;
             }
@@ -124,6 +122,18 @@ public class StringUtils {
             } catch (IllegalArgumentException ignored) {}
         }
         return null;
+    }
+
+    public static int prevIndexOf(String base, String search, int start) {
+        if (start < 0 || start >= base.length()) {
+            return -1;
+        }
+        for (int i = start; i >= 0; i--) {
+            if (substringMatch(base, search, i)) {
+                return i;
+            }
+        }
+        return -1;
     }
 
 }

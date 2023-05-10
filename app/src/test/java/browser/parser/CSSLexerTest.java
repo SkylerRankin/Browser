@@ -132,7 +132,36 @@ public class CSSLexerTest {
                 new CSSToken(CSSLexer.CSSTokenType.SELECTOR_CLOSE_BRACKET, "}"),
                 new CSSToken(CSSLexer.CSSTokenType.AT_RULE_CLOSE_BRACKET, "}")
         );
-        logTokenLists(expectedTokens, tokens);
+        assertTokenListsEqual(expectedTokens, tokens);
+    }
+
+    @Test
+    public void fontAtRule() {
+        String css = "h1 { width: 1px; }\n@font { font-family: 'font'; } h2 { width: 2px; }";
+        List<CSSToken> tokens = CSSLexer.getTokens(css);
+        List<CSSToken> expectedTokens = List.of(
+                new CSSToken(CSSLexer.CSSTokenType.SELECTOR, "h1"),
+                new CSSToken(CSSLexer.CSSTokenType.SELECTOR_OPEN_BRACKET, "{"),
+                new CSSToken(CSSLexer.CSSTokenType.PROPERTY_NAME, "width"),
+                new CSSToken(CSSLexer.CSSTokenType.COLON, ":"),
+                new CSSToken(CSSLexer.CSSTokenType.PROPERTY_VALUE, "1px"),
+                new CSSToken(CSSLexer.CSSTokenType.SEMI_COLON, ";"),
+                new CSSToken(CSSLexer.CSSTokenType.SELECTOR_CLOSE_BRACKET, "}"),
+                new CSSToken(CSSLexer.CSSTokenType.AT_RULE, "@font"),
+                new CSSToken(CSSLexer.CSSTokenType.AT_RULE_OPEN_BRACKET, "{"),
+                new CSSToken(CSSLexer.CSSTokenType.PROPERTY_NAME, "font-family"),
+                new CSSToken(CSSLexer.CSSTokenType.COLON, ":"),
+                new CSSToken(CSSLexer.CSSTokenType.PROPERTY_VALUE, "'font'"),
+                new CSSToken(CSSLexer.CSSTokenType.SEMI_COLON, ";"),
+                new CSSToken(CSSLexer.CSSTokenType.AT_RULE_CLOSE_BRACKET, "}"),
+                new CSSToken(CSSLexer.CSSTokenType.SELECTOR, "h2"),
+                new CSSToken(CSSLexer.CSSTokenType.SELECTOR_OPEN_BRACKET, "{"),
+                new CSSToken(CSSLexer.CSSTokenType.PROPERTY_NAME, "width"),
+                new CSSToken(CSSLexer.CSSTokenType.COLON, ":"),
+                new CSSToken(CSSLexer.CSSTokenType.PROPERTY_VALUE, "2px"),
+                new CSSToken(CSSLexer.CSSTokenType.SEMI_COLON, ";"),
+                new CSSToken(CSSLexer.CSSTokenType.SELECTOR_CLOSE_BRACKET, "}")
+        );
         assertTokenListsEqual(expectedTokens, tokens);
     }
 

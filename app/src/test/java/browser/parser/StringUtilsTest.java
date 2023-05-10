@@ -37,4 +37,13 @@ public class StringUtilsTest {
         assertEquals("abcde", StringUtils.substringUntilSpaceOrString("abcdefg", 0, List.of("g", "f")));
     }
 
+    @Test
+    public void prevIndexOf() {
+        assertEquals(0, StringUtils.prevIndexOf("abcde", "a", 4));
+        assertEquals(0, StringUtils.prevIndexOf("abcde", "ab", 4));
+        assertEquals(1, StringUtils.prevIndexOf("abcde", "bcd", 4));
+        assertEquals(-1, StringUtils.prevIndexOf("abcde", "ac", 4));
+        assertEquals(2, StringUtils.prevIndexOf("abcdefgh", "cde", 6));
+    }
+
 }

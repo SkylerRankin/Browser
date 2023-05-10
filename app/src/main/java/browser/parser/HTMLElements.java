@@ -62,6 +62,7 @@ public class HTMLElements {
     public static final String WBR = "wbr";
     public static final String SCRIPT = "script";
     public static final String NO_SCRIPT = "noscript";
+    public static final String MJX_CONTAINER = "mjx-container";
 
     public static final String PSEUDO_MARKER = "marker";
     public static final String ANONYMOUS = "anonymous";

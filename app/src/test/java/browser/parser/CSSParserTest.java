@@ -367,6 +367,41 @@ public class CSSParserTest {
         assertEquals(expectedDeclarations, rules.get(group));
     }
 
+    @Test
+    public void ignoreAtFont() {
+        String css = "h1 { width: 1px; }\n@font { font-family: 'font'; } h2 { width: 2px; }";
+        Map<CSSSelectorGroup, Map<String, String>> rules = CSSParser.parseRules(css);
+
+        CSSSelectorGroup group1 = new CSSSelectorGroup();
+        group1.selectors.add(new CSSSelector(List.of(new CSSUnitSelector(SelectorType.TYPE, "h1"))));
+        Map<String, String> declarations1 = Map.of("width", "1px");
+
+        CSSSelectorGroup group2 = new CSSSelectorGroup();
+        group2.selectors.add(new CSSSelector(List.of(new CSSUnitSelector(SelectorType.TYPE, "h2"))));
+        Map<String, String> declarations2 = Map.of("width", "2px");
+
+        assertEquals(2, rules.size());
+        assertTrue(rules.containsKey(group1));
+        assertEquals(declarations1, rules.get(group1));
+        assertTrue(rules.containsKey(group2));
+        assertEquals(declarations2, rules.get(group2));
+    }
+
+    @Test
+    public void emptySelectorBlock() {
+        String css = "div.sourceCode\n {   }\n";
+        Map<CSSSelectorGroup, Map<String, String>> rules = CSSParser.parseRules(css);
+
+        CSSSelectorGroup group = new CSSSelectorGroup();
+        group.selectors.add(new CSSSelector(List.of(
+                new CSSUnitSelector(SelectorType.TYPE, "div"),
+                new CSSUnitSelector(SelectorType.CLASS, "sourceCode"))));
+
+        assertEquals(1, rules.size());
+        assertTrue(rules.containsKey(group));
+        assertEquals(Map.of(), rules.get(group));
+    }
+
     private String rulesToString(Map<CSSSelectorGroup, Map<String, String>> rules) {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(String.format("Rules (%d):\n", rules.size()));

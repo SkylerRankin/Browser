@@ -17,6 +17,7 @@ import browser.renderer.ImageCache;
 
 public class BoxLayoutGenerator {
 
+    private float baseScreenWidth;
     private float screenWidth;
     private final Map<Integer, InlineFormattingContext> inlineFormattingContexts = new HashMap<>();
     private final Map<Integer, BlockFormattingContext> blockFormattingContexts = new HashMap<>();
@@ -112,11 +113,12 @@ public class BoxLayoutGenerator {
             }
 
             if (style.width != null) {
-                float widthSpacing = (boxNode.parent == null ? 0 : boxNode.parent.style.paddingLeft + boxNode.parent.style.paddingRight) +
+                float widthSpacing = (boxNode.parent == null ? 0 : boxNode.parent.style.paddingLeft + boxNode.parent.style.paddingRight +
+                        boxNode.parent.style.borderWidthLeft + boxNode.parent.style.borderWidthRight) +
                         boxNode.style.marginLeft + boxNode.style.marginRight;
                 if (style.widthType.equals(CSSStyle.DimensionType.PERCENTAGE)) {
-                    float parentWidth = boxNode.parent == null ? screenWidth : boxNode.parent.width;
-                    boxNode.width = Math.max(0, (parentWidth * style.width / 100) - widthSpacing);
+                    float parentWidth = boxNode.parent == null ? screenWidth : (boxNode.parent.width - widthSpacing);
+                    boxNode.width = Math.max(0, (parentWidth * style.width / 100));
                 } else {
                     boxNode.width = style.width;
                 }
@@ -191,7 +193,9 @@ public class BoxLayoutGenerator {
                         boxNode.parent.style.borderWidthLeft - boxNode.parent.style.paddingLeft - boxNode.style.marginLeft -
                         boxNode.parent.style.borderWidthRight - boxNode.parent.style.paddingRight - boxNode.style.marginRight;
             }
+            float currentScreenWidth = screenWidth;
             boxNode.width = inlineBlockWidthCalculator.getWidth(boxNode, availableWidth);
+            screenWidth = currentScreenWidth;
         }
 
         boolean isTable = boxNode.innerDisplayType.equals(DisplayType.TABLE);
@@ -199,7 +203,9 @@ public class BoxLayoutGenerator {
             float availableWidth = boxNode.parent == null ? screenWidth : boxNode.parent.width -
                     boxNode.parent.style.borderWidthLeft - boxNode.parent.style.paddingLeft - boxNode.style.marginLeft -
                     boxNode.parent.style.borderWidthRight - boxNode.parent.style.paddingRight - boxNode.style.marginRight;
+            float currentScreenWidth = screenWidth;
             tableLayoutFormatter.setTableWidths(boxNode, availableWidth, tableFormattingContexts.get(boxNode.tableFormattingContextId));
+            screenWidth = currentScreenWidth;
         }
 
         for (BoxNode child : boxNode.children) {
@@ -629,22 +635,22 @@ public class BoxLayoutGenerator {
      * @param boxNode       The box to adjust.
      */
     private void applyAutoMargins(BoxNode boxNode) {
-          boolean isBlock = boxNode.outerDisplayType.equals(DisplayType.BLOCK);
-          if (isBlock) {
-              float availableWidth = screenWidth;
-              if (boxNode.parent != null) {
-                  CSSStyle parentStyle = boxNode.parent.style;
-                  availableWidth = boxNode.parent.width - parentStyle.borderWidthLeft - parentStyle.paddingLeft - parentStyle.borderWidthRight - parentStyle.paddingRight;
-              }
-
-              if (boxNode.style.marginLeftType.equals(CSSStyle.MarginType.AUTO) && boxNode.style.marginRightType.equals(CSSStyle.MarginType.AUTO)) {
-                  float diff = availableWidth - boxNode.width;
-                  moveBoxAndDescendants(boxNode, new Vector2(diff / 2, 0));
-              } else if (boxNode.style.marginLeftType.equals(CSSStyle.MarginType.AUTO)) {
-                  float diff = availableWidth - boxNode.width - boxNode.style.marginRight;
-                  moveBoxAndDescendants(boxNode, new Vector2(diff, 0));
-              }
+        boolean isBlock = boxNode.outerDisplayType.equals(DisplayType.BLOCK);
+        if (isBlock) {
+          float availableWidth = screenWidth;
+          if (boxNode.parent != null) {
+              CSSStyle parentStyle = boxNode.parent.style;
+              availableWidth = boxNode.parent.width - parentStyle.borderWidthLeft - parentStyle.paddingLeft - parentStyle.borderWidthRight - parentStyle.paddingRight;
           }
+
+          if (boxNode.style.marginLeftType.equals(CSSStyle.MarginType.AUTO) && boxNode.style.marginRightType.equals(CSSStyle.MarginType.AUTO)) {
+              float diff = availableWidth - boxNode.width;
+              moveBoxAndDescendants(boxNode, new Vector2(diff / 2, 0));
+          } else if (boxNode.style.marginLeftType.equals(CSSStyle.MarginType.AUTO)) {
+              float diff = availableWidth - boxNode.width - boxNode.style.marginRight;
+              moveBoxAndDescendants(boxNode, new Vector2(diff, 0));
+          }
+        }
 
         for (BoxNode child : boxNode.children) {
             applyAutoMargins(child);

@@ -1,7 +1,5 @@
 package browser.parser;
 
-import static browser.constants.CSSConstants.MediaQueryOperator;
-
 import java.util.*;
 import java.util.regex.Matcher;
 
@@ -27,7 +25,7 @@ public class CSSParser {
 
             switch (nextToken.type) {
                 case AT_RULE -> {
-                    switch (parseAtRuleType(nextToken.value.trim())) {
+                    switch (parseAtRuleType(nextToken.value.trim(), tokenIterator)) {
                         case "@media" -> {
                             currentMediaExpression = MediaQueryParser.getExpression(nextToken.value.trim());
                         }
@@ -269,7 +267,7 @@ public class CSSParser {
         }
     }
 
-    private static String parseAtRuleType(String text) {
+    private static String parseAtRuleType(String text, ListIterator<CSSToken> tokenIterator) {
         String invalidType = "invalid";
         if (text == null || text.isBlank()) {
             return invalidType;
@@ -281,6 +279,15 @@ public class CSSParser {
         } else {
             System.err.printf("Unsupported at-rule \"%s\". Ignoring.\n", text);
             return invalidType;
+        }
+    }
+
+    public static void printRules(Map<CSSSelectorGroup, Map<String, String>> rules) {
+        for (CSSSelectorGroup group : rules.keySet()) {
+            System.out.printf("%s:\n", group);
+            for (Map.Entry<String, String> e : rules.get(group).entrySet()) {
+                System.out.printf("\t%s: %s\n", e.getKey(), e.getValue());
+            }
         }
     }
 

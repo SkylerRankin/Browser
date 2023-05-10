@@ -107,16 +107,16 @@ public class HTMLRenderer {
 
     private static void drawBorder(GraphicsContext gc, BoxNode node) {
         if (node.style.borderWidthTop > 0 && !node.style.borderStyleTop.equals(CSSStyle.BorderStyle.NONE)) {
-            fillRect(gc, node.style.borderColorTop, node.x - node.style.borderWidthLeft, node.y - node.style.borderWidthTop, node.width + node.style.borderWidthLeft + node.style.borderWidthRight, node.style.borderWidthTop);
+            fillRect(gc, node.style.borderColorTop, node.x, node.y, node.width, node.style.borderWidthTop);
         }
         if (node.style.borderWidthBottom > 0 && !node.style.borderStyleBottom.equals(CSSStyle.BorderStyle.NONE)) {
-            fillRect(gc, node.style.borderColorBottom, node.x  - node.style.borderWidthLeft, node.y + node.height, node.width + node.style.borderWidthLeft + node.style.borderWidthRight, node.style.borderWidthTop);
+            fillRect(gc, node.style.borderColorBottom, node.x, node.y + node.height - node.style.borderWidthBottom, node.width, node.style.borderWidthTop);
         }
         if (node.style.borderWidthLeft > 0 && !node.style.borderStyleLeft.equals(CSSStyle.BorderStyle.NONE)) {
-            fillRect(gc, node.style.borderColorLeft, node.x - node.style.borderWidthLeft, node.y, node.style.borderWidthLeft, node.height);
+            fillRect(gc, node.style.borderColorLeft, node.x, node.y, node.style.borderWidthLeft, node.height);
         }
         if (node.style.borderWidthRight > 0 && !node.style.borderStyleRight.equals(CSSStyle.BorderStyle.NONE)) {
-            fillRect(gc, node.style.borderColorRight, node.x + node.width, node.y, node.style.borderWidthRight, node.height);
+            fillRect(gc, node.style.borderColorRight, node.x + node.width - node.style.borderWidthRight, node.y, node.style.borderWidthRight, node.height);
         }
     }
     

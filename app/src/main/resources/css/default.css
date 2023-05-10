@@ -1,4 +1,5 @@
 body {
+    background-color: white;
 	padding: 10px;
 	display: block;
 }
@@ -225,4 +226,8 @@ abbr {
 
 footer {
     display: block;
+}
+
+u {
+    display: inline;
 }
