@@ -1,5 +1,7 @@
 package browser.css;
 
+import static browser.constants.CSSConstants.*;
+
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
@@ -11,8 +13,6 @@ import browser.parser.StringUtils;
 
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
-
-import static browser.constants.CSSConstants.*;
 
 @EqualsAndHashCode
 @ToString
@@ -661,9 +661,9 @@ public class CSSStyle {
     public void apply(String property, String value, CSSSpecificity specificity) {
         boolean existingImportance = propertyImportant.containsKey(property) && propertyImportant.get(property);
         boolean important = false;
-        if (property.endsWith(IMPORTANT)) {
+        if (value.endsWith(IMPORTANT)) {
             important = true;
-            property = property.substring(0, property.length() - IMPORTANT.length()).trim();
+            value = value.substring(0, value.length() - IMPORTANT.length()).trim();
         }
 
         boolean specificityOverride = !propertySpecificity.containsKey(property) ||
