@@ -46,4 +46,12 @@ public class StringUtilsTest {
         assertEquals(2, StringUtils.prevIndexOf("abcdefgh", "cde", 6));
     }
 
+    @Test
+    public void splitStringIncludeEmpty() {
+        assertEquals(List.of("", "test", "test", ""), StringUtils.splitStringIncludeEmpty("\ntest\r\ntest\n", List.of("\n", "\r\n")));
+        assertEquals(List.of("", "", "", "test"), StringUtils.splitStringIncludeEmpty("\n\r\n\ntest", List.of("\n", "\r\n")));
+        assertEquals(List.of("", "", "e", "", ""), StringUtils.splitStringIncludeEmpty("abcdebcda", List.of("a", "bcd")));
+        assertEquals(List.of("", "test"), StringUtils.splitStringIncludeEmpty("\ntest", List.of("\n")));
+    }
+
 }

@@ -253,11 +253,11 @@ public class BoxTreeGenerator {
         if (inPre && boxNode.isTextNode) {
             List<BoxNode> newTextBoxes = new ArrayList<>();
             String text = boxNode.correspondingRenderNode.text.substring(boxNode.textStartIndex, boxNode.textEndIndex);
-            String[] lines = text.split("\\r?\\n");
-            if (lines.length > 1) {
+            List<String> lines = StringUtils.splitStringIncludeEmpty(text, List.of("\r\n", "\n"));
+            if (lines.size() > 1) {
                 int index = 0;
-                for (int i = 0; i < lines.length; i++) {
-                    String line = lines[i];
+                for (int i = 0; i < lines.size(); i++) {
+                    String line = lines.get(i);
                     if (!line.isEmpty()) {
                         BoxNode textLineBox = new BoxNode(boxNode);
                         textLineBox.isAnonymous = true;
@@ -267,7 +267,7 @@ public class BoxTreeGenerator {
                         newTextBoxes.add(textLineBox);
                     }
 
-                    if (i < lines.length - 1) {
+                    if (i < lines.size() - 1) {
                         RenderNode lineBreakRenderNode = new RenderNode(HTMLElements.BR);
                         lineBreakRenderNode.id = RenderNode.nextId++;
 

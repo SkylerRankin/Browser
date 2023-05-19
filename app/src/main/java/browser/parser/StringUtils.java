@@ -1,5 +1,6 @@
 package browser.parser;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class StringUtils {
@@ -134,6 +135,40 @@ public class StringUtils {
             }
         }
         return -1;
+    }
+
+    /**
+     * Splits a string on a set of delimiters, but includes any resulting empty strings between delimiters as well as
+     * at the start/end of the string. Delimiters are checked in the provided order, which might have implications if
+     * some are prefixes of others.
+     * @param text      The string to split.
+     * @param delimiters        The delimiters to split on.
+     * @return      A list of strings.
+     */
+    public static List<String> splitStringIncludeEmpty(String text, List<String> delimiters) {
+        List<String> lines = new ArrayList<>();
+
+        int start = 0;
+        int end = 0;
+
+        while (end < text.length()) {
+            boolean foundDelimiter = false;
+            for (String delimiter : delimiters) {
+                if (substringMatch(text, delimiter, end)) {
+                    lines.add(text.substring(start, end));
+                    start = end + delimiter.length();
+                    end = start;
+                    foundDelimiter = true;
+                    break;
+                }
+            }
+            if (!foundDelimiter) {
+                end++;
+            }
+        }
+        lines.add(text.substring(start, end));
+
+        return lines;
     }
 
 }
