@@ -231,3 +231,15 @@ footer {
 u {
     display: inline;
 }
+
+*[align=left] {
+    text-align: -webkit-left;
+}
+
+*[align=center] {
+    text-align: -webkit-center;
+}
+
+*[align=right] {
+    text-align: -webkit-right;
+}
