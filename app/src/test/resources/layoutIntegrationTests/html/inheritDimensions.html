@@ -1,0 +1,42 @@
+<html>
+<head>
+    <style>
+            body {
+                width: 100px;
+                padding: 0px;
+                margin: 0px;
+                font-size: 12px;
+                font-family: Consolas;
+            }
+
+            .div1 {
+                width: 50%;
+                height: 50px;
+                background-color: bisque;
+            }
+
+            .div2 {
+                width: inherit;
+                height: 50px;
+                background-color: coral;
+            }
+
+            .div3 {
+                width: 50px;
+                height: inherit;
+                background-color: coral;
+            }
+
+        </style>
+</head>
+<body>
+    <div class="div1">
+        <!-- Should inherit width=25% -->
+        <div class="div2"></div>
+    </div>
+    <div class="div1">
+        <!-- Should inherit height=50px -->
+        <div class="div3">0</div>
+    </div>
+</body>
+</html>

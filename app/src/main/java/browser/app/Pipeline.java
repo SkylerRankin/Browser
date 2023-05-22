@@ -91,7 +91,7 @@ public class Pipeline {
 
             // Insert list markers, propagate any CSS to them, and update their content.
             ListMarkerGenerator.addMarkers(rootRenderNode);
-            cssLoader.applyAllCSS(rootRenderNode);
+            // TODO apply styles to marker nodes.
             ListMarkerGenerator.setMarkerStyles(rootRenderNode);
 
             BoxTreeGenerator boxTreeGenerator = new BoxTreeGenerator();

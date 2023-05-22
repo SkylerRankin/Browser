@@ -51,7 +51,7 @@ public class CSSStyleTest {
         for (int i = 0; i < properties.size(); i++) {
             CSSStyle style = new CSSStyle();
             style.setProperty(properties.get(i).get(0), properties.get(i).get(1));
-            style.finalizeCSS();
+            style.setComputedValues();
             assertEquals(displayTypes.get(i).get(0), style.outerDisplay);
             assertEquals(displayTypes.get(i).get(1), style.innerDisplay);
         }
@@ -72,7 +72,7 @@ public class CSSStyleTest {
         for (int i = 0; i < properties.size(); i++) {
             CSSStyle style = new CSSStyle();
             style.setProperty(properties.get(i).get(0), properties.get(i).get(1));
-            style.finalizeCSS();
+            style.setComputedValues();
             assertEquals(displayTypes.get(i).get(0), style.outerDisplay);
             assertEquals(displayTypes.get(i).get(1), style.innerDisplay);
             assertEquals(displayTypes.get(i).get(2), style.auxiliaryDisplay);
@@ -92,7 +92,7 @@ public class CSSStyleTest {
         for (String borderValue : permutations) {
             CSSStyle style = new CSSStyle();
             style.setProperty("border", borderValue);
-            style.finalizeCSS();
+            style.setComputedValues();
             assertEquals(1, style.borderWidthLeft);
             assertEquals(1, style.borderWidthRight);
             assertEquals(1, style.borderWidthTop);

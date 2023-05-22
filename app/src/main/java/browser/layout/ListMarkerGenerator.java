@@ -23,8 +23,10 @@ public class ListMarkerGenerator {
     public static void addMarkers(RenderNode renderNode) {
         if (renderNode.style.auxiliaryDisplay != null && renderNode.style.auxiliaryDisplay.equals(CSSStyle.DisplayType.LIST_ITEM)) {
             RenderNode marker = new RenderNode(HTMLElements.PSEUDO_MARKER);
+            marker.style = renderNode.style.deepCopy();
             marker.id = -1;
             // TODO Set the marker display properties from the user agent CSS.
+            // TODO should this set the properties map or display field directly?
             marker.style.outerDisplay = CSSStyle.DisplayType.BLOCK;
             marker.style.innerDisplay = CSSStyle.DisplayType.FLOW;
             // Apply the font size property rather than setting the value directly. Using apply sets the precedent

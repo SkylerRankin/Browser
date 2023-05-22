@@ -1,16 +1,15 @@
 package browser.constants;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Pattern;
 
 import browser.css.CSSStyle;
+import browser.model.CSSColor;
 
 public class CSSConstants {
 
     public static final String IMPORTANT = "!important";
+    public static final String INHERIT = "inherit";
     public static final float BASE_FONT_SIZE = 16;
 
     public enum SelectorType {
@@ -177,6 +176,14 @@ public class CSSConstants {
             Map.entry("-webkit-right", CSSStyle.TextAlign.WEBKIT_RIGHT)
     );
 
+    public static List<String> textNodeInheritedProperties = List.of(
+            "font-size",
+            "font-weight",
+            "font-style",
+            "font-family",
+            "color"
+    );
+
     /**
      * Convert a CSS display type string into the matching display type enum value.
      * @param text      A CSS display type string.
@@ -197,5 +204,118 @@ public class CSSConstants {
     public static List<CSSStyle.DisplayType> getDisplayTypeOverride(CSSStyle.DisplayType type) {
         return displayTypeOverrides.getOrDefault(type, null);
     }
+
+    public static Map<String, Object> getDefaultProperties() {
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("background-color", new CSSColor("rgba(0, 0, 0, 0)"));
+        properties.put("border-color-top", new CSSColor("Black"));
+        properties.put("border-color-bottom", new CSSColor("Black"));
+        properties.put("border-color-left", new CSSColor("Black"));
+        properties.put("border-color-right", new CSSColor("Black"));
+        properties.put("border-width-top", 0);
+        properties.put("border-width-bottom", 0);
+        properties.put("border-width-left", 0);
+        properties.put("border-width-right", 0);
+        properties.put("border-style-top", CSSStyle.BorderStyle.NONE);
+        properties.put("border-style-bottom", CSSStyle.BorderStyle.NONE);
+        properties.put("border-style-right", CSSStyle.BorderStyle.NONE);
+        properties.put("border-style-left", CSSStyle.BorderStyle.NONE);
+        properties.put("box-sizing", CSSStyle.BoxSizingType.CONTENT_BOX);
+        properties.put("border-spacing", 2);
+        properties.put("color", new CSSColor("Black"));
+        properties.put("display", CSSStyle.DisplayType.BLOCK);
+        properties.put("inner-display", CSSStyle.DisplayType.FLOW);
+        properties.put("outer-display", CSSStyle.DisplayType.BLOCK);
+        properties.put("auxiliary-display", CSSStyle.DisplayType.NONE);
+        properties.put("position", CSSStyle.PositionType.RELATIVE);
+        properties.put("font-family", "Times New Roman");
+        properties.put("font-size", BASE_FONT_SIZE);
+        properties.put("font-style", CSSStyle.fontStyleType.NORMAL);
+        properties.put("font-weight", CSSStyle.fontWeightType.NORMAL);
+        properties.put("height-type", CSSStyle.DimensionType.PIXEL);
+        properties.put("height", null);
+        properties.put("margin-top", 0);
+        properties.put("margin-top-type", CSSStyle.MarginType.LENGTH);
+        properties.put("margin-top-unit", LengthUnit.PX);
+        properties.put("margin-bottom", 0);
+        properties.put("margin-bottom-type", CSSStyle.MarginType.LENGTH);
+        properties.put("margin-bottom-unit", LengthUnit.PX);
+        properties.put("margin-left", 0);
+        properties.put("margin-left-type", CSSStyle.MarginType.LENGTH);
+        properties.put("margin-left-unit", LengthUnit.PX);
+        properties.put("margin-right", 0);
+        properties.put("margin-right-type", CSSStyle.MarginType.LENGTH);
+        properties.put("margin-right-unit", LengthUnit.PX);
+        properties.put("max-height", null);
+        properties.put("max-height-type", CSSStyle.DimensionType.PIXEL);
+        properties.put("max-width", null);
+        properties.put("max-width-type", CSSStyle.DimensionType.PIXEL);
+        properties.put("padding-top", 0);
+        properties.put("padding-top-type", CSSStyle.PaddingType.LENGTH);
+        properties.put("padding-top-unit", LengthUnit.PX);
+        properties.put("padding-bottom", 0);
+        properties.put("padding-bottom-type", CSSStyle.PaddingType.LENGTH);
+        properties.put("padding-bottom-unit", LengthUnit.PX);
+        properties.put("padding-left", 0);
+        properties.put("padding-left-type", CSSStyle.PaddingType.LENGTH);
+        properties.put("padding-left-unit", LengthUnit.PX);
+        properties.put("padding-right", 0);
+        properties.put("padding-right-type", CSSStyle.PaddingType.LENGTH);
+        properties.put("padding-right-unit", LengthUnit.PX);
+        properties.put("text-align", CSSStyle.TextAlign.LEFT);
+        properties.put("width", null);
+        properties.put("width-type", CSSStyle.DimensionType.PIXEL);
+        properties.put("word-wrap", CSSStyle.wordWrapType.NORMAL);
+        return properties;
+    }
+
+
+    /**
+     * Maps each property name to the list of fields that the property will set within a CSSStyle object. For instance,
+     * the "height" property will actually set "height" and "height-type".
+     */
+    public static Map<String, List<String>> propertyNameToSetFields = Map.ofEntries(
+            Map.entry("background", List.of("background-color")),
+            Map.entry("background-color", List.of("background-color")),
+            Map.entry("border", List.of("border-style-top", "border-style-right", "border-style-bottom", "border-style-left", "border-width-top", "border-width-right", "border-width-bottom", "border-width-left", "border-color-top", "border-color-right", "border-color-bottom", "border-color-left")),
+            Map.entry("border-color", List.of("border-color-top", "border-color-right", "border-color-bottom", "border-color-left")),
+            Map.entry("border-width", List.of("border-width-top", "border-width-right", "border-width-bottom", "border-width-left")),
+            Map.entry("border-top", List.of("border-style-top", "border-width-top", "border-color-top")),
+            Map.entry("border-top-color", List.of("border-top-color")),
+            Map.entry("border-top-width", List.of("border-top-width")),
+            Map.entry("border-bottom", List.of("border-style-bottom", "border-width-bottom", "border-color-bottom")),
+            Map.entry("border-bottom-color", List.of("border-bottom-color")),
+            Map.entry("border-bottom-width", List.of("border-bottom-width")),
+            Map.entry("border-left", List.of("border-style-left", "border-width-left", "border-color-left")),
+            Map.entry("border-left-color", List.of("border-left-color")),
+            Map.entry("border-left-width", List.of("border-left-width")),
+            Map.entry("border-right", List.of("border-style-right", "border-width-right", "border-color-right")),
+            Map.entry("border-right-color", List.of("border-right-color")),
+            Map.entry("border-right-width", List.of("border-right-width")),
+            Map.entry("box-sizing", List.of("box-sizing")),
+            Map.entry("border-spacing", List.of("border-spacing")),
+            Map.entry("color", List.of("color")),
+            Map.entry("display", List.of("outer-display", "inner-display", "auxiliary-display")),
+            Map.entry("font-family", List.of("font-family")),
+            Map.entry("font-size", List.of("font-size")),
+            Map.entry("font-style", List.of("font-style")),
+            Map.entry("font-weight", List.of("font-weight")),
+            Map.entry("height", List.of("height", "height-type")),
+            Map.entry("margin", List.of("margin-top", "margin-left", "margin-bottom", "margin-right", "margin-top-type", "margin-left-type", "margin-bottom-type", "margin-right-type", "margin-top-unit", "margin-left-unit", "margin-bottom-unit", "margin-right-unit")),
+            Map.entry("margin-top", List.of("margin-top", "margin-top-type", "margin-top-unit")),
+            Map.entry("margin-right", List.of("margin-right", "margin-right-type", "margin-right-unit")),
+            Map.entry("margin-bottom", List.of("margin-bottom", "margin-bottom-type", "margin-bottom-unit")),
+            Map.entry("margin-left", List.of("margin-left", "margin-left-type", "margin-left-unit")),
+            Map.entry("max-width", List.of("max-width", "max-width-type")),
+            Map.entry("max-height", List.of("max-height", "max-height-type")),
+            Map.entry("padding", List.of("padding-top", "padding-top-type", "padding-top-unit", "padding-right", "padding-right-type", "padding-right-unit", "padding-bottom", "padding-bottom-type", "padding-bottom-unit", "padding-left", "padding-left-type", "padding-left-unit")),
+            Map.entry("padding-top", List.of("padding-top", "padding-top-type", "padding-top-unit")),
+            Map.entry("padding-right", List.of("padding-right", "padding-right-type", "padding-right-unit")),
+            Map.entry("padding-bottom", List.of("padding-bottom", "padding-bottom-type", "padding-bottom-unit")),
+            Map.entry("padding-left", List.of("padding-left", "padding-left-type", "padding-left-unit")),
+            Map.entry("position", List.of("position")),
+            Map.entry("text-align", List.of("text-align")),
+            Map.entry("width", List.of("width", "width-type"))
+            );
 
 }

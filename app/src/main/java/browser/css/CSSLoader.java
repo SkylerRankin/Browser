@@ -6,7 +6,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import browser.constants.CSSConstants;
 import browser.model.*;
@@ -32,12 +31,17 @@ public class CSSLoader {
 
     public void applyAllCSS(RenderNode root) {
         SelectorMatcher.clearCache();
+        // Apply all available CSS rules.
         loadDefaults(root);
         loadExternalCSS(root);
         loadStyleTags(root);
         applyInline(root);
-        propagateCSS(root);
-        finalizeCSS(root);
+        // Compute CSS values for each applied rule.
+        computeCSSProperties(root);
+        // Propagate inherited values.
+        propagateInheritedProperties(root);
+        // Set the class fields for each property.
+        setClassProperties(root);
     }
 
     // Private methods
@@ -159,38 +163,39 @@ public class CSSLoader {
         }
     }
 
-    /**
-     * Apply most of the rules of the parent to the child. In some cases, the CSS is not supposed
-     * to be inherited, such as with dimensions. Also, if the child has already set this property,
-     * then the parent should not override it.
-     * @param root
-     */
-    private void propagateCSS(RenderNode root) {
+    private void propagateInheritedProperties(RenderNode root) {
         if (root.parent != null) {
-            for (Entry<String, String> e : root.parent.style.getAllProperties().entrySet()) {
-                if (CSSConstants.inheritedProperties.contains(e.getKey())) {
-                    String property = e.getKey();
-                    CSSSpecificity parentSpecificity = root.parent.style.getPropertySpecificity(property).deepCopy();
-                    parentSpecificity.decrementInlineValue();
-                    if (root.type.equals(HTMLElements.TEXT)) {
-                        // Text nodes always take the parent's styling and are not involved with inheritance.
-                        root.style.apply(property, e.getValue(), parentSpecificity);
-                    } else {
-                        root.style.applyInherited(property, e.getValue(), parentSpecificity);
+            if (root.type.equals(HTMLElements.TEXT)) {
+                // Text nodes always inherit a subset of the parent's properties specific to text.
+                for (String property : CSSConstants.textNodeInheritedProperties) {
+                    root.style.applyInheritedComputed(property, root.parent.style.properties.get(property), true);
+                }
+            } else {
+                for (String property : root.parent.style.properties.keySet()) {
+                    if (root.style.shouldInheritProperty(property)) {
+                        Object computedValue = root.parent.style.properties.get(property);
+                        root.style.applyInheritedComputed(property, computedValue, false);
                     }
                 }
             }
         }
 
         for (RenderNode child : root.children) {
-            propagateCSS(child);
+            propagateInheritedProperties(child);
         }
     }
 
-    private void finalizeCSS(RenderNode root) {
-        root.style.finalizeCSS();
+    private void computeCSSProperties(RenderNode root) {
+        root.style.setComputedValues();
         for (RenderNode child : root.children) {
-            finalizeCSS(child);
+            computeCSSProperties(child);
+        }
+    }
+
+    private void setClassProperties(RenderNode root) {
+        root.style.setClassProperties();
+        for (RenderNode child : root.children) {
+            setClassProperties(child);
         }
     }
 

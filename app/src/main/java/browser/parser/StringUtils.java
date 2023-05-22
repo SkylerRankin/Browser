@@ -171,4 +171,20 @@ public class StringUtils {
         return lines;
     }
 
+    public static String hyphenatedToCamelCase(String s) {
+        s = s.toLowerCase();
+        StringBuilder result = new StringBuilder();
+        for (int i = 0; i < s.length(); i++) {
+            if (s.charAt(i) == '-') {
+                if (i < s.length() - 1 && s.charAt(i + 1) != '-') {
+                    result.append(s.substring(i + 1, i + 2).toUpperCase());
+                    i++;
+                }
+            } else {
+                result.append(s.charAt(i));
+            }
+        }
+        return result.toString();
+    }
+
 }

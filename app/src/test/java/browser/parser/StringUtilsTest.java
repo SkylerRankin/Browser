@@ -4,6 +4,8 @@ import static org.junit.Assert.*;
 
 import java.util.List;
 
+import browser.css.CSSStyle;
+import browser.layout.TextDimensionCalculator;
 import org.junit.Test;
 
 
@@ -52,6 +54,15 @@ public class StringUtilsTest {
         assertEquals(List.of("", "", "", "test"), StringUtils.splitStringIncludeEmpty("\n\r\n\ntest", List.of("\n", "\r\n")));
         assertEquals(List.of("", "", "e", "", ""), StringUtils.splitStringIncludeEmpty("abcdebcda", List.of("a", "bcd")));
         assertEquals(List.of("", "test"), StringUtils.splitStringIncludeEmpty("\ntest", List.of("\n")));
+    }
+
+    @Test
+    public void hyphenatedToCamelCase() {
+        assertEquals("fontSize", StringUtils.hyphenatedToCamelCase("font-size"));
+        assertEquals("marginTopWidth", StringUtils.hyphenatedToCamelCase("margin-top-width"));
+        assertEquals("fontSize", StringUtils.hyphenatedToCamelCase("font-size-"));
+        assertEquals("fontSize", StringUtils.hyphenatedToCamelCase("font---size"));
+        assertEquals("fontsize", StringUtils.hyphenatedToCamelCase("FontSize"));
     }
 
 }

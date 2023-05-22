@@ -2,6 +2,7 @@ package browser.css;
 
 import static browser.constants.CSSConstants.*;
 
+import java.lang.reflect.Field;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
@@ -18,10 +19,13 @@ import lombok.ToString;
 @ToString
 public class CSSStyle {
 
-    private final Map<String, String> properties = new HashMap<>();
-    private final Map<String, CSSSpecificity> propertySpecificity = new HashMap<>();
     private final Map<String, Boolean> propertyImportant = new HashMap<>();
     private final Set<String> inheritedProperties = new HashSet<>();
+    private final Set<String> propertiesToInherit = new HashSet<>(CSSConstants.inheritedProperties);
+
+    public final Map<String, String> propertyStrings = new HashMap<>();
+    public final Map<String, Object> properties = CSSConstants.getDefaultProperties();
+    public final Map<String, CSSSpecificity> propertySpecificity = new HashMap<>();
 
     public enum DimensionType { PIXEL, PERCENTAGE }
 
@@ -48,9 +52,9 @@ public class CSSStyle {
 
     public enum BoxSizingType { CONTENT_BOX, BORDER_BOX }
 
-    public static enum fontStyleType {NORMAL, ITALIC, ITALICS}
+    public enum fontStyleType {NORMAL, ITALIC, ITALICS}
 
-    public static enum fontWeightType {NORMAL, BOLD, OTHER}
+    public enum fontWeightType {NORMAL, BOLD, OTHER}
 
     public enum TextAlign {
         LEFT, CENTER, RIGHT,
@@ -59,7 +63,7 @@ public class CSSStyle {
 
 //    public static enum textDecorationType {NONE, OVERLINE, LINETHROUGH, UNDERLINE}
 
-    public static enum wordWrapType {NORMAL, BREAKWORD}
+    public enum wordWrapType {NORMAL, BREAKWORD}
 
     public enum MarginType {AUTO, LENGTH, PERCENTAGE}
 
@@ -154,11 +158,11 @@ public class CSSStyle {
     public wordWrapType wordWrap = wordWrapType.NORMAL;
     
     public void setProperty(String property, String value) {
-        properties.put(property, value);
+        propertyStrings.put(property, value);
     }
-    
-    public Map<String, String> getAllProperties() {
-        return properties;
+
+    public boolean shouldInheritProperty(String property) {
+        return propertiesToInherit.contains(property);
     }
 
     private Dimension parseSingleDimension(String text) {
@@ -231,10 +235,10 @@ public class CSSStyle {
         }
 
         switch (unit) {
-            case PX -> fontSize = length;
-            case PT -> fontSize = length * (1 + 1.0f / 3.0f);
-            case EM -> fontSize = (parentStyle == null ? fontSize : parentStyle.fontSize) * length;
-            case REM -> fontSize = BASE_FONT_SIZE * length;
+            case PX -> properties.put("font-size", length);
+            case PT -> properties.put("font-size", length * (1 + 1.0f / 3.0f));
+            case EM -> properties.put("font-size", (parentStyle == null ? (float) properties.get("font-size") : (float) parentStyle.properties.get("font-size")) * length);
+            case REM -> properties.put("font-size", BASE_FONT_SIZE * length);
         }
     }
 
@@ -258,15 +262,23 @@ public class CSSStyle {
                     borderStyle = BorderStyle.SOLID;
                 }
                 switch (direction) {
-                    case "top" -> borderStyleTop = borderStyle;
-                    case "right" -> borderStyleRight = borderStyle;
-                    case "bottom" -> borderStyleBottom = borderStyle;
-                    case "left" -> borderStyleLeft = borderStyle;
+                    case "top" -> {
+                        properties.put("border-style-top", borderStyle);
+                    }
+                    case "right" -> {
+                        properties.put("border-style-right", borderStyle);
+                    }
+                    case "bottom" -> {
+                        properties.put("border-style-bottom", borderStyle);
+                    }
+                    case "left" -> {
+                        properties.put("border-style-left", borderStyle);
+                    }
                     default -> {
-                        borderStyleTop = borderStyle;
-                        borderStyleRight = borderStyle;
-                        borderStyleBottom = borderStyle;
-                        borderStyleLeft = borderStyle;
+                        properties.put("border-style-top", borderStyle);
+                        properties.put("border-style-right", borderStyle);
+                        properties.put("border-style-bottom", borderStyle);
+                        properties.put("border-style-left", borderStyle);
                     }
                 }
             } else {
@@ -274,15 +286,23 @@ public class CSSStyle {
                 if (items[i].equals("0")) {
                     // Zero is a special case that does not require a unit.
                     switch (direction) {
-                        case "top" -> borderWidthTop = 0;
-                        case "right" -> borderWidthRight = 0;
-                        case "bottom" -> borderWidthBottom = 0;
-                        case "left" -> borderWidthLeft = 0;
+                        case "top" -> {
+                            properties.put("border-width-top", 0);
+                        }
+                        case "right" -> {
+                            properties.put("border-width-right", 0);
+                        }
+                        case "bottom" -> {
+                            properties.put("border-width-bottom", 0);
+                        }
+                        case "left" -> {
+                            properties.put("border-width-left", 0);
+                        }
                         default -> {
-                            borderWidthTop = 0;
-                            borderWidthRight = 0;
-                            borderWidthBottom = 0;
-                            borderWidthLeft = 0;
+                            properties.put("border-width-top", 0);
+                            properties.put("border-width-right", 0);
+                            properties.put("border-width-bottom", 0);
+                            properties.put("border-width-left", 0);
                         }
                     }
                 } else {
@@ -297,15 +317,23 @@ public class CSSStyle {
                                 length = 1;
                             }
                             switch (direction) {
-                                case "top" -> borderWidthTop = length;
-                                case "right" -> borderWidthRight = length;
-                                case "bottom" -> borderWidthBottom = length;
-                                case "left" -> borderWidthLeft = length;
+                                case "top" -> {
+                                    properties.put("border-width-top", length);
+                                }
+                                case "right" -> {
+                                    properties.put("border-width-right", length);
+                                }
+                                case "bottom" -> {
+                                    properties.put("border-width-bottom", length);
+                                }
+                                case "left" -> {
+                                    properties.put("border-width-left", length);
+                                }
                                 default -> {
-                                    borderWidthTop = length;
-                                    borderWidthRight = length;
-                                    borderWidthBottom = length;
-                                    borderWidthLeft = length;
+                                    properties.put("border-width-top", length);
+                                    properties.put("border-width-right", length);
+                                    properties.put("border-width-bottom", length);
+                                    properties.put("border-width-left", length);
                                 }
                             }
                             continue;
@@ -316,15 +344,23 @@ public class CSSStyle {
                     CSSColor color = CSSColor.getColor(items[i]);
                     if (color != null) {
                         switch (direction) {
-                            case "top" -> borderColorTop = color;
-                            case "right" -> borderColorRight = color;
-                            case "bottom" -> borderColorBottom = color;
-                            case "left" -> borderColorLeft = color;
+                            case "top" -> {
+                                properties.put("border-color-top", color);
+                            }
+                            case "right" -> {
+                                properties.put("border-color-right", color);
+                            }
+                            case "bottom" -> {
+                                properties.put("border-color-bottom", color);
+                            }
+                            case "left" -> {
+                                properties.put("border-color-left", color);
+                            }
                             default -> {
-                                borderColorTop = color;
-                                borderColorRight = color;
-                                borderColorBottom = color;
-                                borderColorLeft = color;
+                                properties.put("border-color-top", color);
+                                properties.put("border-color-right", color);
+                                properties.put("border-color-bottom", color);
+                                properties.put("border-color-left", color);
                             }
                         }
                     }
@@ -355,34 +391,34 @@ public class CSSStyle {
         if (CSSConstants.getDisplayType(text) != null) {
             DisplayType singleType = CSSConstants.getDisplayType(text);
             if (singleType.equals(DisplayType.NONE)) {
-                outerDisplay = DisplayType.NONE;
-                innerDisplay = DisplayType.NONE;
-                auxiliaryDisplay = DisplayType.NONE;
+                properties.put("outer-display", DisplayType.NONE);
+                properties.put("inner-display", DisplayType.NONE);
+                properties.put("auxiliary-display", DisplayType.NONE);
             } else if (CSSConstants.getDisplayTypeOverride(singleType) != null) {
                 // Some display types have mappings to inner/outer display types that are not evident from their names.
                 // For example, inline-block maps to inline flow-root.
                 List<DisplayType> types = CSSConstants.getDisplayTypeOverride(singleType);
-                outerDisplay = types.get(0);
-                innerDisplay = types.get(1);
+                properties.put("outer-display", types.get(0));
+                properties.put("inner-display", types.get(1));
                 if (types.size() == 3) {
-                    auxiliaryDisplay = types.get(2);
+                    properties.put("auxiliary-display", types.get(2));
                 }
             } else if (CSSConstants.outerDisplayTypes.contains(singleType)) {
-                outerDisplay = singleType;
-                innerDisplay = DisplayType.FLOW;
+                properties.put("outer-display", singleType);
+                properties.put("inner-display", DisplayType.FLOW);
             } else {
-                outerDisplay = DisplayType.BLOCK;
-                innerDisplay = singleType;
+                properties.put("outer-display", DisplayType.BLOCK);
+                properties.put("inner-display", singleType);
             }
         } else if (text.contains("-")) {
-            outerDisplay = CSSConstants.getDisplayType(text.substring(0, text.indexOf("-")));
-            innerDisplay = CSSConstants.getDisplayType(text.substring(text.indexOf("-") + 1));
+            properties.put("outer-display", CSSConstants.getDisplayType(text.substring(0, text.indexOf("-"))));
+            properties.put("inner-display", CSSConstants.getDisplayType(text.substring(text.indexOf("-") + 1)));
         } else if (text.contains(" ")) {
-            outerDisplay = CSSConstants.getDisplayType(text.substring(0, text.indexOf(" ")));
-            innerDisplay = CSSConstants.getDisplayType(text.substring(text.indexOf(" ") + 1));
+            properties.put("outer-display", CSSConstants.getDisplayType(text.substring(0, text.indexOf(" "))));
+            properties.put("inner-display", CSSConstants.getDisplayType(text.substring(text.indexOf(" ") + 1)));
         } else {
-            outerDisplay = DisplayType.BLOCK;
-            innerDisplay = DisplayType.FLOW;
+            properties.put("outer-display", DisplayType.BLOCK);
+            properties.put("inner-display", DisplayType.FLOW);
             System.out.printf("CSSStyle.parseDisplayType: unknown display type %s, reverting to block.\n", text);
         }
 
@@ -416,24 +452,24 @@ public class CSSStyle {
 
         switch (direction) {
             case "top" -> {
-                marginTop = value;
-                marginTopType = type;
-                marginTopUnit = unit;
+                properties.put("margin-top", value);
+                properties.put("margin-top-type", type);
+                properties.put("margin-top-unit", unit);
             }
             case "right" -> {
-                marginRight = value;
-                marginRightType = type;
-                marginRightUnit = unit;
+                properties.put("margin-right", value);
+                properties.put("margin-right-type", type);
+                properties.put("margin-right-unit", unit);
             }
             case "bottom" -> {
-                marginBottom = value;
-                marginBottomType = type;
-                marginBottomUnit = unit;
+                properties.put("margin-bottom", value);
+                properties.put("margin-bottom-type", type);
+                properties.put("margin-bottom-unit", unit);
             }
             case "left" -> {
-                marginLeft = value;
-                marginLeftType = type;
-                marginLeftUnit = unit;
+                properties.put("margin-left", value);
+                properties.put("margin-left-type", type);
+                properties.put("margin-left-unit", unit);
             }
         }
     }
@@ -486,24 +522,24 @@ public class CSSStyle {
 
         switch (direction) {
             case "top" -> {
-                paddingTop = value;
-                paddingTopType = type;
-                paddingTopUnit = unit;
+                properties.put("padding-top", value);
+                properties.put("padding-top-type", type);
+                properties.put("padding-top-unit", unit);
             }
             case "right" -> {
-                paddingRight = value;
-                paddingRightType = type;
-                paddingRightUnit = unit;
+                properties.put("padding-right", value);
+                properties.put("padding-right-type", type);
+                properties.put("padding-right-unit", unit);
             }
             case "bottom" -> {
-                paddingBottom = value;
-                paddingBottomType = type;
-                paddingBottomUnit = unit;
+                properties.put("padding-bottom", value);
+                properties.put("padding-bottom-type", type);
+                properties.put("padding-bottom-unit", unit);
             }
             case "left" -> {
-                paddingLeft = value;
-                paddingLeftType = type;
-                paddingLeftUnit = unit;
+                properties.put("padding-left", value);
+                properties.put("padding-left-type", type);
+                properties.put("padding-left-unit", unit);
             }
         }
     }
@@ -544,10 +580,10 @@ public class CSSStyle {
 
     private void parsePosition(String text) {
         try {
-            position = PositionType.valueOf(text.trim().toUpperCase());
+            properties.put("position", PositionType.valueOf(text.trim().toUpperCase()));
         } catch (IllegalArgumentException e) {
             System.err.printf("Invalid position %s, defaulting to relative.\n", text);
-            position = PositionType.RELATIVE;
+            properties.put("position", PositionType.RELATIVE);
         }
     }
 
@@ -559,7 +595,7 @@ public class CSSStyle {
         String[] items = text.split("\\s");
         Dimension dimension = parseSingleDimension(items[0]);
         if (dimension.value != null) {
-            borderSpacing = dimension.value.intValue();
+            properties.put("border-spacing", dimension.value.intValue());
         }
 
         if (items.length > 1) {
@@ -570,9 +606,9 @@ public class CSSStyle {
     private void parseTextAlign(String text) {
         TextAlign textAlignCandidate = StringUtils.toEnum(TextAlign.class, text.toUpperCase());
         if (textAlignCandidate != null) {
-            textAlign = textAlignCandidate;
+            properties.put("text-align", textAlignCandidate);
         } else if (CSSConstants.stringToNonStandardTextAlign.containsKey(text.toLowerCase())) {
-            textAlign = CSSConstants.stringToNonStandardTextAlign.get(text.toLowerCase());
+            properties.put("text-align", CSSConstants.stringToNonStandardTextAlign.get(text.toLowerCase()));
         }
     }
 
@@ -580,7 +616,7 @@ public class CSSStyle {
         text = text.trim();
         CSSColor color = CSSColor.getColor(text);
         if (color != null) {
-            backgroundColor = color;
+            properties.put("background-color", color);
         } else {
             System.err.printf("Unsupported background type \"%s\".\n", text);
         }
@@ -589,10 +625,14 @@ public class CSSStyle {
     /**
      * Convert the string properties and values to actual properties on this class
      */
-    public void finalizeCSS() {
-        for (Entry<String, String> e : properties.entrySet()) {
+    public void setComputedValues() {
+        for (Entry<String, String> e : propertyStrings.entrySet()) {
+            String property = e.getKey();
             String value = e.getValue().trim();
-            switch (e.getKey()) {
+            if (handleValueKeyword(property, value)) {
+                continue;
+            }
+            switch (property) {
             case "background":
             case "background-color":    parseBackground(value); break;
             case "border":
@@ -610,36 +650,36 @@ public class CSSStyle {
             case "border-right":
             case "border-right-color":
             case "border-right-width":  parseBorder(value, "right"); break;
-            case "box-sizing":          boxSizing = parseBoxSizingType(value); break;
+            case "box-sizing":          properties.put("box-sizing", parseBoxSizingType(value)); break;
             case "border-spacing":      parseBorderSpacing(value); break;
-            case "color":               color = new CSSColor(value); break;
+            case "color":               properties.put("color", new CSSColor(value)); break;
             case "display":             parseDisplayType(value); break;
-            case "font-family":         fontFamily = FontLoader.getValidFont(value.split(",")); break;
+            case "font-family":         properties.put("font-family", FontLoader.getValidFont(value.split(","))); break;
             case "font-size":           parseFontSizeValue(value.toLowerCase()); break;
             case "font-style":          fontStyleType fontStyleTypeCandidate = StringUtils.toEnum(fontStyleType.class, value.toUpperCase());
                                         if (fontStyleTypeCandidate != null) {
-                                            fontStyle = fontStyleTypeCandidate;
+                                            properties.put("font-style", fontStyleTypeCandidate);
                                         }
                                         break;
             case "font-weight":         fontWeightType fontWeightTypeCandidate = StringUtils.toEnum(fontWeightType.class, value.toUpperCase());
                                         if (fontWeightTypeCandidate != null) {
-                                            fontWeight = fontWeightTypeCandidate;
+                                            properties.put("font-weight", fontWeightTypeCandidate);
                                         }
                                         break;
             case "height":              Dimension heightDimension = parseSingleDimension(value);
-                                        height = heightDimension.value;
-                                        heightType = heightDimension.type; break;
+                                        properties.put("height", heightDimension.value);
+                                        properties.put("height-type", heightDimension.type); break;
             case "margin":              parseMargin(value, null); break;
             case "margin-top":          parseMargin(value, "top");  break;
             case "margin-right":        parseMargin(value, "right");  break;
             case "margin-bottom":       parseMargin(value, "bottom");  break;
             case "margin-left":         parseMargin(value, "left");  break;
             case "max-width":           Dimension maxWidthDimension = parseSingleDimension(value);
-                                        maxWidth = maxWidthDimension.value;
-                                        maxWidthType = maxWidthDimension.type; break;
+                                        properties.put("max-width", maxWidthDimension.value);
+                                        properties.put("max-width-type", maxWidthDimension.type); break;
             case "max-height":          Dimension maxHeightDimension = parseSingleDimension(value);
-                                        maxHeight = maxHeightDimension.value;
-                                        maxHeightType = maxHeightDimension.type; break;
+                                        properties.put("max-height", maxHeightDimension.value);
+                                        properties.put("max-height-type", maxHeightDimension.type); break;
             case "padding":             parsePadding(value, null); break;
             case "padding-top":         parsePadding(value, "top"); break;
             case "padding-right":       parsePadding(value, "right"); break;
@@ -648,14 +688,34 @@ public class CSSStyle {
             case "position":            parsePosition(value); break;
             case "text-align":          parseTextAlign(value); break;
             case "width":               Dimension widthDimension = parseSingleDimension(value);
-                                        width = widthDimension.value;
-                                        widthType = widthDimension.type; break;
+                                        properties.put("width", widthDimension.value);
+                                        properties.put("width-type", widthDimension.type); break;
             }
         }
     }
 
-    public CSSSpecificity getPropertySpecificity(String property) {
-        return propertySpecificity.get(property);
+    /**
+     * Some CSS values are keywords that require special handling regardless of the property.
+     * @param value     The value to handle, if a keyword.
+     * @return      True if a keyword was handled.
+     */
+    private boolean handleValueKeyword(String property, String value) {
+        switch (value.toLowerCase()) {
+            case INHERIT -> {
+                List<String> fieldNames = propertyNameToSetFields.get(property);
+                if (fieldNames != null) {
+                    propertiesToInherit.addAll(fieldNames);
+                } else {
+                    System.err.printf("Failed to handle inherit for property %s.\n", property);
+                }
+                return true;
+            }
+            case "initial", "revert", "revert-layer", "unset" -> {
+                System.err.printf("Unsupported CSS property keyword %s, ignoring.\n", value);
+                return true;
+            }
+        }
+        return false;
     }
     
     public void apply(String property, String value, CSSSpecificity specificity) {
@@ -667,25 +727,32 @@ public class CSSStyle {
         }
 
         boolean specificityOverride = !propertySpecificity.containsKey(property) ||
-                specificity.hasEqualOrGreaterSpecificityThan(propertySpecificity.get(property)) ||
-                inheritedProperties.contains(property);
-        boolean inheritedOverride = inheritedProperties.contains(property);
+                specificity.hasEqualOrGreaterSpecificityThan(propertySpecificity.get(property));
 
-        boolean applyRule = (existingImportance && important) || (!existingImportance && (specificityOverride || inheritedOverride || important));
+        boolean applyRule = (existingImportance && important) || (!existingImportance && (specificityOverride || important));
 
         if (applyRule) {
             propertySpecificity.put(property, specificity);
             propertyImportant.put(property, important);
-            properties.put(property, value);
-            inheritedProperties.remove(property);
+            propertyStrings.put(property, value);
+            propertiesToInherit.remove(property);
         }
     }
 
-    public void applyInherited(String property, String value, CSSSpecificity specificity) {
-        if (!properties.containsKey(property) || inheritedProperties.contains(property)) {
-            properties.put(property, value);
+    /**
+     * Attempts to apply a computed CSS property inherited from a parent's styling. This inheritance may be the default
+     * CSS behavior, such as with font colors, or the result of using the `inherit` keyword on a CSS property. Any CSS
+     * declaration that applies directly to a node will override an inherited value on that same property.
+     * @param property      The property name.
+     * @param computedValue     The computed value object.
+     * @param override      When true, property will always override the existing value.
+     */
+    public void applyInheritedComputed(String property, Object computedValue, boolean override) {
+        boolean propertyAlreadySet = propertyStrings.containsKey(property) && !propertyStrings.get(property).equals(INHERIT);
+        boolean propertyWasInherited = inheritedProperties.contains(property);
+        if (!propertyAlreadySet || propertyWasInherited || override) {
+            properties.put(property, computedValue);
             inheritedProperties.add(property);
-            propertySpecificity.put(property, specificity);
         }
     }
 
@@ -697,6 +764,9 @@ public class CSSStyle {
 
     public CSSStyle deepCopy() {
         CSSStyle style = new CSSStyle();
+
+        style.propertyStrings.putAll(propertyStrings);
+        style.properties.putAll(properties);
 
         // TODO: copy over the properties maps
         style.parentStyle = parentStyle;
@@ -774,6 +844,31 @@ public class CSSStyle {
         style.textAlign = textAlign;
 
         return style;
+    }
+
+    public void setClassProperties() {
+        for (String property : properties.keySet()) {
+            String fieldName = StringUtils.hyphenatedToCamelCase(property);
+            try {
+                Field field = getClass().getDeclaredField(fieldName);
+                field.set(this, properties.get(property));
+            } catch (Exception e) {
+                System.err.printf("Failed to set field %s to %s.\n", fieldName, properties.get(property));
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public String computedPropertiesToString() {
+        StringBuilder stringBuilder = new StringBuilder();
+        List<String> sortedProperties = new ArrayList<>(properties.keySet()).stream().sorted().toList();
+
+        stringBuilder.append(String.format("Computed properties map (%d):\n", sortedProperties.size()));
+        for (String property : sortedProperties) {
+            stringBuilder.append(String.format("  %s: %s\n", property, properties.get(property)));
+        }
+
+        return stringBuilder.toString();
     }
 
 }

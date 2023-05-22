@@ -116,6 +116,16 @@ public class LayoutIntegrationTests {
         driver.runLayoutTest("anonymousBlockWithinBorder", 500);
     }
 
+    @Test
+    public void inheritDimensions() {
+        driver.runLayoutTest("inheritDimensions", 1000);
+    }
+
+    @Test
+    public void relativeFontSize() {
+        driver.runLayoutTest("relativeFontSize", 100);
+    }
+
     // Text alignment
 
     @Test

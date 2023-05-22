@@ -1,5 +1,7 @@
 package browser.layout;
 
+import static browser.constants.MathConstants.DELTA;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -104,7 +106,7 @@ public class TextNodeSplitter {
         CSSStyle style = boxNode.style;
         String text = boxNode.correspondingRenderNode.text.substring(boxNode.textStartIndex, boxNode.textEndIndex);
         Vector2 textDimension = textDimensionCalculator.getDimension(text, style);
-        if (textDimension.x <= availableWidth) {
+        if (textDimension.x <= availableWidth + DELTA) {
             // The text fits in the available space. No extra node is needed.
             return null;
         }
