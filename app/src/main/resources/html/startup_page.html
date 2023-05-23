@@ -1,6 +1,6 @@
 <html>
     <head>
-        <title>New Tab</title>
+        <title>Kelp</title>
         <style>
             body {
                 padding: 50px;
@@ -23,25 +23,48 @@
                 margin-right: 5px;
                 color: #a3a3a3;
             }
+
+            #title {
+                font-size: 60px;
+                margin-left: 20px;
+                color: #53aa6f;
+                display: inline-block;
+                height: 70px;
+                vertical-align: top;
+            }
+
+            #subtitle {
+                font-size: 12px;
+                margin: 20px 30px;
+            }
+
+            #icon {
+                width: 70px;
+                height: 75.27px;
+            }
+
+            #footer {
+                font-size: 10px;
+                color: #a3a3a3;
+            }
         </style>
     </head>
     <body>
         <div class="container">
-            <h1>HTML Web Browser</h1>
+            <div>
+                <img src="../images/kelp_icon_2.png" id="icon">
+                <div id="title">kelp</div>
+                <div id="subtitle">~ a rendering engine and web browser in Java</div>
+            </div>
             <hr/>
             <div>
+                <p><a href="https://www.github.com/SkylerRankin/browser" target="_blank">Kelp</a> is an HTML and CSS rendering engine written in Java with a minimal browser UI built with JavaFX.</p>
                 <p>
-                    This browser implements the bare minimum HTML and CSS required to view simple webpages. The rendering pipeline converts a given URL into a visible webpage via three main steps: <b>resource fetching</b>, <b>layout calculation</b>, and <b>rendering</b>. These steps, particularly layout calculation, explore lots of interesting HTML rendering engine problems, such as DOM box calculation, resolving messy CSS precedence rules, and intelligent line splitting.
+                    Much of the core HTML 5 and CSS 3 specification required for static webpages is implemented. This includes standard features such as flow layout, lists, tables, various selectors, media queries, etc. While clickable links are supported, other interactive features that require repainting such as hover CSS effects, forms, and scripting in general are not yet implemented.
                 </p>
                 <p>
-                    Open/close the developer tools with <code style="background-color: #bfbfbf;">Ctrl + i</code>.
+                    Below is a list of offline webpages included within Kelp. They demonstrate its rendering capabilities, and give this engine something to render in the situation that future HTML specs are incompatible with what is currently implemented.
                 </p>
-                <p>
-                    Read more and see the source code at <a href="https://www.github.com/SkylerRankin/browser" target="_blank">github.com/SkylerRankin/browser</a>.
-                </p>
-                <hr/>
-                <b style="margin-top: 10px; margin-bottom: 10px;">Offline test webpages</b>
-                <div>The following lists of webpages are simple enough that they should render completely correctly in this browser. The source files are saved locally in this repo in case the webpages are taken down in the future.</div>
                 <ul>
                     <li>
                         <span>Eytzinger Binary Search: </span>
@@ -96,6 +119,8 @@
                         <a href="file://src/main/resources/offline-webpages/saturn/APOD_ 2022 July 24 - Saturn in Infrared from Cassini.html" target="_blank">Saved</a>
                     </li>
                 </ul>
+                <hr style="margin-top: 20px;"/>
+                <p id="footer">Skyler Rankin 2023</p>
             </div>
         </div>
     </body>
