@@ -2,9 +2,9 @@
   <img width="600" src="docs/images/kelp_banner.png">
 </p>
 
-Kelp is my attempt at putting together a semi-competent HTML and CSS rendering engine and using it to build a minimal web browser.
+Kelp is my attempt at putting together an HTML and CSS rendering engine and using it to build a minimal web browser.
 
-Much of the older HTML 4/5 and CSS 3 specification required for static webpages is implemented. This includes standard features such as flow layout, lists, tables, various selectors, media queries, etc. While clickable links are supported, other interactive features that require repainting such as hover CSS effects, forms, and scripting in general are not yet implemented.
+Enough of the essential HTML and CSS specifications required for older static webpages is implemented. This includes features such as flow layout, lists, tables, common CSS selectors, and media queries to name a few. Clickable links are supported, but other interactive features that require repainting such as hover CSS effects, forms, and scripting in general are not yet implemented.
 
 Kelp relies on [the JavaFX Canvas class](https://docs.oracle.com/javase/8/javafx/api/javafx/scene/canvas/Canvas.html) to handle rendering text, images, and rectangles to its UI, and [the standard HttpUrlConnection class](https://docs.oracle.com/javase/8/docs/api/java/net/HttpURLConnection.html) for making GET requests for pages and their resources. The rest of the browser's pipeline, including HTML and CSS parsing, DOM tree creation, render tree creation, and box layout algorithms, is implemented within this codebase.
 
@@ -15,4 +15,5 @@ A few sites rendered using Kelp:
 <img width="500px" src="docs/images/spamhaus.png">
 <img width="500px" src="docs/images/saturn.png">
 <img width="500px" src="docs/images/hn.png">
+<img width="500px" src="docs/images/hn_comments.png">
 <img width="500px" src="docs/images/serenity.png">
